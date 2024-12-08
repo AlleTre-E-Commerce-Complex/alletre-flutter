@@ -28,8 +28,14 @@ class AuctionListWidget extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 10),
               child: ListTile(
                 leading: Image.asset(auction.imageUrl),
-                title: Text(auction.title),
-                subtitle: Text(auction.price),
+                title: Text(
+                  auction.title,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                subtitle: Text(
+                  auction.price,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             );
           }),

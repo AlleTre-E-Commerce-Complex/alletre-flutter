@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +8,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _HomeScreenState createState() => _HomeScreenState();
 }
 
@@ -26,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF5b0c1f),
+        backgroundColor: Theme.of(context).primaryColor,
         title: const Text('Alletre'),
         actions: [
           IconButton(
@@ -77,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFFc73659),
+        color: Theme.of(context).bottomAppBarTheme.color,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
