@@ -1,6 +1,7 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/view/home/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(

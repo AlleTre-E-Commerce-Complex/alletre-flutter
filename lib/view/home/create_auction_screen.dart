@@ -1,6 +1,7 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CreateAuctionScreen extends StatefulWidget {
   const CreateAuctionScreen({super.key});
@@ -19,27 +20,27 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
   String _price = '';
   String _status = 'active'; // Default value
 
-  // void _saveAuction() {
-  //   if (!_formKey.currentState!.validate()) return;
+  void _saveAuction() {
+    if (!_formKey.currentState!.validate()) return;
 
-  //   _formKey.currentState!.save();
+    _formKey.currentState!.save();
 
-  //   final newAuction = AuctionItem(
-  //     title: _title,
-  //     imageUrl: _imageUrl,
-  //     price: _price,
-  //     status: _status,
-  //   );
+    final newAuction = AuctionItem(
+      title: _title,
+      imageUrl: _imageUrl,
+      price: _price,
+      status: _status,
+    );
 
-  //   // Add to the relevant list based on status
-  //   if (_status == 'active') {
-  //     context.read<AuctionProvider>().addOngoingAuction(newAuction);
-  //   } else if (_status == 'scheduled') {
-  //     context.read<AuctionProvider>().addUpcomingAuction(newAuction);
-  //   }
+    // Add to the relevant list based on status
+    if (_status == 'active') {
+      context.read<AuctionProvider>().addOngoingAuction(newAuction);
+    } else if (_status == 'scheduled') {
+      context.read<AuctionProvider>().addUpcomingAuction(newAuction);
+    }
 
-  //   Navigator.of(context).pop(); // Return to previous screen
-  // }
+    Navigator.of(context).pop(); // Return to previous screen
+  }
 
   @override
   Widget build(BuildContext context) {

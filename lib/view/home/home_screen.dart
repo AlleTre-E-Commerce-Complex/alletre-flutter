@@ -3,6 +3,7 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'create_auction_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,8 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
-    // final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
+    final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
+    final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
 
     return Scaffold(
       appBar: AppBar(
