@@ -2,19 +2,19 @@ import 'package:alletre_app/model/auction_item.dart';
 import 'package:flutter/foundation.dart';
 
 class AuctionProvider with ChangeNotifier {
-  List<AuctionItem> _ongoingAuctions = [];
-  List<AuctionItem> _upcomingAuctions = [];
+  final List<AuctionItem> _ongoingAuctions = [];
+  final List<AuctionItem> _upcomingAuctions = [];
 
   List<AuctionItem> get ongoingAuctions => _ongoingAuctions;
   List<AuctionItem> get upcomingAuctions => _upcomingAuctions;
 
-  void setOngoingAuctions(List<AuctionItem> auctions) {
-    _ongoingAuctions = auctions;
+  void addOngoingAuction(AuctionItem auction) {
+    _ongoingAuctions.add(auction);
     notifyListeners();
   }
 
-  void setUpcomingAuctions(List<AuctionItem> auctions) {
-    _upcomingAuctions = auctions;
+  void addUpcomingAuction(AuctionItem auction) {
+    _upcomingAuctions.add(auction);
     notifyListeners();
   }
 }
