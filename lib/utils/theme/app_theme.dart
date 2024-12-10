@@ -15,8 +15,9 @@ ThemeData customTheme() {
     primaryColor: primaryColor,
     primaryColorDark: primaryVariantColor,
     primaryColorLight: surfaceColor,
+    splashColor: secondaryColor,
     hintColor: surfaceColor,
-    fontFamily: 'Montserrat', // Apply Montserrat font
+    fontFamily: 'Montserrat',
 
     // Define text styles
     textTheme: const TextTheme(
