@@ -37,8 +37,8 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // App Logo Image
             Container(
-              height: 250,
-              width: 250,
+              height: 230,
+              width: 230,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(60),
               ),

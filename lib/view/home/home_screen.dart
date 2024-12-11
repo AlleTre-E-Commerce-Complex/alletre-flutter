@@ -18,9 +18,15 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).primaryColor,
         leading: Padding(
           padding: const EdgeInsets.only(left: 20.0),
-          child: SvgPicture.asset(
-            'assets/images/alletre_header.svg',
-            fit: BoxFit.contain
+          child: Container(
+            height: 50,
+            width: 50,
+            child: ClipOval(
+              child: SvgPicture.asset(
+                'assets/images/alletre_header.svg',
+                fit: BoxFit.fill,
+              ),
+            ),
           ),
         ),
         actions: [
