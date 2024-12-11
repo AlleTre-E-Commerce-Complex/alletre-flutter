@@ -1,22 +1,12 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'create_auction_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  // ignore: library_private_types_in_public_api
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +16,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text('Alletre'),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 20.0),
+          child: SvgPicture.asset(
+            'assets/images/alletre_header.svg',
+            fit: BoxFit.contain
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {},

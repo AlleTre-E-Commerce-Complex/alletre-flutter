@@ -37,14 +37,14 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // App Logo Image
             Container(
-              height: 220,
-              width: 220,
+              height: 250,
+              width: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(60),
               ),
               child: ClipOval(
                 child: SvgPicture.asset(
-                  'assets/images/alletre.svg',
+                  'assets/images/alletre_splash.svg',
                   fit: BoxFit.cover,
                 ),
               ),
