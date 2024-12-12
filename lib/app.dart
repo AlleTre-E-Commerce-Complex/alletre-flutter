@@ -3,6 +3,7 @@ import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:alletre_app/view/splash%20screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'controller/providers/language_provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -11,9 +12,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => AuctionProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => AuctionProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
       child: MaterialApp(
         title: 'Alletre',
