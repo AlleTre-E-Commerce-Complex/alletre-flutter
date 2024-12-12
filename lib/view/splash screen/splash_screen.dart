@@ -3,24 +3,12 @@ import 'package:alletre_app/view/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _navigateToHome();
-  }
-
-  void _navigateToHome() {
+  void _navigateToHome(BuildContext context) {
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
@@ -29,6 +17,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _navigateToHome(context);
+
     return Scaffold(
       backgroundColor: Theme.of(context).splashColor,
       body: Center(

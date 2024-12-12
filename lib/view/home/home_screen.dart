@@ -13,36 +13,45 @@ class HomeScreen extends StatelessWidget {
     final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
     final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
 
+    void changeLanguage(String language) {
+      // Logic to handle language change
+      debugPrint('Selected Language: $language');
+      // Example: Integrate localization changes here
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 20.0),
-          child: Container(
-            height: 50,
-            width: 50,
-            child: ClipOval(
-              child: SvgPicture.asset(
-                'assets/images/alletre_header.svg',
-                fit: BoxFit.fill,
-              ),
+        title: Padding(
+          padding: const EdgeInsets.only(right: 81),
+          child: SizedBox(
+            height: 28,
+            child: SvgPicture.asset(
+              'assets/images/alletre_header.svg',
+              fit: BoxFit.contain,
             ),
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.language),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (ctx) => const CreateAuctionScreen(),
-                ),
-              );
-            },
-            child: const Text('Create Auction'),
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: GestureDetector(
+              onTap: () {
+                changeLanguage('English'); // Set default language
+              },
+              child: const Row(
+                children: [
+                  SizedBox(width: 4),
+                  Text(
+                    'EN',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -77,6 +86,21 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(3),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (ctx) => const CreateAuctionScreen(),
+              ),
+            );
+          },
+          label: const Text('Create Auction'),
+          backgroundColor: Theme.of(context).splashColor,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       bottomNavigationBar: BottomAppBar(
         color: Theme.of(context).bottomAppBarTheme.color,
         child: Row(

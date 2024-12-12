@@ -19,22 +19,50 @@ ThemeData customTheme() {
     hintColor: surfaceColor,
     fontFamily: 'Montserrat',
 
-    // Define text styles
+    // Define text styles using specific Montserrat font weights
     textTheme: const TextTheme(
       displayLarge: TextStyle(
-          fontWeight: FontWeight.bold, fontSize: 32, color: onSecondaryColor),
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.bold, 
+        fontSize: 32, 
+        color: onSecondaryColor
+      ),
       displayMedium: TextStyle(
-          fontWeight: FontWeight.w600, fontSize: 28, color: onSecondaryColor),
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.w600, // Medium
+        fontSize: 28, 
+        color: onSecondaryColor
+      ),
       bodyLarge: TextStyle(
-          fontWeight: FontWeight.w400, fontSize: 16, color: onSecondaryColor),
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.w400, // Regular
+        fontSize: 16, 
+        color: onSecondaryColor
+      ),
       bodyMedium: TextStyle(
-          fontWeight: FontWeight.w300, fontSize: 14, color: onSecondaryColor),
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.w300, // Light
+        fontSize: 14, 
+        color: onSecondaryColor
+      ),
       bodySmall: TextStyle(
-          fontWeight: FontWeight.w300, fontSize: 12, color: onSecondaryColor),
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.w300, // Light
+        fontSize: 12, 
+        color: onSecondaryColor
+      ),
       labelLarge: TextStyle(
-          fontWeight: FontWeight.w600, fontSize: 18, color: secondaryColor),
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.w600, // Medium
+        fontSize: 11,
+        color: primaryColor
+      ),
       titleLarge: TextStyle(
-          fontWeight: FontWeight.w700, fontSize: 24, color: onSecondaryColor),
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.w700, // Bold
+        fontSize: 24, 
+        color: onSecondaryColor
+      ),
     ),
 
     // Color scheme with errorColor
@@ -58,7 +86,11 @@ ThemeData customTheme() {
     appBarTheme: const AppBarTheme(
       backgroundColor: primaryColor,
       titleTextStyle: TextStyle(
-          fontSize: 24, fontWeight: FontWeight.bold, color: secondaryColor),
+        fontFamily: 'Montserrat', // Apply to AppBar text
+        fontSize: 24, 
+        fontWeight: FontWeight.bold, 
+        color: secondaryColor
+      ),
       iconTheme: IconThemeData(color: secondaryColor),
     ),
 

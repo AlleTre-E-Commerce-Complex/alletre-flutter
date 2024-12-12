@@ -3,23 +3,31 @@ import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/model/auction_item.dart';
 
-class CreateAuctionScreen extends StatefulWidget {
+class CreateAuctionScreen extends StatelessWidget {
   const CreateAuctionScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _CreateAuctionScreenState createState() => _CreateAuctionScreenState();
-}
-
-class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late String _title;
-  late String _imageUrl;
-  late String _price;
-  late DateTime _scheduledTime;
-
-  @override
   Widget build(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
+    final titleController = TextEditingController();
+    final imageUrlController = TextEditingController();
+    final priceController = TextEditingController();
+    DateTime? scheduledTime;
+
+    void saveAuction() {
+      if (!formKey.currentState!.validate()) return;
+
+      final newAuction = AuctionItem(
+        title: titleController.text,
+        imageUrl: imageUrlController.text,
+        price: priceController.text,
+        scheduledTime: scheduledTime!,
+      );
+
+      context.read<AuctionProvider>().addUpcomingAuction(newAuction);
+      Navigator.of(context).pop();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Auction'),
@@ -27,18 +35,16 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
+                controller: titleController,
                 decoration: InputDecoration(
                   labelText: 'Title',
                   labelStyle: Theme.of(context).textTheme.bodyLarge,
                 ),
-                onSaved: (value) {
-                  _title = value ?? '';
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a title';
@@ -47,13 +53,11 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 },
               ),
               TextFormField(
+                controller: imageUrlController,
                 decoration: InputDecoration(
                   labelText: 'Image URL',
                   labelStyle: Theme.of(context).textTheme.bodyLarge,
                 ),
-                onSaved: (value) {
-                  _imageUrl = value ?? '';
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an image URL';
@@ -62,13 +66,11 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 },
               ),
               TextFormField(
+                controller: priceController,
                 decoration: InputDecoration(
                   labelText: 'Price',
                   labelStyle: Theme.of(context).textTheme.bodyLarge,
                 ),
-                onSaved: (value) {
-                  _price = value ?? '';
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a price';
@@ -91,16 +93,22 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                     lastDate: DateTime(2100),
                   );
                   if (pickedTime != null) {
-                    setState(() {
-                      _scheduledTime = pickedTime;
-                    });
+                    scheduledTime = pickedTime;
                   }
                 },
                 child: const Text('Pick Scheduled Time'),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _saveAuction,
+                onPressed: () {
+                  if (scheduledTime == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please select a scheduled time')),
+                    );
+                    return;
+                  }
+                  saveAuction();
+                },
                 child: const Text('Save Auction'),
               ),
             ],
@@ -108,22 +116,5 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         ),
       ),
     );
-  }
-
-  void _saveAuction() {
-    if (!_formKey.currentState!.validate()) return;
-
-    _formKey.currentState!.save();
-
-    final newAuction = AuctionItem(
-      title: _title,
-      imageUrl: _imageUrl,
-      price: _price,
-      scheduledTime: _scheduledTime,
-    );
-
-    context.read<AuctionProvider>().addUpcomingAuction(newAuction);
-
-    Navigator.of(context).pop();
   }
 }
