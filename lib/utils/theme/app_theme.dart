@@ -54,7 +54,7 @@ ThemeData customTheme() {
       labelLarge: TextStyle(
         fontFamily: 'Montserrat',
         fontWeight: FontWeight.w600, // Medium
-        fontSize: 11,
+        fontSize: 10,
         color: primaryColor
       ),
       titleLarge: TextStyle(

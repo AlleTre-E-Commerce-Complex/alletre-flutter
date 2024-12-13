@@ -19,9 +19,9 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 58,
         backgroundColor: Theme.of(context).primaryColor,
         title: SizedBox(
-          height: 28,
           width: 69,
           child: SvgPicture.asset(
             'assets/images/alletre_header.svg',
@@ -34,14 +34,14 @@ class HomeScreen extends StatelessWidget {
               context.read<LanguageProvider>().toggleLanguage();
             },
             child: SizedBox(
-              width: 196,
+              width: 185,
               child: Text(
                 currentLanguage,
                 style: TextStyle(
                   color: secondaryColor,
                   fontSize: currentLanguage == 'English'
-                      ? 14
-                      : 18,
+                      ? 13
+                      : 17,
                       fontWeight: currentLanguage == 'English'
                       ? FontWeight.w500 
                       : FontWeight.w600 
@@ -71,7 +71,7 @@ class HomeScreen extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text('//card banner will appear here...',
-              style: TextStyle(color: Colors.black)),
+              style: TextStyle(color: onSecondaryColor)),
             ),
             AuctionListWidget(
               title: 'Ongoing Auctions',
@@ -85,10 +85,10 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(right: 4, bottom: 60),
+        padding: const EdgeInsets.only(right: 4, bottom: 61),
         child: SizedBox(
           height: 30,
-          width: 110,
+          width: 105,
           child: FloatingActionButton.extended(
             onPressed: () {
               Navigator.of(context).push(
