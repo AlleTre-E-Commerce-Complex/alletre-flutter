@@ -1,5 +1,7 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/language_provider.dart';
+import 'package:alletre_app/utils/button/textbutton.dart';
+import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,36 +20,33 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: Padding(
-          padding: const EdgeInsets.only(right: 81),
-          child: SizedBox(
-            height: 28,
-            child: SvgPicture.asset(
-              'assets/images/alletre_header.svg',
-              fit: BoxFit.contain,
-            ),
+        title: SizedBox(
+          height: 28,
+          width: 69,
+          child: SvgPicture.asset(
+            'assets/images/alletre_header.svg',
+            fit: BoxFit.contain,
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: GestureDetector(
-              onTap: () {
-                context.read<LanguageProvider>().toggleLanguage();
-              },
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 138),
-                    child: Text(
-                      currentLanguage,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ],
+          GestureDetector(
+            onTap: () {
+              context.read<LanguageProvider>().toggleLanguage();
+            },
+            child: SizedBox(
+              width: 196,
+              child: Text(
+                currentLanguage,
+                style: TextStyle(
+                  color: secondaryColor,
+                  fontSize: currentLanguage == 'English'
+                      ? 14
+                      : 18,
+                      fontWeight: currentLanguage == 'English'
+                      ? FontWeight.w500 
+                      : FontWeight.w600 
+                ),
+                textDirection: TextDirection.ltr,
               ),
             ),
           ),
@@ -71,7 +70,8 @@ class HomeScreen extends StatelessWidget {
             ),
             const Padding(
               padding: EdgeInsets.all(16.0),
-              child: Text('Get the ideal Buyer for Your unique Item...'),
+              child: Text('//card banner will appear here...',
+              style: TextStyle(color: Colors.black)),
             ),
             AuctionListWidget(
               title: 'Ongoing Auctions',
@@ -85,9 +85,9 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(right: 4, bottom: 58),
+        padding: const EdgeInsets.only(right: 4, bottom: 60),
         child: SizedBox(
-          height: 32,
+          height: 30,
           width: 110,
           child: FloatingActionButton.extended(
             onPressed: () {
@@ -110,27 +110,27 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).bottomAppBarTheme.color,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'Login',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'Sign Up',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
+  color: Theme.of(context).bottomAppBarTheme.color,
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      buildFixedSizeButton(
+        text: 'Login',
+        onPressed: () {},
+        backgroundColor: secondaryColor,
+        borderColor: primaryColor,
+        textStyle: Theme.of(context).textTheme.bodySmall!,
       ),
+      buildFixedSizeButton(
+        text: 'Sign Up',
+        onPressed: () {},
+        backgroundColor: primaryColor,
+        borderColor: secondaryColor,
+        textStyle: Theme.of(context).textTheme.bodyMedium!,
+      ),
+    ],
+  ),
+),
     );
   }
 }

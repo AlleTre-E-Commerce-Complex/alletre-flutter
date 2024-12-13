@@ -41,15 +41,15 @@ ThemeData customTheme() {
       ),
       bodyMedium: TextStyle(
         fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w300, // Light
-        fontSize: 14, 
-        color: onSecondaryColor
+        fontWeight: FontWeight.w600, // Light
+        fontSize: 14,
+        color: secondaryColor
       ),
       bodySmall: TextStyle(
         fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w300, // Light
-        fontSize: 12, 
-        color: onSecondaryColor
+        fontWeight: FontWeight.w600, // Medium
+        fontSize: 14,
+        color: primaryColor
       ),
       labelLarge: TextStyle(
         fontFamily: 'Montserrat',
@@ -82,25 +82,6 @@ ThemeData customTheme() {
       error: errorColor,
     ),
 
-    // AppBar Theme
-    appBarTheme: const AppBarTheme(
-      backgroundColor: primaryColor,
-      titleTextStyle: TextStyle(
-        fontFamily: 'Montserrat', // Apply to AppBar text
-        fontSize: 24, 
-        fontWeight: FontWeight.bold, 
-        color: secondaryColor
-      ),
-      iconTheme: IconThemeData(color: secondaryColor),
-    ),
-
-    // Button Theme
-    buttonTheme: ButtonThemeData(
-      buttonColor: surfaceColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      textTheme: ButtonTextTheme.primary,
-    ),
-
     // Floating Action Button Theme
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: primaryColor,
@@ -108,7 +89,7 @@ ThemeData customTheme() {
     ),
 
     // Bottom App Bar Theme
-    bottomAppBarTheme: const BottomAppBarTheme(color: surfaceColor),
+    bottomAppBarTheme: const BottomAppBarTheme(color: primaryColor),
 
     // Input Decoration Theme
     inputDecorationTheme: const InputDecorationTheme(
