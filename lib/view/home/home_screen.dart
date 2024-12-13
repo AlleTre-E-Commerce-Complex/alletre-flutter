@@ -1,5 +1,4 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/controller/providers/language_provider.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -13,7 +12,12 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
     final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
-    final currentLanguage = context.watch<LanguageProvider>().currentLanguage;
+
+    void changeLanguage(String language) {
+      // Logic to handle language change
+      debugPrint('Selected Language: $language');
+      // Example: Integrate localization changes here
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -33,18 +37,16 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.only(right: 10),
             child: GestureDetector(
               onTap: () {
-                context.read<LanguageProvider>().toggleLanguage();
+                changeLanguage('English'); // Set default language
               },
-              child: Row(
+              child: const Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 138),
-                    child: Text(
-                      currentLanguage,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                  SizedBox(width: 4),
+                  Text(
+                    'EN',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -85,26 +87,17 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(right: 4, bottom: 58),
-        child: SizedBox(
-          height: 32,
-          width: 110,
-          child: FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (ctx) => const CreateAuctionScreen(),
-                ),
-              );
-            },
-            label: Text(
-              'Create Auction', 
-              style: TextStyle(color: Theme.of(context).primaryColor)),
-            backgroundColor: Theme.of(context).splashColor,
-            shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-          ),
+        padding: const EdgeInsets.all(3),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (ctx) => const CreateAuctionScreen(),
+              ),
+            );
+          },
+          label: const Text('Create Auction'),
+          backgroundColor: Theme.of(context).splashColor,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
