@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
         toolbarHeight: 58,
         backgroundColor: Theme.of(context).primaryColor,
         title: SizedBox(
-          width: 69,
+          width: 74,
           child: SvgPicture.asset(
             'assets/images/alletre_header.svg',
             fit: BoxFit.contain,
@@ -39,14 +39,11 @@ class HomeScreen extends StatelessWidget {
               child: Text(
                 currentLanguage,
                 style: TextStyle(
-                  color: secondaryColor,
-                  fontSize: currentLanguage == 'English'
-                      ? 13
-                      : 17,
-                      fontWeight: currentLanguage == 'English'
-                      ? FontWeight.w500 
-                      : FontWeight.w600 
-                ),
+                    color: secondaryColor,
+                    fontSize: currentLanguage == 'English' ? 13 : 17,
+                    fontWeight: currentLanguage == 'English'
+                        ? FontWeight.w500
+                        : FontWeight.w600),
                 textDirection: TextDirection.ltr,
               ),
             ),
@@ -58,9 +55,9 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(18.0),
               child: SizedBox(
-                height: 45,
+                height: 44,
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Search on Alletre',
@@ -72,34 +69,42 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-             Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: CarouselSlider(
-          items: [
-            'assets/images/banner1.svg',
-            'assets/images/banner2.svg',
-            'assets/images/banner3.svg',
-            'assets/images/banner4.svg',
-            'assets/images/banner5.svg'
-          ].map((imagePath) {
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                width: double.infinity,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: CarouselSlider(
+                items: [
+                  'assets/images/banner1.svg',
+                  'assets/images/banner2.svg',
+                  'assets/images/banner3.svg',
+                  'assets/images/banner4.svg',
+                  'assets/images/banner5.svg',
+                ].map((imagePath) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.grey.shade200,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SvgPicture.asset(
+                        imagePath,
+                        fit: BoxFit.cover,
+                        width: double.infinity
+                      ),
+                    ),
+                  );
+                }).toList(),
+                options: CarouselOptions(
+                  height: 140,
+                  autoPlay: true,
+                  enlargeCenterPage: true,
+                  viewportFraction: 0.91,
+                  aspectRatio: 16 / 9,
+                ),
               ),
-            );
-          }).toList(),
-          options: CarouselOptions(
-            height: 150,
-            autoPlay: true,
-            enlargeCenterPage: true,
-            viewportFraction: 0.9,
-            aspectRatio: 16 / 9,
-          ),
-        ),
-      ),
+            ),
             AuctionListWidget(
               title: 'Ongoing Auctions',
               auctions: ongoingAuctions,
@@ -112,9 +117,9 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(right: 4, bottom: 61),
+        padding: const EdgeInsets.only(right: 4, bottom: 60),
         child: SizedBox(
-          height: 30,
+          height: 32,
           width: 105,
           child: FloatingActionButton.extended(
             onPressed: () {
@@ -137,27 +142,27 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       bottomNavigationBar: BottomAppBar(
-  color: Theme.of(context).bottomAppBarTheme.color,
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [
-      buildFixedSizeButton(
-        text: 'Login',
-        onPressed: () {},
-        backgroundColor: secondaryColor,
-        borderColor: primaryColor,
-        textStyle: Theme.of(context).textTheme.bodySmall!,
+        color: Theme.of(context).bottomAppBarTheme.color,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            buildFixedSizeButton(
+              text: 'Login',
+              onPressed: () {},
+              backgroundColor: secondaryColor,
+              borderColor: const Color.fromARGB(255, 253, 215, 222),
+              textStyle: Theme.of(context).textTheme.bodySmall!,
+            ),
+            buildFixedSizeButton(
+              text: 'Sign Up',
+              onPressed: () {},
+              backgroundColor: primaryColor,
+              borderColor: secondaryColor,
+              textStyle: Theme.of(context).textTheme.bodyMedium!,
+            ),
+          ],
+        ),
       ),
-      buildFixedSizeButton(
-        text: 'Sign Up',
-        onPressed: () {},
-        backgroundColor: primaryColor,
-        borderColor: secondaryColor,
-        textStyle: Theme.of(context).textTheme.bodyMedium!,
-      ),
-    ],
-  ),
-),
     );
   }
 }
