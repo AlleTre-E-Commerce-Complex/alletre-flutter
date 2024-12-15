@@ -58,19 +58,22 @@ class HomeScreen extends StatelessWidget {
           children: [
             const Padding(
               padding: EdgeInsets.all(16.0),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search on Alletre',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+              child: SizedBox(
+                height: 45,
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search on Alletre',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
                   ),
                 ),
               ),
             ),
             const Padding(
               padding: EdgeInsets.all(16.0),
-              child: Text('//card banner will appear here...',
+              child: Text('MY APP',
               style: TextStyle(color: onSecondaryColor)),
             ),
             AuctionListWidget(
