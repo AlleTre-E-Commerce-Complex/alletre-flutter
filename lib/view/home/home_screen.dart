@@ -54,8 +54,9 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 16),
             const Padding(
-              padding: EdgeInsets.all(18.0),
+              padding: EdgeInsets.only(left: 18, right: 18),
               child: SizedBox(
                 height: 44,
                 child: TextField(
@@ -69,40 +70,63 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: CarouselSlider(
-                items: [
-                  'assets/images/banner1.svg',
-                  'assets/images/banner2.svg',
-                  'assets/images/banner3.svg',
-                  'assets/images/banner4.svg',
-                  'assets/images/banner5.svg',
-                ].map((imagePath) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.grey.shade200,
-                      ),
+              padding: const EdgeInsets.only(left: 16, right: 16),
+              child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Chip(
+              label: const Text('Category 1'),
+              backgroundColor: Colors.grey.shade200,
+              labelStyle: const TextStyle(color: Colors.black),
+              
+                        ),
+                        Chip(
+              label: const Text('Category 2'),
+              backgroundColor: Colors.grey.shade200,
+              labelStyle: const TextStyle(color: Colors.black),
+                        ),
+                        Chip(
+              label: const Text('Category 3'),
+              backgroundColor: Colors.grey.shade200,
+              labelStyle: const TextStyle(color: Colors.black),
+                        ),
+                      ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SvgPicture.asset(
-                        imagePath,
-                        fit: BoxFit.cover,
-                        width: double.infinity
-                      ),
+            ),
+            const SizedBox(height: 16),
+            CarouselSlider(
+              items: [
+                'assets/images/banner1.svg',
+                'assets/images/banner2.svg',
+                'assets/images/banner3.svg',
+                'assets/images/banner4.svg',
+                'assets/images/banner5.svg',
+              ].map((imagePath) {
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.grey.shade200,
                     ),
-                  );
-                }).toList(),
-                options: CarouselOptions(
-                  height: 140,
-                  autoPlay: true,
-                  enlargeCenterPage: true,
-                  viewportFraction: 0.91,
-                  aspectRatio: 16 / 9,
-                ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SvgPicture.asset(
+                      imagePath,
+                      fit: BoxFit.contain,
+                      width: double.infinity
+                    ),
+                  ),
+                );
+              }).toList(),
+              options: CarouselOptions(
+                height: 140,
+                autoPlay: true,
+                enlargeCenterPage: true,
+                viewportFraction: 0.91,
+                aspectRatio: 16 / 9,
               ),
             ),
             AuctionListWidget(
@@ -117,7 +141,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(right: 4, bottom: 60),
+        padding: const EdgeInsets.only(right: 6, bottom: 60),
         child: SizedBox(
           height: 32,
           width: 105,
