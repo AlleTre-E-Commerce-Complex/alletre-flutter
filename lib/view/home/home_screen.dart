@@ -3,6 +3,7 @@ import 'package:alletre_app/controller/providers/language_provider.dart';
 import 'package:alletre_app/utils/button/textbutton.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -71,11 +72,34 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('MY APP',
-              style: TextStyle(color: onSecondaryColor)),
-            ),
+             Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: CarouselSlider(
+          items: [
+            'assets/images/banner1.svg',
+            'assets/images/banner2.svg',
+            'assets/images/banner3.svg',
+            'assets/images/banner4.svg',
+            'assets/images/banner5.svg'
+          ].map((imagePath) {
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
+            );
+          }).toList(),
+          options: CarouselOptions(
+            height: 150,
+            autoPlay: true,
+            enlargeCenterPage: true,
+            viewportFraction: 0.9,
+            aspectRatio: 16 / 9,
+          ),
+        ),
+      ),
             AuctionListWidget(
               title: 'Ongoing Auctions',
               auctions: ongoingAuctions,
