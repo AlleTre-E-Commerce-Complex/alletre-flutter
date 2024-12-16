@@ -3,6 +3,7 @@ import 'package:alletre_app/controller/providers/language_provider.dart';
 import 'package:alletre_app/utils/button/textbutton.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
+import 'package:alletre_app/view/widgets/search_field_widget.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -55,45 +56,30 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.only(left: 18, right: 18),
-              child: SizedBox(
-                height: 44,
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search on Alletre',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
+            const SearchFieldWidget(),
+            const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.only(left: 16, right: 16),
               child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Chip(
-              label: const Text('Category 1'),
-              backgroundColor: Colors.grey.shade200,
-              labelStyle: const TextStyle(color: Colors.black),
-              
-                        ),
-                        Chip(
-              label: const Text('Category 2'),
-              backgroundColor: Colors.grey.shade200,
-              labelStyle: const TextStyle(color: Colors.black),
-                        ),
-                        Chip(
-              label: const Text('Category 3'),
-              backgroundColor: Colors.grey.shade200,
-              labelStyle: const TextStyle(color: Colors.black),
-                        ),
-                      ],
-                    ),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Chip(
+                    label: const Text('Category 1'),
+                    backgroundColor: Colors.grey.shade200,
+                    labelStyle: const TextStyle(color: Colors.black),
+                  ),
+                  Chip(
+                    label: const Text('Category 2'),
+                    backgroundColor: Colors.grey.shade200,
+                    labelStyle: const TextStyle(color: Colors.black),
+                  ),
+                  Chip(
+                    label: const Text('Category 3'),
+                    backgroundColor: Colors.grey.shade200,
+                    labelStyle: const TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             CarouselSlider(
@@ -106,18 +92,15 @@ class HomeScreen extends StatelessWidget {
               ].map((imagePath) {
                 return Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.grey.shade200,
                     ),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: SvgPicture.asset(
-                      imagePath,
-                      fit: BoxFit.contain,
-                      width: double.infinity
-                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    child: SvgPicture.asset(imagePath,
+                        fit: BoxFit.contain, width: double.infinity),
                   ),
                 );
               }).toList(),
