@@ -11,6 +11,7 @@ class CarouselBannerWidget extends StatelessWidget {
       'assets/images/banner1.svg',
       'assets/images/banner2.svg',
       'assets/images/banner3.svg',
+      'assets/images/banner4.svg'
     ];
 
     return CarouselSlider(
