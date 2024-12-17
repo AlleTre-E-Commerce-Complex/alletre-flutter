@@ -1,5 +1,5 @@
+import 'package:alletre_app/controller/helpers/chip_widget_helper.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
-import 'package:alletre_app/view/widgets/chip_functions.dart';
 import 'package:flutter/material.dart';
 
 class ChipWidget extends StatelessWidget {

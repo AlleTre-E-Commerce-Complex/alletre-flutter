@@ -8,6 +8,15 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> get upcomingAuctions => _upcomingAuctions;
   List<AuctionItem> get ongoingAuctions => _ongoingAuctions;
 
+  DateTime? _scheduledTime;
+
+  DateTime? get scheduledTime => _scheduledTime;
+
+  set scheduledTime(DateTime? time) {
+    _scheduledTime = time;
+    notifyListeners();
+  }
+
   // Add an auction to the upcoming list
   void addUpcomingAuction(AuctionItem auction) {
     _upcomingAuctions.add(auction);

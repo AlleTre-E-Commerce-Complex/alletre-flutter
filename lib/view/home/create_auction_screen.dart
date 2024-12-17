@@ -1,7 +1,10 @@
+// create_auction_screen.dart
+import 'package:alletre_app/controller/helpers/auction_screen_helper.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/view/widgets/auction_form_fields.dart';
+import 'package:alletre_app/view/widgets/auction_screen_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/model/auction_item.dart';
 
 class CreateAuctionScreen extends StatelessWidget {
   const CreateAuctionScreen({super.key});
@@ -12,21 +15,6 @@ class CreateAuctionScreen extends StatelessWidget {
     final titleController = TextEditingController();
     final imageUrlController = TextEditingController();
     final priceController = TextEditingController();
-    DateTime? scheduledTime;
-
-    void saveAuction() {
-      if (!formKey.currentState!.validate()) return;
-
-      final newAuction = AuctionItem(
-        title: titleController.text,
-        imageUrl: imageUrlController.text,
-        price: priceController.text,
-        scheduledTime: scheduledTime!,
-      );
-
-      context.read<AuctionProvider>().addUpcomingAuction(newAuction);
-      Navigator.of(context).pop();
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -39,77 +27,25 @@ class CreateAuctionScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  labelText: 'Title',
-                  labelStyle: Theme.of(context).textTheme.bodyLarge,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
+              AuctionFormFields(
+                titleController: titleController,
+                imageUrlController: imageUrlController,
+                priceController: priceController,
               ),
-              TextFormField(
-                controller: imageUrlController,
-                decoration: InputDecoration(
-                  labelText: 'Image URL',
-                  labelStyle: Theme.of(context).textTheme.bodyLarge,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an image URL';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: priceController,
-                decoration: InputDecoration(
-                  labelText: 'Price',
-                  labelStyle: Theme.of(context).textTheme.bodyLarge,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Scheduled Time',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  final pickedTime = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2100),
+              Consumer<AuctionProvider>(
+                builder: (context, auctionProvider, child) {
+                  return AuctionScreenButtons(
+                    onPickTime: () => AuctionHelper.pickScheduledTime(context),
+                    onSave: () => AuctionHelper.saveAuction(
+                      context: context,
+                      formKey: formKey,
+                      titleController: titleController,
+                      imageUrlController: imageUrlController,
+                      priceController: priceController,
+                    ),
+                    scheduledTime: auctionProvider.scheduledTime,
                   );
-                  if (pickedTime != null) {
-                    scheduledTime = pickedTime;
-                  }
                 },
-                child: const Text('Pick Scheduled Time'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (scheduledTime == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please select a scheduled time')),
-                    );
-                    return;
-                  }
-                  saveAuction();
-                },
-                child: const Text('Save Auction'),
               ),
             ],
           ),

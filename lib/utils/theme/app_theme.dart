@@ -102,7 +102,10 @@ ThemeData customTheme() {
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: primaryColor),
+        borderSide: BorderSide(color: onSecondaryColor), // Default border color
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: primaryColor), // Border color when focused (tapped)
       ),
     ),
   );
