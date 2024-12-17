@@ -1,15 +1,13 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/controller/providers/language_provider.dart';
-import 'package:alletre_app/utils/button/textbutton.dart';
-import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
+import 'package:alletre_app/view/widgets/bottom_navbar.dart';
+import 'package:alletre_app/view/widgets/carousel_banner_widget.dart';
 import 'package:alletre_app/view/widgets/chip_widget.dart';
+import 'package:alletre_app/view/widgets/create_auction_button.dart';
+import 'package:alletre_app/view/widgets/home_appbar.dart';
 import 'package:alletre_app/view/widgets/search_field_widget.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'create_auction_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -18,40 +16,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
     final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
-    final currentLanguage = context.watch<LanguageProvider>().currentLanguage;
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 58,
-        backgroundColor: Theme.of(context).primaryColor,
-        title: SizedBox(
-          width: 74,
-          child: SvgPicture.asset(
-            'assets/images/alletre_header.svg',
-            fit: BoxFit.contain,
-          ),
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              context.read<LanguageProvider>().toggleLanguage();
-            },
-            child: SizedBox(
-              width: 185,
-              child: Text(
-                currentLanguage,
-                style: TextStyle(
-                    color: secondaryColor,
-                    fontSize: currentLanguage == 'English' ? 13 : 17,
-                    fontWeight: currentLanguage == 'English'
-                        ? FontWeight.w500
-                        : FontWeight.w600),
-                textDirection: TextDirection.ltr,
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: const AppBarWidget(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,34 +28,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 5),
             const ChipWidget(),
             const SizedBox(height: 18),
-            CarouselSlider(
-              items: [
-                'assets/images/banner1.svg',
-                'assets/images/banner2.svg',
-                'assets/images/banner3.svg',
-              ].map((imagePath) {
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: SvgPicture.asset(imagePath,
-                        fit: BoxFit.contain, width: double.infinity),
-                  ),
-                );
-              }).toList(),
-              options: CarouselOptions(
-                height: 140,
-                autoPlay: true,
-                enlargeCenterPage: true,
-                viewportFraction: 0.91,
-                aspectRatio: 16 / 9,
-              ),
-            ),
+            const CarouselBannerWidget(),
             AuctionListWidget(
               title: 'Ongoing Auctions',
               auctions: ongoingAuctions,
@@ -100,53 +40,9 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(right: 6, bottom: 60),
-        child: SizedBox(
-          height: 32,
-          width: 105,
-          child: FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (ctx) => const CreateAuctionScreen(),
-                ),
-              );
-            },
-            label: Text(
-              'Create Auction',
-              style: TextStyle(color: Theme.of(context).primaryColor),
-            ),
-            backgroundColor: Theme.of(context).splashColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-      ),
+      floatingActionButton: const CreateAuctionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).bottomAppBarTheme.color,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            buildFixedSizeButton(
-              text: 'Login',
-              onPressed: () {},
-              backgroundColor: secondaryColor,
-              borderColor: const Color.fromARGB(255, 253, 215, 222),
-              textStyle: Theme.of(context).textTheme.bodySmall!,
-            ),
-            buildFixedSizeButton(
-              text: 'Sign Up',
-              onPressed: () {},
-              backgroundColor: primaryColor,
-              borderColor: secondaryColor,
-              textStyle: Theme.of(context).textTheme.bodyMedium!,
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: const BottomNavBarWidget(),
     );
   }
 }
