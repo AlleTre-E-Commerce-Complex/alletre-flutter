@@ -9,6 +9,7 @@ const Color secondaryColor = Color(0xFFFFFFFF);
 const Color errorColor = Color(0xFFe40909);
 const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
+Color buttonBgColor = Colors.grey.shade200;
 
 ThemeData customTheme() {
   return ThemeData(
@@ -29,8 +30,8 @@ ThemeData customTheme() {
       ),
       displayMedium: TextStyle(
         fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w600, // Medium
-        fontSize: 28, 
+        fontWeight: FontWeight.w500, // Medium
+        fontSize: 14,
         color: onSecondaryColor
       ),
       bodyLarge: TextStyle(

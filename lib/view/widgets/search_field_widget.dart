@@ -6,25 +6,25 @@ class SearchFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(left: 18, right: 18),
-      child: SizedBox(
-        height: 45,
-        child: TextField(
-          decoration: InputDecoration(
-            hintText: 'Search on Alletre',
-            prefixIcon: Icon(Icons.search),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-              borderSide: BorderSide(color: onSecondaryColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-              borderSide: BorderSide(color: primaryColor),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 18, right: 18),
+      child: TextField(
+        textAlignVertical: TextAlignVertical.top,
+        decoration: InputDecoration(
+          hintText: 'Search on Alletre',
+          hintStyle: Theme.of(context).textTheme.displayMedium,
+          prefixIcon: const Icon(Icons.search),
+          contentPadding: const EdgeInsets.symmetric(vertical: 11 ),
+          enabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            borderSide: BorderSide(color: onSecondaryColor),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            borderSide: BorderSide(color: primaryColor),
+          ),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:alletre_app/controller/providers/language_provider.dart';
 import 'package:alletre_app/utils/button/textbutton.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
+import 'package:alletre_app/view/widgets/chip_widget.dart';
 import 'package:alletre_app/view/widgets/search_field_widget.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -55,40 +56,16 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             const SearchFieldWidget(),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Chip(
-                    label: const Text('Category 1'),
-                    backgroundColor: Colors.grey.shade200,
-                    labelStyle: const TextStyle(color: Colors.black),
-                  ),
-                  Chip(
-                    label: const Text('Category 2'),
-                    backgroundColor: Colors.grey.shade200,
-                    labelStyle: const TextStyle(color: Colors.black),
-                  ),
-                  Chip(
-                    label: const Text('Category 3'),
-                    backgroundColor: Colors.grey.shade200,
-                    labelStyle: const TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 5),
+            const ChipWidget(),
+            const SizedBox(height: 18),
             CarouselSlider(
               items: [
                 'assets/images/banner1.svg',
                 'assets/images/banner2.svg',
                 'assets/images/banner3.svg',
-                'assets/images/banner4.svg',
-                'assets/images/banner5.svg',
               ].map((imagePath) {
                 return Container(
                   decoration: BoxDecoration(
