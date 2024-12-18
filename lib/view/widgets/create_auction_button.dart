@@ -7,10 +7,10 @@ class CreateAuctionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 6, bottom: 60),
+      padding: const EdgeInsets.only(right: 4, bottom: 57),
       child: SizedBox(
-        height: 32,
-        width: 105,
+        height: 27,
+        width: 94,
         child: FloatingActionButton.extended(
           onPressed: () {
             Navigator.of(context).push(

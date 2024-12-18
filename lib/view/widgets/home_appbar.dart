@@ -12,39 +12,45 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
     final currentLanguage = context.watch<LanguageProvider>().currentLanguage;
 
     return AppBar(
-      toolbarHeight: 58,
+      toolbarHeight: 56,
       backgroundColor: Theme.of(context).primaryColor,
-      title: SizedBox(
-        width: 74,
-        child: SvgPicture.asset(
-          'assets/images/alletre_header.svg',
-          fit: BoxFit.contain,
-        ),
-      ),
-      actions: [
-        GestureDetector(
-          onTap: () {
-            context.read<LanguageProvider>().toggleLanguage();
-          },
-          child: SizedBox(
-            width: 185,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          // Logo
+          SvgPicture.asset(
+            'assets/images/alletre_header.svg',
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(width: 90),
+          // Language Text
+          GestureDetector(
+            onTap: () {
+              context.read<LanguageProvider>().toggleLanguage();
+            },
             child: Text(
               currentLanguage,
-              style: TextStyle(
+              style: const TextStyle(
                 color: secondaryColor,
-                fontSize: currentLanguage == 'English' ? 13 : 17,
-                fontWeight: currentLanguage == 'English'
-                    ? FontWeight.w500
-                    : FontWeight.w600,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
-              textDirection: TextDirection.ltr,
             ),
           ),
-        ),
-      ],
+          // Notification Icon
+          IconButton(
+            icon: const Icon(Icons.notifications, color: secondaryColor, size: 19),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Notifications Clicked!')),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(58);
+  Size get preferredSize => const Size.fromHeight(56);
 }

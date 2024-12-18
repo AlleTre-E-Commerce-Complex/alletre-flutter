@@ -23,11 +23,11 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 18),
+            const SizedBox(height: 15),
             const SearchFieldWidget(),
             const SizedBox(height: 5),
             const ChipWidget(),
-            const SizedBox(height: 18),
+            const SizedBox(height: 15),
             const CarouselBannerWidget(),
             AuctionListWidget(
               title: 'Ongoing Auctions',
