@@ -1,15 +1,14 @@
-import 'package:alletre_app/view/home/create_auction_screen.dart';
+import 'package:alletre_app/view/auction%20screen/create_auction_screen.dart';
 import 'package:flutter/material.dart';
-
 class CreateAuctionButton extends StatelessWidget {
   const CreateAuctionButton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 4, bottom: 57),
+      padding: const EdgeInsets.only(right: 4, bottom: 58),
       child: SizedBox(
-        height: 27,
+        height: 29,
         width: 94,
         child: FloatingActionButton.extended(
           onPressed: () {

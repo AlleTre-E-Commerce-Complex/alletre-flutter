@@ -1,4 +1,5 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/view/widgets/auction_list_widget.dart';
 import 'package:alletre_app/view/widgets/bottom_navbar.dart';
 import 'package:alletre_app/view/widgets/carousel_banner_widget.dart';
@@ -17,14 +18,24 @@ class HomeScreen extends StatelessWidget {
     final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
     final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
 
+    Future.microtask(() {
+      // ignore: use_build_context_synchronously
+      context.read<SearchProvider>().setAllAuctions([
+        ...ongoingAuctions,
+        ...upcomingAuctions,
+      ]);
+    });
+
     return Scaffold(
       appBar: const AppBarWidget(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 15),
-            const SearchFieldWidget(),
+            const SizedBox(height: 9),
+            const SearchFieldWidget(
+              isNavigable: true, // Enables navigation to search screen
+            ),
             const SizedBox(height: 5),
             const ChipWidget(),
             const SizedBox(height: 15),

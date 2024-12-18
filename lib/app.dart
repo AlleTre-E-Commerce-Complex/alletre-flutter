@@ -4,6 +4,7 @@ import 'package:alletre_app/view/splash%20screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controller/providers/language_provider.dart';
+import 'controller/providers/search_provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => LanguageProvider(),
         ),
+        ChangeNotifierProvider(create: (context) => SearchProvider()),
       ],
       child: MaterialApp(
         title: 'Alletre',

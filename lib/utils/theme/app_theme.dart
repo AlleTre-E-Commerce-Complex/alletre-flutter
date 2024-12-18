@@ -31,7 +31,7 @@ ThemeData customTheme() {
       displayMedium: TextStyle(
         fontFamily: 'Montserrat',
         fontWeight: FontWeight.w500, // Medium
-        fontSize: 14,
+        fontSize: 15,
         color: onSecondaryColor
       ),
       bodyLarge: TextStyle(
