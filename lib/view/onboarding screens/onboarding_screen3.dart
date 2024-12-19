@@ -14,7 +14,6 @@ class OnboardingPage3 extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // SVG Image
           SvgPicture.asset(
             AppImages.onboarding3,
             fit: BoxFit.cover,
