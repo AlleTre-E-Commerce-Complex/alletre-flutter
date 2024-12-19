@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/images/images.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,15 +8,8 @@ class CarouselBannerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> bannerImages = [
-      'assets/images/banner1.svg',
-      'assets/images/banner2.svg',
-      'assets/images/banner3.svg',
-      'assets/images/banner4.svg'
-    ];
-
     return CarouselSlider(
-      items: bannerImages.map((imagePath) {
+      items: AppImages.bannerImages.map((imagePath) {
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),

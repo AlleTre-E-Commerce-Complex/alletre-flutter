@@ -1,4 +1,5 @@
 import 'package:alletre_app/controller/providers/language_provider.dart';
+import 'package:alletre_app/utils/images/images.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,7 +20,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
         children: [
           // Logo
           SvgPicture.asset(
-            'assets/images/alletre_header.svg',
+            AppImages.header,
             fit: BoxFit.contain,
           ),
           const SizedBox(width: 90),

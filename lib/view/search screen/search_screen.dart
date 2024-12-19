@@ -25,10 +25,10 @@ class SearchScreen extends StatelessWidget {
                 child: SearchFieldWidget(
                   leadingIcon: Icons.arrow_back,
                   onLeadingIconPressed: () {
-                    Navigator.pop(context); // Navigate back
+                    Navigator.pop(context);
                   },
                   onChanged: (query) {
-                    searchProvider.updateQuery(query); // Update search results
+                    searchProvider.updateQuery(query); // Updates search results
                   },
                   autofocus: true,
                 ),

@@ -1,16 +1,14 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+import 'package:alletre_app/utils/images/images.dart';
+import 'package:alletre_app/utils/navigation/named_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../home screen/home_screen.dart';
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   void _navigateToHome(BuildContext context) {
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
     });
   }
 
@@ -33,7 +31,7 @@ class SplashScreen extends StatelessWidget {
               ),
               child: ClipOval(
                 child: SvgPicture.asset(
-                  'assets/images/alletre_splash.svg',
+                  AppImages.splash,
                   fit: BoxFit.cover,
                 ),
               ),

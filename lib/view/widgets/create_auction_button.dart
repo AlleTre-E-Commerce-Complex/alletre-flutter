@@ -1,4 +1,4 @@
-import 'package:alletre_app/view/auction%20screen/create_auction_screen.dart';
+import 'package:alletre_app/utils/navigation/named_routes.dart';
 import 'package:flutter/material.dart';
 class CreateAuctionButton extends StatelessWidget {
   const CreateAuctionButton({super.key});
@@ -12,11 +12,7 @@ class CreateAuctionButton extends StatelessWidget {
         width: 94,
         child: FloatingActionButton.extended(
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (ctx) => const CreateAuctionScreen(),
-              ),
-            );
+            Navigator.pushReplacementNamed(context, AppRoutes.createAuction);
           },
           label: Text(
             'Create Auction',
