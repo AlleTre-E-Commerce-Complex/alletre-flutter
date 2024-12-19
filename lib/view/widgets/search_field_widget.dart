@@ -24,7 +24,7 @@ class SearchFieldWidget extends StatelessWidget {
       onTap: isNavigable
           ? () {
               // Navigates to SearchScreen when tapped
-              Navigator.pushReplacementNamed(context, AppRoutes.search);
+              Navigator.pushNamed(context, AppRoutes.search);
             }
           : null,
       child: AbsorbPointer(

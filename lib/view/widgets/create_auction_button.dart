@@ -12,7 +12,7 @@ class CreateAuctionButton extends StatelessWidget {
         width: 94,
         child: FloatingActionButton.extended(
           onPressed: () {
-            Navigator.pushReplacementNamed(context, AppRoutes.createAuction);
+            Navigator.pushNamed(context, AppRoutes.createAuction);
           },
           label: Text(
             'Create Auction',
