@@ -1,5 +1,5 @@
-import 'package:alletre_app/view/widgets/search_field_widget.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/search_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -1,8 +1,8 @@
 // create_auction_screen.dart
 import 'package:alletre_app/controller/helpers/auction_screen_helper.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/view/widgets/auction_form_fields.dart';
-import 'package:alletre_app/view/widgets/auction_screen_buttons.dart';
+import 'package:alletre_app/view/widgets/auction%20widgets/auction_form_fields.dart';
+import 'package:alletre_app/view/widgets/auction%20widgets/auction_screen_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

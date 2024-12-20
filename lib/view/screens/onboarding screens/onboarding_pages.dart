@@ -1,7 +1,7 @@
-import 'package:alletre_app/view/onboarding%20screens/onboarding_screen3.dart';
 import 'package:flutter/material.dart';
 import 'onboarding_screen1.dart';
 import 'onboarding_screen2.dart';
+import 'onboarding_screen3.dart';
 
 class OnboardingPages extends StatelessWidget {
   const OnboardingPages({super.key});

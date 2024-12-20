@@ -1,5 +1,7 @@
 import 'package:alletre_app/utils/button/textbutton.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
+import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
+import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavBarWidget extends StatelessWidget {
@@ -14,14 +16,20 @@ class BottomNavBarWidget extends StatelessWidget {
         children: [
           buildFixedSizeButton(
             text: 'Login',
-            onPressed: () {},
+             onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+            ),
             backgroundColor: secondaryColor,
             borderColor: const Color.fromARGB(255, 253, 215, 222),
             textStyle: Theme.of(context).textTheme.bodySmall!,
           ),
           buildFixedSizeButton(
             text: 'Sign Up',
-            onPressed: () {},
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SignUpPage()),
+            ),
             backgroundColor: primaryColor,
             borderColor: secondaryColor,
             textStyle: Theme.of(context).textTheme.bodyMedium!,

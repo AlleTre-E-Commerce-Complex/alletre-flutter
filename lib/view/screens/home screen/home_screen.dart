@@ -1,12 +1,12 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
-import 'package:alletre_app/view/widgets/auction_list_widget.dart';
-import 'package:alletre_app/view/widgets/bottom_navbar.dart';
-import 'package:alletre_app/view/widgets/carousel_banner_widget.dart';
-import 'package:alletre_app/view/widgets/chip_widget.dart';
-import 'package:alletre_app/view/widgets/create_auction_button.dart';
-import 'package:alletre_app/view/widgets/home_appbar.dart';
-import 'package:alletre_app/view/widgets/search_field_widget.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/auction_list_widget.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/bottom_navbar.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/carousel_banner_widget.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/chip_widget.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/create_auction_button.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/home_appbar.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/search_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
     });
 
     return Scaffold(
-      appBar: const AppBarWidget(),
+      appBar: const HomeAppbar(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
-class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
-  const AppBarWidget({super.key});
+class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
+  const HomeAppbar({super.key});
 
   @override
   Widget build(BuildContext context) {

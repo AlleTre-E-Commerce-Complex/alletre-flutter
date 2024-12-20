@@ -1,11 +1,10 @@
-import 'package:alletre_app/view/auction%20screen/create_auction_screen.dart';
-import 'package:alletre_app/view/home%20screen/home_screen.dart';
-import 'package:alletre_app/view/onboarding%20screens/onboarding_pages.dart';
-import 'package:alletre_app/view/onboarding%20screens/onboarding_screen3.dart';
-import 'package:alletre_app/view/search%20screen/search_screen.dart';
-import 'package:alletre_app/view/splash%20screen/splash_screen.dart';
+import 'package:alletre_app/view/screens/auction%20screen/create_auction_screen.dart';
+import 'package:alletre_app/view/screens/home%20screen/home_screen.dart';
+import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
+import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
+import 'package:alletre_app/view/screens/search%20screen/search_screen.dart';
+import 'package:alletre_app/view/screens/splash%20screen/splash_screen.dart';
 import 'package:flutter/material.dart';
-
 class AppRoutes {
   // Defining named routes
   static const String splash = '/splash';
