@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class SignupFormFields extends StatelessWidget {
@@ -5,6 +6,8 @@ class SignupFormFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isCheckboxChecked = false; // Track the state within the builder
+
     return Column(
       children: [
         TextFormField(
@@ -29,55 +32,15 @@ class SignupFormFields extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            SizedBox(
-              width: 80,
-              child: TextFormField(
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.flag),
-                  hintText: '+91',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  hintText: 'Enter your phone number',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
+        TextFormField(
           decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.language),
-            labelText: 'Select Nationality',
+            prefixIcon: const Icon(Icons.phone),
+            labelText: 'Phone Number',
+            hintText: 'Enter your phone number',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          items: [
-            'India',
-            'United Arab Emirates',
-            'United States',
-            'United Kingdom'
-          ].map((nationality) {
-            return DropdownMenuItem(
-              value: nationality,
-              child: Text(nationality),
-            );
-          }).toList(),
-          onChanged: (value) {},
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -93,28 +56,53 @@ class SignupFormFields extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            Checkbox(
-              value: true,
-              onChanged: (value) {},
+        TextFormField(
+          obscureText: true,
+          decoration: InputDecoration(
+            prefixIcon: const Icon(Icons.lock),
+            labelText: 'Confirm Password',
+            hintText: 'Enter your password again',
+            suffixIcon: const Icon(Icons.visibility_off),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            const Text(
-              'I accept the ',
-              style: TextStyle(fontSize: 14),
-            ),
-            GestureDetector(
-              onTap: () {},
-              child: const Text(
-                'Terms & Conditions',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
+          ),
+        ),
+        const SizedBox(height: 16),
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Row(
+              children: [
+                Checkbox(
+                  value: isCheckboxChecked,
+                  onChanged: (value) {
+                    setState(() {
+                      isCheckboxChecked = value ?? false;
+                    });
+                  },
                 ),
-              ),
-            ),
-          ],
+                const Text(
+                  'I agree to the ',
+                  style: TextStyle(fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to Terms & Conditions page or perform an action
+                  },
+                  child: const Text(
+                    'Terms & Conditions',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: surfaceColor,
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.underline,
+                      decorationColor: surfaceColor,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ],
     );

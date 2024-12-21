@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class SignUpTitle extends StatelessWidget {
@@ -11,8 +12,9 @@ class SignUpTitle extends StatelessWidget {
         Text(
           "Let's create your account.",
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
+            color: onSecondaryColor
           ),
         ),
         SizedBox(height: 8),

@@ -6,7 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
-  void _navigateToHome(BuildContext context) {
+  void _navigateToOnBoarding(BuildContext context) {
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
     });
@@ -14,7 +14,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _navigateToHome(context);
+    _navigateToOnBoarding(context);
 
     return Scaffold(
       backgroundColor: Theme.of(context).splashColor,
