@@ -38,7 +38,7 @@ class SignUpPage extends StatelessWidget {
                   SignUpTitle(),
                   SizedBox(height: 24),
                   SignupFormFields(),
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
                   SignupButtons(),
                 ],
               ),

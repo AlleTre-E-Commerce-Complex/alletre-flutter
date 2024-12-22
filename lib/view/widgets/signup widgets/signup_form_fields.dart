@@ -68,7 +68,7 @@ class SignupFormFields extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Row(
@@ -83,7 +83,7 @@ class SignupFormFields extends StatelessWidget {
                 ),
                 const Text(
                   'I agree to the ',
-                  style: TextStyle(fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 15, color: onSecondaryColor, fontWeight: FontWeight.w500),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -92,7 +92,7 @@ class SignupFormFields extends StatelessWidget {
                   child: const Text(
                     'Terms & Conditions',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 15,
                       color: surfaceColor,
                       fontWeight: FontWeight.w500,
                       decorationColor: surfaceColor,
