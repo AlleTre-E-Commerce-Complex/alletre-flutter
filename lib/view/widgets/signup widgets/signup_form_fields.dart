@@ -1,4 +1,5 @@
 import 'package:alletre_app/utils/theme/app_theme.dart';
+import 'package:alletre_app/view/widgets/common%20widgets/obscure_password_field.dart';
 import 'package:flutter/material.dart';
 
 class SignupFormFields extends StatelessWidget {
@@ -14,7 +15,7 @@ class SignupFormFields extends StatelessWidget {
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.person),
             labelText: 'Full Name',
-            hintText: 'Enter your name exactly as it appears on your Emirates ID or Passport',
+            hintText: 'Enter your name',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -24,7 +25,7 @@ class SignupFormFields extends StatelessWidget {
         TextFormField(
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.email),
-            labelText: 'Your Email',
+            labelText: 'Email',
             hintText: 'Enter your email',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -43,43 +44,30 @@ class SignupFormFields extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          obscureText: true,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.lock),
-            labelText: 'Password',
-            hintText: 'Enter your password',
-            suffixIcon: const Icon(Icons.visibility_off),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+        const ObscurePasswordField(
+          labelText: 'Password',
+          hintText: 'Enter your password',
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          obscureText: true,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.lock),
-            labelText: 'Confirm Password',
-            hintText: 'Enter your password again',
-            suffixIcon: const Icon(Icons.visibility_off),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+        const ObscurePasswordField(
+          labelText: 'Confirm Password',
+          hintText: 'Enter your password again',
         ),
         const SizedBox(height: 12),
         StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Row(
               children: [
-                Checkbox(
-                  value: isCheckboxChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      isCheckboxChecked = value ?? false;
-                    });
-                  },
+                Transform.scale(
+                  scale: 0.8,
+                  child: Checkbox(
+                    value: isCheckboxChecked,
+                    onChanged: (value) {
+                      setState(() {
+                        isCheckboxChecked = value ?? false;
+                      });
+                    },
+                  ),
                 ),
                 const Text(
                   'I agree to the ',

@@ -1,15 +1,20 @@
 import 'package:alletre_app/view/screens/auction%20screen/create_auction_screen.dart';
 import 'package:alletre_app/view/screens/home%20screen/home_screen.dart';
+import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
 import 'package:alletre_app/view/screens/search%20screen/search_screen.dart';
+import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/splash%20screen/splash_screen.dart';
 import 'package:flutter/material.dart';
+
 class AppRoutes {
   // Defining named routes
   static const String splash = '/splash';
   static const String onboarding = '/onboarding';
   static const String onboarding3 = '/onboarding3';
+  static const String signup = '/signup';
+  static const String login = '/login';
   static const String home = '/home';
   static const String createAuction = '/createAuction';
   static const String search = '/search';
@@ -20,10 +25,11 @@ class AppRoutes {
       splash: (context) => const SplashScreen(),
       onboarding: (context) => const OnboardingPages(),
       onboarding3: (context) {
-  final PageController pageController = PageController();
-  return OnboardingPage3(pageController: pageController);
-},
-
+        final PageController pageController = PageController();
+        return OnboardingPage3(pageController: pageController);
+      },
+      signup: (context) => const SignUpPage(),
+      login: (context) => const LoginPage(),
       home: (context) => const HomeScreen(),
       createAuction: (context) => const CreateAuctionScreen(),
       search: (context) => const SearchScreen()

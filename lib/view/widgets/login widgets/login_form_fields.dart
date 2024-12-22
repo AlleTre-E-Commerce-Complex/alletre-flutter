@@ -1,4 +1,5 @@
 import 'package:alletre_app/utils/theme/app_theme.dart';
+import 'package:alletre_app/view/widgets/common%20widgets/obscure_password_field.dart';
 import 'package:flutter/material.dart';
 
 class LoginFormFields extends StatelessWidget {
@@ -12,19 +13,8 @@ class LoginFormFields extends StatelessWidget {
       children: [
         TextFormField(
           decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.person),
-            labelText: 'Full Name',
-            hintText: 'Enter your name exactly as it appears on your Emirates ID or Passport',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          decoration: InputDecoration(
             prefixIcon: const Icon(Icons.email),
-            labelText: 'Your Email',
+            labelText: 'Email',
             hintText: 'Enter your email',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -32,77 +22,61 @@ class LoginFormFields extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.phone),
-            labelText: 'Phone Number',
-            hintText: 'Enter your phone number',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+        const ObscurePasswordField(
+          labelText: 'Password',
+          hintText: 'Enter your password',
+        ),
+        const SizedBox(height: 8),
+        Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    // StatefulBuilder for 'Remember Password' checkbox
+    StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Row(
+          children: [
+            Transform.scale(
+              scale: 0.8,
+              child: Checkbox(
+                value: isCheckboxChecked,
+                onChanged: (value) {
+                  setState(() {
+                    isCheckboxChecked = value ?? false;
+                  });
+                },
+              ),
             ),
+            const Text(
+              'Remember Password',
+              style: TextStyle(
+                fontSize: 15,
+                color: onSecondaryColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+    Padding(
+      padding: const EdgeInsets.only(left: 15),
+      child: GestureDetector(
+        onTap: () {
+          // Navigate to Forgot Password page or perform an action
+        },
+        child: const Text(
+          'Forgot Password?',
+          style: TextStyle(
+            fontSize: 15,
+            color: surfaceColor,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 16),
-        TextFormField(
-          obscureText: true,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.lock),
-            labelText: 'Password',
-            hintText: 'Enter your password',
-            suffixIcon: const Icon(Icons.visibility_off),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          obscureText: true,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.lock),
-            labelText: 'Confirm Password',
-            hintText: 'Enter your password again',
-            suffixIcon: const Icon(Icons.visibility_off),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Row(
-              children: [
-                Checkbox(
-                  value: isCheckboxChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      isCheckboxChecked = value ?? false;
-                    });
-                  },
-                ),
-                const Text(
-                  'I agree to the ',
-                  style: TextStyle(fontSize: 15, color: onSecondaryColor, fontWeight: FontWeight.w500),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    // Navigate to Terms & Conditions page or perform an action
-                  },
-                  child: const Text(
-                    'Terms & Conditions',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: surfaceColor,
-                      fontWeight: FontWeight.w500,
-                      decorationColor: surfaceColor,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+      ),
+    ),
+  ],
+),
+
       ],
     );
   }

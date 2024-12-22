@@ -44,7 +44,7 @@ class OnboardingPage1 extends StatelessWidget {
             right: 0,
             child: Center(
               child: Icon(
-                Icons.swipe_right_rounded,
+                Icons.swipe_left_rounded,
                 color: primaryColor,
                 size: 50,
               ),

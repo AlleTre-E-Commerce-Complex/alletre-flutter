@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/navigation/named_routes.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,7 +19,7 @@ class LoginButtons extends StatelessWidget {
             ),
           ),
           onPressed: () {},
-          child: const Text('Create Account',
+          child: const Text('LOGIN',
               style: TextStyle(
                   fontSize: 16,
                   color: secondaryColor,
@@ -124,7 +125,7 @@ class LoginButtons extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'Already have an account?  ',
+              "Don't have an account?  ",
               style: TextStyle(
                 fontSize: 14,
                 color: onSecondaryColor,
@@ -133,10 +134,10 @@ class LoginButtons extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                // Handle the tap action for "Login Now"
+                Navigator.pushReplacementNamed(context, AppRoutes.signup);
               },
               child: const Text(
-                'Login Now',
+                'Register Now',
                 style: TextStyle(
                   fontSize: 14,
                   color: surfaceColor,

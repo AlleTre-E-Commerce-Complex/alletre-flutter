@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/navigation/named_routes.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -133,7 +134,7 @@ class SignupButtons extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                // Handle the tap action for "Login Now"
+                Navigator.pushReplacementNamed(context, AppRoutes.login);
               },
               child: const Text(
                 'Login Now',

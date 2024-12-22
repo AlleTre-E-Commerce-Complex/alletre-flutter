@@ -10,7 +10,7 @@ class LoginTitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Let's create your account.",
+          "Welcome back!",
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w600,
@@ -19,7 +19,7 @@ class LoginTitle extends StatelessWidget {
         ),
         SizedBox(height: 8),
         Text(
-          "Begin the bidding experience now!",
+          "Kindly enter your details to continue",
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
       ],

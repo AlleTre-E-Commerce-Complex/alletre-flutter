@@ -22,7 +22,7 @@ class LoginPage extends StatelessWidget {
                   LoginTitle(),
                   SizedBox(height: 24),
                   LoginFormFields(),
-                  SizedBox(height: 12),
+                  SizedBox(height: 24),
                   LoginButtons(),
                 ],
               ),
