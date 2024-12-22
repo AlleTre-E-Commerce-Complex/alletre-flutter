@@ -13,14 +13,14 @@ class LoginPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
+            const TextField(
               decoration: InputDecoration(
                 labelText: 'Email',
                 hintText: 'Enter your email',
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
+            const TextField(
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',

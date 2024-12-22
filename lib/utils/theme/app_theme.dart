@@ -10,6 +10,7 @@ const Color errorColor = Color(0xFFe40909);
 const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
 Color buttonBgColor = Colors.grey.shade200;
+Color dividerColor = Colors.black54;
 
 ThemeData customTheme() {
   return ThemeData(

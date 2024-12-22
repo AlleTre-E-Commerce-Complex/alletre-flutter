@@ -13,7 +13,7 @@ class SignUpTitle extends StatelessWidget {
           "Let's create your account.",
           style: TextStyle(
             fontSize: 22,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: onSecondaryColor
           ),
         ),

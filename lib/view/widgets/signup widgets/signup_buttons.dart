@@ -1,5 +1,6 @@
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SignupButtons extends StatelessWidget {
   const SignupButtons({super.key});
@@ -18,20 +19,23 @@ class SignupButtons extends StatelessWidget {
           ),
           onPressed: () {},
           child: const Text('Create Account',
-              style: TextStyle(fontSize: 15, color: secondaryColor)),
+              style: TextStyle(
+                  fontSize: 16,
+                  color: secondaryColor,
+                  fontWeight: FontWeight.w600)),
         ),
         const SizedBox(height: 16),
-        const Row(
+        Row(
           children: [
-            Expanded(child: Divider(color: Colors.grey)),
+            Expanded(child: Divider(color: dividerColor)),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text('OR',
                   style: TextStyle(
-                      color: Colors.grey, fontWeight: FontWeight.w500)),
+                      color: dividerColor, fontWeight: FontWeight.w500)),
             ),
             Expanded(
-              child: Divider(color: Colors.grey),
+              child: Divider(color: dividerColor),
             ),
           ],
         ),
@@ -39,20 +43,25 @@ class SignupButtons extends StatelessWidget {
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
-            side: BorderSide(color: Colors.grey.shade400),
+            side: const BorderSide(color: primaryColor),
+            padding: const EdgeInsets.only(right: 18),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {},
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.g_mobiledata_outlined, color: Colors.black),
-              SizedBox(width: 8),
-              Text(
+              SvgPicture.asset('assets/icons/google_icon.svg',
+                  width: 15, height: 15),
+              const SizedBox(width: 10),
+              const Text(
                 'Continue with Google',
-                style: TextStyle(color: Colors.black, fontSize: 14),
+                style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -61,20 +70,25 @@ class SignupButtons extends StatelessWidget {
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
-            side: BorderSide(color: Colors.grey.shade400),
+            side: const BorderSide(color: primaryColor),
+            padding: const EdgeInsets.only(right: 26),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {},
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.apple_outlined, color: Colors.black),
-              SizedBox(width: 8),
-              Text(
+              SvgPicture.asset('assets/icons/apple_icon.svg',
+                  width: 15, height: 15),
+              const SizedBox(width: 10),
+              const Text(
                 'Continue with Apple',
-                style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -83,20 +97,24 @@ class SignupButtons extends StatelessWidget {
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
-            side: BorderSide(color: Colors.grey.shade400),
+            side: const BorderSide(color: primaryColor),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {},
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.facebook_outlined, color: Colors.black),
-              SizedBox(width: 8),
-              Text(
+              SvgPicture.asset('assets/icons/facebook_icon.svg',
+                  width: 15, height: 15),
+              const SizedBox(width: 10),
+              const Text(
                 'Continue with Facebook',
-                style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -106,7 +124,7 @@ class SignupButtons extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'Already have an account?   ',
+              'Already have an account?  ',
               style: TextStyle(
                 fontSize: 14,
                 color: onSecondaryColor,
@@ -122,7 +140,7 @@ class SignupButtons extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   color: surfaceColor,
-                  fontWeight: FontWeight.w500, 
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
