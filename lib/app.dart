@@ -1,4 +1,5 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +23,9 @@ class MyApp extends StatelessWidget {
       ),
       child: MultiProvider(
         providers: [
+          ChangeNotifierProvider(
+            create: (context) => UserProvider(),
+          ),
           ChangeNotifierProvider(
             create: (context) => AuctionProvider(),
           ),
