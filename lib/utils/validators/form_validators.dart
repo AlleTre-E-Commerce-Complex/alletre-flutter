@@ -31,12 +31,12 @@ class FormValidators {
     if (value == null || value.isEmpty) {
       return 'This field is required';
     }
-    if (!StringValidators.phoneRegex.hasMatch(value)) {
-      return 'Phone number can contain only digits';
-    }
-    if (!StringValidators.isWithinLength(value, 10, 15)) {
-      return 'Enter a valid phone number';
-    }
+     if (value.length != 10) { 
+    return 'Phone number must be exactly 10 digits';
+  }
+    // if (!StringValidators.isWithinLength(value, 10, 15)) {
+    //   return 'Enter a valid phone number';
+    // }
     return null;
   }
 

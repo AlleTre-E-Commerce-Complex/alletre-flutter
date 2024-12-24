@@ -49,6 +49,7 @@ class SignupFormFields extends StatelessWidget {
             keyboardType: TextInputType.number,
             onChanged: (value) => userProvider.setPhoneNumber(value),
             validator: FormValidators.validatePhoneNumber,
+            maxLength: 10,
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.phone),
               labelText: 'Phone Number',

@@ -5,9 +5,6 @@ class StringValidators {
   static final RegExp emailRegex =
       RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 
-  // Regex for validating phone numbers (numeric only)
-  static final RegExp phoneRegex = RegExp(r'^[0-9]+$');
-
   // Regex for validating names (alphabets only)
   static final RegExp nameRegex = RegExp(r'^[a-zA-Z]+$');
 

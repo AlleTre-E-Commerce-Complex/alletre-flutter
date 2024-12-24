@@ -36,8 +36,8 @@ class SignupButtons extends StatelessWidget {
                 // Shows error if terms are not agreed upon
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('You must agree to the Terms & Conditions'),
-                    backgroundColor: Colors.red,
+                    content: Text('Agree to the Terms & Conditions'),
+                    backgroundColor: primaryColor,
                   ),
                 );
               }
@@ -46,7 +46,7 @@ class SignupButtons extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Center(
-                      child: Text('Please fill all the fields')),
+                      child: Text('Invalid registration')),
                       backgroundColor: primaryColor,
                       duration: Durations.extralong4
                 ),
