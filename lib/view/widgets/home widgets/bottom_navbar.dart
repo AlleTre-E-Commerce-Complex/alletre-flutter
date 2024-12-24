@@ -1,4 +1,4 @@
-import 'package:alletre_app/utils/button/textbutton.dart';
+import 'package:alletre_app/utils/buttons/textbutton.dart';
 import 'package:alletre_app/utils/theme/app_theme.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';

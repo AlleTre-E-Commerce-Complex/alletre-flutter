@@ -1,4 +1,3 @@
-// user_provider.dart
 import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 
@@ -10,13 +9,14 @@ class UserProvider with ChangeNotifier {
   // Getter for user
   UserModel get user => _user;
 
-  // Getter for agreement and remember password flags
+  // Getter for individual fields
+  String get password => _user.password; // Added getter for password
   bool get agreeToTerms => _agreeToTerms;
   bool get rememberPassword => _rememberPassword;
 
   // Setters for user fields
   void setFullName(String value) {
-    _user.fullName = value;
+    _user.name = value;
     notifyListeners();
   }
 
@@ -35,9 +35,20 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setConfirmPassword(String value) {
-    _user.confirmPassword = value;
+  // Setters for login fields (Login data)
+  void setLoginEmail(String value) {
+    _user.email = value;
     notifyListeners();
+  }
+
+  void setLoginPassword(String value) {
+    _user.password = value;
+    notifyListeners();
+  }
+
+  // Validation for login credentials (Checks if login email and password matches the stored data)
+  bool validateLoginCredentials() {
+    return _user.email == _user.email && _user.password == _user.password;
   }
 
   // Setters for additional fields

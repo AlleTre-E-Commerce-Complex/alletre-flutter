@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class ObscurePasswordField extends StatefulWidget {
   final String labelText;
   final String hintText;
+  final String? Function(String?) validator;
+  final void Function(String) onChanged;
 
   const ObscurePasswordField({
     super.key,
     required this.labelText,
     required this.hintText,
+    required this.validator,
+    required this.onChanged,
   });
 
   @override
@@ -21,6 +25,8 @@ class _ObscurePasswordFieldState extends State<ObscurePasswordField> {
   Widget build(BuildContext context) {
     return TextFormField(
       obscureText: obscureText,
+      onChanged: widget.onChanged,
+      validator: widget.validator,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.lock),
         labelText: widget.labelText,
