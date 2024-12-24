@@ -1,6 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 import 'package:alletre_app/utils/images/images.dart';
-import 'package:alletre_app/utils/navigation/named_routes.dart';
+import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 class SplashScreen extends StatelessWidget {

@@ -1,6 +1,6 @@
 // OnboardingPage1.dart
 import 'package:alletre_app/utils/images/images.dart';
-import 'package:alletre_app/utils/theme/app_theme.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 

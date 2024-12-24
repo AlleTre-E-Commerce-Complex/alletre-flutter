@@ -1,16 +1,17 @@
 import 'package:alletre_app/controller/providers/user_provider.dart';
-import 'package:alletre_app/utils/theme/app_theme.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/obscure_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LoginFormFields extends StatelessWidget {
-  const LoginFormFields({super.key});
+  final formKey = GlobalKey<FormState>();
+
+  LoginFormFields({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
     final userProvider = Provider.of<UserProvider>(context);
 
     return Form(
@@ -32,15 +33,16 @@ class LoginFormFields extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ObscurePasswordField(
-  labelText: 'Password',
-  hintText: 'Enter your password',
-  validator: (value) => FormValidators.validateLoginPassword(
-    value,
-    Provider.of<UserProvider>(context, listen: false),
-  ),
-  onChanged: (value) => Provider.of<UserProvider>(context, listen: false).setLoginPassword(value),
-),
-
+            labelText: 'Password',
+            hintText: 'Enter your password',
+            validator: (value) => FormValidators.validateLoginPassword(
+              value,
+              Provider.of<UserProvider>(context, listen: false),
+            ),
+            onChanged: (value) =>
+                Provider.of<UserProvider>(context, listen: false)
+                    .setLoginPassword(value),
+          ),
           const SizedBox(height: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

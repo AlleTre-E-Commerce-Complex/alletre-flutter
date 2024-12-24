@@ -9,21 +9,21 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: CustomScrollView(
         slivers: [
-          CommonAppBar(),
+          const CommonAppBar(),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  LoginTitle(),
-                  SizedBox(height: 24),
+                  const LoginTitle(),
+                  const SizedBox(height: 24),
                   LoginFormFields(),
-                  SizedBox(height: 24),
-                  LoginButtons(),
+                  const SizedBox(height: 24),
+                  const LoginButtons(),
                 ],
               ),
             ),

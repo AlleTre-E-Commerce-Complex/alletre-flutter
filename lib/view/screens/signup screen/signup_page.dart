@@ -9,21 +9,21 @@ class SignUpPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: CustomScrollView(
         slivers: [
-          CommonAppBar(),
+          const CommonAppBar(),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SignUpTitle(),
-                  SizedBox(height: 24),
+                  const SignUpTitle(),
+                  const SizedBox(height: 24),
                   SignupFormFields(),
-                  SizedBox(height: 12),
-                  SignupButtons(),
+                  const SizedBox(height: 12),
+                  const SignupButtons(),
                 ],
               ),
             ),

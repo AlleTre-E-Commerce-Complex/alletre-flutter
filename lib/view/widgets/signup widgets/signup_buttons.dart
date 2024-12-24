@@ -1,5 +1,5 @@
-import 'package:alletre_app/utils/navigation/named_routes.dart';
-import 'package:alletre_app/utils/theme/app_theme.dart';
+import 'package:alletre_app/utils/routes/named_routes.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

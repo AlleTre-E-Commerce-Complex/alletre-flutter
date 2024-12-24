@@ -1,12 +1,12 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
-import 'package:alletre_app/utils/theme/app_theme.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'controller/providers/language_provider.dart';
 import 'controller/providers/search_provider.dart';
-import 'utils/navigation/named_routes.dart';
+import 'utils/routes/named_routes.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

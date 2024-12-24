@@ -1,4 +1,4 @@
-import 'package:alletre_app/utils/navigation/named_routes.dart';
+import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:flutter/material.dart';
 class CreateAuctionButton extends StatelessWidget {
   const CreateAuctionButton({super.key});

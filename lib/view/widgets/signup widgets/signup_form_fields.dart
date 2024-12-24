@@ -1,12 +1,14 @@
 import 'package:alletre_app/controller/providers/user_provider.dart';
-import 'package:alletre_app/utils/theme/app_theme.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/obscure_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SignupFormFields extends StatelessWidget {
-  const SignupFormFields({super.key});
+  final formKey = GlobalKey<FormState>();
+
+  SignupFormFields({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -58,21 +60,21 @@ class SignupFormFields extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ObscurePasswordField(
-  labelText: 'Password',
-  hintText: 'Enter your password',
-  validator: FormValidators.validatePassword,
-  onChanged: (value) => userProvider.setPassword(value),
-),
-const SizedBox(height: 16),
-ObscurePasswordField(
-  labelText: 'Confirm Password',
-  hintText: 'Enter your password again',
-  validator: (value) => FormValidators.validateConfirmPassword(
-    value,
-    userProvider.password,
-  ),
-  onChanged: (value) => userProvider.setPassword(value),
-),
+            labelText: 'Password',
+            hintText: 'Enter your password',
+            validator: FormValidators.validatePassword,
+            onChanged: (value) => userProvider.setPassword(value),
+          ),
+          const SizedBox(height: 16),
+          ObscurePasswordField(
+            labelText: 'Confirm Password',
+            hintText: 'Enter your password again',
+            validator: (value) => FormValidators.validateConfirmPassword(
+              value,
+              userProvider.password,
+            ),
+            onChanged: (value) => userProvider.setPassword(value),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
