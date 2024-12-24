@@ -6,7 +6,7 @@ const Color primaryVariantColor = Color(0xFF5b0c1f);
 const Color primaryColor = Color(0xFFa91d3a);
 const Color surfaceColor = Color(0xFFc73659);
 const Color secondaryColor = Color(0xFFFFFFFF);
-const Color errorColor = Color(0xFFe40909);
+const Color errorColor = Color(0xFFB91C1C);
 const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
 Color buttonBgColor = Colors.grey.shade200;
@@ -107,6 +107,11 @@ ThemeData customTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: primaryColor), // Border color when focused (tapped)
+      ),
+      errorStyle: TextStyle(
+        color: errorColor, // Error text color
+        fontSize: 12, // Adjust font size for error text
+        fontWeight: FontWeight.w500, // Medium weight for better visibility
       ),
     ),
   );

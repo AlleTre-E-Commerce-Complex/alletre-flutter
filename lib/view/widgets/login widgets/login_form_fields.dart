@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LoginFormFields extends StatelessWidget {
-  final formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey;
 
-  LoginFormFields({super.key});
+  const LoginFormFields({super.key, required this.formKey});
 
   @override
   Widget build(BuildContext context) {

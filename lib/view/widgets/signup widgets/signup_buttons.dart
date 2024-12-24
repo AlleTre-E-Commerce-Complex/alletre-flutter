@@ -1,13 +1,19 @@
+import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class SignupButtons extends StatelessWidget {
-  const SignupButtons({super.key});
+  final GlobalKey<FormState> formKey;
+
+  const SignupButtons({super.key, required this.formKey});
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     return Column(
       children: [
         ElevatedButton(
@@ -18,12 +24,43 @@ class SignupButtons extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: () {},
-          child: const Text('Create Account',
-              style: TextStyle(
-                  fontSize: 16,
-                  color: secondaryColor,
-                  fontWeight: FontWeight.w600)),
+          onPressed: () {
+            // Validating the form
+            if (formKey.currentState!.validate()) {
+              // Checks if user agreed to terms
+              if (userProvider.agreeToTerms) {
+                // Simulates user registration success
+                // Navigates to the login page
+                Navigator.pushReplacementNamed(context, AppRoutes.login);
+              } else {
+                // Shows error if terms are not agreed upon
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('You must agree to the Terms & Conditions'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            } else {
+              // generic error message
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Center(
+                      child: Text('Please fill all the fields')),
+                      backgroundColor: primaryColor,
+                      duration: Durations.extralong4
+                ),
+              );
+            }
+          },
+          child: const Text(
+            'Create Account',
+            style: TextStyle(
+              fontSize: 16,
+              color: secondaryColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         const SizedBox(height: 16),
         Row(
@@ -31,9 +68,13 @@ class SignupButtons extends StatelessWidget {
             Expanded(child: Divider(color: dividerColor)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text('OR',
-                  style: TextStyle(
-                      color: dividerColor, fontWeight: FontWeight.w500)),
+              child: Text(
+                'OR',
+                style: TextStyle(
+                  color: dividerColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
             Expanded(
               child: Divider(color: dividerColor),
@@ -41,6 +82,7 @@ class SignupButtons extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
+        // Google button
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
@@ -68,6 +110,7 @@ class SignupButtons extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        // Apple button
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
@@ -95,6 +138,7 @@ class SignupButtons extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        // Facebook button
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
@@ -121,6 +165,7 @@ class SignupButtons extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        // Login link
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -146,7 +191,7 @@ class SignupButtons extends StatelessWidget {
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }

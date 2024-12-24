@@ -6,7 +6,7 @@ class FormValidators {
 
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Name is required';
+      return 'This field is required';
     }
     if (!StringValidators.nameRegex.hasMatch(value)) {
       return 'Name can only contain alphabets';
@@ -19,7 +19,7 @@ class FormValidators {
 
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return 'This field is required';
     }
     if (!StringValidators.emailRegex.hasMatch(value)) {
       return 'Enter a valid email';
@@ -29,7 +29,7 @@ class FormValidators {
 
   static String? validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Phone number is required';
+      return 'This field is required';
     }
     if (!StringValidators.phoneRegex.hasMatch(value)) {
       return 'Phone number can contain only digits';
@@ -42,7 +42,7 @@ class FormValidators {
 
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return 'This field is required';
     }
     if (!StringValidators.isWithinLength(value, 8, 30)) {
       return 'Password must be at least 8 characters long';
@@ -55,7 +55,7 @@ class FormValidators {
 
   static String? validateConfirmPassword(String? value, String? password) {
     if (value == null || value.isEmpty) {
-      return 'Confirm Password cannot be empty';
+      return 'This field is required';
     }
     if (value != password) {
       return 'Passwords do not match';
@@ -65,7 +65,7 @@ class FormValidators {
 
   static String? validateLoginEmail(String? value, UserProvider userProvider) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return 'This field is required';
     }
     if (value != userProvider.user.email) {
       return 'Email does not match any registered user';
@@ -75,10 +75,10 @@ class FormValidators {
 
   static String? validateLoginPassword(String? value, UserProvider userProvider) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return 'This field is required';
     }
     if (value != userProvider.user.password) {
-      return 'Invalid password';
+      return 'Incorrect password';
     }
     return null;
   }

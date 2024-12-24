@@ -28,8 +28,8 @@ class AppRoutes {
         final PageController pageController = PageController();
         return OnboardingPage3(pageController: pageController);
       },
-      signup: (context) => const SignUpPage(),
-      login: (context) => const LoginPage(),
+      signup: (context) => SignUpPage(),
+      login: (context) => LoginPage(),
       home: (context) => const HomeScreen(),
       createAuction: (context) => const CreateAuctionScreen(),
       search: (context) => const SearchScreen()

@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SignupFormFields extends StatelessWidget {
-  final formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey; // Receiving the formKey from parent
 
-  SignupFormFields({super.key});
+  const SignupFormFields({super.key, required this.formKey});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +21,7 @@ class SignupFormFields extends StatelessWidget {
           TextFormField(
             onChanged: (value) => userProvider.setFullName(value),
             validator: FormValidators.validateName,
+            textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.person),
               labelText: 'Name',
@@ -74,7 +75,7 @@ class SignupFormFields extends StatelessWidget {
             ),
             onChanged: (value) => userProvider.setPassword(value),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Transform.scale(
@@ -87,9 +88,10 @@ class SignupFormFields extends StatelessWidget {
               const Text(
                 'I agree to the ',
                 style: TextStyle(
-                    fontSize: 15,
-                    color: onSecondaryColor,
-                    fontWeight: FontWeight.w500),
+                  fontSize: 15,
+                  color: onSecondaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               GestureDetector(
                 onTap: () {

@@ -5,7 +5,9 @@ import 'package:alletre_app/view/widgets/signup%20widgets/signup_title.dart';
 import 'package:flutter/material.dart';
 
 class SignUpPage extends StatelessWidget {
-  const SignUpPage({super.key});
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +23,9 @@ class SignUpPage extends StatelessWidget {
                 children: [
                   const SignUpTitle(),
                   const SizedBox(height: 24),
-                  SignupFormFields(),
-                  const SizedBox(height: 12),
-                  const SignupButtons(),
+                  SignupFormFields(formKey: formKey),
+                  const SizedBox(height: 10),
+                  SignupButtons(formKey: formKey),
                 ],
               ),
             ),

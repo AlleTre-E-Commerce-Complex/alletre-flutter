@@ -18,7 +18,7 @@ class BottomNavBarWidget extends StatelessWidget {
             text: 'Login',
              onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
+              MaterialPageRoute(builder: (context) => LoginPage()),
             ),
             backgroundColor: secondaryColor,
             borderColor: const Color.fromARGB(255, 253, 215, 222),
@@ -28,7 +28,7 @@ class BottomNavBarWidget extends StatelessWidget {
             text: 'Sign Up',
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const SignUpPage()),
+              MaterialPageRoute(builder: (context) => SignUpPage()),
             ),
             backgroundColor: primaryColor,
             borderColor: secondaryColor,
