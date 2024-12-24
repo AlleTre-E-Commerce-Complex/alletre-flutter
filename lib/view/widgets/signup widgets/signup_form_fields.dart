@@ -12,7 +12,6 @@ class SignupFormFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
     final userProvider = Provider.of<UserProvider>(context);
 
     return Form(

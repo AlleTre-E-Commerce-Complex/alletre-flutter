@@ -69,7 +69,7 @@ ThemeData customTheme() {
 
     // Color scheme with errorColor
     colorScheme: ColorScheme.fromSwatch(
-        primarySwatch: MaterialColor(primaryColor.value, const {
+        primarySwatch: const MaterialColor(0xFFa91d3a, {
       50: primaryColor,
       100: primaryColor,
       200: primaryColor,
