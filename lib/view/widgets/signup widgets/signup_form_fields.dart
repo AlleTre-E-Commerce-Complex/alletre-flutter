@@ -1,7 +1,7 @@
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
-import 'package:alletre_app/view/widgets/common%20widgets/obscure_password_field.dart';
+import 'package:alletre_app/view/widgets/common%20widgets/common_obscure_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
