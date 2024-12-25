@@ -19,7 +19,7 @@ class SignupFormFields extends StatelessWidget {
       child: Column(
         children: [
           TextFormField(
-            onChanged: (value) => userProvider.setFullName(value),
+            onChanged: (value) => userProvider.setName(value),
             validator: FormValidators.validateName,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
@@ -64,16 +64,6 @@ class SignupFormFields extends StatelessWidget {
             labelText: 'Password',
             hintText: 'Enter your password',
             validator: FormValidators.validatePassword,
-            onChanged: (value) => userProvider.setPassword(value),
-          ),
-          const SizedBox(height: 16),
-          ObscurePasswordField(
-            labelText: 'Confirm Password',
-            hintText: 'Enter your password again',
-            validator: (value) => FormValidators.validateConfirmPassword(
-              value,
-              userProvider.password,
-            ),
             onChanged: (value) => userProvider.setPassword(value),
           ),
           const SizedBox(height: 10),

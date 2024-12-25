@@ -15,7 +15,7 @@ class UserProvider with ChangeNotifier {
   bool get rememberPassword => _rememberPassword;
 
   // Setters for user fields
-  void setFullName(String value) {
+  void setName(String value) {
     _user.name = value;
     notifyListeners();
   }
