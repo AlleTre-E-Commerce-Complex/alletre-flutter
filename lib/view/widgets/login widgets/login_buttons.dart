@@ -1,8 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/widgets/login%20widgets/success_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +34,7 @@ class LoginButtons extends StatelessWidget {
                 // Show success dialog
                 showDialog(
                   context: context,
-                  builder: (context) => _buildSuccessDialog(context),
+                  builder: (context) => buildSuccessDialog(context),
                 );
               } else {
                 // Show error message
@@ -176,46 +176,6 @@ class LoginButtons extends StatelessWidget {
           ],
         )
       ],
-    );
-  }
-
-  Widget _buildSuccessDialog(BuildContext context) {
-    // Schedule the dialog to close automatically after 3 seconds
-    Future.delayed(const Duration(seconds: 2), () {
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context); // Close the dialog
-        Navigator.pushReplacementNamed(
-            context, AppRoutes.home); // Redirect to home
-      }
-    });
-
-    return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.check_circle,
-              color: primaryColor,
-              size: 60,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Login Successful!',
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    color: primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
