@@ -25,7 +25,7 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: 24),
                   LoginFormFields(formKey: formKey),
                   const SizedBox(height: 24),
-                  const LoginButtons(),
+                  LoginButtons(formKey: formKey),
                 ],
               ),
             ),
