@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -13,7 +15,7 @@ class LoginButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    
+
     return Column(
       children: [
         ElevatedButton(
@@ -178,6 +180,15 @@ class LoginButtons extends StatelessWidget {
   }
 
   Widget _buildSuccessDialog(BuildContext context) {
+    // Schedule the dialog to close automatically after 3 seconds
+    Future.delayed(const Duration(seconds: 2), () {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context); // Close the dialog
+        Navigator.pushReplacementNamed(
+            context, AppRoutes.home); // Redirect to home
+      }
+    });
+
     return Dialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(

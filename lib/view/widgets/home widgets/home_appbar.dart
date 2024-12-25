@@ -13,6 +13,7 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
     final currentLanguage = context.watch<LanguageProvider>().currentLanguage;
 
     return AppBar(
+      automaticallyImplyLeading: false,
       toolbarHeight: 56,
       backgroundColor: Theme.of(context).primaryColor,
       title: Row(
