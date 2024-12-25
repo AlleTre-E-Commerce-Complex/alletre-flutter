@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -15,6 +16,8 @@ class LoginButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final loggedinProvider =
+        Provider.of<LoggedInProvider>(context, listen: false);
 
     return Column(
       children: [
@@ -31,6 +34,8 @@ class LoginButtons extends StatelessWidget {
               if (userProvider.validateLoginCredentials()) {
                 // Navigate to home page
                 userProvider.resetCheckboxes();
+                // Login successful, updates the provider and navigates to the home screen
+                loggedinProvider.logIn();
                 Navigator.pushReplacementNamed(context, AppRoutes.home);
                 // Show success dialog
                 showDialog(

@@ -1,8 +1,11 @@
 import 'package:alletre_app/view/screens/auction%20screen/create_auction_screen.dart';
+import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/home%20screen/home_screen.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
+import 'package:alletre_app/view/screens/profile%20screen/profile_screen.dart';
+import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dart';
 import 'package:alletre_app/view/screens/search%20screen/search_screen.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/splash%20screen/splash_screen.dart';
@@ -18,6 +21,9 @@ class AppRoutes {
   static const String home = '/home';
   static const String createAuction = '/createAuction';
   static const String search = '/search';
+  static const String purchases = '/purchases';
+  static const String bids = '/bids';
+  static const String profile = '/profile';
 
   // Static method to define all the routes in one place
   static Map<String, WidgetBuilder> get routes {
@@ -32,7 +38,10 @@ class AppRoutes {
       login: (context) => LoginPage(),
       home: (context) => const HomeScreen(),
       createAuction: (context) => const CreateAuctionScreen(),
-      search: (context) => const SearchScreen()
+      search: (context) => const SearchScreen(),
+      purchases: (context) => const PurchaseScreen(),
+      bids: (context) => const BidsScreen(),
+      profile: (context) => const ProfileScreen(),
     };
   }
 }

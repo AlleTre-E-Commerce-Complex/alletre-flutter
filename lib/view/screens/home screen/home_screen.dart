@@ -1,5 +1,7 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
+import 'package:alletre_app/utils/extras/common_navbar.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/auction_list_widget.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/bottom_navbar.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/carousel_banner_widget.dart';
@@ -17,6 +19,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
     final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
+    final loginState = context.watch<LoggedInProvider>().isLoggedIn;
 
     Future.microtask(() {
       // ignore: use_build_context_synchronously
@@ -53,7 +56,13 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: const CreateAuctionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-      bottomNavigationBar: const BottomNavBarWidget(),
+      bottomNavigationBar: BottomAppBar(
+        height: 72,
+        color: Theme.of(context).bottomAppBarTheme.color,
+        child: !loginState
+            ? const BottomNavBar()
+            : NavBarUtils.buildAuthenticatedNavBar(context),
+      ),
     );
   }
 }

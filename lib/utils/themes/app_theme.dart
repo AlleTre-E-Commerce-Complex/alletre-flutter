@@ -9,6 +9,7 @@ const Color secondaryColor = Color(0xFFFFFFFF);
 const Color errorColor = Color(0xFFB91C1C);
 const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
+const Color selectedIndex = Color(0xFFCDAF89);
 Color buttonBgColor = Colors.grey.shade200;
 Color dividerColor = Colors.black54;
 
