@@ -30,6 +30,7 @@ class LoginButtons extends StatelessWidget {
             if (formKey.currentState!.validate()) {
               if (userProvider.validateLoginCredentials()) {
                 // Navigate to home page
+                userProvider.resetCheckboxes();
                 Navigator.pushReplacementNamed(context, AppRoutes.home);
                 // Show success dialog
                 showDialog(
@@ -162,6 +163,7 @@ class LoginButtons extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
+                userProvider.resetCheckboxes();
                 Navigator.pushReplacementNamed(context, AppRoutes.signup);
               },
               child: const Text(

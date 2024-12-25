@@ -32,6 +32,7 @@ class SignupButtons extends StatelessWidget {
                 // Simulates user registration success
                 // Navigates to the login page
                 Navigator.pushReplacementNamed(context, AppRoutes.login);
+                userProvider.resetCheckboxes();
               } else {
                 // Shows error if terms are not agreed upon
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -45,11 +46,9 @@ class SignupButtons extends StatelessWidget {
               // generic error message
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Center(
-                      child: Text('Invalid registration')),
-                      backgroundColor: primaryColor,
-                      duration: Durations.extralong4
-                ),
+                    content: Center(child: Text('Invalid registration')),
+                    backgroundColor: primaryColor,
+                    duration: Durations.extralong4),
               );
             }
           },
@@ -179,6 +178,7 @@ class SignupButtons extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
+                userProvider.resetCheckboxes();
                 Navigator.pushReplacementNamed(context, AppRoutes.login);
               },
               child: const Text(

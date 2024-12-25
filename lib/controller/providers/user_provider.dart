@@ -61,4 +61,11 @@ class UserProvider with ChangeNotifier {
     _rememberPassword = !_rememberPassword;
     notifyListeners();
   }
+
+  void resetCheckboxes() {
+  _agreeToTerms = false;
+  _rememberPassword = false;
+  notifyListeners();
+}
+
 }
