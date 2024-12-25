@@ -8,8 +8,8 @@ Widget buildFixedSizeButton({
   required TextStyle textStyle,
 }) {
   return SizedBox(
-    width: 122, 
-    height: 36,
+    width: 124, 
+    height: 38,
     child: TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
