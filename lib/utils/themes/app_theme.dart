@@ -11,6 +11,7 @@ const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
 const Color selectedIndex = Color(0xFFCDAF89);
 Color buttonBgColor = Colors.grey.shade200;
+Color avatarColor = Colors.grey.shade600;
 Color dividerColor = Colors.black54;
 
 ThemeData customTheme() {
@@ -24,49 +25,47 @@ ThemeData customTheme() {
 
     // Define text styles using specific Montserrat font weights
     textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.bold, 
-        fontSize: 32, 
-        color: onSecondaryColor
-      ),
-      displayMedium: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w500, // Medium
-        fontSize: 15,
-        color: onSecondaryColor
-      ),
-      bodyLarge: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w400, // Regular
-        fontSize: 16, 
-        color: onSecondaryColor
-      ),
-      bodyMedium: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w600, // Light
-        fontSize: 14,
-        color: secondaryColor
-      ),
-      bodySmall: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w600, // Medium
-        fontSize: 14,
-        color: primaryColor
-      ),
-      labelLarge: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w600, // Medium
-        fontSize: 10,
-        color: primaryColor
-      ),
-      titleLarge: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w700, // Bold
-        fontSize: 24, 
-        color: onSecondaryColor
-      ),
-    ),
+        displayLarge: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.bold,
+            fontSize: 32,
+            color: onSecondaryColor),
+        displayMedium: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w500, // Medium
+            fontSize: 15,
+            color: onSecondaryColor),
+        bodyLarge: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w500, // Regular
+            fontSize: 16,
+            color: onSecondaryColor),
+        bodyMedium: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w600, // Light
+            fontSize: 14,
+            color: secondaryColor),
+        bodySmall: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w600, // Medium
+            fontSize: 14,
+            color: primaryColor),
+        labelSmall: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w500, // Regular
+            fontSize: 12,
+            color: onSecondaryColor),
+        labelLarge: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w600, // Medium
+            fontSize: 10,
+            color: primaryColor),
+        titleLarge: TextStyle(
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.w600, // Bold
+          fontSize: 20,
+          color: onSecondaryColor,
+        )),
 
     // Color scheme with errorColor
     colorScheme: ColorScheme.fromSwatch(
@@ -92,7 +91,10 @@ ThemeData customTheme() {
     ),
 
     // Bottom App Bar Theme
-    bottomAppBarTheme: const BottomAppBarTheme(color: primaryColor),
+    bottomAppBarTheme: const BottomAppBarTheme(
+      height: 72,
+      color: primaryColor,
+    ),
 
     // Input Decoration Theme
     inputDecorationTheme: const InputDecorationTheme(
@@ -107,7 +109,8 @@ ThemeData customTheme() {
         borderSide: BorderSide(color: onSecondaryColor), // Default border color
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: primaryColor), // Border color when focused (tapped)
+        borderSide: BorderSide(
+            color: primaryColor), // Border color when focused (tapped)
       ),
       errorStyle: TextStyle(
         color: errorColor, // Error text color

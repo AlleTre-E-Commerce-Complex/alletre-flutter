@@ -25,13 +25,13 @@ class NavBarUtils {
 
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, route);
+        Navigator.pushReplacementNamed(context, route);
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            icon,
+            icon, 
             color: isSelected ? selectedIndex : secondaryColor,
           ),
           const SizedBox(height: 5), // Spacing between icon and text

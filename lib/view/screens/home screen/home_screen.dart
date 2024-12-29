@@ -57,8 +57,12 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: const CreateAuctionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       bottomNavigationBar: BottomAppBar(
-        height: 72,
-        color: Theme.of(context).bottomAppBarTheme.color,
+        color: Theme.of(context)
+            .bottomAppBarTheme
+            .color, 
+        height: Theme.of(context)
+            .bottomAppBarTheme
+            .height, 
         child: !loginState
             ? const BottomNavBar()
             : NavBarUtils.buildAuthenticatedNavBar(context),

@@ -1,3 +1,5 @@
+import 'package:alletre_app/utils/extras/common_navbar.dart';
+import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
 
 class PurchaseScreen extends StatelessWidget {
@@ -6,9 +8,7 @@ class PurchaseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Purchases'),
-      ),
+      appBar: const NavbarElementsAppbar(title: 'Purchases'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -32,6 +32,15 @@ class PurchaseScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context)
+            .bottomAppBarTheme
+            .color, 
+        height: Theme.of(context)
+            .bottomAppBarTheme
+            .height,
+        child: NavBarUtils.buildAuthenticatedNavBar(context),
       ),
     );
   }
