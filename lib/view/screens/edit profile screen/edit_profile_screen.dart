@@ -11,100 +11,97 @@ class EditProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: customTheme(),
-      home: Scaffold(
-        appBar: const NavbarElementsAppbar(title: 'Edit Profile', showBackButton: true),
-        body: Consumer<UserProvider>(
-          builder: (context, userProvider, child) {
-            final user = userProvider.user;
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Center(
-                  //   child: CircleAvatar(
-                  //     radius: 50,
-                  //     backgroundColor: avatarColor,
-                  //     child: const Icon(Icons.person, size: 50, color: Colors.white),
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 16),
-                  // Center(
-                  //   child: Text(
-                  //     'Fahad',
-                  //     style: Theme.of(context).textTheme.displayMedium,
-                  //   ),
-                  // ),
-                  const SizedBox(height: 4),
-                  UserProfileCard(
-                    user: user,
-                    buttonText: "Upload Photo",
-                    onButtonPressed: () {
-                      // Add upload photo functionality here
-                    },
+    return Scaffold(
+      appBar: const NavbarElementsAppbar(
+          title: 'Edit Profile', showBackButton: true),
+      body: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          final user = userProvider.user;
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Center(
+                //   child: CircleAvatar(
+                //     radius: 50,
+                //     backgroundColor: avatarColor,
+                //     child: const Icon(Icons.person, size: 50, color: Colors.white),
+                //   ),
+                // ),
+                // const SizedBox(height: 16),
+                // Center(
+                //   child: Text(
+                //     'Fahad',
+                //     style: Theme.of(context).textTheme.displayMedium,
+                //   ),
+                // ),
+                const SizedBox(height: 4),
+                UserProfileCard(
+                  user: user,
+                  buttonText: "Upload Photo",
+                  onButtonPressed: () {
+                    // Add upload photo functionality here
+                  },
+                ),
+                const SizedBox(height: 4),
+                _buildSectionTitle('Personal Information', context),
+                _buildEditableField(
+                  context,
+                  label: 'Primary Number',
+                  value: user.phoneNumber,
+                  icon: Icons.phone,
+                  onEdit: (newValue) => userProvider.setPhoneNumber(newValue),
+                ),
+                _buildEditableField(
+                  context,
+                  label: 'Primary Email',
+                  value: user.email,
+                  icon: Icons.email,
+                  onEdit: (newValue) => userProvider.setEmail(newValue),
+                  actionButton: ElevatedButton(
+                    onPressed: () {},
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: primaryColor),
+                    child: const Text('Verify'),
                   ),
-                  const SizedBox(height: 4),
-                  _buildSectionTitle('Personal Information', context),
-                  _buildEditableField(
-                    context,
-                    label: 'Primary Number',
-                    value: user.phoneNumber,
-                    icon: Icons.phone,
-                    onEdit: (newValue) => userProvider.setPhoneNumber(newValue),
-                  ),
-                  _buildEditableField(
-                    context,
-                    label: 'Primary Email',
-                    value: user.email,
-                    icon: Icons.email,
-                    onEdit: (newValue) => userProvider.setEmail(newValue),
-                    actionButton: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor),
-                      child: const Text('Verify'),
-                    ),
-                  ),
-                  Divider(height: 32, color: dividerColor),
-                  _buildSectionTitle('Address Book', context),
-                  _buildEmptySection(
-                    icon: Icons.add_location_alt,
-                    text: 'No addresses yet!',
-                    actionLabel: 'Add Address',
-                    onTap: () {},
-                  ),
-                  Divider(height: 32, color: dividerColor),
-                  _buildSectionTitle('Traffic Profiles', context),
-                  _buildEmptySection(
-                    icon: Icons.person,
-                    text: 'No traffic profiles yet!',
-                    actionLabel: 'Add Traffic Profile',
-                    onTap: () {},
-                  ),
-                  Divider(height: 32, color: dividerColor),
-                  _buildSectionTitle('Settings', context),
-                  ListTile(
-                    leading: const Icon(Icons.lock),
-                    title: const Text('Change Password'),
-                    onTap: () {},
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.delete),
-                    title: const Text('Delete my Account'),
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        bottomNavigationBar: BottomAppBar(
-          color: Theme.of(context).bottomAppBarTheme.color,
-          height: Theme.of(context).bottomAppBarTheme.height,
-          child: NavBarUtils.buildAuthenticatedNavBar(context),
-        ),
+                ),
+                Divider(height: 32, color: dividerColor),
+                _buildSectionTitle('Address Book', context),
+                _buildEmptySection(
+                  icon: Icons.add_location_alt,
+                  text: 'No addresses yet!',
+                  actionLabel: 'Add Address',
+                  onTap: () {},
+                ),
+                Divider(height: 32, color: dividerColor),
+                _buildSectionTitle('Traffic Profiles', context),
+                _buildEmptySection(
+                  icon: Icons.person,
+                  text: 'No traffic profiles yet!',
+                  actionLabel: 'Add Traffic Profile',
+                  onTap: () {},
+                ),
+                Divider(height: 32, color: dividerColor),
+                _buildSectionTitle('Settings', context),
+                ListTile(
+                  leading: const Icon(Icons.lock),
+                  title: const Text('Change Password'),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: const Text('Delete my Account'),
+                  onTap: () {},
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).bottomAppBarTheme.color,
+        height: Theme.of(context).bottomAppBarTheme.height,
+        child: NavBarUtils.buildAuthenticatedNavBar(context),
       ),
     );
   }
