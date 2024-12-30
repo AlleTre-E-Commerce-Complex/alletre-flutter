@@ -5,10 +5,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class UserProfileCard extends StatelessWidget {
   final UserModel user;
+  final String buttonText;
+  final VoidCallback onButtonPressed;
 
   const UserProfileCard({
     super.key,
     required this.user,
+    required this.buttonText,
+    required this.onButtonPressed,
   });
 
   @override
@@ -18,7 +22,7 @@ class UserProfileCard extends StatelessWidget {
     return Theme(
       data: theme,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Card(
           color: buttonBgColor,
           shape: RoundedRectangleBorder(
@@ -59,9 +63,7 @@ class UserProfileCard extends StatelessWidget {
                               style: theme.textTheme.titleLarge,
                             ),
                             ElevatedButton(
-                              onPressed: () {
-                                // Adds functionality for editing the profile
-                              },
+                              onPressed: onButtonPressed,
                               style: ElevatedButton.styleFrom(
                                 foregroundColor: primaryColor,
                                 backgroundColor: buttonBgColor,
@@ -75,7 +77,7 @@ class UserProfileCard extends StatelessWidget {
                                 elevation: 0,
                               ),
                               child: Text(
-                                "Edit Profile",
+                                buttonText,
                                 style: theme.textTheme.labelSmall!
                                     .copyWith(color: onSecondaryColor),
                               ),
@@ -83,16 +85,6 @@ class UserProfileCard extends StatelessWidget {
                           ],
                         ),
                       ],
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        // Adds navigation or functionality here
-                      },
-                      child: const Icon(
-                        Icons.arrow_forward_ios,
-                        color: onSecondaryColor,
-                        size: 20,
-                      ),
                     ),
                   ],
                 ),
