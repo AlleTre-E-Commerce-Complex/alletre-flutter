@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class EditProfileEmptySection extends StatelessWidget {
@@ -18,17 +19,17 @@ class EditProfileEmptySection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 48, color: Theme.of(context).iconTheme.color),
+        Icon(icon, size: 48, color: avatarColor),
         const SizedBox(height: 8),
-        Text(text, style: TextStyle(color: Theme.of(context).hintColor)),
+        Text(text, style: TextStyle(color: avatarColor)),
         const SizedBox(height: 10),
         ElevatedButton.icon(
           onPressed: onTap,
-          icon: const Icon(Icons.add_circle),
+          icon: const Icon(Icons.add_circle, color: secondaryColor),
           label: Text(actionLabel),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).primaryColor,
-            foregroundColor: Colors.white,
+            foregroundColor: secondaryColor,
             minimumSize: const Size(100, 30),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             shape: RoundedRectangleBorder(

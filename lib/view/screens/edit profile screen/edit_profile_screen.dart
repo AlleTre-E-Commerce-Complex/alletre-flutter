@@ -1,6 +1,9 @@
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
+import 'package:alletre_app/view/widgets/edit%20profile%20widgets/custom%20button%20widgets/add_phone_button.dart';
+import 'package:alletre_app/view/widgets/edit%20profile%20widgets/custom%20button%20widgets/edit_name_button.dart';
+import 'package:alletre_app/view/widgets/edit%20profile%20widgets/custom%20button%20widgets/verify_email_button.dart';
 import 'package:alletre_app/view/widgets/edit%20profile%20widgets/edit_profile_card.dart';
 import 'package:alletre_app/view/widgets/edit%20profile%20widgets/edit_profile_card_section.dart';
 import 'package:alletre_app/view/widgets/edit%20profile%20widgets/edit_profile_empty_section.dart';
@@ -39,10 +42,9 @@ class EditProfileScreen extends StatelessWidget {
                   label: 'Username',
                   value: 'username',
                   icon: Icons.person,
-                  actionButton: IconButton(
-                    icon: const Icon(Icons.edit),
+                  actionButton: EditNameButton(
                     onPressed: () {
-                      // Open dialog or text field to edit the username
+                      // Handle edit action
                     },
                   ),
                 ),
@@ -51,10 +53,9 @@ class EditProfileScreen extends StatelessWidget {
                   label: 'Primary Number',
                   value: '123456789',
                   icon: Icons.phone,
-                  actionButton: IconButton(
-                    icon: const Icon(Icons.add),
+                  actionButton: AddPhoneButton(
                     onPressed: () {
-                      // functionality to add another phone number
+                      // Handle add phone action
                     },
                   ),
                 ),
@@ -63,14 +64,10 @@ class EditProfileScreen extends StatelessWidget {
                   label: 'Primary Email',
                   value: 'user@gmail.com',
                   icon: Icons.email,
-                  actionButton: ElevatedButton(
+                  actionButton: VerifyEmailButton(
                     onPressed: () {
-                      // functionality to verify email
+                      // Handle edit action
                     },
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: primaryColor),
-                    child: const Text('Verify',
-                        style: TextStyle(color: secondaryColor)),
                   ),
                 ),
                 const SizedBox(height: 8),

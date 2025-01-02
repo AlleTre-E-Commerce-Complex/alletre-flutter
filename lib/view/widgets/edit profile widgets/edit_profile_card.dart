@@ -23,7 +23,7 @@ class EditProfileCard extends StatelessWidget {
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.9,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 19.0, horizontal: 12.0),
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 12.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -37,28 +37,26 @@ class EditProfileCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(label, style: Theme.of(context).textTheme.bodySmall),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: TextEditingController(text: value),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 1.0, horizontal: 6.0),
-                            ),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(fontSize: 14),
-                          ),
+                    SizedBox(
+                      height: 36,
+                      child: TextField(
+                        controller: TextEditingController(text: value),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 7.0, horizontal: 6.0),
                         ),
-                        actionButton,
-                      ],
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(fontSize: 14),
+                      ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 16),
+              actionButton,
             ],
           ),
         ),
