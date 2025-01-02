@@ -60,6 +60,11 @@ ThemeData customTheme() {
             fontWeight: FontWeight.w600, // Medium
             fontSize: 10,
             color: primaryColor),
+        titleMedium: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w600, // Bold
+            fontSize: 20,
+            color: secondaryColor),
         titleLarge: TextStyle(
           fontFamily: 'Montserrat',
           fontWeight: FontWeight.w600, // Bold

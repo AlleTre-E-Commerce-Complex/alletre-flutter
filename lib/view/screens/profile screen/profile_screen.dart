@@ -14,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = UserModel(
-      name: "Fahad TT",
+      name: "Username",
       email: "fahad@example.com",
       phoneNumber: "+1234567890",
       profileImagePath: null, // Initially empty

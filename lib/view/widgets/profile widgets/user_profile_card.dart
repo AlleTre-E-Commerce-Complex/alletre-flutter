@@ -24,7 +24,8 @@ class UserProfileCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Card(
-          color: buttonBgColor,
+          // color: buttonBgColor,
+          color: primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -47,7 +48,7 @@ class UserProfileCard extends StatelessWidget {
                               )
                             : CircleAvatar(
                                 radius: 36,
-                                backgroundColor: secondaryColor,
+                                backgroundColor: buttonBgColor,
                                 child: Icon(
                                   Icons.person,
                                   color: avatarColor,
@@ -59,8 +60,8 @@ class UserProfileCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user.name.isNotEmpty ? user.name : 'User Name',
-                              style: theme.textTheme.titleLarge,
+                              user.name.isNotEmpty ? user.name : 'Username',
+                              style: theme.textTheme.titleMedium,
                             ),
                             ElevatedButton(
                               onPressed: onButtonPressed,
