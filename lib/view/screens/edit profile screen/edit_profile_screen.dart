@@ -81,7 +81,9 @@ class EditProfileScreen extends StatelessWidget {
                     icon: Icons.add_location_alt,
                     text: 'No addresses yet!',
                     actionLabel: 'Add Address',
-                    onTap: () {},
+                    onTap: () {
+                      // Add address functionality
+                    },
                   ),
                 ),
                 const SizedBox(height: 14),

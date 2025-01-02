@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class EditProfileTitle extends StatelessWidget {
   final String title;
 
-  const EditProfileTitle({required this.title, super.key});
+  const EditProfileTitle({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
