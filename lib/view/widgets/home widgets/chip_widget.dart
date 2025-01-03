@@ -17,18 +17,27 @@ class ChipWidget extends StatelessWidget {
             label: 'Sell Now',
             backgroundColor: buttonBgColor,
             labelStyle: const TextStyle(color: onSecondaryColor),
+            onTap: () {
+              Navigator.pushNamed(context, '/sellNow'); // Example navigation
+            },
           ),
           buildCustomChip(
             icon: Icons.category,
             label: 'Categories',
             backgroundColor: buttonBgColor,
             labelStyle: const TextStyle(color: onSecondaryColor),
+            onTap: () {
+              Navigator.pushNamed(context, '/categories');
+            },
           ),
           buildCustomChip(
             icon: Icons.assignment,
             label: 'Wishlist',
             backgroundColor: buttonBgColor,
             labelStyle: const TextStyle(color: onSecondaryColor),
+            onTap: () {
+              Navigator.pushNamed(context, '/wishlist');
+            },
           ),
         ],
       ),

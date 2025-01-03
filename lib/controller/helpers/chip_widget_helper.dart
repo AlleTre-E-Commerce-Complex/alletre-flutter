@@ -6,11 +6,16 @@ Widget buildCustomChip({
   required String label,
   required Color backgroundColor,
   required TextStyle labelStyle,
+  required VoidCallback onTap, // Add onTap parameter
 }) {
-  return Chip(
-    avatar: Icon(icon, color: labelStyle.color),
-    label: Text(label),
-    backgroundColor: backgroundColor,
-    labelStyle: labelStyle,
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(16), // Optional: Add ripple effect
+    child: Chip(
+      avatar: Icon(icon, color: labelStyle.color),
+      label: Text(label),
+      backgroundColor: backgroundColor,
+      labelStyle: labelStyle,
+    ),
   );
 }

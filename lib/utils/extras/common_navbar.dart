@@ -1,46 +1,58 @@
-import 'package:alletre_app/utils/routes/named_routes.dart';
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class NavBarUtils {
   // Bottom navbar for authenticated users
-  static Widget buildAuthenticatedNavBar(BuildContext context) {
+  static Widget buildAuthenticatedNavBar(
+    BuildContext context, {
+    required Function(int) onTabChange,
+  }) {
+    final tabIndex = Provider.of<TabIndexProvider>(context).selectedIndex;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        buildNavItem(context, 'Home', Icons.home, AppRoutes.home),
-        buildNavItem(
-            context, 'Purchases', Icons.shopping_cart, AppRoutes.purchases),
-        buildNavItem(context, 'My Bids', Icons.gavel, AppRoutes.bids),
-        buildNavItem(context, 'Profile', Icons.person, AppRoutes.profile),
+        buildNavItem(context, 'Home', Icons.home, 0, tabIndex, onTabChange),
+        buildNavItem(context, 'Purchases', Icons.shopping_cart, 1, tabIndex, onTabChange),
+        buildNavItem(context, 'My Bids', Icons.gavel, 2, tabIndex, onTabChange),
+        buildNavItem(context, 'Profile', Icons.person, 3, tabIndex, onTabChange),
       ],
     );
   }
 
   // Reusable method to build the icon-text navigation items for authenticated users
   static Widget buildNavItem(
-      BuildContext context, String title, IconData icon, String route) {
-    // Check if the current route matches the item's route
-    final bool isSelected = ModalRoute.of(context)?.settings.name == route;
+    BuildContext context,
+    String title,
+    IconData icon,
+    int index,
+    int selectIndex,
+    Function(int) onTabChange,
+  ) {
+    final isSelected = index == selectIndex;
+    const selectedColor = selectedIndex;
+    const unselectedColor = secondaryColor;
 
     return GestureDetector(
       onTap: () {
-        Navigator.pushReplacementNamed(context, route);
+        onTabChange(index); // Updates the tab index when an item is tapped
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            icon, 
-            color: isSelected ? selectedIndex : secondaryColor,
+            icon,
+            color: isSelected ? selectedColor : unselectedColor,
           ),
-          const SizedBox(height: 5), // Spacing between icon and text
+          const SizedBox(height: 5),
           Text(
             title,
             style: TextStyle(
-              color: isSelected ? selectedIndex : secondaryColor,
+              color: isSelected ? selectedColor : unselectedColor,
               fontSize: 11,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w500
             ),
           ),
         ],

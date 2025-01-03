@@ -1,5 +1,6 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
+import 'package:alletre_app/controller/providers/category_state.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -34,8 +35,11 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (context) => LanguageProvider(),
           ),
+          ChangeNotifierProvider(
+            create: (context) => CategoryState(),
+          ),
           ChangeNotifierProvider(create: (context) => SearchProvider()),
-          ChangeNotifierProvider(create: (_) => BottomNavBarProvider()),
+          ChangeNotifierProvider(create: (_) => TabIndexProvider()),
           ChangeNotifierProvider(create: (_) => LoggedInProvider())
         ],
         child: MaterialApp(
