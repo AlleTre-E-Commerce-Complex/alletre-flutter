@@ -29,6 +29,11 @@ ThemeData customTheme() {
 
     // Define text styles using specific Montserrat font weights
     textTheme: const TextTheme(
+      displaySmall: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w400, // Light
+            fontSize: 14,
+            color: onSecondaryColor),
         displayLarge: TextStyle(
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,

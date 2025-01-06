@@ -1,6 +1,7 @@
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/faqs%20screen/faqs_screen.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:alletre_app/view/widgets/profile%20widgets/profile_list_tile.dart';
 import 'package:alletre_app/view/widgets/profile%20widgets/profile_section_title.dart';
@@ -81,7 +82,12 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.help_outline,
               title: 'FAQS',
               subtitle: 'Know more about the services',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FaqScreen()),
+                );
+              },
             ),
             ProfileListTile(
               icon: Icons.settings,
