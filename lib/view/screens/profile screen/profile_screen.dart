@@ -79,8 +79,8 @@ class ProfileScreen extends StatelessWidget {
             const ProfileSectionTitle(title: 'Account'),
             ProfileListTile(
               icon: Icons.help_outline,
-              title: 'Help',
-              subtitle: 'Let us know your queries',
+              title: 'FAQS',
+              subtitle: 'Know more about the services',
               onTap: () {},
             ),
             ProfileListTile(
