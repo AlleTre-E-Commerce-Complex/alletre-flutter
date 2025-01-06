@@ -8,7 +8,7 @@ class ChipWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 26),
+      padding: const EdgeInsets.symmetric(horizontal: 27),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
