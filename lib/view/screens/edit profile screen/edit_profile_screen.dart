@@ -51,7 +51,7 @@ class EditProfileScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 EditProfileCard(
                   label: 'Primary Number',
-                  value: '123456789',
+                  value: context.watch<UserProvider>().phoneNumber,
                   icon: Icons.phone,
                   actionButton: AddPhoneButton(
                     onPressed: () {

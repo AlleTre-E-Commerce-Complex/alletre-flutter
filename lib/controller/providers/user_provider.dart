@@ -14,6 +14,9 @@ class UserProvider with ChangeNotifier {
   bool get agreeToTerms => _agreeToTerms;
   bool get rememberPassword => _rememberPassword;
 
+  // Getter for phone number with country code
+  String get phoneNumber => _user.phoneNumber; 
+
   // Setters for user fields
   void setName(String value) {
     _user.name = value;
@@ -46,7 +49,7 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Validation for login credentials (Checks if login email and password matches the stored data)
+  // Validation for login credentials (Checks if login email and password match the stored data)
   bool validateLoginCredentials() {
     return _user.email == _user.email && _user.password == _user.password;
   }
@@ -63,9 +66,8 @@ class UserProvider with ChangeNotifier {
   }
 
   void resetCheckboxes() {
-  _agreeToTerms = false;
-  _rememberPassword = false;
-  notifyListeners();
-}
-
+    _agreeToTerms = false;
+    _rememberPassword = false;
+    notifyListeners();
+  }
 }
