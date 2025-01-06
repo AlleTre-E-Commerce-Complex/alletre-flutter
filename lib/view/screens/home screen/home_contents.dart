@@ -33,7 +33,7 @@ class HomeScreenContent extends StatelessWidget {
           children: [
             const SizedBox(height: 9),
             const SearchFieldWidget(isNavigable: true),
-            const SizedBox(height: 6),
+            const SizedBox(height: 5),
             const ChipWidget(),
             const SizedBox(height: 15),
             const CarouselBannerWidget(),
