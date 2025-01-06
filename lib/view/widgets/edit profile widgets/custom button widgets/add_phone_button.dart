@@ -27,7 +27,8 @@ class AddPhoneButton extends StatelessWidget {
             final phoneNumber = await _showPhoneNumberDialog(context);
             if (phoneNumber != null && phoneNumber.isNotEmpty) {
               // Update the phone number in the UserProvider
-              context.read<UserProvider>().setPhoneNumber(phoneNumber);
+              // ignore: use_build_context_synchronously
+              context.read<UserProvider>().setPhoneNumber(phoneNumber as PhoneNumber);
               onPressed(); // Call the onPressed callback if needed
             }
           },
@@ -60,10 +61,10 @@ class AddPhoneButton extends StatelessWidget {
                 formatInput: true,
                 keyboardType: TextInputType.number,
                 inputBorder: const OutlineInputBorder(),
-                inputDecoration: InputDecoration(
+                inputDecoration: const InputDecoration(
                   hintText: 'Enter your phone number',
                   border: OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                 ),
                 // Adding custom controller to manually format the input
                 onSaved: (PhoneNumber number) {
