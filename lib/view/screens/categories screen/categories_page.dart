@@ -1,6 +1,9 @@
+import 'package:alletre_app/controller/providers/category_state.dart';
+import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categories_screen.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/categories%20widgets/categories_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CategoriesPage extends StatelessWidget {
   final List<Map<String, String>> categories = [
@@ -14,6 +17,11 @@ class CategoriesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Resets all the titles when the page is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<CategoryState>(context, listen: false).resetAllTitles();
+    });
+
     return Scaffold(
       appBar: const NavbarElementsAppbar(title: 'Categories', showBackButton: true),
       body: Padding(
@@ -27,6 +35,16 @@ class CategoriesPage extends StatelessWidget {
                   index: index,
                   title: categories[index]['title']!,
                   image: categories[index]['image']!,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SubCategoryPage(
+                          categoryName: categories[index]['title']!,
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 if (index < categories.length - 1) const SizedBox(height: 20),
               ],

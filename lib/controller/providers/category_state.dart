@@ -4,15 +4,21 @@ class CategoryState extends ChangeNotifier {
   final Map<int, bool> _showTitleMap = {};
 
   bool isTitleVisible(int index) {
-    return _showTitleMap[index] ?? false; // Default to false if not initialized
+    return _showTitleMap[index] ?? false;
   }
 
   void toggleTitle(int index) {
     if (_showTitleMap[index] == null) {
-      _showTitleMap[index] = true; // Initialize with true if not already set
+      _showTitleMap[index] = true;
     } else {
-      _showTitleMap[index] = !_showTitleMap[index]!; // Toggle the value
+      _showTitleMap[index] = !_showTitleMap[index]!;
     }
-    notifyListeners(); // Notify listeners about the change
+    notifyListeners();
+  }
+
+  // Add method to reset all titles
+  void resetAllTitles() {
+    _showTitleMap.clear();
+    notifyListeners();
   }
 }

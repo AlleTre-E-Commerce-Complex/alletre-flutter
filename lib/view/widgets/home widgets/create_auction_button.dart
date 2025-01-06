@@ -1,27 +1,42 @@
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:provider/provider.dart';
+
 class CreateAuctionButton extends StatelessWidget {
   const CreateAuctionButton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
+
     return Padding(
       padding: const EdgeInsets.only(right: 4, bottom: 58),
       child: SizedBox(
         height: 29,
         width: 94,
         child: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.createAuction);
-          },
+          onPressed: isLoggedIn
+              ? () {
+                  Navigator.pushNamed(context, AppRoutes.createAuction);
+                }
+              : null, 
           label: Text(
             'Create Auction',
-            style: TextStyle(color: Theme.of(context).primaryColor),
+            style: TextStyle(
+              color: isLoggedIn
+                  ? Theme.of(context).primaryColor
+                  : const Color(0xFFFFFFFF).withAlpha(102),
+            ),
           ),
-          backgroundColor: Theme.of(context).splashColor,
+          backgroundColor: isLoggedIn
+              ? Theme.of(context).splashColor
+              : const Color(0xFFBDBDBD).withAlpha(62),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
           ),
+          elevation: 0, 
+          disabledElevation: 0, 
         ),
       ),
     );

@@ -8,36 +8,39 @@ class ChipWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          buildCustomChip(
-            icon: Icons.discount,
-            label: 'Sell Now',
-            backgroundColor: buttonBgColor,
-            labelStyle: const TextStyle(color: onSecondaryColor),
-            onTap: () {
-              Navigator.pushNamed(context, '/sellNow'); // Example navigation
-            },
+          Expanded(
+            child: buildCustomChip(
+              icon: Icons.category,
+              label: 'Categories',
+              backgroundColor: buttonBgColor,
+              labelStyle: const TextStyle(
+                color: onSecondaryColor,
+                fontSize: 12, 
+              ),
+              iconSize: 16, 
+              onTap: () {
+                Navigator.pushNamed(context, '/categories');
+              },
+            ),
           ),
-          buildCustomChip(
-            icon: Icons.category,
-            label: 'Categories',
-            backgroundColor: buttonBgColor,
-            labelStyle: const TextStyle(color: onSecondaryColor),
-            onTap: () {
-              Navigator.pushNamed(context, '/categories');
-            },
-          ),
-          buildCustomChip(
-            icon: Icons.assignment,
-            label: 'Wishlist',
-            backgroundColor: buttonBgColor,
-            labelStyle: const TextStyle(color: onSecondaryColor),
-            onTap: () {
-              Navigator.pushNamed(context, '/wishlist');
-            },
+          Expanded(
+            child: buildCustomChip(
+              icon: Icons.assignment,
+              label: 'Wishlist',
+              backgroundColor: buttonBgColor,
+              labelStyle: const TextStyle(
+                color: onSecondaryColor,
+                fontSize: 13, 
+              ),
+              iconSize: 17, 
+              onTap: () {
+                Navigator.pushNamed(context, '/wishlist');
+              },
+            ),
           ),
         ],
       ),

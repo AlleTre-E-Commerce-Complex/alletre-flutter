@@ -28,13 +28,13 @@ class HomeScreen extends StatelessWidget {
       ]);
     });
 
-    // Use Consumer to listen for index changes from TabIndexProvider
+    // Uses Consumer to listen for index changes from TabIndexProvider
     return Consumer<TabIndexProvider>(
       builder: (context, tabIndexProvider, child) {
         return Scaffold(
           body: IndexedStack(
             index: tabIndexProvider
-                .selectedIndex, // Use the selected index from provider
+                .selectedIndex, // Uses the selected index from provider
             children: const [
               HomeScreenContent(),
               PurchaseScreen(),
@@ -52,10 +52,10 @@ class HomeScreen extends StatelessWidget {
                     onTabChange: (index) {
                       context
                           .read<TabIndexProvider>()
-                          .updateIndex(index); // Update index on tap
+                          .updateIndex(index); // Updates index on tap
                     },
-                  )
-                : const BottomNavBar(), // Provide a default navbar for unauthenticated users
+                  ) 
+                : const BottomNavBar(), // default navbar for unauthenticated users
           ),
         );
       },
