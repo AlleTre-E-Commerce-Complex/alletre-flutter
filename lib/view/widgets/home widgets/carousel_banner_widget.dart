@@ -14,7 +14,7 @@ class CarouselBannerWidget extends StatelessWidget {
           builder: (context, constraints) {
             // Calculate the width and height to match the SVG's aspect ratio
             final width = constraints.maxWidth * 0.91; // 91% of screen width
-            final height = width / (830.6667 / 353.33334); // Aspect ratio 2.35
+            final height = width / (830.6667 / 353.33334) * 1.2; // Aspect ratio 2.35
 
             return Container(
               width: width,
@@ -37,7 +37,7 @@ class CarouselBannerWidget extends StatelessWidget {
         );
       }).toList(),
       options: CarouselOptions(
-        height: MediaQuery.of(context).size.width * 0.91 / (830.6667 / 353.33334), // Dynamic height
+        height: MediaQuery.of(context).size.width * 0.91 / (830.6667 / 353.33334) * 1.2, // Dynamic height
         autoPlay: true,
         enlargeCenterPage: true,
         viewportFraction: 1,
