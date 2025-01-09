@@ -91,7 +91,9 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.settings,
               title: 'Settings',
               subtitle: 'View more settings',
-              onTap: () {},
+              onTap: () {
+                context.read<TabIndexProvider>().updateIndex(14);
+              },
             ),
           ],
         ),

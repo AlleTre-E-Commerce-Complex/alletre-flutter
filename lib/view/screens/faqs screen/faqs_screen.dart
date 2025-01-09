@@ -93,8 +93,10 @@ class FaqScreen extends StatelessWidget {
                   ),
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0, top: 5.0, right: 16.0, bottom: 16.0),
-                      child: _buildFormattedContent(faqs[index].content, context),
+                      padding: const EdgeInsets.only(
+                          left: 16.0, top: 5.0, right: 16.0, bottom: 16.0),
+                      child:
+                          _buildFormattedContent(faqs[index].content, context),
                     ),
                   ],
                 ),
@@ -116,7 +118,8 @@ class FaqScreen extends StatelessWidget {
           return RichText(
             text: TextSpan(
               text: '• ',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: onSecondaryColor),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold, color: onSecondaryColor),
               children: [
                 TextSpan(
                   text: line.substring(1).trim(),

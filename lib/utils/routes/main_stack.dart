@@ -6,6 +6,7 @@ import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
 import 'package:alletre_app/view/screens/search%20screen/search_screen.dart';
+import 'package:alletre_app/view/screens/settings%20screen/settings_screen.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categories_screen.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,8 @@ class MainStack extends StatelessWidget {
             const CreateAuctionScreen(), // index 10
             CategoriesPage(), // index 11
             const SubCategoryPage(categoryName: "Default"), // index 12 
-            const SearchScreen() // index 13
+            const SearchScreen(), // index 13
+            const SettingsScreen() // index 14
           ],
         );
       },
