@@ -1,6 +1,7 @@
-import 'package:alletre_app/utils/routes/named_routes.dart';
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SearchFieldWidget extends StatelessWidget {
   final ValueChanged<String>? onChanged;
@@ -24,7 +25,7 @@ class SearchFieldWidget extends StatelessWidget {
       onTap: isNavigable
           ? () {
               // Navigates to SearchScreen when tapped
-              Navigator.pushNamed(context, AppRoutes.search);
+              context.read<TabIndexProvider>().updateIndex(13);
             }
           : null,
       child: AbsorbPointer(

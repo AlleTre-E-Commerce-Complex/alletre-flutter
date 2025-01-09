@@ -1,3 +1,4 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/search_field_widget.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class SearchScreen extends StatelessWidget {
                 child: SearchFieldWidget(
                   leadingIcon: Icons.arrow_back,
                   onLeadingIconPressed: () {
-                    Navigator.pop(context);
+                    context.read<TabIndexProvider>().updateIndex(1);
                   },
                   onChanged: (query) {
                     searchProvider.updateQuery(query); // Updates search results

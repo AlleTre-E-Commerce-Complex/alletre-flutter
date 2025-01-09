@@ -29,21 +29,23 @@ class LoginButtons extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: () {
+          onPressed: () async {
             if (formKey.currentState!.validate()) {
               if (userProvider.validateLoginCredentials()) {
-                // Navigate to home page
+                // Navigates to the home page
                 userProvider.resetCheckboxes();
-                // Login successful, updates the provider and navigates to the home screen
                 loggedinProvider.logIn();
-                Navigator.pushReplacementNamed(context, AppRoutes.home);
-                // Show success dialog
-                showDialog(
-                  context: context,
-                  builder: (context) => buildSuccessDialog(context),
-                );
+                await Navigator.pushReplacementNamed(context, AppRoutes.home);
+
+                // Shows success dialog only after navigation is complete
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => buildSuccessDialog(context),
+                  );
+                }
               } else {
-                // Show error message
+                // Shows error message
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Invalid email or password'),

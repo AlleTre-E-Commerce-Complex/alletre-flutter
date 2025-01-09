@@ -5,11 +5,10 @@ import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 
 Widget buildSuccessDialog(BuildContext context) {
-  // Scheduled the dialog to close automatically after 2 seconds
   Future.delayed(const Duration(seconds: 2), () {
     if (Navigator.canPop(context)) {
-      Navigator.pop(context); // Closes the dialog
-      Navigator.pushReplacementNamed(context, AppRoutes.home); // Redirects to home
+      Navigator.pop(context); // Close the dialog
+      Navigator.pushReplacementNamed(context, AppRoutes.home); // Navigate to home
     }
   });
 
@@ -48,3 +47,4 @@ Widget buildSuccessDialog(BuildContext context) {
     ),
   );
 }
+
