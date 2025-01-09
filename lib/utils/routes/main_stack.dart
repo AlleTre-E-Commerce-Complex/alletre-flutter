@@ -8,7 +8,6 @@ import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3
 import 'package:alletre_app/view/screens/search%20screen/search_screen.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categories_screen.dart';
-import 'package:alletre_app/view/widgets/home%20widgets/search_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
