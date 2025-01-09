@@ -14,7 +14,7 @@ Widget buildSuccessDialog(BuildContext context) {
   });
 
   return Dialog(
-    backgroundColor: Colors.white,
+    backgroundColor: secondaryColor,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
     ),

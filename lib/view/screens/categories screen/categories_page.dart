@@ -1,6 +1,6 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/controller/providers/category_state.dart';
-import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categories_screen.dart';
-import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/categories%20widgets/categories_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +23,17 @@ class CategoriesPage extends StatelessWidget {
     });
 
     return Scaffold(
-      appBar: const NavbarElementsAppbar(title: 'Categories', showBackButton: true),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: secondaryColor),
+          onPressed: () {
+            context.read<TabIndexProvider>().updateIndex(1);
+          },
+        ),
+        title: const Text('Categories', style: TextStyle(color: secondaryColor)),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView.builder(
@@ -36,14 +46,7 @@ class CategoriesPage extends StatelessWidget {
                   title: categories[index]['title']!,
                   image: categories[index]['image']!,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SubCategoryPage(
-                          categoryName: categories[index]['title']!,
-                        ),
-                      ),
-                    );
+                    context.read<TabIndexProvider>().updateIndex(11);
                   },
                 ),
                 if (index < categories.length - 1) const SizedBox(height: 20),

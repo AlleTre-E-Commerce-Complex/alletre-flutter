@@ -4,6 +4,7 @@ import 'package:alletre_app/controller/providers/category_state.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/splash%20screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -46,8 +47,8 @@ class MyApp extends StatelessWidget {
           title: 'Alletre',
           theme: customTheme(),
           debugShowCheckedModeBanner: false,
-          initialRoute: AppRoutes.splash,
           routes: AppRoutes.routes,
+          home: const SplashScreen(),
         ),
       ),
     );

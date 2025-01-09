@@ -1,6 +1,8 @@
 import 'package:alletre_app/controller/helpers/chip_widget_helper.dart';
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ChipWidget extends StatelessWidget {
   const ChipWidget({super.key});
@@ -23,7 +25,7 @@ class ChipWidget extends StatelessWidget {
               ),
               iconSize: 16, 
               onTap: () {
-                Navigator.pushNamed(context, '/categories');
+                context.read<TabIndexProvider>().updateIndex(11);
               },
             ),
           ),

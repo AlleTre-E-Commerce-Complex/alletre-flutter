@@ -1,4 +1,8 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/utils/extras/common_navbar.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/auction_list_widget.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/bottom_navbar.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/carousel_banner_widget.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/chip_widget.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/create_auction_button.dart';
@@ -14,6 +18,7 @@ class HomeScreenContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
     final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
 
@@ -25,31 +30,46 @@ class HomeScreenContent extends StatelessWidget {
       ]);
     });
 
-    return Scaffold(
-      appBar: const HomeAppbar(),
-       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 9),
-            const SearchFieldWidget(isNavigable: true),
-            const SizedBox(height: 5),
-            const ChipWidget(),
-            const SizedBox(height: 15),
-            const CarouselBannerWidget(),
-            AuctionListWidget(
-              title: 'Ongoing Auctions',
-              auctions: ongoingAuctions,
-            ),
-            AuctionListWidget(
-              title: 'Upcoming Auctions',
-              auctions: upcomingAuctions,
-            ),
-          ],
+    return PopScope(
+      canPop: true,
+      child: Scaffold(
+        appBar: const HomeAppbar(),
+         body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 9),
+              const SearchFieldWidget(isNavigable: true),
+              const SizedBox(height: 5),
+              const ChipWidget(),
+              const SizedBox(height: 15),
+              const CarouselBannerWidget(),
+              AuctionListWidget(
+                title: 'Ongoing Auctions',
+                auctions: ongoingAuctions,
+              ),
+              AuctionListWidget(
+                title: 'Upcoming Auctions',
+                auctions: upcomingAuctions,
+              ),
+            ],
+          ),
+        ),
+        floatingActionButton: const CreateAuctionButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
+        bottomNavigationBar: BottomAppBar(
+          color: Theme.of(context).bottomAppBarTheme.color,
+          height: Theme.of(context).bottomAppBarTheme.height,
+          child: loginState
+              ? NavBarUtils.buildAuthenticatedNavBar(
+                  context,
+                  onTabChange: (index) {
+                    context.read<TabIndexProvider>().updateIndex(index);
+                  },
+                )
+              : const BottomNavBar(),
         ),
       ),
-      floatingActionButton: const CreateAuctionButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
     );
   }
 }

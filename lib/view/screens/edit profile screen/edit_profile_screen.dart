@@ -1,6 +1,6 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:alletre_app/view/widgets/edit%20profile%20widgets/custom%20button%20widgets/add_phone_button.dart';
 import 'package:alletre_app/view/widgets/edit%20profile%20widgets/custom%20button%20widgets/edit_name_button.dart';
 import 'package:alletre_app/view/widgets/edit%20profile%20widgets/custom%20button%20widgets/verify_email_button.dart';
@@ -19,8 +19,17 @@ class EditProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavbarElementsAppbar(
-          title: 'Edit Profile', showBackButton: true),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: secondaryColor),
+          onPressed: () {
+            context.read<TabIndexProvider>().updateIndex(4);
+          },
+        ),
+        title: const Text('Edit Profile', style: TextStyle(color: secondaryColor)),
+      ),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, child) {
           final user = userProvider.user;

@@ -1,7 +1,8 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/utils/images/images.dart';
-import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
 class OnboardingPage3 extends StatelessWidget {
@@ -32,7 +33,7 @@ class OnboardingPage3 extends StatelessWidget {
               sliderButtonIconSize: 17,
               sliderRotate: true,
               onSubmit: () {
-                Navigator.pushReplacementNamed(context, AppRoutes.home);
+                context.read<TabIndexProvider>().updateIndex(1); // Navigates to Home
                 return null;
               },
             ),

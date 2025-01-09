@@ -1,5 +1,8 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
+import 'package:alletre_app/utils/extras/common_navbar.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BidsScreen extends StatelessWidget {
   const BidsScreen({super.key});
@@ -31,6 +34,16 @@ class BidsScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).bottomAppBarTheme.color,
+        height: Theme.of(context).bottomAppBarTheme.height,
+        child: NavBarUtils.buildAuthenticatedNavBar(
+                context,
+                onTabChange: (index) {
+                  context.read<TabIndexProvider>().updateIndex(index);
+                },
+              )
       ),
     );
   }

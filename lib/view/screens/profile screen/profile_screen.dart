@@ -1,12 +1,13 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
-import 'package:alletre_app/utils/routes/named_routes.dart';
+import 'package:alletre_app/utils/extras/common_navbar.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/screens/faqs%20screen/faqs_screen.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:alletre_app/view/widgets/profile%20widgets/profile_list_tile.dart';
 import 'package:alletre_app/view/widgets/profile%20widgets/profile_section_title.dart';
 import 'package:alletre_app/view/widgets/profile%20widgets/user_profile_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -47,7 +48,7 @@ class ProfileScreen extends StatelessWidget {
               user: user,
               buttonText: "Edit Profile",
               onButtonPressed: () {
-                Navigator.pushReplacementNamed(context, AppRoutes.editProfile);
+                context.read<TabIndexProvider>().updateIndex(6);
               },
             ),
             const SizedBox(height: 4),
@@ -83,10 +84,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'FAQS',
               subtitle: 'Know more about the services',
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FaqScreen()),
-                );
+                context.read<TabIndexProvider>().updateIndex(5);
               },
             ),
             ProfileListTile(
@@ -97,6 +95,16 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).bottomAppBarTheme.color,
+        height: Theme.of(context).bottomAppBarTheme.height,
+        child: NavBarUtils.buildAuthenticatedNavBar(
+                context,
+                onTabChange: (index) {
+                  context.read<TabIndexProvider>().updateIndex(index);
+                },
+              )
       ),
     );
   }

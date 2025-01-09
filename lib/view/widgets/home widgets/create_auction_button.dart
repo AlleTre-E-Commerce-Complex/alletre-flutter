@@ -1,4 +1,4 @@
-import 'package:alletre_app/utils/routes/named_routes.dart';
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +18,7 @@ class CreateAuctionButton extends StatelessWidget {
         child: FloatingActionButton.extended(
           onPressed: isLoggedIn
               ? () {
-                  Navigator.pushNamed(context, AppRoutes.createAuction);
+                  context.read<TabIndexProvider>().updateIndex(10);
                 }
               : null, 
           label: Text(

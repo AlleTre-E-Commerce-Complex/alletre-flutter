@@ -14,10 +14,10 @@ class NavBarUtils {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        buildNavItem(context, 'Home', Icons.home, 0, tabIndex, onTabChange),
-        buildNavItem(context, 'Purchases', Icons.shopping_cart, 1, tabIndex, onTabChange),
-        buildNavItem(context, 'My Bids', Icons.gavel, 2, tabIndex, onTabChange),
-        buildNavItem(context, 'Profile', Icons.person, 3, tabIndex, onTabChange),
+        buildNavItem(context, 'Home', Icons.home, 1, tabIndex, onTabChange),
+        buildNavItem(context, 'Purchases', Icons.shopping_cart, 7, tabIndex, onTabChange),
+        buildNavItem(context, 'My Bids', Icons.gavel, 8, tabIndex, onTabChange),
+        buildNavItem(context, 'Profile', Icons.person, 4, tabIndex, onTabChange),
       ],
     );
   }

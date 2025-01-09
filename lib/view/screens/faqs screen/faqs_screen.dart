@@ -1,7 +1,8 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/model/faq_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class FaqScreen extends StatelessWidget {
   const FaqScreen({super.key});
@@ -63,7 +64,17 @@ class FaqScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavbarElementsAppbar(title: 'FAQs', showBackButton: true),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: secondaryColor),
+          onPressed: () {
+            context.read<TabIndexProvider>().updateIndex(4);
+          },
+        ),
+        title: const Text('FAQs', style: TextStyle(color: secondaryColor)),
+      ),
       body: ListView.builder(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 15),
         itemCount: faqs.length,
