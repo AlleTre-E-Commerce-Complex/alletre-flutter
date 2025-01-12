@@ -44,7 +44,7 @@ class AddPhoneButton extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Enter Phone Number'),
+          title: const Text('Enter Phone Number', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -62,31 +62,36 @@ class AddPhoneButton extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 inputBorder: const OutlineInputBorder(),
                 inputDecoration: const InputDecoration(
-                  hintText: 'Enter your phone number',
+                  hintText: 'Enter your number', hintStyle: TextStyle(fontSize: 11),
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 8), // Reduced padding
+    isDense: true, // Makes the input field more compact
                 ),
                 // Adding custom controller to manually format the input
                 onSaved: (PhoneNumber number) {
                   phoneNumber = number.phoneNumber;
                 },
               ),
-              // Added a small gap between the country code and phone number
-              const SizedBox(height: 12),
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0), 
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel', style: TextStyle(fontSize: 12)),
+              ),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, phoneNumber); // Return phone number
-              },
-              child: const Text('Save'),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pop(context, phoneNumber); // Returns phone number
+                },
+                child: const Text('Save', style: TextStyle(fontSize: 12)),
+              ),
             ),
           ],
         );

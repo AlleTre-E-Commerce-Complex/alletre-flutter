@@ -14,9 +14,9 @@ Color buttonBgColor = Colors.grey.shade200;
 Color avatarColor = Colors.grey.shade600;
 Color dividerColor = Colors.black54;
 final overlayColor = Color.alphaBlend(
-      Colors.black.withAlpha(128), // Semi-transparent black
-      Colors.transparent,          // Base color
-    );
+  Colors.black.withAlpha(128), // Semi-transparent black
+  Colors.transparent, // Base color
+);
 
 ThemeData customTheme() {
   return ThemeData(
@@ -29,7 +29,7 @@ ThemeData customTheme() {
 
     // Define text styles using specific Montserrat font weights
     textTheme: const TextTheme(
-      displaySmall: TextStyle(
+        displaySmall: TextStyle(
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.w400, // Light
             fontSize: 14,
@@ -79,6 +79,12 @@ ThemeData customTheme() {
           fontWeight: FontWeight.w600, // Bold
           fontSize: 20,
           color: onSecondaryColor,
+        ),
+        titleSmall: TextStyle(
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.w600, // Bold
+          fontSize: 16,
+          color: primaryColor,
         )),
 
     // Color scheme with errorColor
