@@ -21,7 +21,7 @@ class AddPhoneButton extends StatelessWidget {
           color: primaryColor,
         ),
         child: IconButton(
-          icon: const Icon(Icons.add_ic_call_sharp, color: Colors.white, size: 20),
+          icon: const Icon(Icons.add_ic_call_sharp, color: secondaryColor, size: 20),
           onPressed: () async {
             // Open dialog to input phone number
             final phoneNumber = await _showPhoneNumberDialog(context);
@@ -38,14 +38,21 @@ class AddPhoneButton extends StatelessWidget {
   }
 
   // Function to show the phone number dialog
-  Future<String?> _showPhoneNumberDialog(BuildContext context) async {
-    String? phoneNumber = '';
-    return showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Enter Phone Number', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-          content: Column(
+  // Function to show the phone number dialog
+Future<String?> _showPhoneNumberDialog(BuildContext context) async {
+  String? phoneNumber = '';
+  return showDialog<String>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text(
+          'Enter Phone Number',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 26.0, vertical: 10.0),
+        content: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.2, // Set smaller width
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               InternationalPhoneNumberInput(
@@ -62,40 +69,36 @@ class AddPhoneButton extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 inputBorder: const OutlineInputBorder(),
                 inputDecoration: const InputDecoration(
-                  hintText: 'Enter your number', hintStyle: TextStyle(fontSize: 11),
+                  hintText: 'Enter your number',
+                  hintStyle: TextStyle(fontSize: 10),
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 8), // Reduced padding
-    isDense: true, // Makes the input field more compact
+                  contentPadding: EdgeInsets.symmetric(vertical: 6, horizontal: 9), // Reduced padding
+                  isDense: true, // Makes the input field more compact
                 ),
-                // Adding custom controller to manually format the input
                 onSaved: (PhoneNumber number) {
                   phoneNumber = number.phoneNumber;
                 },
               ),
             ],
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4.0), 
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Cancel', style: TextStyle(fontSize: 12)),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4.0),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(context, phoneNumber); // Returns phone number
-                },
-                child: const Text('Save', style: TextStyle(fontSize: 12)),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel', style: TextStyle(fontSize: 12)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, phoneNumber); // Returns phone number
+            },
+            child: const Text('Save', style: TextStyle(fontSize: 12)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 }
