@@ -56,7 +56,9 @@ class SettingsScreen extends StatelessWidget {
             ),
             SettingsListTile(
               title: 'Terms and Conditions',
-              onTap: () {},
+              onTap: () {
+                context.read<TabIndexProvider>().updateIndex(15);
+              },
             ),
             Divider(color: dividerColor, thickness: 0.5),
             const SettingsSectionTitle(title: 'About'),
