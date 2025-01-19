@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 class SocialMediaSection extends StatelessWidget {
   final List<Map<String, dynamic>> socialIcons = [
     {'icon': Icons.facebook, 'color': Colors.blue},
-    {'icon': Icons.tiktok, 'color': Colors.black},
-    {'icon': Icons.youtube_searched_for, 'color': Colors.red},
     {'icon': Icons.linked_camera, 'color': Colors.blue.shade700},
     // Add more social icons if needed
   ];

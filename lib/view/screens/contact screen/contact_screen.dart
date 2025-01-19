@@ -1,27 +1,26 @@
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/contact%20widgets/contact_section.dart';
 import 'package:alletre_app/view/widgets/contact%20widgets/social_media_section.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class ContactUsPage extends StatelessWidget {
-  const ContactUsPage({super.key});
+class ContactUsScreen extends StatelessWidget {
+  const ContactUsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: primaryColor,
-        title: Text('Contact Us', style: Theme.of(context).textTheme.titleMedium),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: secondaryColor),
-          onPressed: () {},
+          onPressed: () {
+            context.read<TabIndexProvider>().updateIndex(4);
+          },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: secondaryColor),
-            onPressed: () {},
-          ),
-        ],
+        title: const Text('Contact us', style: TextStyle(color: secondaryColor)),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -34,7 +33,7 @@ class ContactUsPage extends StatelessWidget {
                 title: 'Email us',
                 description:
                     'Reach out to us via email and a customer service representative will respond as soon as possible.',
-                contactInfo: 'cs@emiratesauction.ae',
+                contactInfo: 'info@alletre.com',
                 onTap: () {},
               ),
               const SizedBox(height: 16),
@@ -43,25 +42,12 @@ class ContactUsPage extends StatelessWidget {
                 title: 'Call us',
                 description:
                     'Our customer support is available around the clock to assist with any concerns.',
-                contactInfo: '+971 600 54 54 54',
+                contactInfo: '+971 72663004',
                 contactPrefix: '24/7',
                 onTap: () {},
               ),
               const SizedBox(height: 16),
-              SocialMediaSection(),
-              const SizedBox(height: 32),
-              Center(
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  ),
-                  icon: const Icon(Icons.chat, color: secondaryColor),
-                  label: const Text('Live Chat',
-                      style: TextStyle(color: secondaryColor, fontSize: 16)),
-                ),
-              ),
+              SocialMediaSection(),          
             ],
           ),
         ),
