@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
@@ -32,17 +33,23 @@ class LoginButtons extends StatelessWidget {
           onPressed: () async {
             if (formKey.currentState!.validate()) {
               if (userProvider.validateLoginCredentials()) {
-                // Navigates to the home page
-                userProvider.resetCheckboxes();
+                // Update login state
                 loggedinProvider.logIn();
-                await Navigator.pushReplacementNamed(context, AppRoutes.home);
+                userProvider.resetCheckboxes();
 
-                // Shows success dialog only after navigation is complete
+                // Navigate to home using TabIndexProvider
                 if (context.mounted) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => buildSuccessDialog(context),
-                  );
+                  context
+                      .read<TabIndexProvider>()
+                      .updateIndex(1); // Index for HomeScreenContent
+
+                  // Show success dialog
+                  if (context.mounted) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => buildSuccessDialog(context),
+                    );
+                  }
                 }
               } else {
                 // Shows error message

@@ -1,4 +1,5 @@
 import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/settings%20widgets/settings_list_tile.dart';
 import 'package:alletre_app/view/widgets/settings%20widgets/settings_section_title.dart';
@@ -12,6 +13,44 @@ class SettingsScreen extends StatelessWidget {
   Future<String> _getAppVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
     return 'Version ${packageInfo.version}';
+  }
+
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    // Show dialog
+    showDialog(
+      context: context,
+      barrierDismissible:
+          false, // Prevents dismissing the dialog by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout',
+              style: TextStyle(fontWeight: FontWeight.w500)),
+          content: const Text('Do you want to logout?',
+              style: TextStyle(
+                  color: onSecondaryColor, fontWeight: FontWeight.w500)),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel', style: TextStyle(fontSize: 12)),
+            ),
+            TextButton(
+              onPressed: () {
+                // Log out the user
+                context.read<LoggedInProvider>().logOut();
+                // Navigate using TabIndexProvider
+                context
+                    .read<TabIndexProvider>()
+                    .updateIndex(2); // Index for LoginPage
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Logout', style: TextStyle(fontSize: 12)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -70,7 +109,9 @@ class SettingsScreen extends StatelessWidget {
             ),
             SettingsListTile(
               title: 'Logout',
-              onTap: () {},
+              onTap: () {
+                _showLogoutDialog(context); // logout confirmation dialog
+              },
             ),
             const SizedBox(height: 20),
             FutureBuilder<String>(
