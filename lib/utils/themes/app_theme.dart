@@ -17,6 +17,13 @@ final overlayColor = Color.alphaBlend(
   Colors.black.withAlpha(128), // Semi-transparent black
   Colors.transparent, // Base color
 );
+Color tiktokColor = const Color(0xFFEE1D52);
+Color facebookColor = const Color(0xFF1877F2);
+Color youtubeColor = const Color(0xFFFF0000);
+Color instagramColor = const Color(0xFFE1306C);
+Color telegramColor = const Color(0xFF0088CC);
+Color whatsappColor = const Color(0xFF25D366);
+Color snapchatColor = const Color(0xFFFFCC00);
 
 ThemeData customTheme() {
   return ThemeData(
@@ -51,7 +58,7 @@ ThemeData customTheme() {
             color: onSecondaryColor),
         bodyMedium: TextStyle(
             fontFamily: 'Montserrat',
-            fontWeight: FontWeight.w600, // Light
+            fontWeight: FontWeight.w600, // Medium
             fontSize: 14,
             color: secondaryColor),
         bodySmall: TextStyle(

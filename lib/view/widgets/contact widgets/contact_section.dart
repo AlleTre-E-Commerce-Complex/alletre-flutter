@@ -38,25 +38,25 @@ class ContactSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 32, color: primaryColor),
-              const SizedBox(width: 16),
+              Icon(icon, size: 25, color: primaryColor),
+              const SizedBox(width: 12),
               Text(
                 title,
-                style: Theme.of(context).textTheme.displayMedium,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             description,
             style: Theme.of(context).textTheme.displaySmall,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           if (contactPrefix != null)
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(4),

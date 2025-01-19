@@ -5,12 +5,11 @@ class HeaderText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
+    return Text(
       'ALLE TRE E-COMMERCE COMPLEX LLC OPC',
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 18.0,
-      ),
+      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+        fontSize: 14
+      )
     );
   }
 }

@@ -5,11 +5,11 @@ class IntroductoryText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 10.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Text(
         'We welcome you to the "ALLE TRE" platform, where we provide electronic auction services. By using the platform, you agree to be bound by the terms and conditions and wish them below. Please read these fine print, as your use of the platform constitutes full acceptance of these terms. If you do not agree, please refrain from using the platform.',
-        style: TextStyle(fontSize: 16.0),
+        style: Theme.of(context).textTheme.displaySmall
       ),
     );
   }

@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  font_awesome_flutter: ^10.8.0
+  url_launcher: ^6.3.1
   provider: ^6.1.2
   flutter_svg: ^2.0.16
   carousel_slider: ^5.0.0

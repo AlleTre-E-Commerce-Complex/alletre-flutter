@@ -1,4 +1,3 @@
-import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class SectionWidget extends StatelessWidget {
@@ -20,20 +19,14 @@ class SectionWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Text(
             title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16.0,
-            ),
+            style: Theme.of(context).textTheme.bodyLarge
           ),
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 10.0),
           child: Text(
             content,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: onSecondaryColor,
-                ),
+            style: Theme.of(context).textTheme.displaySmall
           ),
         ),
       ],

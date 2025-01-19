@@ -171,10 +171,13 @@
 // }
 
 
+import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/user%20terms%20widgets/user_terms_header.dart';
 import 'package:alletre_app/view/widgets/user%20terms%20widgets/user_terms_introduction.dart';
 import 'package:alletre_app/view/widgets/user%20terms%20widgets/user_terms_section.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class TermsAndConditions extends StatelessWidget {
   const TermsAndConditions({super.key});
@@ -183,14 +186,22 @@ class TermsAndConditions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Terms and Conditions'),
         centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: secondaryColor),
+          onPressed: () {
+            context.read<TabIndexProvider>().updateIndex(14);
+          },
+        ),
+        title: const Text('Terms and Conditions', style: TextStyle(color: secondaryColor, fontSize: 18)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: const [
             HeaderText(),
+            SizedBox(height: 4),
             IntroductoryText(),
             SectionWidget(
               title: '1 - Definitions',
@@ -255,7 +266,7 @@ class TermsAndConditions extends StatelessWidget {
               content: 'The platform may contain links to external sites. ALLE TRE is not responsible for the content of these links or any damages that may result from their use.',
             ),
             SectionWidget(
-              title: '12 - Protection of Intellectual Property Rights',
+              title: '12 - Protection of Intellectual  Property Rights',
               content: 'ALLE TRE respects intellectual property rights. Please contact us if you have a complaint regarding intellectual property rights infringement on the platform.',
             ),
             SectionWidget(

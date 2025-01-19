@@ -87,14 +87,14 @@ class ProfileScreen extends StatelessWidget {
                 context.read<TabIndexProvider>().updateIndex(5);
               },
             ),
-            ProfileListTile(
-              icon: Icons.call,
-              title: 'Contact us',
-              subtitle: 'Reach out for help',
-              onTap: () {
-                context.read<TabIndexProvider>().updateIndex(16);
-              },
-            ),
+            // ProfileListTile(
+            //   icon: Icons.call,
+            //   title: 'Contact us',
+            //   subtitle: 'Reach out for help',
+            //   onTap: () {
+            //     context.read<TabIndexProvider>().updateIndex(16);
+            //   },
+            // ),
             ProfileListTile(
               icon: Icons.settings,
               title: 'Settings',

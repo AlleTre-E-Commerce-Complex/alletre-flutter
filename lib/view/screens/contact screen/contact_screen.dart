@@ -17,14 +17,14 @@ class ContactUsScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: secondaryColor),
           onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(4);
+            context.read<TabIndexProvider>().updateIndex(14);
           },
         ),
         title: const Text('Contact us', style: TextStyle(color: secondaryColor)),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(18.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -36,7 +36,7 @@ class ContactUsScreen extends StatelessWidget {
                 contactInfo: 'info@alletre.com',
                 onTap: () {},
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 22),
               ContactSection(
                 icon: Icons.headphones,
                 title: 'Call us',
@@ -46,8 +46,8 @@ class ContactUsScreen extends StatelessWidget {
                 contactPrefix: '24/7',
                 onTap: () {},
               ),
-              const SizedBox(height: 16),
-              SocialMediaSection(),          
+              const SizedBox(height: 22),
+              SocialMediaSection(),        
             ],
           ),
         ),
