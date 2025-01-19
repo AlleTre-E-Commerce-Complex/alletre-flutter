@@ -87,18 +87,18 @@ class SettingsScreen extends StatelessWidget {
               title: 'Clear search history',
               onTap: () {},
             ),
-            SettingsListTile(
-              title: 'Terms and Conditions',
-              onTap: () {
-                context.read<TabIndexProvider>().updateIndex(15);
-              },
-            ),
             Divider(color: dividerColor, thickness: 0.5),
             const SettingsSectionTitle(title: 'Support'),
             SettingsListTile(
               title: 'Contact us',
               onTap: () {
                 context.read<TabIndexProvider>().updateIndex(16);
+              },
+            ),
+            SettingsListTile(
+              title: 'Terms and Conditions',
+              onTap: () {
+                context.read<TabIndexProvider>().updateIndex(15);
               },
             ),
             Divider(color: dividerColor, thickness: 0.5),
