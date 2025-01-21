@@ -38,7 +38,7 @@ class SearchScreen extends StatelessWidget {
                     showModalBottomSheet(
                       context: context,
                       builder: (context) {
-                        return FilterBottomSheet(); // Custom widget for filters
+                        return const FilterBottomSheet(); // Custom widget for filters
                       },
                     );
                   },
