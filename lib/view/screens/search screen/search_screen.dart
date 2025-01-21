@@ -1,5 +1,6 @@
 import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/filter_bottom_sheet.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/search_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +33,15 @@ class SearchScreen extends StatelessWidget {
                     searchProvider.updateQuery(query); // Updates search results
                   },
                   autofocus: true,
+                   onFilterPressed: () {
+                    // bottom sheet or dialog for filters
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return FilterBottomSheet(); // Custom widget for filters
+                      },
+                    );
+                  },
                 ),
               ),
             ],

@@ -9,6 +9,7 @@ class SearchFieldWidget extends StatelessWidget {
   final IconData leadingIcon;
   final VoidCallback? onLeadingIconPressed;
   final bool isNavigable;
+  final VoidCallback? onFilterPressed; // Callback for filter button
 
   const SearchFieldWidget({
     super.key,
@@ -17,6 +18,7 @@ class SearchFieldWidget extends StatelessWidget {
     this.leadingIcon = Icons.search, // Default to search icon
     this.onLeadingIconPressed,
     this.isNavigable = false, // flag for navigation behavior
+    this.onFilterPressed // function to handle filter button press
   });
 
   @override
@@ -42,6 +44,10 @@ class SearchFieldWidget extends StatelessWidget {
               prefixIcon: IconButton(
                 icon: Icon(leadingIcon),
                 onPressed: onLeadingIconPressed, // Handles back button press
+              ),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.filter_list), // Filter icon
+                onPressed: onFilterPressed, // Triggers the filter action
               ),
               contentPadding: const EdgeInsets.symmetric(vertical: 11),
               enabledBorder: const OutlineInputBorder(
