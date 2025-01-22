@@ -13,6 +13,7 @@ const Color selectedIndex = Color(0xFFCDAF89);
 Color buttonBgColor = Colors.grey.shade200;
 Color avatarColor = Colors.grey.shade600;
 Color dividerColor = Colors.black54;
+const Color greyColor = Colors.grey;
 final overlayColor = Color.alphaBlend(
   Colors.black.withAlpha(128), // Semi-transparent black
   Colors.transparent, // Base color
