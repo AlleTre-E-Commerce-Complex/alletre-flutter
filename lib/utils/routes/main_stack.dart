@@ -1,3 +1,4 @@
+import 'package:alletre_app/view/screens/auction%20screen/auction_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
 import 'package:alletre_app/view/screens/contact%20screen/contact_screen.dart';
@@ -45,13 +46,14 @@ class MainStack extends StatelessWidget {
             const PurchaseScreen(), // index 7
             const BidsScreen(), // index 8
             OnboardingPage3(pageController: pageController), // index 9
-            const CreateAuctionScreen(), // index 10
+            const ProductDetailsScreen(), // index 10
             CategoriesPage(), // index 11
             const SubCategoryPage(categoryName: "Default"), // index 12 
             const SearchScreen(), // index 13
             const SettingsScreen(), // index 14
             const TermsAndConditions(), // index 15
-            const ContactUsScreen() // index 16
+            const ContactUsScreen(), // index 16
+            // const AuctionDetailsScreen() //index 17
           ],
         );
       },

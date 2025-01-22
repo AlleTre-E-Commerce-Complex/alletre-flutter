@@ -1,3 +1,4 @@
+import 'package:alletre_app/view/screens/auction%20screen/auction_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
@@ -21,7 +22,8 @@ class AppRoutes {
   static const String signup = '/signup';
   static const String login = '/login';
   static const String home = '/home';
-  static const String createAuction = '/createAuction';
+  static const String productDetails = '/productDetails';
+  static const String auctionDetails = '/auctionDetails';
   static const String search = '/search';
   static const String purchases = '/purchases';
   static const String bids = '/bids';
@@ -41,7 +43,8 @@ class AppRoutes {
       signup: (context) => SignUpPage(),
       login: (context) => LoginPage(),
       home: (context) => const HomeScreen(),
-      createAuction: (context) => const CreateAuctionScreen(),
+      productDetails: (context) => const ProductDetailsScreen(),
+      // auctionDetails: (context) => const AuctionDetailsScreen(),
       search: (context) => const SearchScreen(),
       purchases: (context) => const PurchaseScreen(),
       bids: (context) => const BidsScreen(),
