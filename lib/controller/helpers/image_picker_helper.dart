@@ -11,21 +11,19 @@ Future<File?> pickImageFromGallery() async {
 Future<void> pickMultipleImages(ValueNotifier<List<File>> media) async {
   try {
     final ImagePicker picker = ImagePicker();
-    final List<XFile>? pickedFiles = await picker.pickMultiImage(
+    final List<XFile> pickedFiles = await picker.pickMultiImage(
       imageQuality: 80,
     );
 
-    if (pickedFiles != null) {
-      // Ensure the total images do not exceed 5
-      final List<File> newFiles = pickedFiles
-          .map((pickedFile) => File(pickedFile.path))
-          .toList()
-          .take(5 - media.value.length)
-          .toList();
+    // Ensure the total images do not exceed 5
+    final List<File> newFiles = pickedFiles
+        .map((pickedFile) => File(pickedFile.path))
+        .toList()
+        .take(5 - media.value.length)
+        .toList();
 
-      media.value = [...media.value, ...newFiles];
-    }
-  } catch (e) {
+    media.value = [...media.value, ...newFiles];
+    } catch (e) {
     debugPrint('Error picking images: $e');
   }
 }
