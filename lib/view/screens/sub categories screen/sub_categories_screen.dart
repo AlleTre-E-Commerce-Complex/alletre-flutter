@@ -1,6 +1,8 @@
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 
+import '../../widgets/home widgets/categories widgets/categories_data.dart';
+
 class SubCategoryPage extends StatelessWidget {
   final String categoryName;
 
@@ -8,34 +10,7 @@ class SubCategoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subCategories = {
-      "Jewellery": [
-        "Gold",
-        "Diamond",
-        "Silver"
-      ],
-      "Properties": [
-        "House",
-        "Townhouse",
-        "Unit",
-        "Villa",
-        "Land",
-        "Office"
-      ],
-      "Cars": [
-        "SUVs",
-        "Sedans",
-        "Electric",
-      ],
-      "Electronic Devices": [
-        "Computers & tablets",
-        "Cameras",
-        "TVs & Audios",
-        "Smartphones",
-        "Accessories"
-      ],
-    };
-
+    const subCategories = CategoryData.subCategories;
     final categorySubList = subCategories[categoryName] ?? [];
 
     return Scaffold(

@@ -53,7 +53,7 @@ class MainStack extends StatelessWidget {
             const SettingsScreen(), // index 14
             const TermsAndConditions(), // index 15
             const ContactUsScreen(), // index 16
-            // const AuctionDetailsScreen() //index 17
+            const AuctionDetailsScreen() //index 17
           ],
         );
       },

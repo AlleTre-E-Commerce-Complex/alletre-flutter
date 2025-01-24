@@ -26,6 +26,8 @@ Color telegramColor = const Color(0xFF0088CC);
 Color whatsappColor = const Color(0xFF25D366);
 Color snapchatColor = const Color(0xFFFFCC00);
 
+const TextStyle radioTextStyle = TextStyle(fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500);
+
 ThemeData customTheme() {
   return ThemeData(
     primaryColor: primaryColor,

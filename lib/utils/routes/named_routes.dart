@@ -44,13 +44,13 @@ class AppRoutes {
       login: (context) => LoginPage(),
       home: (context) => const HomeScreen(),
       productDetails: (context) => const ProductDetailsScreen(),
-      // auctionDetails: (context) => const AuctionDetailsScreen(),
+      auctionDetails: (context) => const AuctionDetailsScreen(),
       search: (context) => const SearchScreen(),
       purchases: (context) => const PurchaseScreen(),
       bids: (context) => const BidsScreen(),
       profile: (context) => const ProfileScreen(),
-      editProfile : (context) => const EditProfileScreen(),
-      categories : (context) => CategoriesPage()
+      editProfile: (context) => const EditProfileScreen(),
+      categories: (context) => CategoriesPage()
     };
   }
 }
