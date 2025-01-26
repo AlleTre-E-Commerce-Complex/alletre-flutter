@@ -1,6 +1,6 @@
 import 'dart:io';
 
-class ProductDetailsValidation {
+class CreateAuctionValidation {
   static String? validateItemName(String? value) {
     return value!.isEmpty ? "Enter item name" : null;
   }
@@ -30,5 +30,9 @@ class ProductDetailsValidation {
       return "Please upload at least 3 images";
     }
     return null;
+  }
+
+  static String? validatePrice(String? value) {
+    return value!.isEmpty ? "Enter start price" : null;
   }
 }

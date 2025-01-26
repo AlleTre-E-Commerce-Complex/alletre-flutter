@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
 import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/utils/validators/product_details_validators.dart';
+import 'package:alletre_app/utils/validators/create_auction_validators.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/home widgets/categories widgets/categories_data.dart';
@@ -82,7 +82,7 @@ class ProductDetailsScreen extends StatelessWidget {
                     borderSide: const BorderSide(color: errorColor),
                   ),
                 ),
-                validator: ProductDetailsValidation.validateItemName,
+                validator: CreateAuctionValidation.validateItemName,
               ),
               const SizedBox(height: 10),
               const SizedBox(height: 10),
@@ -122,7 +122,7 @@ class ProductDetailsScreen extends StatelessWidget {
                       categoryController.value = value;
                       subCategoryController.value = null; // Reset subcategory
                     },
-                    validator: ProductDetailsValidation.validateCategory,
+                    validator: CreateAuctionValidation.validateCategory,
                   );
                 },
               ),
@@ -169,13 +169,13 @@ class ProductDetailsScreen extends StatelessWidget {
                         onChanged: (value) {
                           subCategoryController.value = value;
                         },
-                        validator: ProductDetailsValidation.validateSubCategory,
+                        validator: CreateAuctionValidation.validateSubCategory,
                       );
                     },
                   );
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               TextFormField(
                 controller: descriptionController,
                 decoration: InputDecoration(
@@ -194,7 +194,7 @@ class ProductDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 maxLines: 5,
-                validator: ProductDetailsValidation.validateDescription,
+                validator: CreateAuctionValidation.validateDescription,
               ),
               const SizedBox(height: 20),
               RichText(
@@ -208,7 +208,7 @@ class ProductDetailsScreen extends StatelessWidget {
                     TextSpan(
                       text: '(3-5 images)',
                       style: TextStyle(
-                          color: greyColor, fontWeight: FontWeight.w600),
+                          color: greyColor, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -394,7 +394,7 @@ class ProductDetailsScreen extends StatelessWidget {
                         builder: (context, submitted, child) {
                           if (submitted) {
                             final mediaError =
-                                ProductDetailsValidation.validateMediaSection(
+                                CreateAuctionValidation.validateMediaSection(
                                     mediaList);
                             return mediaError != null
                                 ? Padding(
@@ -417,7 +417,7 @@ class ProductDetailsScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
               const Text(
                 "Item Condition",
                 style: TextStyle(
@@ -478,16 +478,25 @@ class ProductDetailsScreen extends StatelessWidget {
                 },
               ),
               Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.only(top: 10, bottom: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
                       onPressed: () {
                         // Save as draft logic
-                        if (formKey.currentState!.validate()) {
+                        isSubmitted.value = true;
+                        final isValid = formKey.currentState!.validate() &&
+                            CreateAuctionValidation.validateMediaSection(
+                                    media.value) ==
+                                null &&
+                            condition.value != null;
+
+                        if (isValid) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Saved as draft')),
+                            const SnackBar(
+                                content:
+                                    Center(child: Text('Saved in Drafts'))),
                           );
                           // Navigate to the home page after a short delay
                           Future.delayed(const Duration(seconds: 1), () {
@@ -506,16 +515,16 @@ class ProductDetailsScreen extends StatelessWidget {
                       ),
                       child: const Text(
                         "Save as Draft",
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: onSecondaryColor),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     ElevatedButton(
                       onPressed: () {
                         // Set submitted to true to show validation errors
                         isSubmitted.value = true;
                         final isValid = formKey.currentState!.validate() &&
-                            ProductDetailsValidation.validateMediaSection(
+                            CreateAuctionValidation.validateMediaSection(
                                     media.value) ==
                                 null &&
                             condition.value != null;
