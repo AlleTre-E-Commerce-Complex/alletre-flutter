@@ -123,7 +123,7 @@ class SwitchWithField extends StatelessWidget {
                     keyboardType: TextInputType.datetime,
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: 'Start Date',
+                      labelText: 'Start Date and Time',
                       labelStyle: const TextStyle(fontSize: 14),
                       hintStyle: const TextStyle(fontSize: 12),
                       suffixIcon: IconButton(
@@ -200,7 +200,7 @@ class SwitchWithField extends StatelessWidget {
                     ),
                     validator: (value) {
                       if (isActive && (value == null || value.isEmpty)) {
-                        return "Start date is required.";
+                        return "Start date and time are required.";
                       }
                       return null;
                     },
