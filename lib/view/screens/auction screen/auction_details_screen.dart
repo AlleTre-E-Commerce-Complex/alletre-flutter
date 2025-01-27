@@ -134,7 +134,8 @@ class AuctionDetailsScreen extends StatelessWidget {
                                     const Align(
                                       alignment: Alignment.centerLeft,
                                       child: Padding(
-                                        padding: EdgeInsets.only(left: 8, top: 4),
+                                        padding:
+                                            EdgeInsets.only(left: 8, top: 4),
                                         child: Text(
                                           "Please select an auction type",
                                           style: TextStyle(
