@@ -69,220 +69,246 @@ class AuctionDetailsScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ValueListenableBuilder<String?>(
-                        valueListenable: condition,
-                        builder: (context, value, child) {
-                          return Column(
-                            children: [
-                              Row(
+                      ValueListenableBuilder<bool>(
+                        valueListenable: isSubmitted,
+                        builder: (context, submitted, child) {
+                          return ValueListenableBuilder<String?>(
+                            valueListenable: condition,
+                            builder: (context, value, child) {
+                              return Column(
                                 children: [
-                                  Radio<String>(
-                                    value: "quickAuction",
-                                    groupValue: value,
-                                    onChanged: (selected) {
-                                      condition.value = selected!;
-                                      selectedDuration.value =
-                                          null; // Reset dropdown
-                                    },
-                                  ),
-                                  const Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                  Row(
                                     children: [
-                                      Text("Quick Auction",
-                                          style: radioTextStyle),
-                                      Text(
-                                        "Short-term auction with faster results",
-                                        style: TextStyle(
-                                            fontSize: 11, color: greyColor),
+                                      Radio<String>(
+                                        value: "quickAuction",
+                                        groupValue: value,
+                                        onChanged: (selected) {
+                                          condition.value = selected!;
+                                          selectedDuration.value =
+                                              null; // Reset dropdown
+                                        },
                                       ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Radio<String>(
-                                    value: "longAuction",
-                                    groupValue: value,
-                                    onChanged: (selected) {
-                                      condition.value = selected!;
-                                      selectedDuration.value =
-                                          null; // Reset dropdown
-                                    },
-                                  ),
-                                  const Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text("Long Auction",
-                                          style: radioTextStyle),
-                                      Text(
-                                        "Extended auction for better reach",
-                                        style: TextStyle(
-                                            fontSize: 11, color: greyColor),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              if (value != null)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 8),
-                                    ValueListenableBuilder<String?>(
-                                      valueListenable: selectedDuration,
-                                      builder: (context, selectedValue, child) {
-                                        return DropdownButtonFormField<String>(
-                                          decoration: InputDecoration(
-                                            labelText: "Auction Duration",
-                                            labelStyle:
-                                                const TextStyle(fontSize: 14),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            errorBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              borderSide: const BorderSide(
-                                                  color: errorColor),
-                                            ),
-                                            focusedErrorBorder:
-                                                OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              borderSide: const BorderSide(
-                                                  color: errorColor),
-                                            ),
+                                      const Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text("Quick Auction",
+                                              style: radioTextStyle),
+                                          Text(
+                                            "Short-term auction with faster results",
+                                            style: TextStyle(
+                                                fontSize: 11, color: greyColor),
                                           ),
-                                          value: selectedValue,
-                                          isExpanded: true,
-                                          items: (value == "quickAuction"
-                                                  ? List.generate(
-                                                      24,
-                                                      (index) =>
-                                                          "${index + 1} hrs")
-                                                  : List.generate(
-                                                      7,
-                                                      (index) =>
-                                                          "${index + 1} days"))
-                                              .map((duration) =>
-                                                  DropdownMenuItem<String>(
-                                                    value: duration,
-                                                    child: Text(duration,
-                                                        style: const TextStyle(
-                                                          color:
-                                                              onSecondaryColor,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontSize: 15,
-                                                        )),
-                                                  ))
-                                              .toList(),
-                                          onChanged: (newValue) {
-                                            selectedDuration.value = newValue;
-                                          },
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return "Please select a duration.";
-                                            }
-                                            return null;
-                                          },
-                                        );
-                                      },
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Radio<String>(
+                                        value: "longAuction",
+                                        groupValue: value,
+                                        onChanged: (selected) {
+                                          condition.value = selected!;
+                                          selectedDuration.value =
+                                              null; // Reset dropdown
+                                        },
+                                      ),
+                                      const Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text("Long Auction",
+                                              style: radioTextStyle),
+                                          Text(
+                                            "Extended auction for better reach",
+                                            style: TextStyle(
+                                                fontSize: 11, color: greyColor),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  if (submitted && value == null)
+                                    const Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                        padding: EdgeInsets.only(left: 8, top: 4),
+                                        child: Text(
+                                          "Please select an auction type",
+                                          style: TextStyle(
+                                              color: errorColor,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
                                     ),
-                                  ],
-                                ),
-                              const SizedBox(height: 18),
-                              SwitchWithField(
-                                  label: 'Schedule Bid',
-                                  leadingText:
-                                      'If a start date and time are not chosen,\nyour listing becomes active immediately',
-                                  switchNotifier: scheduleBidSwitch,
-                                  isSchedulingEnabled: true,
-                                  startDateController: startDateController,
-                                  startTimeController: startTimeController),
-                              const SizedBox(height: 8),
-                              const Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  "Pricing",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: onSecondaryColor,
+                                  if (value != null)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: 8),
+                                        ValueListenableBuilder<String?>(
+                                          valueListenable: selectedDuration,
+                                          builder:
+                                              (context, selectedValue, child) {
+                                            return DropdownButtonFormField<
+                                                String>(
+                                              decoration: InputDecoration(
+                                                labelText: "Auction Duration",
+                                                labelStyle: const TextStyle(
+                                                    fontSize: 14),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                errorBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  borderSide: const BorderSide(
+                                                      color: errorColor),
+                                                ),
+                                                focusedErrorBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  borderSide: const BorderSide(
+                                                      color: errorColor),
+                                                ),
+                                              ),
+                                              value: selectedValue,
+                                              isExpanded: true,
+                                              items: (value == "quickAuction"
+                                                      ? List.generate(
+                                                          24,
+                                                          (index) =>
+                                                              "${index + 1} hrs")
+                                                      : List.generate(
+                                                          7,
+                                                          (index) =>
+                                                              "${index + 1} days"))
+                                                  .map((duration) =>
+                                                      DropdownMenuItem<String>(
+                                                        value: duration,
+                                                        child: Text(duration,
+                                                            style:
+                                                                const TextStyle(
+                                                              color:
+                                                                  onSecondaryColor,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              fontSize: 15,
+                                                            )),
+                                                      ))
+                                                  .toList(),
+                                              onChanged: (newValue) {
+                                                selectedDuration.value =
+                                                    newValue;
+                                              },
+                                              validator: (value) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
+                                                  return "Please select a duration.";
+                                                }
+                                                return null;
+                                              },
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  const SizedBox(height: 18),
+                                  SwitchWithField(
+                                      label: 'Schedule Bid',
+                                      leadingText:
+                                          'If a start date and time are not chosen,\nyour listing becomes active immediately',
+                                      switchNotifier: scheduleBidSwitch,
+                                      isSchedulingEnabled: true,
+                                      startDateController: startDateController,
+                                      startTimeController: startTimeController),
+                                  const SizedBox(height: 8),
+                                  const Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text(
+                                      "Pricing",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: onSecondaryColor,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              TextFormField(
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(),
-                                controller: priceController,
-                                decoration: InputDecoration(
-                                  labelText: "Start Price",
-                                  labelStyle: const TextStyle(fontSize: 14),
-                                  hintText: "AED XXX",
-                                  hintStyle: const TextStyle(fontSize: 12),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                  const SizedBox(height: 8),
+                                  TextFormField(
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(),
+                                    controller: priceController,
+                                    decoration: InputDecoration(
+                                      labelText: "Start Price",
+                                      labelStyle: const TextStyle(fontSize: 14),
+                                      hintText: "AED XXX",
+                                      hintStyle: const TextStyle(fontSize: 12),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide:
+                                            const BorderSide(color: errorColor),
+                                      ),
+                                      focusedErrorBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide:
+                                            const BorderSide(color: errorColor),
+                                      ),
+                                    ),
+                                    validator:
+                                        CreateAuctionValidation.validatePrice,
                                   ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide:
-                                        const BorderSide(color: errorColor),
+                                  const SizedBox(height: 22),
+                                  // Buy Now Logic
+                                  SwitchWithField(
+                                    label: 'Buy Now',
+                                    leadingText:
+                                        'Amount the user should pay\nto buy the item directly without auction',
+                                    switchNotifier: buyNowSwitch,
+                                    textController: buyNowController,
+                                    labelText: 'Purchase Price',
+                                    hintText: 'AED XXX',
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(),
                                   ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide:
-                                        const BorderSide(color: errorColor),
+                                  const SizedBox(height: 12),
+                                  // Return Policy Logic
+                                  SwitchWithField(
+                                    label: 'Return Policy',
+                                    leadingText:
+                                        'Write your own return related policy here',
+                                    switchNotifier: returnPolicySwitch,
+                                    textController: returnPolicyController,
+                                    labelText: 'Return Policy Description',
+                                    hintText:
+                                        'Enter the return policy description',
                                   ),
-                                ),
-                                validator:
-                                    CreateAuctionValidation.validatePrice,
-                              ),
-                              const SizedBox(height: 22),
-                              // Buy Now Logic
-                              SwitchWithField(
-                                label: 'Buy Now',
-                                leadingText:
-                                    'Amount the user should pay\nto buy the item directly without auction',
-                                switchNotifier: buyNowSwitch,
-                                textController: buyNowController,
-                                labelText: 'Purchase Price',
-                                hintText: 'AED XXX',
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(),
-                              ),
-                              const SizedBox(height: 12),
-                              // Return Policy Logic
-                              SwitchWithField(
-                                label: 'Return Policy',
-                                leadingText:
-                                    'Write your own return related policy here',
-                                switchNotifier: returnPolicySwitch,
-                                textController: returnPolicyController,
-                                labelText: 'Return Policy Description',
-                                hintText: 'Enter the return policy description',
-                              ),
-                              const SizedBox(height: 12),
-                              // Warranty Policy Logic
-                              SwitchWithField(
-                                label: 'Warranty Policy',
-                                leadingText:
-                                    'Write your own warranty related policy here',
-                                switchNotifier: warrantyPolicySwitch,
-                                textController: warrantyPolicyController,
-                                labelText: 'Warranty Policy Description',
-                                hintText:
-                                    'Enter the warranty policy description',
-                              ),
-                              const SizedBox(height: 12),
-                            ],
+                                  const SizedBox(height: 12),
+                                  // Warranty Policy Logic
+                                  SwitchWithField(
+                                    label: 'Warranty Policy',
+                                    leadingText:
+                                        'Write your own warranty related policy here',
+                                    switchNotifier: warrantyPolicySwitch,
+                                    textController: warrantyPolicyController,
+                                    labelText: 'Warranty Policy Description',
+                                    hintText:
+                                        'Enter the warranty policy description',
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                              );
+                            },
                           );
                         },
                       ),
