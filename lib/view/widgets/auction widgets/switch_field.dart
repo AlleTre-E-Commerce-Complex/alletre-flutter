@@ -1,4 +1,6 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/widgets/auction%20widgets/custom_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +14,7 @@ class SwitchWithField extends StatelessWidget {
   final String? hintText;
   final bool isSchedulingEnabled; // Determines if scheduling fields are needed
   final TextEditingController? startDateController;
+  final TextEditingController? startTimeController;
   final TextInputType? keyboardType;
 
   const SwitchWithField({
@@ -24,6 +27,7 @@ class SwitchWithField extends StatelessWidget {
     this.hintText,
     this.isSchedulingEnabled = false,
     this.startDateController,
+    this.startTimeController,
     this.keyboardType,
   });
 
@@ -37,14 +41,14 @@ class SwitchWithField extends StatelessWidget {
           children: [
             RichText(
               text: TextSpan(
-                text: '$label ',
+                text: label,
                 style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: onSecondaryColor),
                 children: const [
                   TextSpan(
-                    text: '(Optional)',
+                    text: ' (Optional)',
                     style: TextStyle(
                       color: greyColor,
                       fontWeight: FontWeight.w500,
@@ -63,6 +67,7 @@ class SwitchWithField extends StatelessWidget {
                     if (!newValue) {
                       textController?.clear();
                       startDateController?.clear();
+                      startTimeController?.clear();
                     }
                   },
                   activeColor: primaryColor,
@@ -125,15 +130,67 @@ class SwitchWithField extends StatelessWidget {
                         icon: const Icon(Icons.calendar_today,
                             color: primaryVariantColor),
                         onPressed: () async {
+                          // Select Date
                           DateTime? selectedDate = await showDatePicker(
                             context: context,
                             initialDate: DateTime.now(),
                             firstDate: DateTime.now(),
                             lastDate: DateTime(2100),
+                            builder: (context, child) {
+                              return Theme(
+                                data: Theme.of(context).copyWith(
+                                  textButtonTheme: TextButtonThemeData(
+                                    style: TextButton.styleFrom(
+                                      textStyle: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      foregroundColor:
+                                          primaryColor, // For OK/Cancel buttons
+                                    ),
+                                  ),
+                                  datePickerTheme: const DatePickerThemeData(
+                                    headerHelpStyle: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    headerBackgroundColor: primaryColor,
+                                    headerForegroundColor: secondaryColor,
+                                    headerHeadlineStyle: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
                           );
+
                           if (selectedDate != null) {
-                            startDateController?.text =
-                                DateFormat('yyyy-MM-dd').format(selectedDate);
+                            // Select Time
+                            TimeOfDay? selectedTime =
+                                await CustomTimePicker.showTimePickerDialog(
+                                    context);
+                            if (selectedTime != null) {
+                              // Combine Date and Time
+                              DateTime combinedDateTime = DateTime(
+                                selectedDate.year,
+                                selectedDate.month,
+                                selectedDate.day,
+                                selectedTime.hour,
+                                selectedTime.minute,
+                              );
+
+                              // Format Date and Time
+                              // Format as single string with date and time
+                              final formattedDateTime =
+                                  DateFormat('yyyy-MM-dd, hh:mm a')
+                                      .format(combinedDateTime);
+                              startDateController?.text = formattedDateTime;
+                              // Store time separately if needed
+                              startTimeController?.text = DateFormat('hh:mm a')
+                                  .format(combinedDateTime);
+                            }
                           }
                         },
                       ),
