@@ -5,8 +5,8 @@ import 'package:alletre_app/view/widgets/auction%20widgets/switch_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AuctionDetailsScreen extends StatelessWidget {
-  const AuctionDetailsScreen({super.key});
+class ShippingDetailsScreen extends StatelessWidget {
+  const ShippingDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class AuctionDetailsScreen extends StatelessWidget {
                       const Divider(thickness: 1, color: primaryColor),
                       const Center(
                         child: Text(
-                          "Auction Details",
+                          "Shipping Details",
                           style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
@@ -347,7 +347,7 @@ class AuctionDetailsScreen extends StatelessWidget {
                       final isValid = formKey.currentState!.validate();
 
                       if (isValid) {
-                        context.read<TabIndexProvider>().updateIndex(18);
+                        context.read<TabIndexProvider>().updateIndex(17);
                       }
                     },
                     style: ElevatedButton.styleFrom(
