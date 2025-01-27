@@ -23,7 +23,7 @@ class CreateAuctionValidation {
 
 
   static String? validateMediaSection(List<File> mediaList) {
-    if (mediaList.isEmpty && mediaList.length < 3) {
+    if (mediaList.isEmpty || mediaList.length < 3) {
       return "Please upload at least 3 image";
     }
     return null;
