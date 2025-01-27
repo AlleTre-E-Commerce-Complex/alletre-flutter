@@ -1,3 +1,4 @@
+import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/auction_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/shipping_details_screen.dart';
@@ -55,7 +56,8 @@ class MainStack extends StatelessWidget {
             const TermsAndConditions(), // index 15
             const ContactUsScreen(), // index 16
             const AuctionDetailsScreen(), //index 17
-            const ShippingDetailsScreen() //index 18
+            const ShippingDetailsScreen(), //index 18
+            const AddLocationScreen() //index 19
           ],
         );
       },
