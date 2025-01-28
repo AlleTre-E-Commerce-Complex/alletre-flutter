@@ -29,7 +29,12 @@ class AuctionDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: secondaryColor),
+          onPressed: () {
+            context.read<TabIndexProvider>().updateIndex(19);
+          },
+        ),
         title: const Text(
           'Create Auction',
           style: TextStyle(color: secondaryColor, fontSize: 18),

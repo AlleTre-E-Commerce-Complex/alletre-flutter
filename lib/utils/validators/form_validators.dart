@@ -3,7 +3,6 @@ import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/validators/string_validators.dart';
 
 class FormValidators {
-
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
@@ -31,11 +30,8 @@ class FormValidators {
     if (value == null || value.isEmpty) {
       return 'This field is required';
     }
-  //    if (value.length != 10) { 
-  //   return 'Phone number must be exactly 10 digits';
-  // }
-    // if (!StringValidators.isWithinLength(value, 10, 15)) {
-    //   return 'Enter a valid phone number';
+    //    if (value.length != 9) {
+    //   return 'Phone number must be exactly 9 digits';
     // }
     return null;
   }
@@ -63,7 +59,8 @@ class FormValidators {
     return null;
   }
 
-  static String? validateLoginPassword(String? value, UserProvider userProvider) {
+  static String? validateLoginPassword(
+      String? value, UserProvider userProvider) {
     if (value == null || value.isEmpty) {
       return 'This field is required';
     }

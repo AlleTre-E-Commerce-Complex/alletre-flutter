@@ -81,7 +81,7 @@ class UserProvider with ChangeNotifier {
   final UserModel _user = UserModel();
   bool _agreeToTerms = false;
   bool _rememberPassword = false;
-  String _isoCode = 'US';  // Store country ISO code
+  String _isoCode = 'AE';  // Store country ISO code
 
   // Getters
   UserModel get user => _user;
@@ -107,9 +107,9 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setPhoneNumber(PhoneNumber phoneNumber) {
-    _user.phoneNumber = phoneNumber.phoneNumber ?? '';
-    _isoCode = phoneNumber.isoCode ?? 'US';
+  void setPhoneNumber(PhoneNumber userPhoneNumber) {
+    _user.phoneNumber = userPhoneNumber.phoneNumber ?? '';
+    _isoCode = userPhoneNumber.isoCode ?? 'AE';
     notifyListeners();
   }
 

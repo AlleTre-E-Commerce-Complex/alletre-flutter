@@ -34,7 +34,7 @@ class ProductDetailsScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: secondaryColor),
           onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(1);
+            context.read<TabIndexProvider>().updateIndex(19);
           },
         ),
         title: const Text('Create Auction',

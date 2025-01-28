@@ -4,6 +4,7 @@ import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/controller/providers/category_state.dart';
 import 'package:alletre_app/controller/providers/focus_state_provider.dart';
 import 'package:alletre_app/controller/providers/language_provider.dart';
+import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
@@ -37,7 +38,8 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => FocusStateNotifier()),
           ChangeNotifierProvider(create: (context) => SearchProvider()),
           ChangeNotifierProvider(create: (_) => TabIndexProvider()),
-          ChangeNotifierProvider(create: (_) => LoggedInProvider())
+          ChangeNotifierProvider(create: (_) => LoggedInProvider()),
+          ChangeNotifierProvider(create: (_) => LocationProvider())
         ],
         child: Consumer<LoggedInProvider>(
           builder: (context, loggedInProvider, _) {
