@@ -12,9 +12,9 @@ class CreateAuctionButton extends StatelessWidget {
           .read<TabIndexProvider>()
           .updateIndex(19); // Navigate to Add Location Screen
     } else if (option == 'List Products') {
-      // context
-      //     .read<TabIndexProvider>()
-      //     .updateIndex(11); // Navigate to List Products
+      context
+          .read<TabIndexProvider>()
+          .updateIndex(20); // Navigate to List Products
     }
   }
 
