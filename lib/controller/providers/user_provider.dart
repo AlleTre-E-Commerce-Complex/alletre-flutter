@@ -79,6 +79,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class UserProvider with ChangeNotifier {
   final UserModel _user = UserModel();
+  String? selectedAddress;
   bool _agreeToTerms = false;
   bool _rememberPassword = false;
   String _isoCode = 'AE';  // Store country ISO code
@@ -148,6 +149,11 @@ class UserProvider with ChangeNotifier {
   void resetCheckboxes() {
     _agreeToTerms = false;
     _rememberPassword = false;
+    notifyListeners();
+  }
+  
+  void updateSelectedAddress(String address) {
+    selectedAddress = address;
     notifyListeners();
   }
 }

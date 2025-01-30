@@ -13,6 +13,8 @@ import 'package:alletre_app/view/widgets/profile%20widgets/user_profile_card.dar
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'add_address_screen.dart';
+
 class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({super.key});
 
@@ -33,6 +35,8 @@ class EditProfileScreen extends StatelessWidget {
       body: Consumer<UserProvider>(
         builder: (context, userProvider, child) {
           final user = userProvider.user;
+          // Variable to store selected address
+          String selectedAddress = userProvider.selectedAddress ?? 'No address selected';
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,10 +89,20 @@ class EditProfileScreen extends StatelessWidget {
                 EditProfileCardSection(
                   child: EditProfileEmptySection(
                     icon: Icons.add_location_alt,
-                    text: 'No addresses yet!',
+                    text: selectedAddress == 'No address selected' ? 'No addresses yet!' : selectedAddress,
                     actionLabel: 'Add Address',
-                    onTap: () {
-                      // Add address functionality
+                    onTap: () async {
+                      final selectedLocation = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GoogleMapScreen(),
+                        ),
+                      );
+
+                      if (selectedLocation != null) {
+                        // You can optionally reverse geocode this LatLng to get a human-readable address
+                        userProvider.updateSelectedAddress(selectedLocation);
+                      }
                     },
                   ),
                 ),
