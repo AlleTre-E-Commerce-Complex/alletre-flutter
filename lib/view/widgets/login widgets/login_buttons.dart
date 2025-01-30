@@ -48,7 +48,12 @@ class LoginButtons extends StatelessWidget {
                     showDialog(
                       context: context,
                       builder: (context) => buildSuccessDialog(context),
-                    );
+                    ).then((_) {
+                      // Ensure the context is still valid before navigating
+                      if (context.mounted) {
+                        Navigator.of(context).pop(); // Close the dialog
+                      }
+                    });
                   }
                 }
               } else {
@@ -56,7 +61,7 @@ class LoginButtons extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Invalid email or password'),
-                    backgroundColor: Colors.red,
+                    backgroundColor: errorColor,
                   ),
                 );
               }
