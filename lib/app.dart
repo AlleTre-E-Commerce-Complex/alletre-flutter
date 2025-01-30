@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => SearchProvider()),
           ChangeNotifierProvider(create: (_) => TabIndexProvider()),
           ChangeNotifierProvider(create: (_) => LoggedInProvider()),
-          ChangeNotifierProvider(create: (_) => LocationProvider())
+          ChangeNotifierProvider(create: (_) => LocationProvider()),
         ],
         child: Consumer<LoggedInProvider>(
           builder: (context, loggedInProvider, _) {

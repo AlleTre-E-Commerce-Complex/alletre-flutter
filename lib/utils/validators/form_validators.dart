@@ -30,9 +30,9 @@ class FormValidators {
     if (value == null || value.isEmpty) {
       return 'This field is required';
     }
-    //    if (value.length != 9) {
-    //   return 'Phone number must be exactly 9 digits';
-    // }
+       if (value.length != 9) {
+      return 'Phone number must be exactly 9 digits';
+    }
     return null;
   }
 
