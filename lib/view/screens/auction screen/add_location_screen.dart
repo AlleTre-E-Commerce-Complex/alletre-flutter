@@ -64,7 +64,6 @@ class AddLocationScreen extends StatelessWidget {
                   onCityChanged: (city) {
                     locationProvider.updateCity(city);
                   },
-                  defaultCountry: CscCountry.United_Arab_Emirates,
                   countryFilter: const [CscCountry.United_Arab_Emirates],
                   countryDropdownLabel: "Select Country",
                   stateDropdownLabel: "Select State",
