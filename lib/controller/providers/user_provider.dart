@@ -80,6 +80,8 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 class UserProvider with ChangeNotifier {
   final UserModel _user = UserModel();
   String? selectedAddress;
+  final List<String> _addresses = []; // List of stored addresses
+  String? _defaultAddress;
   bool _agreeToTerms = false;
   bool _rememberPassword = false;
   String _isoCode = 'AE';  // Store country ISO code
@@ -91,6 +93,8 @@ class UserProvider with ChangeNotifier {
   bool get rememberPassword => _rememberPassword;
   String get phoneNumber => _user.phoneNumber;
   String get isoCode => _isoCode;
+  List<String> get addresses => _addresses;
+  String? get defaultAddress => _defaultAddress;
 
   PhoneNumber get currentPhoneNumber => PhoneNumber(
     phoneNumber: _user.phoneNumber,
@@ -151,7 +155,31 @@ class UserProvider with ChangeNotifier {
     _rememberPassword = false;
     notifyListeners();
   }
-  
+
+  // Add a new address
+  void addAddress(String address) {
+    _addresses.add(address);
+    _defaultAddress ??= address;
+    notifyListeners();
+  }
+
+  // Set default address
+  void setDefaultAddress(String address) {
+    if (_addresses.contains(address)) {
+      _defaultAddress = address;
+      notifyListeners();
+    }
+  }
+
+  // Remove an address
+  void removeAddress(String address) {
+    _addresses.remove(address);
+    if (_defaultAddress == address) {
+      _defaultAddress = _addresses.isNotEmpty ? _addresses.first : null;
+    }
+    notifyListeners();
+  }
+
   void updateSelectedAddress(String address) {
     selectedAddress = address;
     notifyListeners();
