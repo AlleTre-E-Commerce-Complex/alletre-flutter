@@ -15,7 +15,9 @@ class GoogleMapScreen extends StatelessWidget {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse && 
-          permission != LocationPermission.always) return null;
+          permission != LocationPermission.always) {
+        return null;
+      }
     }
 
     Position position = await Geolocator.getCurrentPosition();
@@ -77,6 +79,7 @@ class GoogleMapScreen extends StatelessWidget {
             myLocationButtonEnabled: true,
             onTap: (LatLng tappedLocation) async {
               String address = await _getAddressFromLatLng(tappedLocation);
+              // ignore: use_build_context_synchronously
               Navigator.pop(context, address);
             },
           );
