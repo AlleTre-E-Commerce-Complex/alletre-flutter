@@ -37,6 +37,8 @@ class EditProfileScreen extends StatelessWidget {
           final user = userProvider.user;
           // Variable to store selected address
           String selectedAddress = userProvider.selectedAddress ?? 'No address selected';
+          bool hasAddress = selectedAddress != 'No address selected';
+
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,9 +90,9 @@ class EditProfileScreen extends StatelessWidget {
                 const EditProfileTitle(title: 'Address Book'),
                 EditProfileCardSection(
                   child: EditProfileEmptySection(
-                    icon: Icons.add_location_alt,
+                    icon: hasAddress ? Icons.edit_location_alt : Icons.add_location_alt,
                     text: selectedAddress == 'No address selected' ? 'No addresses yet!' : selectedAddress,
-                    actionLabel: 'Add Address',
+                    actionLabel: hasAddress ? 'Edit Address' : 'Add Address',
                     onTap: () async {
                       final selectedLocation = await Navigator.push(
                         context,

@@ -17,6 +17,9 @@ class EditProfileEmptySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final bool isEdit = actionLabel.toLowerCase().contains('edit');
+
     return Column(
       children: [
         Icon(icon, size: 48, color: avatarColor),
@@ -25,7 +28,10 @@ class EditProfileEmptySection extends StatelessWidget {
         const SizedBox(height: 10),
         ElevatedButton.icon(
           onPressed: onTap,
-          icon: const Icon(Icons.add_circle, color: secondaryColor),
+          icon: Icon(
+            isEdit ? Icons.edit_outlined : Icons.add_circle,
+            color: secondaryColor,
+          ),
           label: Text(actionLabel),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).primaryColor,
