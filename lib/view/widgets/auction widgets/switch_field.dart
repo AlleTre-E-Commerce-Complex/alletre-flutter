@@ -127,8 +127,7 @@ class SwitchWithField extends StatelessWidget {
                       labelStyle: const TextStyle(fontSize: 14),
                       hintStyle: const TextStyle(fontSize: 12),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.calendar_today,
-                            color: primaryVariantColor),
+                        icon: const Icon(Icons.calendar_today),
                         onPressed: () async {
                           // Select Date
                           DateTime? selectedDate = await showDatePicker(

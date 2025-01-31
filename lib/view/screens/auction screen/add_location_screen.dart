@@ -8,15 +8,30 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
 
+import '../edit profile screen/add_address_screen.dart';
+
 class AddLocationScreen extends StatelessWidget {
   const AddLocationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final addressController = TextEditingController();
     final phoneController = TextEditingController();
-    final labelController = TextEditingController();
+    final addressController = TextEditingController();
     final formKey = GlobalKey<FormState>();
+
+    // Method to handle google map functonality
+    Future<void> navigateToGoogleMapScreen(BuildContext context) async {
+      final selectedAddress = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const GoogleMapScreen(),
+        ),
+      );
+
+      if (selectedAddress != null) {
+        addressController.text = selectedAddress; // Updates the address field
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -25,7 +40,7 @@ class AddLocationScreen extends StatelessWidget {
           'Add Location',
           style: TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         leading: IconButton(
@@ -52,7 +67,8 @@ class AddLocationScreen extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: '\nIn order to complete the procedure, we need to get access to your location.\nYou can manage it later.',
+                    text:
+                        '\nIn order to complete the procedure, we need to get access to your location.\nYou can manage it later.',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -68,7 +84,8 @@ class AddLocationScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Consumer<LocationProvider>(
-                    builder: (context, locationProvider, child) => CSCPickerPlus(
+                    builder: (context, locationProvider, child) =>
+                        CSCPickerPlus(
                       layout: Layout.vertical,
                       flagState: CountryFlag.ENABLE,
                       cityLanguage: CityLanguage.native,
@@ -86,68 +103,34 @@ class AddLocationScreen extends StatelessWidget {
                       stateDropdownLabel: "Select State",
                       cityDropdownLabel: "Select City",
                       dropdownDecoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(Radius.circular(5)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(5)),
                         border: Border.all(color: Colors.grey.shade400),
                       ),
                       disabledDropdownDecoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(Radius.circular(5)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(5)),
                         color: Colors.grey.shade300,
                         border: Border.all(color: Colors.grey.shade400),
                       ),
                       selectedItemStyle: const TextStyle(
-                        color: onSecondaryColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500
-                      ),
+                          color: onSecondaryColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500),
                       dropdownHeadingStyle: const TextStyle(
-                        color: onSecondaryColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold
-                      ),
+                          color: onSecondaryColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
                       dropdownItemStyle: const TextStyle(
-                        color: onSecondaryColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500
-                      ),
+                          color: onSecondaryColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: addressController,
-                    decoration: InputDecoration(
-                      labelText: 'Street Address',
-                      labelStyle: const TextStyle(
-                        color: onSecondaryColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade400),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade600),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade400),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 10,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your street address';
-                      }
-                      return null;
-                    },
                   ),
                   const SizedBox(height: 16),
                   Consumer<UserProvider>(
-                    builder: (context, provider, child) => InternationalPhoneNumberInput(
+                    builder: (context, provider, child) =>
+                        InternationalPhoneNumberInput(
                       onInputChanged: (PhoneNumber number) {
                         provider.setPhoneNumber(number);
                       },
@@ -183,44 +166,63 @@ class AddLocationScreen extends StatelessWidget {
                           horizontal: 10,
                         ),
                       ),
-                      validator: (_) => FormValidators.validatePhoneNumber(phoneController.text),
+                      validator: (_) => FormValidators.validatePhoneNumber(
+                          phoneController.text),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: labelController,
-                    decoration: InputDecoration(
-                      labelText: 'Address Label',
-                      labelStyle: const TextStyle(
-                        color: onSecondaryColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade400),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade600),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade400),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 10,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a label for your address';
-                      }
-                      return null;
-                    },
+                  ValueListenableBuilder(
+                    valueListenable: addressController,
+                    builder: (context, value, child) {
+                      return TextFormField(
+                        controller: addressController,
+                        readOnly: true,
+                        onTap: () => navigateToGoogleMapScreen(context),
+                        style: const TextStyle(fontSize: 14),
+                        maxLines: 2,
+                        decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                                  value.text.isEmpty 
+                                    ? Icons.location_on_sharp
+                                    : Icons.edit_location_alt_sharp,
+                                  size: 26,
+                                ),
+                            onPressed: () => navigateToGoogleMapScreen(context),
+                          ),
+                          labelText: 'Add Address',
+                          labelStyle: const TextStyle(
+                            color: onSecondaryColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.grey.shade400),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.grey.shade600),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.grey.shade400),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 10,
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please add your address';
+                          }
+                          return null;
+                        },
+                      );
+                    }
                   ),
-                  const SizedBox(height: 20), // Reduced space here
+                  const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -240,12 +242,16 @@ class AddLocationScreen extends StatelessWidget {
                       const SizedBox(width: 16),
                       ElevatedButton(
                         onPressed: () {
-                          final locationProvider = context.read<LocationProvider>();
+                          final locationProvider =
+                              context.read<LocationProvider>();
                           if (locationProvider.selectedCountry == null ||
                               locationProvider.selectedState == null ||
                               locationProvider.selectedCity == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please select the country, state and city'), duration: Duration(seconds: 2)),
+                              const SnackBar(
+                                  content: Text(
+                                      'Please select the country, state and city'),
+                                  duration: Duration(seconds: 2)),
                             );
                             return;
                           }
@@ -253,8 +259,10 @@ class AddLocationScreen extends StatelessWidget {
                             context.read<TabIndexProvider>().updateIndex(10);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please fill all the fields')),
-                            ); 
+                              const SnackBar(
+                                  content: Text('Please fill all the fields'),
+                                  duration: Duration(seconds: 2)),
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -265,7 +273,7 @@ class AddLocationScreen extends StatelessWidget {
                           backgroundColor: Theme.of(context).primaryColor,
                         ),
                         child: const Text(
-                          "Add",
+                          "Done",
                           style: TextStyle(color: secondaryColor),
                         ),
                       ),
