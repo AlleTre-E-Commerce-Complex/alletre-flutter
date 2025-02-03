@@ -13,7 +13,6 @@ class ShippingDetailsScreen extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final isSubmitted = ValueNotifier<bool>(false);
     final userProvider = Provider.of<UserProvider>(context);
-    final selectedAddresses = userProvider.addresses;
     final defaultAddress = userProvider.defaultAddress;
 
     return Scaffold(
@@ -58,16 +57,50 @@ class ShippingDetailsScreen extends StatelessWidget {
                     ),
 
                   // Other Address Cards
-                  for (final address in selectedAddresses)
-                    if (address != defaultAddress)
-                      _buildAddressCard(
-                        context,
-                        address: address,
-                        isDefault: false,
-                        onMakeDefault: () {
-                          userProvider.setDefaultAddress(address);
-                        },
-                      ),
+                  Consumer<UserProvider>(
+                    builder: (context, userProvider, child) {
+                      final addresses = userProvider.addresses;
+                      final defaultAddress = userProvider.defaultAddress;
+
+                      // Sort addresses to put default address first
+                      final sortedAddresses = [...addresses]..sort((a, b) {
+                          if (a == defaultAddress) return -1;
+                          if (b == defaultAddress) return 1;
+                          return 0;
+                        });
+
+                      return Column(
+                        children: [
+                          for (final address in sortedAddresses)
+                            _buildAddressCard(
+                              context,
+                              address: address,
+                              isDefault: address == defaultAddress,
+                              onMakeDefault: () {
+                                userProvider.setDefaultAddress(address);
+                              },
+                              onEdit: () async {
+                                final editedAddress = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const GoogleMapScreen(),
+                                  ),
+                                );
+
+                                if (editedAddress != null) {
+                                  userProvider.editAddress(
+                                      address, editedAddress);
+                                }
+                              },
+                              onDelete: () {
+                                userProvider.removeAddress(address);
+                              },
+                            ),
+                        ],
+                      );
+                    },
+                  ),
 
                   // Add Address Button
                   Padding(
@@ -96,14 +129,14 @@ class ShippingDetailsScreen extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.add,
-                              color: primaryColor,
+                              color: onSecondaryColor,
                               size: 22,
                             ),
                             SizedBox(width: 8),
                             Text(
                               'Add Address',
                               style: TextStyle(
-                                color: primaryColor,
+                                color: onSecondaryColor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -144,7 +177,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                       isSubmitted.value = true;
                       final isValid = formKey.currentState!.validate();
                       if (isValid) {
-                        context.read<TabIndexProvider>().updateIndex(17);
+                        context.read<TabIndexProvider>().updateIndex(22);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -175,38 +208,55 @@ class ShippingDetailsScreen extends StatelessWidget {
     required String address,
     required bool isDefault,
     VoidCallback? onMakeDefault,
+    VoidCallback? onEdit,
+    VoidCallback? onDelete,
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
-    side: BorderSide(color: Colors.grey.shade300), // Added border color
-    borderRadius: BorderRadius.circular(8), // Rounded corners
-  ),
+        side: BorderSide(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 8), // Reduced bottom padding
+        padding:
+            EdgeInsets.fromLTRB(14, isDefault ? 2 : 14, 14, isDefault ? 14 : 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: isDefault ? 0 : 8, // Add spacing control based on isDefault
           children: [
-            if (isDefault)
-              Container(
-                width: 50,
-                height: 15,
-                margin: const EdgeInsets.only(bottom: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                decoration: BoxDecoration(
-                  border: Border.all(color: primaryColor),
-                  borderRadius: BorderRadius.circular(4),
-                  color: primaryColor,
-                ),
-                child: const Text(
-                  'Default',
-                  style: TextStyle(
-                    fontSize: 9,
-                    color: secondaryColor,
-                    fontWeight: FontWeight.w500,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (isDefault)
+                  Container(
+                    width: 50,
+                    height: 15,
+                    margin: const EdgeInsets.only(
+                        bottom: 0), // Removed bottom margin
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: primaryColor),
+                      borderRadius: BorderRadius.circular(4),
+                      color: primaryColor,
+                    ),
+                    child: const Text(
+                      'Default',
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: secondaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                if (isDefault)
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 18, color: primaryColor),
+                    onPressed: onEdit,
+                    padding: EdgeInsets.zero, // Removed padding
+                  ),
+              ],
+            ),
+            if (isDefault) const SizedBox(height: 0),
             Text(
               address,
               style: const TextStyle(
@@ -215,24 +265,45 @@ class ShippingDetailsScreen extends StatelessWidget {
               ),
             ),
             if (!isDefault)
-              Container(
-                margin: const EdgeInsets.only(top: 4), // Reduced top margin
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: onMakeDefault,
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero, // Remove default padding
-                    minimumSize: Size.zero, // Remove minimum size
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Shrink tap target
-                  ),
-                  child: const Text(
-                    'Make Default',
-                    style: TextStyle(
-                      color: primaryColor,
-                      fontWeight: FontWeight.w500,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 0),
+                    alignment: Alignment.bottomLeft,
+                    child: TextButton(
+                      onPressed: onMakeDefault,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Make Default',
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 11,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 128),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit,
+                            size: 18, color: primaryColor),
+                        onPressed: onEdit,
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon:
+                        const Icon(Icons.delete, size: 18, color: primaryColor),
+                    onPressed: onDelete,
+                  ),
+                ],
               ),
           ],
         ),

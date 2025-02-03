@@ -1,78 +1,3 @@
-// import 'package:alletre_app/model/user_model.dart';
-// import 'package:flutter/material.dart';
-
-// class UserProvider with ChangeNotifier {
-//   final UserModel _user = UserModel();
-//   bool _agreeToTerms = false;
-//   bool _rememberPassword = false;
-
-//   // Getter for user
-//   UserModel get user => _user;
-
-//   // Getter for individual fields
-//   String get password => _user.password; // Added getter for password
-//   bool get agreeToTerms => _agreeToTerms;
-//   bool get rememberPassword => _rememberPassword;
-
-//   // Getter for phone number with country code
-//   String get phoneNumber => _user.phoneNumber; 
-
-//   // Setters for user fields
-//   void setName(String value) {
-//     _user.name = value;
-//     notifyListeners();
-//   }
-
-//   void setEmail(String value) {
-//     _user.email = value;
-//     notifyListeners();
-//   }
-
-//   void setPhoneNumber(String value) {
-//     _user.phoneNumber = value;
-//     notifyListeners();
-//   }
-
-//   void setPassword(String value) {
-//     _user.password = value;
-//     notifyListeners();
-//   }
-
-//   // Setters for login fields (Login data)
-//   void setLoginEmail(String value) {
-//     _user.email = value;
-//     notifyListeners();
-//   }
-
-//   void setLoginPassword(String value) {
-//     _user.password = value;
-//     notifyListeners();
-//   }
-
-//   // Validation for login credentials (Checks if login email and password match the stored data)
-//   bool validateLoginCredentials() {
-//     return _user.email == _user.email && _user.password == _user.password;
-//   }
-
-//   // Setters for additional fields
-//   void toggleAgreeToTerms() {
-//     _agreeToTerms = !_agreeToTerms;
-//     notifyListeners();
-//   }
-
-//   void toggleRememberPassword() {
-//     _rememberPassword = !_rememberPassword;
-//     notifyListeners();
-//   }
-
-//   void resetCheckboxes() {
-//     _agreeToTerms = false;
-//     _rememberPassword = false;
-//     notifyListeners();
-//   }
-// }
-
-
 import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -172,16 +97,24 @@ class UserProvider with ChangeNotifier {
   }
 
   // Remove an address
+  // Edit an address
+  void editAddress(String oldAddress, String newAddress) {
+    final index = _addresses.indexOf(oldAddress);
+    if (index != -1) {
+      _addresses[index] = newAddress;
+      if (_defaultAddress == oldAddress) {
+        _defaultAddress = newAddress; // Update default address if edited
+      }
+      notifyListeners();
+    }
+  }
+
+  // Remove an address
   void removeAddress(String address) {
     _addresses.remove(address);
     if (_defaultAddress == address) {
       _defaultAddress = _addresses.isNotEmpty ? _addresses.first : null;
     }
-    notifyListeners();
-  }
-
-  void updateSelectedAddress(String address) {
-    selectedAddress = address;
     notifyListeners();
   }
 }

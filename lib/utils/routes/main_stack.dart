@@ -1,9 +1,11 @@
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/auction_details_screen.dart';
+import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/shipping_details_screen.dart';
 import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
 import 'package:alletre_app/view/screens/contact%20screen/contact_screen.dart';
+import 'package:alletre_app/view/screens/edit%20profile%20screen/add_address_screen.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/edit_profile_screen.dart';
 import 'package:alletre_app/view/screens/faqs%20screen/faqs_screen.dart';
 import 'package:alletre_app/view/screens/list%20products%20screen/list_products_screen.dart';
@@ -59,7 +61,9 @@ class MainStack extends StatelessWidget {
             const AuctionDetailsScreen(), //index 17
             const ShippingDetailsScreen(), //index 18
             const AddLocationScreen(), //index 19
-            const ListProductsScreen() //index 19
+            const ListProductsScreen(), //index 20
+            const GoogleMapScreen(), //index 21
+            const PaymentDetailsScreen() //index 22
           ],
         );
       },

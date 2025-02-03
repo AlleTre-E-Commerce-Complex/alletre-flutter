@@ -11,7 +11,7 @@ class EditProfileTitle extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleLarge,
+        style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 19)
       ),
     );
   }

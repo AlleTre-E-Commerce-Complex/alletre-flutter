@@ -5,9 +5,8 @@ class LocationProvider with ChangeNotifier {
   String? selectedCountry;
   String? selectedState;
   String? selectedCity;
-
+  
   final List<Location> _locations = [];
-
   List<Location> get locations => _locations;
 
   void updateCountry(String? country) {
