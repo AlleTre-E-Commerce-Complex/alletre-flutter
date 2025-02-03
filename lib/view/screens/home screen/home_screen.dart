@@ -1,26 +1,11 @@
-import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ongoingAuctions = context.watch<AuctionProvider>().ongoingAuctions;
-    final upcomingAuctions = context.watch<AuctionProvider>().upcomingAuctions;
-
-    // Initializing search data
-    Future.microtask(() {
-      // ignore: use_build_context_synchronously
-      context.read<SearchProvider>().setAllAuctions([
-        ...ongoingAuctions,
-        ...upcomingAuctions,
-      ]);
-    });
-
     return const Scaffold(
       body: MainStack(),
     );
