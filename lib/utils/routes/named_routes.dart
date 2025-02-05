@@ -3,7 +3,6 @@ import 'package:alletre_app/view/screens/auction%20screen/product_details_screen
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/edit_profile_screen.dart';
-import 'package:alletre_app/view/screens/home%20screen/home_screen.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
@@ -42,7 +41,7 @@ class AppRoutes {
       },
       signup: (context) => SignUpPage(),
       login: (context) => LoginPage(),
-      home: (context) => const HomeScreen(),
+      // home: (context) => const HomeScreen(),
       productDetails: (context) => const ProductDetailsScreen(),
       auctionDetails: (context) => const AuctionDetailsScreen(),
       search: (context) => const SearchScreen(),

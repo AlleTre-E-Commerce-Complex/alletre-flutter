@@ -5,13 +5,13 @@ import 'package:alletre_app/view/widgets/login%20widgets/login_title.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       body: CustomScrollView(
         slivers: [
           const CommonAppBar(),

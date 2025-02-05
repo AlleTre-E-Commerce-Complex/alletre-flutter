@@ -19,6 +19,7 @@ class LoginFormFields extends StatelessWidget {
       child: Column(
         children: [
           TextFormField(
+            controller: userProvider.emailController,
             decoration: InputDecoration(
               labelText: 'Email',
               hintText: 'Enter your email',
@@ -70,7 +71,6 @@ class LoginFormFields extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 15),
                 child: GestureDetector(
                   onTap: () {
-                    // Navigate to Forgot Password page or perform an action
                   },
                   child: const Text(
                     'Forgot Password?',

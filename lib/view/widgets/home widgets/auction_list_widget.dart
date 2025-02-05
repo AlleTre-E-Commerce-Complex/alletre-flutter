@@ -27,7 +27,7 @@ class AuctionListWidget extends StatelessWidget {
             return Card(
               margin: const EdgeInsets.only(bottom: 10),
               child: ListTile(
-                leading: Image.asset(auction.imageUrl),
+                leading: Image.asset(auction.imageLinks.first),
                 title: Text(
                   auction.title,
                   style: Theme.of(context).textTheme.bodyLarge,

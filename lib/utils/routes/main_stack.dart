@@ -19,7 +19,7 @@ import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categorie
 import 'package:alletre_app/view/screens/user%20terms%20screen/user_terms.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
 import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dart';
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';

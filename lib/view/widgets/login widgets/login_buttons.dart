@@ -1,12 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
-import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/login%20widgets/success_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class LoginButtons extends StatelessWidget {
@@ -16,6 +14,7 @@ class LoginButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isLoading = false; // Add a loading state
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final loggedinProvider =
         Provider.of<LoggedInProvider>(context, listen: false);
@@ -31,141 +30,49 @@ class LoginButtons extends StatelessWidget {
             ),
           ),
           onPressed: () async {
+            if (isLoading) return; // Prevent multiple presses
+            isLoading = true;
             if (formKey.currentState!.validate()) {
-              if (userProvider.validateLoginCredentials()) {
-                // Update login state
+              try {
+                await userProvider.login();
                 loggedinProvider.logIn();
-                userProvider.resetCheckboxes();
 
-                // Navigate to home using TabIndexProvider
+                // Show success dialog
                 if (context.mounted) {
-                  context
-                      .read<TabIndexProvider>()
-                      .updateIndex(1); // Index for HomeScreenContent
-
-                  // Show success dialog
-                  if (context.mounted) {
-                    showDialog(
-                      context: context,
-                      builder: (context) => buildSuccessDialog(context),
-                    ).then((_) {
-                      // Ensure the context is still valid before navigating
-                      if (context.mounted) {
-                        Navigator.of(context).pop(); // Close the dialog
-                      }
-                    });
-                  }
+                  showDialog(
+                    context: context,
+                    builder: (context) => buildSuccessDialog(context),
+                  ).then((_) {
+                    if (context.mounted) {
+                      Navigator.of(context).pop(); // Close the dialog
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.home); // Navigate to home
+                    }
+                  });
                 }
-              } else {
-                // Shows error message
+              } catch (e) {
+                // Show error message
+                ScaffoldMessenger.of(context)
+                    .hideCurrentSnackBar(); // Dismiss the current SnackBar
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Invalid email or password'),
+                  SnackBar(
+                    key: UniqueKey(),
+                    content: Text('Login failed: $e'),
                     backgroundColor: errorColor,
                   ),
                 );
+              } finally {
+                isLoading = false; // Reset loading state
               }
             }
           },
-          child: const Text('LOGIN',
-              style: TextStyle(
-                  fontSize: 16,
-                  color: secondaryColor,
-                  fontWeight: FontWeight.w600)),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(child: Divider(color: dividerColor)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text('OR',
-                  style: TextStyle(
-                      color: dividerColor, fontWeight: FontWeight.w500)),
+          child: const Text(
+            'LOGIN',
+            style: TextStyle(
+              fontSize: 16,
+              color: secondaryColor,
+              fontWeight: FontWeight.w600,
             ),
-            Expanded(
-              child: Divider(color: dividerColor),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            padding: const EdgeInsets.only(right: 18),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: () {},
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/google_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Continue with Google',
-                style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            padding: const EdgeInsets.only(right: 26),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: () {},
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/apple_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Continue with Apple',
-                style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: () {},
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/facebook_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Continue with Facebook',
-                style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600),
-              ),
-            ],
           ),
         ),
         const SizedBox(height: 16),

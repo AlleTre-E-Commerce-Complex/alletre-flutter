@@ -105,7 +105,6 @@ class SignupFormFields extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  // Navigate to Terms & Conditions page or perform an action
                 },
                 child: const Text(
                   'Terms & Conditions',

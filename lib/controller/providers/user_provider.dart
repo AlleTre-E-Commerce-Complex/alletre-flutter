@@ -1,8 +1,12 @@
+import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class UserProvider with ChangeNotifier {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
   final UserModel _user = UserModel();
   String? selectedAddress;
   final List<String> _addresses = []; // List of stored addresses
@@ -11,8 +15,12 @@ class UserProvider with ChangeNotifier {
   bool _rememberPassword = false;
   String _isoCode = 'AE';  // Store country ISO code
 
+  final UserService _userService = UserService();
+
   // Getters
   UserModel get user => _user;
+  String get name => _user.name;
+  String get email => _user.email;
   String get password => _user.password;
   bool get agreeToTerms => _agreeToTerms;
   bool get rememberPassword => _rememberPassword;
@@ -61,7 +69,7 @@ class UserProvider with ChangeNotifier {
 
   // Validation for login credentials
   bool validateLoginCredentials() {
-    return _user.email == _user.email && _user.password == _user.password;
+    return emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
   }
 
   // Checkbox handlers
@@ -78,6 +86,8 @@ class UserProvider with ChangeNotifier {
   void resetCheckboxes() {
     _agreeToTerms = false;
     _rememberPassword = false;
+    emailController.clear();
+    passwordController.clear();
     notifyListeners();
   }
 
@@ -96,7 +106,6 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // Remove an address
   // Edit an address
   void editAddress(String oldAddress, String newAddress) {
     final index = _addresses.indexOf(oldAddress);
@@ -116,5 +125,41 @@ class UserProvider with ChangeNotifier {
       _defaultAddress = _addresses.isNotEmpty ? _addresses.first : null;
     }
     notifyListeners();
+  }
+
+  // Signup method
+  Future<void> signup() async {
+    try {
+      final success = await _userService.signup(
+        _user.name,
+        _user.email,
+        _user.phoneNumber,
+        _user.password,
+      );
+
+      if (success) {
+        // Reset form fields after successful signup
+        resetCheckboxes();
+      }
+    } catch (e) {
+      throw Exception('Signup failed: $e');
+    }
+  }
+
+  // Login method
+  Future<void> login() async {
+    try {
+      final success = await _userService.login(
+        emailController.text,
+        passwordController.text,
+      );
+
+      if (success) {
+        // Reset form fields after successful login
+        resetCheckboxes();
+      }
+    } catch (e) {
+      throw Exception('Login failed: $e');
+    }
   }
 }

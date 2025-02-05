@@ -1,11 +1,30 @@
+// ignore_for_file: avoid_print
+
+import 'package:alletre_app/controller/helpers/auction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
 class AuctionProvider with ChangeNotifier {
+  final AuctionService _auctionService = AuctionService();
   final List<AuctionItem> _upcomingAuctions = [];
   final List<AuctionItem> _ongoingAuctions = [];
+  final bool _isLoading = false;
+  String? _error;
 
   List<AuctionItem> get upcomingAuctions => _upcomingAuctions;
   List<AuctionItem> get ongoingAuctions => _ongoingAuctions;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+
+  Future<void> getUpcomingAuctions() async {
+    try {
+      final auctions = await _auctionService.fetchUpcomingAuctions();
+      _upcomingAuctions.clear();
+      _upcomingAuctions.addAll(auctions);
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching upcoming auctions: $e');
+    }
+  }
 
   DateTime? _scheduledTime;
   final List<String> _media = [];
@@ -50,13 +69,24 @@ class AuctionProvider with ChangeNotifier {
   }
 
   // Check the status and update it to active if the scheduled time has passed
+
   void _checkAuctionStatus(AuctionItem auction) {
     if (auction.isActive()) {
-      auction.status = 'active';
-      _upcomingAuctions.remove(auction);
-      _ongoingAuctions.add(auction);
-      notifyListeners();
-    }
+  _upcomingAuctions.remove(auction);
+  _ongoingAuctions.add(AuctionItem(
+    id: auction.id,
+    title: auction.title,
+    price: auction.price,
+    description: auction.description,
+    startBidAmount: auction.startBidAmount,
+    status: 'active', // New status assigned
+    startDate: auction.startDate,
+    expiryDate: auction.expiryDate,
+    imageLinks: auction.imageLinks,
+  ));
+  notifyListeners();
+}
+
   }
 
   // Periodic check to update auction statuses (optional)

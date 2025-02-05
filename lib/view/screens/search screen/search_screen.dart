@@ -1,4 +1,4 @@
-import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/filter_bottom_sheet.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/search_field_widget.dart';
@@ -64,7 +64,7 @@ class SearchScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final auction = filteredAuctions[index];
                   return ListTile(
-                    leading: Image.network(auction.imageUrl),
+                    leading: Image.network(auction.imageLinks.first),
                     title: Text(auction.title),
                     subtitle: Text('Price: ${auction.price}'),
                   );

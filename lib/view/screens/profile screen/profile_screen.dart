@@ -1,4 +1,4 @@
-import 'package:alletre_app/controller/providers/bottom_navbar_provider.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/common_navbar.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';

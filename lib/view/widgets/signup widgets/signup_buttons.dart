@@ -1,8 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class SignupButtons extends StatelessWidget {
@@ -12,6 +12,7 @@ class SignupButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isLoading = false;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     return Column(
@@ -24,17 +25,30 @@ class SignupButtons extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: () {
-            // Validating the form
+          onPressed: () async {
+            if (isLoading) return; // Prevent multiple presses
+            isLoading = true;
             if (formKey.currentState!.validate()) {
-              // Checks if user agreed to terms
               if (userProvider.agreeToTerms) {
-                // Simulates user registration success
-                // Navigates to the login page
-                Navigator.pushReplacementNamed(context, AppRoutes.login);
-                userProvider.resetCheckboxes();
+                try {
+                  await userProvider.signup();
+                  Navigator.pushReplacementNamed(context, AppRoutes.login);
+                } catch (e) {
+                  // Show error message
+                  ScaffoldMessenger.of(context)
+                      .hideCurrentSnackBar(); // Dismiss the current SnackBar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      key: UniqueKey(),
+                      content: Text('Signup failed: $e'),
+                      backgroundColor: errorColor,
+                    ),
+                  );
+                } finally {
+                  isLoading = false; // Reset loading state
+                }
               } else {
-                // Shows error if terms are not agreed upon
+                // Show error if terms are not agreed upon
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Agree to the Terms & Conditions'),
@@ -43,12 +57,13 @@ class SignupButtons extends StatelessWidget {
                 );
               }
             } else {
-              // generic error message
+              // Show generic error message
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                    content: Center(child: Text('Invalid registration')),
-                    backgroundColor: primaryColor,
-                    duration: Durations.extralong4),
+                  content: Center(child: Text('Invalid registration')),
+                  backgroundColor: primaryColor,
+                  duration: Durations.extralong4,
+                ),
               );
             }
           },
@@ -59,108 +74,6 @@ class SignupButtons extends StatelessWidget {
               color: secondaryColor,
               fontWeight: FontWeight.w600,
             ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(child: Divider(color: dividerColor)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                'OR',
-                style: TextStyle(
-                  color: dividerColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Divider(color: dividerColor),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Google button
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            padding: const EdgeInsets.only(right: 18),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: () {},
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/google_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Continue with Google',
-                style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        // Apple button
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            padding: const EdgeInsets.only(right: 26),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: () {},
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/apple_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Continue with Apple',
-                style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        // Facebook button
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: () {},
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/facebook_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Continue with Facebook',
-                style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600),
-              ),
-            ],
           ),
         ),
         const SizedBox(height: 16),
