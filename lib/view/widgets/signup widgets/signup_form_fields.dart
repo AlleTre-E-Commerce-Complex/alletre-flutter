@@ -60,7 +60,7 @@ class SignupFormFields extends StatelessWidget {
                 showFlags: true,
               ),
               initialValue: provider.currentPhoneNumber,
-              textFieldController: phoneController,
+              // textFieldController: phoneController,
               formatInput: true,
               keyboardType: TextInputType.phone,
               inputDecoration: InputDecoration(

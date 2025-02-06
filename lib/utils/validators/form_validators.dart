@@ -69,4 +69,37 @@ class FormValidators {
     }
     return null;
   }
+
+
+  static String? validateEmptyField(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName is required';
+    }
+    return null;
+  }
+
+  static bool validateSignupFields(String name, String email, String phone, String password) {
+    List<String> emptyFields = [];
+    
+    if (name.trim().isEmpty) emptyFields.add('Name');
+    if (email.trim().isEmpty) emptyFields.add('Email');
+    if (phone.trim().isEmpty) emptyFields.add('Phone number');
+    if (password.trim().isEmpty) emptyFields.add('Password');
+
+    return emptyFields.isEmpty;
+  }
+
+  static String getEmptyFieldsMessage(String name, String email, String phone, String password) {
+    List<String> emptyFields = [];
+    
+    if (name.trim().isEmpty) emptyFields.add('Name');
+    if (email.trim().isEmpty) emptyFields.add('Email');
+    if (phone.trim().isEmpty) emptyFields.add('Phone number');
+    if (password.trim().isEmpty) emptyFields.add('Password');
+
+    if (emptyFields.isEmpty) return '';
+    if (emptyFields.length == 1) return '${emptyFields[0]} is required';
+    
+    return 'Please fill in the following fields: ${emptyFields.join(", ")}';
+  }
 }

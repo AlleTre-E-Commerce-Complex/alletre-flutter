@@ -21,62 +21,109 @@ class LoginButtons extends StatelessWidget {
     return Consumer<UserProvider>(builder: (context, userProvider, child) {
       return Column(
         children: [
-           ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                backgroundColor: primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              backgroundColor: primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-              onPressed: userProvider.isLoading
-                  ? null
-                  : () async {
-                      if (formKey.currentState!.validate()) {
-                        final result = await userProvider.login();
-                        
+            ),
+            // onPressed: userProvider.isLoading
+            //     ? null
+            //     : () async {
+            //         if (formKey.currentState!.validate()) {
+            //           if (!userProvider.validateLoginForm()) {
+            //           final result = await userProvider.login();
+
+            //           if (!context.mounted) return;
+
+            //           if (result['success']) {
+            //             Provider.of<LoggedInProvider>(context, listen: false).logIn();
+
+            //             if (!context.mounted) return;
+
+            //             // Show success dialog
+            //             showDialog(
+            //               context: context,
+            //               barrierDismissible: false,
+            //               builder: (context) => buildSuccessDialog(context),
+            //             );
+            //           } else {
+            //             ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            //             ScaffoldMessenger.of(context).showSnackBar(
+            //               SnackBar(
+            //                 content: Text(result['message']),
+            //                 backgroundColor: errorColor,
+            //               ),
+            //             );
+            //           }
+            //         }
+            //         }
+            //       },
+
+            onPressed: userProvider.isLoading
+                ? null
+                : () async {
+                    if (formKey.currentState!.validate()) {
+                      if (!userProvider.validateLoginForm()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(userProvider.lastValidationMessage),
+                            backgroundColor: avatarColor,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final result = await userProvider.login();
+
+                      if (!context.mounted) return;
+
+                      if (result['success']) {
+                        Provider.of<LoggedInProvider>(context, listen: false)
+                            .logIn();
+
                         if (!context.mounted) return;
 
-                        if (result['success']) {
-                          Provider.of<LoggedInProvider>(context, listen: false).logIn();
-
-                          if (!context.mounted) return;
-                          
-                          // Show success dialog
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) => buildSuccessDialog(context),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(result['message']),
-                              backgroundColor: errorColor,
-                            ),
-                          );
-                        }
+                        // Show success dialog
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => buildSuccessDialog(context),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(result['message']),
+                            backgroundColor: activeColor,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
                       }
-                    },
-              child: userProvider.isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: secondaryColor,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      'LOGIN',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: secondaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    }
+                  },
+
+            child: userProvider.isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: secondaryColor,
+                      strokeWidth: 2,
                     ),
-            ),
+                  )
+                : const Text(
+                    'LOGIN',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: secondaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -32,56 +32,91 @@ class UserService {
   }
 
   // Signup API
+  // Future<Map<String, dynamic>> signupService(String name, String email, String phoneNumber, String password) async {
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse('$baseUrl/sign-up'),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Accept': 'application/json',
+  //       },
+  //       body: json.encode({
+  //         'userName': name,
+  //         'email': email,
+  //         'phone': phoneNumber,
+  //         'password': password,
+  //       }),
+  //     );
+
+  //     final Map<String, dynamic> data = json.decode(response.body);
+
+  //     if (response.statusCode >= 200 && response.statusCode < 300) {
+  //       if (data['data'] != null) {
+  //         final String accessToken = data['data']['accessToken'];
+  //         final String refreshToken = data['data']['refreshToken'];
+          
+  //         await _storage.write(key: 'accessToken', value: accessToken);
+  //         await _storage.write(key: 'refreshToken', value: refreshToken);
+          
+  //         return {'success': true, 'message': 'Signup successful'};
+  //       } else {
+  //         throw Exception('Invalid response format: missing data');
+  //       }
+  //     } else {
+  //       // Handle error message that could be either String or List
+  //       String errorMessage = '';
+  //       if (data['message'] is List) {
+  //         errorMessage = (data['message'] as List).join(', ');
+  //       } else if (data['message'] is String) {
+  //         errorMessage = data['message'];
+  //       } else {
+  //         errorMessage = 'An error occurred during signup';
+  //       }
+  //       return {
+  //         'success': false,
+  //         'message': errorMessage
+  //       };
+  //     }
+  //   } 
+  //   on FormatException {
+  //     return {'success': false, 'message': 'Invalid response format from server'};
+  //   } catch (e) {
+  //     return {'success': false, 'message': e.toString()};
+  //   }
+  // }
+
   Future<Map<String, dynamic>> signupService(String name, String email, String phoneNumber, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/sign-up'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'userName': name,
-          'email': email,
-          'phone': phoneNumber,
-          'password': password,
-        }),
-      );
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/sign-up'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({
+        'userName': name,
+        'email': email.trim(),
+        'phone': phoneNumber,
+        'password': password,
+      }),
+    );
 
-      final Map<String, dynamic> data = json.decode(response.body);
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (data['data'] != null) {
-          final String accessToken = data['data']['accessToken'];
-          final String refreshToken = data['data']['refreshToken'];
-          
-          await _storage.write(key: 'accessToken', value: accessToken);
-          await _storage.write(key: 'refreshToken', value: refreshToken);
-          
-          return {'success': true, 'message': 'Signup successful'};
-        } else {
-          throw Exception('Invalid response format: missing data');
-        }
-      } else {
-        // Handle error message that could be either String or List
-        String errorMessage = '';
-        if (data['message'] is List) {
-          errorMessage = (data['message'] as List).join(', ');
-        } else if (data['message'] is String) {
-          errorMessage = data['message'];
-        } else {
-          errorMessage = 'An error occurred during signup';
-        }
-        return {
-          'success': false,
-          'message': errorMessage
-        };
-      }
-    } on FormatException {
-      return {'success': false, 'message': 'Invalid response format from server'};
-    } catch (e) {
-      return {'success': false, 'message': e.toString()};
+    final Map<String, dynamic> data = json.decode(response.body);
+    
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return {
+        'success': true,
+        'message': 'Registration successful! Please check your email for verification instructions.',
+        'requiresVerification': true
+      };
     }
+
+    return AuthErrorHandler.handleSignUpError(data);
+    
+  } catch (e) {
+    return AuthErrorHandler.handleSignUpError(e);
   }
+}
 
   // Login API
   Future<Map<String, dynamic>> loginService(String email, String password) async {

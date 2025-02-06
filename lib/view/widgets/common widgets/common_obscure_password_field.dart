@@ -1,6 +1,4 @@
-import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ObscurePasswordField extends StatefulWidget {
   final String labelText;
@@ -25,10 +23,10 @@ class _ObscurePasswordFieldState extends State<ObscurePasswordField> {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
+    // final userProvider = Provider.of<UserProvider>(context);
 
     return TextFormField(
-      controller: userProvider.passwordController,
+      // controller: userProvider.passwordController,
       obscureText: obscureText,
       onChanged: widget.onChanged,
       validator: widget.validator,

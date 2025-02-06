@@ -1,5 +1,6 @@
 import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/model/user_model.dart';
+import 'package:alletre_app/utils/validators/form_validators.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -17,7 +18,7 @@ class UserProvider with ChangeNotifier {
   bool _rememberPassword = false;
   String _isoCode = 'AE';  // Store country ISO code
   bool _isLoading = false;
-  bool get isLoading => _isLoading;
+  String _lastValidationMessage = '';
 
   final UserService _userService = UserService();
 
@@ -32,9 +33,11 @@ class UserProvider with ChangeNotifier {
   String get isoCode => _isoCode;
   List<String> get addresses => _addresses;
   String? get defaultAddress => _defaultAddress;
+  bool get isLoading => _isLoading;
+  String get lastValidationMessage => _lastValidationMessage;
 
   PhoneNumber get currentPhoneNumber => PhoneNumber(
-    phoneNumber: _user.phoneNumber,
+    // phoneNumber: _user.phoneNumber,
     isoCode: _isoCode,
   );
 
@@ -137,13 +140,43 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // bool validateSignupForm() {
+  //   return _user.name.isNotEmpty &&
+  //          _user.email.isNotEmpty &&
+  //          _user.phoneNumber.isNotEmpty &&
+  //          _user.password.isNotEmpty &&
+  //          _agreeToTerms;
+  // }
+
   bool validateSignupForm() {
-    return _user.name.isNotEmpty &&
-           _user.email.isNotEmpty &&
-           _user.phoneNumber.isNotEmpty &&
-           _user.password.isNotEmpty &&
-           _agreeToTerms;
+  bool isValid = _user.name.isNotEmpty &&
+         _user.email.isNotEmpty &&
+         _user.phoneNumber.isNotEmpty &&
+         _user.password.isNotEmpty &&
+         _agreeToTerms;
+
+  if (!isValid) {
+    String emptyFieldsMessage = FormValidators.getEmptyFieldsMessage(
+      _user.name,
+      _user.email,
+      _user.phoneNumber,
+      _user.password
+    );
+    
+    if (!_agreeToTerms) {
+      if (emptyFieldsMessage.isNotEmpty) {
+        emptyFieldsMessage += ' and accept the Terms & Conditions';
+      } else {
+        emptyFieldsMessage = 'Please accept the Terms & Conditions';
+      }
+    }
+    
+    _lastValidationMessage = emptyFieldsMessage;
   }
+
+  return isValid;
+}
+
 
   Future<Map<String, dynamic>> signup() async {
     if (!validateSignupForm()) {
@@ -173,9 +206,25 @@ class UserProvider with ChangeNotifier {
   }
 
   
+  // bool validateLoginForm() {
+  //   return emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
+  // }
+
   bool validateLoginForm() {
-    return emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
+  if (emailController.text.isEmpty && passwordController.text.isEmpty) {
+    _lastValidationMessage = 'Please enter your email and password';
+    return false;
   }
+  if (emailController.text.isEmpty) {
+    _lastValidationMessage = 'Email is required';
+    return false;
+  }
+  if (passwordController.text.isEmpty) {
+    _lastValidationMessage = 'Password is required';
+    return false;
+  }
+  return true;
+}
 
   Future<Map<String, dynamic>> login() async {
     if (!validateLoginForm()) {
