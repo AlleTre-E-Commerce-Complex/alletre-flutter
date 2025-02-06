@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:alletre_app/controller/providers/user_provider.dart';
-import 'package:alletre_app/utils/environment/platform_util.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -117,20 +116,20 @@ class SignupButtons extends StatelessWidget {
                           ),
                         );
                         // Navigate to login after a short delay
+            //             Future.delayed(const Duration(seconds: 2), () {
+            //   if (context.mounted) {
+            //     PlatformUtil.handleLoginRedirect(
+            //       context,
+            //       result['requiresVerification'] ?? false
+            //     );
+            //   }
+            // });
                         Future.delayed(const Duration(seconds: 2), () {
-              if (context.mounted) {
-                PlatformUtil.handleLoginRedirect(
-                  context,
-                  result['requiresVerification'] ?? false
-                );
-              }
-            });
-                        // Future.delayed(const Duration(seconds: 2), () {
-                        //   if (context.mounted) {
-                        //     Navigator.pushReplacementNamed(
-                        //         context, AppRoutes.login);
-                        //   }
-                        // });
+                          if (context.mounted) {
+                            Navigator.pushReplacementNamed(
+                                context, AppRoutes.login);
+                          }
+                        });
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
