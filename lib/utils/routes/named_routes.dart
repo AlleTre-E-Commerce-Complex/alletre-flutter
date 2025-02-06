@@ -12,6 +12,7 @@ import 'package:alletre_app/view/screens/search%20screen/search_screen.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/splash%20screen/splash_screen.dart';
 import 'package:flutter/material.dart';
+import '../../view/screens/home screen/home_contents.dart';
 
 class AppRoutes {
   // Defining named routes
@@ -41,7 +42,7 @@ class AppRoutes {
       },
       signup: (context) => SignUpPage(),
       login: (context) => LoginPage(),
-      // home: (context) => const HomeScreen(),
+      home: (context) => const HomeScreenContent(),
       productDetails: (context) => const ProductDetailsScreen(),
       auctionDetails: (context) => const AuctionDetailsScreen(),
       search: (context) => const SearchScreen(),

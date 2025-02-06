@@ -112,7 +112,6 @@ class SignupFormFields extends StatelessWidget {
                     fontSize: 15,
                     color: surfaceColor,
                     fontWeight: FontWeight.w500,
-                    decoration: TextDecoration.underline,
                   ),
                 ),
               ),

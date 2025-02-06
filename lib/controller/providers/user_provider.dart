@@ -1,12 +1,14 @@
 import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class UserProvider with ChangeNotifier {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  
   final UserModel _user = UserModel();
   String? selectedAddress;
   final List<String> _addresses = []; // List of stored addresses
@@ -14,6 +16,8 @@ class UserProvider with ChangeNotifier {
   bool _agreeToTerms = false;
   bool _rememberPassword = false;
   String _isoCode = 'AE';  // Store country ISO code
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
   final UserService _userService = UserService();
 
@@ -127,39 +131,147 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Signup method
-  Future<void> signup() async {
+  // Toggle loading state
+  void setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  bool validateSignupForm() {
+    return _user.name.isNotEmpty &&
+           _user.email.isNotEmpty &&
+           _user.phoneNumber.isNotEmpty &&
+           _user.password.isNotEmpty &&
+           _agreeToTerms;
+  }
+
+  Future<Map<String, dynamic>> signup() async {
+    if (!validateSignupForm()) {
+      return {
+        'success': false,
+        'message': 'Please fill in all required fields and agree to terms'
+      };
+    }
+
+    setLoading(true);
     try {
-      final success = await _userService.signup(
+      final result = await _userService.signupService(
         _user.name,
         _user.email,
         _user.phoneNumber,
         _user.password,
       );
-
-      if (success) {
-        // Reset form fields after successful signup
-        resetCheckboxes();
+      
+      if (result['success']) {
+        resetSignupForm();
       }
-    } catch (e) {
-      throw Exception('Signup failed: $e');
+      
+      return result;
+    } finally {
+      setLoading(false);
     }
   }
+
+  
+  bool validateLoginForm() {
+    return emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
+  }
+
+  Future<Map<String, dynamic>> login() async {
+    if (!validateLoginForm()) {
+      return {
+        'success': false,
+        'message': 'Please enter both email and password'
+      };
+    }
+
+    setLoading(true);
+    try {
+      // Trim whitespace from email
+      final email = emailController.text.trim();
+      final password = passwordController.text;
+      
+      debugPrint('Attempting login for email: $email');
+      
+      final result = await _userService.loginService(email, password);
+
+      // final result = await _userService.login(
+      //   emailController.text,
+      //   passwordController.text,
+      // );
+      
+      if (result['success']) {
+        if (_rememberPassword) {
+          // Save credentials if remember password is checked
+          await _storage.write(key: 'saved_email', value: email);
+          await _storage.write(key: 'saved_password', value: password);
+        }
+
+        // Validate tokens after successful login
+        final hasValidTokens = await _userService.validateTokens();
+        if (!hasValidTokens) {
+          return {
+            'success': false,
+            'message': 'Login failed: Unable to store authentication tokens'
+          };
+        }
+
+        resetLoginForm(); // form reset on successful login
+      }
+      
+      return result;
+    } catch (e) {
+      debugPrint('Error in login process: $e');
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred during login'
+      };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> logout() async {
+    await _userService.logout(); // Added logout method to match UserService
+    resetLoginForm();
+    resetSignupForm();
+  }
+
+  Future<Map<String, String?>> getTokens() async {
+    return await _userService.getTokens(); // Added getTokens to match UserService
+  }
+
+  void resetLoginForm() {
+    emailController.clear();
+    passwordController.clear();
+    _rememberPassword = false;
+    notifyListeners();
+  }
+
+  void resetSignupForm() {
+    _user.name = '';
+    _user.email = '';
+    _user.phoneNumber = '';
+    _user.password = '';
+    _agreeToTerms = false;
+    notifyListeners();
+  }
+
 
   // Login method
-  Future<void> login() async {
-    try {
-      final success = await _userService.login(
-        emailController.text,
-        passwordController.text,
-      );
+  // Future<void> login() async {
+  //   try {
+  //     final success = await _userService.login(
+  //       emailController.text,
+  //       passwordController.text,
+  //     );
 
-      if (success) {
-        // Reset form fields after successful login
-        resetCheckboxes();
-      }
-    } catch (e) {
-      throw Exception('Login failed: $e');
-    }
-  }
+  //     if (success) {
+  //       // Reset form fields after successful login
+  //       resetCheckboxes();
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Login failed: $e');
+  //   }
+  // }
 }
