@@ -98,6 +98,7 @@ class UserService {
         'email': email.trim(),
         'phone': phoneNumber,
         'password': password,
+        // 'platform': 'mobile_app'
       }),
     );
 

@@ -98,7 +98,7 @@ class LoginButtons extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(result['message']),
-                            backgroundColor: activeColor,
+                            backgroundColor: avatarColor,
                             duration: const Duration(seconds: 2),
                           ),
                         );
