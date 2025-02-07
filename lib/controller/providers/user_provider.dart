@@ -94,7 +94,7 @@ class UserProvider with ChangeNotifier {
     _agreeToTerms = false;
     _rememberPassword = false;
     emailController.clear();
-    passwordController.clear();
+    // passwordController.clear();
     notifyListeners();
   }
 
@@ -303,6 +303,8 @@ class UserProvider with ChangeNotifier {
     _user.phoneNumber = '';
     _user.password = '';
     _agreeToTerms = false;
+    emailController.clear();
+    passwordController.clear();
     notifyListeners();
   }
 
