@@ -78,6 +78,7 @@
 
 import 'package:alletre_app/controller/providers/auction_details_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/category_state.dart';
 import 'package:alletre_app/controller/providers/focus_state_provider.dart';
@@ -339,6 +340,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => TabIndexProvider()),
           ChangeNotifierProvider(create: (_) => LoggedInProvider()),
           ChangeNotifierProvider(create: (_) => LocationProvider()),
+          ChangeNotifierProvider(create: (_) => ShareProvider()),
         ],
         child: MaterialApp(
           navigatorKey: navigatorKey,

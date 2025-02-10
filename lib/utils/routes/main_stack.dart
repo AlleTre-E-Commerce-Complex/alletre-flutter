@@ -131,6 +131,7 @@ class MainStack extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<TabIndexProvider>(
       builder: (context, tabIndexProvider, _) {
+        // ignore: avoid_print
         print('Building MainStack with index: ${tabIndexProvider.selectedIndex}');
         return Scaffold(
           key: ValueKey(tabIndexProvider.selectedIndex),

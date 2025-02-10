@@ -1,3 +1,4 @@
+import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/common_navbar.dart';
@@ -93,7 +94,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'Share App',
               subtitle: 'Let your network know about us',
               onTap: () {
-                context.read<TabIndexProvider>().updateIndex(5);
+                context.read<ShareProvider>().shareApp(context);
               },
             ),
             // ProfileListTile(

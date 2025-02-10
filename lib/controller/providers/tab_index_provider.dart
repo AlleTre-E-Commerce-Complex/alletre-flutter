@@ -6,10 +6,11 @@ class TabIndexProvider extends ChangeNotifier {
   int get selectedIndex => _selectedIndex;
 
   void updateIndex(int index) {
+     // ignore: avoid_print
      print('Updating tab index to: $index'); 
     if (_selectedIndex != index) {
       _selectedIndex = index;
-      notifyListeners();  // Notify listeners to rebuild UI
+      notifyListeners(); 
     }
   }
 }
