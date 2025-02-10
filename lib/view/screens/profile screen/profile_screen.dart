@@ -7,6 +7,7 @@ import 'package:alletre_app/view/widgets/profile%20widgets/profile_list_tile.dar
 import 'package:alletre_app/view/widgets/profile%20widgets/profile_section_title.dart';
 import 'package:alletre_app/view/widgets/profile%20widgets/user_profile_card.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -78,11 +79,19 @@ class ProfileScreen extends StatelessWidget {
               onTap: () {},
             ),
             Divider(color: dividerColor, thickness: 0.5),
-            const ProfileSectionTitle(title: 'Account'),
+            const ProfileSectionTitle(title: 'About'),
             ProfileListTile(
               icon: Icons.help_outline,
               title: 'FAQS',
               subtitle: 'Know more about the services',
+              onTap: () {
+                context.read<TabIndexProvider>().updateIndex(5);
+              },
+            ),
+            ProfileListTile(
+              icon: FontAwesomeIcons.shareFromSquare,
+              title: 'Share App',
+              subtitle: 'Let your network know about us',
               onTap: () {
                 context.read<TabIndexProvider>().updateIndex(5);
               },

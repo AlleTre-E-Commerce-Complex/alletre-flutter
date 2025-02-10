@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ProfileListTile extends StatelessWidget {
   final IconData icon;
@@ -17,10 +18,16 @@ class ProfileListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double defaultIconSize = 24.0;
+    const double shareIconSize = 20.0;
+    final double iconSize = icon == FontAwesomeIcons.shareFromSquare
+        ? shareIconSize
+        : defaultIconSize;
+
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: buttonBgColor,
-        child: Icon(icon, color: onSecondaryColor),
+        child: Icon(icon, color: onSecondaryColor, size: iconSize),
       ),
       title: Text(
         title,
