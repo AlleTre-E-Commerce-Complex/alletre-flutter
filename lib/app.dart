@@ -9,15 +9,32 @@ import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/screens/splash%20screen/splash_screen.dart';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-
 import 'controller/providers/login_state.dart';
+import 'view/screens/login screen/login_page.dart';
+import 'view/screens/splash screen/splash_screen.dart';
 
 class MyApp extends StatelessWidget {
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
   const MyApp({super.key});
+
+  Future<Widget> getInitialScreen() async {
+    try {
+      final appLinks = AppLinks();
+      final initialUri = await appLinks.getInitialLink();
+      
+      if (initialUri != null && initialUri.scheme == 'alletre' && initialUri.path == 'login') {
+        return LoginPage(); // Navigate directly to login screen
+      }
+    } catch (e) {
+      debugPrint('Error handling deep link: $e');
+    }
+    return const SplashScreen(); // Default to splash screen
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,16 +58,21 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => LoggedInProvider()),
           ChangeNotifierProvider(create: (_) => LocationProvider()),
         ],
-        child: Consumer<LoggedInProvider>(
-          builder: (context, loggedInProvider, _) {
-            return MaterialApp(
-              title: 'Alletre',
-              theme: customTheme(),
-              debugShowCheckedModeBanner: false,
-              routes: AppRoutes.routes,
-              home: const SplashScreen(),
-            );
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          title: 'Alletre',
+          theme: customTheme(),
+          debugShowCheckedModeBanner: false,
+          routes: AppRoutes.routes,
+          home: FutureBuilder<Widget>(
+          future: getInitialScreen(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return snapshot.data ?? const SplashScreen();
+            }
+            return const Center(child: CircularProgressIndicator()); // Show loading indicator
           },
+        ),
         ),
       ),
     );

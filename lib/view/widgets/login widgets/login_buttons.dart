@@ -139,6 +139,7 @@ class LoginButtons extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   userProvider.resetCheckboxes();
+                  userProvider.resetSignupForm();
                   Navigator.pushReplacementNamed(context, AppRoutes.signup);
                 },
                 child: const Text(

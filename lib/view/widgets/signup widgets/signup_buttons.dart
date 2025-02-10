@@ -116,19 +116,24 @@ class SignupButtons extends StatelessWidget {
                           ),
                         );
                         // Navigate to login after a short delay
-            //             Future.delayed(const Duration(seconds: 2), () {
-            //   if (context.mounted) {
-            //     PlatformUtil.handleLoginRedirect(
-            //       context,
-            //       result['requiresVerification'] ?? false
-            //     );
-            //   }
-            // });
+                        //             Future.delayed(const Duration(seconds: 2), () {
+                        //   if (context.mounted) {
+                        //     PlatformUtil.handleLoginRedirect(
+                        //       context,
+                        //       result['requiresVerification'] ?? false
+                        //     );
+                        //   }
+                        // });
                         Future.delayed(const Duration(seconds: 2), () {
                           if (context.mounted) {
                             Navigator.pushReplacementNamed(
                                 context, AppRoutes.login);
                           }
+                          // if (context.mounted) {
+                          //   UrlHandlerService.handleUrl(
+                          //       'https://www.alletre.com/login', // The website login URL
+                          //       context);
+                          // }
                         });
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(

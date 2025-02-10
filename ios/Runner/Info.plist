@@ -33,6 +33,18 @@
     <key>NSLocationAlwaysUsageDescription</key>
     <string>We need your location for better service</string>
 
+	<key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>alletre</string>
+            </array>
+            <key>CFBundleURLName</key>
+            <string>com.alletre.app</string>
+        </dict>
+    </array>
+
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
