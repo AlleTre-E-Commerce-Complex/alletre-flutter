@@ -1,8 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
-
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:provider/provider.dart';
 
 Widget buildSuccessDialog(BuildContext context) {
   // Store the context in a variable that will be captured by the closure
@@ -11,10 +11,22 @@ Widget buildSuccessDialog(BuildContext context) {
   Future.delayed(const Duration(seconds: 2), () {
     // Check if the context is still mounted before using Navigator
     if (navigatorContext.mounted) {
-      // Pop the dialog
+      // // Pop the dialog
+      // Navigator.of(navigatorContext).pop();
+      // // Navigate to the desired screen
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreenContent()));
+
+       // Pop the dialog
       Navigator.of(navigatorContext).pop();
-      // Navigate to the desired screen
-      Navigator.pushReplacementNamed(navigatorContext, AppRoutes.home);
+      
+      // Update the tab index to home (1)
+      Provider.of<TabIndexProvider>(navigatorContext, listen: false).updateIndex(1);
+      
+      // Pop everything until we reach the MainStack
+      Navigator.of(navigatorContext).popUntil((route) => route.isFirst);
+      
+      // Force rebuild of MainStack with new index
+      Provider.of<TabIndexProvider>(navigatorContext, listen: false).notifyListeners();
     }
   });
 

@@ -25,46 +25,140 @@ import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dar
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/profile%20screen/profile_screen.dart';
 
+// class MainStack extends StatelessWidget {
+//   const MainStack({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final PageController pageController = PageController();
+
+//     return Consumer<TabIndexProvider>(
+//       builder: (context, tabIndexProvider, _) {
+//          // Add print statement for debugging
+//         // ignore: avoid_print
+//         print('Current index: ${tabIndexProvider.selectedIndex}');
+        
+//         return IndexedStack(
+//           index: tabIndexProvider.selectedIndex,
+//           children: [
+//             const OnboardingPages(), //index 0
+//             const HomeScreenContent(), // index 1
+//             LoginPage(), // index 2
+//             SignUpPage(), // index 3
+//             const ProfileScreen(), // index 4
+//             const FaqScreen(), // index 5
+//             const EditProfileScreen(), // index 6
+//             const PurchaseScreen(), // index 7
+//             const BidsScreen(), // index 8
+//             OnboardingPage3(pageController: pageController), // index 9
+//             const ProductDetailsScreen(), // index 10
+//             CategoriesPage(), // index 11
+//             const SubCategoryPage(categoryName: "Default"), // index 12 
+//             const SearchScreen(), // index 13
+//             const SettingsScreen(), // index 14
+//             const TermsAndConditions(), // index 15
+//             const ContactUsScreen(), // index 16
+//             const AuctionDetailsScreen(), //index 17
+//             const ShippingDetailsScreen(), //index 18
+//             const AddLocationScreen(), //index 19
+//             const ListProductsScreen(), //index 20
+//             const GoogleMapScreen(), //index 21
+//             const PaymentDetailsScreen() //index 22
+//           ],
+//         );
+//       },
+//     );
+//   }
+// }
+
 class MainStack extends StatelessWidget {
   const MainStack({super.key});
 
+  Widget _buildScreen(int index) {
+    switch (index) {
+      case 0:
+        return const OnboardingPages();
+      case 1:
+        return const HomeScreenContent();
+      case 2:
+        return LoginPage();
+      case 3:
+        return SignUpPage();
+      case 4:
+        return const ProfileScreen();
+      case 5:
+        return const FaqScreen();
+      case 6:
+        return const EditProfileScreen();
+      case 7:
+        return const PurchaseScreen();
+      case 8:
+        return const BidsScreen();
+      case 9:
+        return OnboardingPage3(pageController: PageController());
+      case 10:
+        return const ProductDetailsScreen();
+      case 11:
+        return CategoriesPage();
+      case 12:
+        return const SubCategoryPage(categoryName: "Default");
+      case 13:
+        return const SearchScreen();
+      case 14:
+        return const SettingsScreen();
+      case 15:
+        return const TermsAndConditions();
+      case 16:
+        return const ContactUsScreen();
+      case 17:
+        return const AuctionDetailsScreen();
+      case 18:
+        return const ShippingDetailsScreen();
+      case 19:
+        return const AddLocationScreen();
+      case 20:
+        return const ListProductsScreen();
+      case 21:
+        return const GoogleMapScreen();
+      case 22:
+        return const PaymentDetailsScreen();
+      default:
+        return const HomeScreenContent();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final PageController pageController = PageController();
-
     return Consumer<TabIndexProvider>(
       builder: (context, tabIndexProvider, _) {
-         // Add print statement for debugging
-        // ignore: avoid_print
-        print('Current index: ${tabIndexProvider.selectedIndex}');
-        
-        return IndexedStack(
-          index: tabIndexProvider.selectedIndex,
-          children: [
-            const OnboardingPages(), //index 0
-            const HomeScreenContent(), // index 1
-            LoginPage(), // index 2
-            SignUpPage(), // index 3
-            const ProfileScreen(), // index 4
-            const FaqScreen(), // index 5
-            const EditProfileScreen(), // index 6
-            const PurchaseScreen(), // index 7
-            const BidsScreen(), // index 8
-            OnboardingPage3(pageController: pageController), // index 9
-            const ProductDetailsScreen(), // index 10
-            CategoriesPage(), // index 11
-            const SubCategoryPage(categoryName: "Default"), // index 12 
-            const SearchScreen(), // index 13
-            const SettingsScreen(), // index 14
-            const TermsAndConditions(), // index 15
-            const ContactUsScreen(), // index 16
-            const AuctionDetailsScreen(), //index 17
-            const ShippingDetailsScreen(), //index 18
-            const AddLocationScreen(), //index 19
-            const ListProductsScreen(), //index 20
-            const GoogleMapScreen(), //index 21
-            const PaymentDetailsScreen() //index 22
-          ],
+        print('Building MainStack with index: ${tabIndexProvider.selectedIndex}');
+        return Scaffold(
+          key: ValueKey(tabIndexProvider.selectedIndex),
+          body: Navigator(
+            key: GlobalKey<NavigatorState>(),
+            onGenerateRoute: (settings) {
+              return MaterialPageRoute(
+                builder: (_) => _buildScreen(tabIndexProvider.selectedIndex),
+              );
+            },
+          ),
+          // bottomNavigationBar: BottomAppBar(
+          //   color: Theme.of(context).bottomAppBarTheme.color,
+          //   height: Theme.of(context).bottomAppBarTheme.height,
+          //   child: Consumer<LoggedInProvider>(
+          //     builder: (context, loginProvider, _) {
+          //       return loginProvider.isLoggedIn
+          //           ? NavBarUtils.buildAuthenticatedNavBar(
+          //               context,
+          //               onTabChange: (index) {
+          //                 Navigator.of(context).popUntil((route) => route.isFirst);
+          //                 tabIndexProvider.updateIndex(index);
+          //               },
+          //             )
+          //           : const BottomNavBar();
+          //     },
+          //   ),
+          // ),
         );
       },
     );

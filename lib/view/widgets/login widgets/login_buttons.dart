@@ -1,7 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
+import 'package:alletre_app/controller/helpers/navigation_services.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
-import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/login%20widgets/success_dialog.dart';
 import 'package:flutter/material.dart';
@@ -85,6 +86,9 @@ class LoginButtons extends StatelessWidget {
                         Provider.of<LoggedInProvider>(context, listen: false)
                             .logIn();
 
+                            // First update the tab index to home
+            Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
+
                         if (!context.mounted) return;
 
                         // Show success dialog
@@ -140,7 +144,8 @@ class LoginButtons extends StatelessWidget {
                 onTap: () {
                   userProvider.resetCheckboxes();
                   userProvider.resetSignupForm();
-                  Navigator.pushReplacementNamed(context, AppRoutes.signup);
+                  // Navigator.pushReplacementNamed(context, AppRoutes.signup);
+                  NavigationService.navigateToScreen(context, 3);
                 },
                 child: const Text(
                   'Register Now',
