@@ -1,29 +1,56 @@
 // ignore_for_file: avoid_print
-
 import 'package:alletre_app/controller/helpers/auction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
+
 class AuctionProvider with ChangeNotifier {
   final AuctionService _auctionService = AuctionService();
-  final List<AuctionItem> _upcomingAuctions = [];
+  List<AuctionItem> _upcomingAuctions = [];
   final List<AuctionItem> _ongoingAuctions = [];
-  final bool _isLoading = false;
+  final List<AuctionItem> _expiredAuctions = [];
+  bool _isLoading = false;
   String? _error;
 
   List<AuctionItem> get upcomingAuctions => _upcomingAuctions;
   List<AuctionItem> get ongoingAuctions => _ongoingAuctions;
+  List<AuctionItem> get expiredAuctions => _expiredAuctions;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
   Future<void> getUpcomingAuctions() async {
+    // try {
+    //   final auctions = await _auctionService.fetchUpcomingAuctions();
+    //   _upcomingAuctions.clear();
+    //   _upcomingAuctions.addAll(auctions);
+    //   notifyListeners();
+    // } catch (e) {
+    //   print('Error fetching upcoming auctions: $e');
+    // }
+    if (_isLoading) return;
+    
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
     try {
-      final auctions = await _auctionService.fetchUpcomingAuctions();
-      _upcomingAuctions.clear();
-      _upcomingAuctions.addAll(auctions);
-      notifyListeners();
-    } catch (e) {
-      print('Error fetching upcoming auctions: $e');
-    }
+    final auctions = await _auctionService.fetchUpcomingAuctions();
+    // _upcomingAuctions
+    //   ..clear()
+    //   ..addAll(auctions);
+    _upcomingAuctions = auctions;
+    _error = null;
+  } catch (e) {
+    _error = e.toString();
+    print('Error fetching upcoming auctions: $e');
+  } finally {
+     _isLoading = false;
+    notifyListeners();
+  }
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
   }
 
   DateTime? _scheduledTime;
@@ -72,21 +99,21 @@ class AuctionProvider with ChangeNotifier {
 
   void _checkAuctionStatus(AuctionItem auction) {
     if (auction.isActive()) {
-  _upcomingAuctions.remove(auction);
-  _ongoingAuctions.add(AuctionItem(
-    id: auction.id,
-    title: auction.title,
-    price: auction.price,
-    description: auction.description,
-    startBidAmount: auction.startBidAmount,
-    status: 'active', // New status assigned
-    startDate: auction.startDate,
-    expiryDate: auction.expiryDate,
-    imageLinks: auction.imageLinks,
-  ));
-  notifyListeners();
-}
-
+      _upcomingAuctions.remove(auction);
+      _ongoingAuctions.add(AuctionItem(
+        id: auction.id,
+        title: auction.title,
+        price: auction.price,
+        bids: auction.bids,
+        description: auction.description,
+        startBidAmount: auction.startBidAmount,
+        status: 'active', // New status assigned
+        startDate: auction.startDate,
+        expiryDate: auction.expiryDate,
+        imageLinks: auction.imageLinks,
+      ));
+      notifyListeners();
+    }
   }
 
   // Periodic check to update auction statuses (optional)
