@@ -76,6 +76,7 @@
 //   }
 // }
 
+import 'package:alletre_app/controller/providers/auction_image_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
@@ -340,6 +341,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => LoggedInProvider()),
           ChangeNotifierProvider(create: (_) => LocationProvider()),
           ChangeNotifierProvider(create: (_) => ShareProvider()),
+          ChangeNotifierProvider(create: (_) => AuctionImageProvider()),
         ],
         child: MaterialApp(
           navigatorKey: navigatorKey,

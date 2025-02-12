@@ -1,5 +1,18 @@
 import 'package:flutter/material.dart';
 
+Color getStatusColor(String status) {
+    switch (status) {
+      case "WAITING_FOR_PAYMENT":
+        return  errorColor; // Material Green
+      case "EXPIRED":
+        return const Color(0xFF9E9E9E); // Material Grey
+      case "ACTIVE":
+        return const Color(0xFF2196F3); // Material Blue
+      default:
+        return const Color(0xFF757575); // Default Grey
+    }
+  }
+
 // Define color palette
 const Color onSecondaryColor = Color(0xFF000000);
 const Color primaryVariantColor = Color(0xFF5b0c1f);
@@ -11,6 +24,7 @@ const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
 const Color selectedIndex = Color(0xFFCDAF89);
 Color buttonBgColor = Colors.grey.shade200;
+Color placeholderColor = Colors.grey.shade100;
 Color avatarColor = Colors.grey.shade600;
 Color dividerColor = Colors.black54;
 const Color greyColor = Colors.grey;
