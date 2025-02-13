@@ -14,7 +14,7 @@ class AuctionService {
     return await _storage.read(key: 'accessToken');
   }
 
-  Future<List<AuctionItem>> fetchUpcomingAuctions() async {
+  Future<List<AuctionItem>> fetchExpiredAuctions() async {
     final accessToken = await _getAccessToken();
 
     if (accessToken == null) {
@@ -33,17 +33,6 @@ class AuctionService {
     print('Response body');
     print(response.body);
 
-    // if (response.statusCode == 200) {
-    //   final Map<String, dynamic> data = json.decode(response.body);
-    //   final List<dynamic> auctions = data['data'];
-    //   return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-    // } else if (response.statusCode == 403) {
-    //   // Handle 403 Forbidden error (e.g., refresh token)
-    //   throw Exception('Access denied: Invalid or expired token');
-    // } else {
-    //   throw Exception('Failed to load upcoming auctions: ${response.statusCode}');
-    // }
-
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       final List<dynamic> auctions = data['data'];
@@ -54,7 +43,7 @@ class AuctionService {
     } else if (response.statusCode == 403) {
       throw Exception('Access denied: User may be blocked');
     } else {
-      throw Exception('Failed to load upcoming auctions: ${response.statusCode}');
+      throw Exception('Failed to load expired auctions: ${response.statusCode}');
     }
   }
 }

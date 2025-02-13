@@ -5,9 +5,9 @@ import 'package:alletre_app/model/auction_item.dart';
 
 class AuctionProvider with ChangeNotifier {
   final AuctionService _auctionService = AuctionService();
-  List<AuctionItem> _upcomingAuctions = [];
+  final List<AuctionItem> _upcomingAuctions = [];
   final List<AuctionItem> _ongoingAuctions = [];
-  final List<AuctionItem> _expiredAuctions = [];
+  List<AuctionItem> _expiredAuctions = [];
   bool _isLoading = false;
   String? _error;
 
@@ -17,7 +17,7 @@ class AuctionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  Future<void> getUpcomingAuctions() async {
+  Future<void> getExpiredAuctions() async {
     // try {
     //   final auctions = await _auctionService.fetchUpcomingAuctions();
     //   _upcomingAuctions.clear();
@@ -27,25 +27,22 @@ class AuctionProvider with ChangeNotifier {
     //   print('Error fetching upcoming auctions: $e');
     // }
     if (_isLoading) return;
-    
+
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-    final auctions = await _auctionService.fetchUpcomingAuctions();
-    // _upcomingAuctions
-    //   ..clear()
-    //   ..addAll(auctions);
-    _upcomingAuctions = auctions;
-    _error = null;
-  } catch (e) {
-    _error = e.toString();
-    print('Error fetching upcoming auctions: $e');
-  } finally {
-     _isLoading = false;
-    notifyListeners();
-  }
+      final auctions = await _auctionService.fetchExpiredAuctions();
+      _expiredAuctions = auctions;
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      print('Error fetching expired auctions: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void clearError() {
@@ -89,41 +86,41 @@ class AuctionProvider with ChangeNotifier {
   }
 
   // Add an auction to the upcoming list
-  void addUpcomingAuction(AuctionItem auction) {
-    _upcomingAuctions.add(auction);
-    notifyListeners();
-    _checkAuctionStatus(auction);
-  }
+  // void addUpcomingAuction(AuctionItem auction) {
+  //   _upcomingAuctions.add(auction);
+  //   notifyListeners();
+  //   _checkAuctionStatus(auction);
+  // }
 
   // Check the status and update it to active if the scheduled time has passed
 
-  void _checkAuctionStatus(AuctionItem auction) {
-    if (auction.isActive()) {
-      _upcomingAuctions.remove(auction);
-      _ongoingAuctions.add(AuctionItem(
-        id: auction.id,
-        title: auction.title,
-        price: auction.price,
-        bids: auction.bids,
-        description: auction.description,
-        startBidAmount: auction.startBidAmount,
-        status: 'active', // New status assigned
-        startDate: auction.startDate,
-        expiryDate: auction.expiryDate,
-        imageLinks: auction.imageLinks,
-      ));
-      notifyListeners();
-    }
-  }
+  // void _checkAuctionStatus(AuctionItem auction) {
+  //   if (auction.isActive()) {
+  //     _upcomingAuctions.remove(auction);
+  //     _ongoingAuctions.add(AuctionItem(
+  //       id: auction.id,
+  //       title: auction.title,
+  //       price: auction.price,
+  //       bids: auction.bids,
+  //       description: auction.description,
+  //       startBidAmount: auction.startBidAmount,
+  //       status: 'active', // New status assigned
+  //       startDate: auction.startDate,
+  //       expiryDate: auction.expiryDate,
+  //       imageLinks: auction.imageLinks,
+  //     ));
+  //     notifyListeners();
+  //   }
+  // }
 
   // Periodic check to update auction statuses (optional)
-  void checkAllAuctionsStatus() {
-    for (var auction in _upcomingAuctions) {
-      if (auction.isActive()) {
-        auction.status = 'active';
-        _ongoingAuctions.add(auction);
-      }
-    }
-    notifyListeners();
-  }
+  // void checkAllAuctionsStatus() {
+  //   for (var auction in _upcomingAuctions) {
+  //     if (auction.isActive()) {
+  //       auction.status = 'active';
+  //       _ongoingAuctions.add(auction);
+  //     }
+  //   }
+  //   notifyListeners();
+  // }
 }
