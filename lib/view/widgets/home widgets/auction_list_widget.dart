@@ -27,13 +27,13 @@ class AuctionListWidget extends StatelessWidget {
             style:
                 Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 17),
           ),
-          const SizedBox(height: 4), // Spacing before subtitle
+          const SizedBox(height: 2), // Spacing before subtitle
           Text(
             subtitle,
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium
-                ?.copyWith(color: greyColor, fontSize: 12),
+                ?.copyWith(color: greyColor, fontSize: 13),
           ),
           const SizedBox(height: 10),
           // Horizontal scrollable list of cards
