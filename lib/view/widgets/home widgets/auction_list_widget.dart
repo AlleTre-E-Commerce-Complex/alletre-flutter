@@ -17,7 +17,7 @@ class AuctionListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min ,
@@ -38,13 +38,13 @@ class AuctionListWidget extends StatelessWidget {
           const SizedBox(height: 10),
           // Horizontal scrollable list of cards
           SizedBox(
-            height: 245, // Set the height for the scrollable area
+            height: 242, // Set the height for the scrollable area
             child: ListView.builder(
               scrollDirection: Axis.horizontal, // Make it horizontal
               itemCount: auctions.length,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
+                  padding: const EdgeInsets.only(right: 7.0),
                   child: _buildAuctionCard(context, auctions[index]),
                 );
               },
@@ -60,7 +60,7 @@ class AuctionListWidget extends StatelessWidget {
     final displayStatus = status == "WAITING_FOR_PAYMENT" ? "SOLD" : status;
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
         color: baseColor.withAlpha(26),
         borderRadius: BorderRadius.circular(4),
@@ -68,7 +68,7 @@ class AuctionListWidget extends StatelessWidget {
       child: Text(
         displayStatus,
         style: TextStyle(
-          fontSize: 9,
+          fontSize: 7,
           color: getStatusColor(status),
           fontWeight: FontWeight.bold,
         ),
@@ -78,7 +78,7 @@ class AuctionListWidget extends StatelessWidget {
 
   Widget _buildAuctionCard(BuildContext context, AuctionItem auction) {
   final screenWidth = MediaQuery.of(context).size.width;
-  final cardWidth = (screenWidth - 32 - 10) / 1.8;
+  final cardWidth = (screenWidth - 32 - 10) / 2;
 
   return SizedBox(
     width: cardWidth,
@@ -190,5 +190,4 @@ class AuctionListWidget extends StatelessWidget {
     ),
   );
 }
-
 }
