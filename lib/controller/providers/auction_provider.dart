@@ -5,7 +5,7 @@ import 'package:alletre_app/model/auction_item.dart';
 
 class AuctionProvider with ChangeNotifier {
   final AuctionService _auctionService = AuctionService();
-  final List<AuctionItem> _upcomingAuctions = [];
+  List<AuctionItem> _upcomingAuctions = [];
   final List<AuctionItem> _ongoingAuctions = [];
   List<AuctionItem> _expiredAuctions = [];
   bool _isLoading = false;
@@ -17,15 +17,27 @@ class AuctionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  Future<void> getUpcomingAuctions() async {
+    if (_isLoading) return;
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final auctions = await _auctionService.fetchUpcomingAuctions();
+      _upcomingAuctions = auctions;
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      print('Error fetching upcoming auctions: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> getExpiredAuctions() async {
-    // try {
-    //   final auctions = await _auctionService.fetchUpcomingAuctions();
-    //   _upcomingAuctions.clear();
-    //   _upcomingAuctions.addAll(auctions);
-    //   notifyListeners();
-    // } catch (e) {
-    //   print('Error fetching upcoming auctions: $e');
-    // }
     if (_isLoading) return;
 
     _isLoading = true;

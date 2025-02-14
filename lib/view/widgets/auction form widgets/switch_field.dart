@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/widgets/auction%20widgets/custom_time_picker.dart';
+import 'package:alletre_app/view/widgets/auction%20form%20widgets/custom_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:intl/intl.dart';

@@ -14,7 +14,7 @@ class AuctionService {
     return await _storage.read(key: 'accessToken');
   }
 
-  Future<List<AuctionItem>> fetchExpiredAuctions() async {
+  Future<List<AuctionItem>> fetchUpcomingAuctions() async {
     final accessToken = await _getAccessToken();
 
     if (accessToken == null) {
@@ -22,10 +22,8 @@ class AuctionService {
     }
     
     final response = await http.get(
-      Uri.parse('$baseUrl/auctions/user/expired-auctions'),
+      Uri.parse('$baseUrl/auctions/user/up-comming'),
       headers: {
-        // 'Content-Type': 'application/json',
-        // 'Accept': 'application/json',
         'Authorization': 'Bearer $accessToken',
       },
     );
@@ -43,7 +41,49 @@ class AuctionService {
     } else if (response.statusCode == 403) {
       throw Exception('Access denied: User may be blocked');
     } else {
+      throw Exception('Failed to load upcoming auctions: ${response.statusCode}');
+    }
+  }
+
+  Future<List<AuctionItem>> fetchExpiredAuctions() async {
+    final accessToken = await _getAccessToken();
+
+    if (accessToken == null) {
+      throw Exception('Access token not found');
+    }
+    
+    final response = await http.get(
+      Uri.parse('$baseUrl/auctions/user/expired-auctions'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+    print('Response status: ${response.statusCode}');
+    print('Response body');
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      final List<dynamic> auctions = data['data'];
+
+      // Debugging auction image URLs
+      for (var auction in auctions) {
+        var imageLinks = auction['product']['images'];
+        if (imageLinks != null && imageLinks.isNotEmpty) {
+          for (var image in imageLinks) {
+            print('Image URL: ${image['imageLink']}'); // Debugging log
+          }
+        }
+      }
+
+      return auctions.map((json) => AuctionItem.fromJson(json)).toList();
+    } else if (response.statusCode == 401) {
+      // Implement token refresh here if needed
+      throw Exception('Authentication failed: Please login again');
+    } else if (response.statusCode == 403) {
+      throw Exception('Access denied: User may be blocked');
+    } else {
       throw Exception('Failed to load expired auctions: ${response.statusCode}');
     }
   }
-}
+  }

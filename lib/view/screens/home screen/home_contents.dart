@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
@@ -23,18 +25,19 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        // context.read<AuctionProvider>().getUpcomingAuctions());
-        // ignore: use_build_context_synchronously
-        context.read<AuctionProvider>().getExpiredAuctions());
+    // API calls happen after the widget is built, using Future.microtask.
+    Future.microtask(() async {
+      await context.read<AuctionProvider>().getUpcomingAuctions();
+      await context.read<AuctionProvider>().getExpiredAuctions();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
-    // final upcomingAuctions = auctionProvider.upcomingAuctions;
-    final expiredAuctions = auctionProvider.expiredAuctions;
+    final upcoming = auctionProvider.upcomingAuctions;
+    final expired = auctionProvider.expiredAuctions;
 
     return Scaffold(
       appBar: const HomeAppbar(),
@@ -54,7 +57,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
             // else if (error != null)
             //   Center(child: Text(error))
             // else
-            
+
             const AuctionListWidget(
               title: 'Live Auctions',
               subtitle: 'Live Deals, Real-Time Wins!',
@@ -65,15 +68,15 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               subtitle: 'Find and Reach the Product',
               auctions: [],
             ),
-            const AuctionListWidget(
+            AuctionListWidget(
               title: 'Upcoming Auctions',
               subtitle: 'Coming Soon: Get Ready to Bid!',
-              auctions: [],
+              auctions: upcoming,
             ),
             AuctionListWidget(
               title: 'Expired Auctions',
               subtitle: 'The Best Deals You Missed',
-              auctions: expiredAuctions,
+              auctions: expired,
             ),
           ],
         ),

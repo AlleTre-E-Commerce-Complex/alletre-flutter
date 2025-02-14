@@ -1,7 +1,7 @@
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/create_auction_validators.dart';
-import 'package:alletre_app/view/widgets/auction%20widgets/switch_field.dart';
+import 'package:alletre_app/view/widgets/auction%20form%20widgets/switch_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

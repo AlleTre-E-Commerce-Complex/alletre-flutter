@@ -7,7 +7,9 @@ Color getStatusColor(String status) {
       case "EXPIRED":
         return const Color(0xFF9E9E9E); // Material Grey
       case "ACTIVE":
-        return const Color(0xFF2196F3); // Material Blue
+        return activeColor; // Material Blue
+      case "IN_SCHEDULED":
+        return scheduledColor;
       default:
         return const Color(0xFF757575); // Default Grey
     }
@@ -24,6 +26,7 @@ const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
 const Color selectedIndex = Color(0xFFCDAF89);
 Color buttonBgColor = Colors.grey.shade200;
+Color borderColor = Colors.grey.shade300;
 Color placeholderColor = Colors.grey.shade100;
 Color avatarColor = Colors.grey.shade600;
 Color dividerColor = Colors.black54;
