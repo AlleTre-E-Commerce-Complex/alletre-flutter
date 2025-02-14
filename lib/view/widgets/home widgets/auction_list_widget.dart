@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../auction card widgets/auction_countdown.dart';
+
 class AuctionListWidget extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -40,7 +42,7 @@ class AuctionListWidget extends StatelessWidget {
           const SizedBox(height: 10),
           // Horizontal scrollable list of cards
           SizedBox(
-            height: 260, // Set the height for the scrollable area
+            height: auctions.any((auction) => auction.startDate.isBefore(DateTime.now())) ? 240 : 270,
             child: ListView.builder(
               scrollDirection: Axis.horizontal, // Make it horizontal
               itemCount: auctions.length,
@@ -64,7 +66,7 @@ class AuctionListWidget extends StatelessWidget {
     // Handle different status cases
     if (status == "WAITING_FOR_PAYMENT") {
       displayStatus = "SOLD";
-    } else if (status == "IN_SCHEDULE") {
+    } else if (status == "IN_SCHEDULED") {
       displayStatus = "SCHEDULED";
     }
 
@@ -86,11 +88,26 @@ class AuctionListWidget extends StatelessWidget {
   }
 
   bool isSvg(String url) {
-  final Uri uri = Uri.parse(url);
-  final String path = uri.path;
-  final String extension = path.split('.').last.toLowerCase();
-  return extension == 'svg';
-}
+    final Uri uri = Uri.parse(url);
+    final String path = uri.path;
+    final String extension = path.split('.').last.toLowerCase();
+    return extension == 'svg';
+  }
+
+   String getRemainingTime(DateTime startDate) {
+    final DateTime now = DateTime.now();
+    final Duration difference = startDate.isAfter(now) ? startDate.difference(now) : Duration.zero;
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} day(s) remaining';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hour(s) remaining';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minute(s) remaining';
+    } else {
+      return 'Auction started';
+    }
+  }
 
   Widget _buildAuctionCard(BuildContext context, AuctionItem auction) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -117,53 +134,52 @@ class AuctionListWidget extends StatelessWidget {
                   margin: const EdgeInsets.all(0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-
-child: SizedBox(
-  height: 120, // Increased the image height
-  child: auction.imageLinks.isNotEmpty
-      ? isSvg(auction.imageLinks.first)
-          ? SvgPicture.network(
-              auction.imageLinks.first,
-              width: double.infinity,
-              fit: BoxFit.contain,
-              placeholderBuilder: (context) => Container(
-                width: double.infinity,
-                height: double.infinity,
-                alignment: Alignment.center,
-                color: greyColor,
-                child: const Icon(
-                  Icons.image_not_supported,
-                  size: 50,
-                ),
-              ),
-            )
-          : Image.network(
-              auction.imageLinks.first,
-              width: double.infinity,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) =>
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    alignment: Alignment.center,
-                    color: greyColor,
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      size: 50,
+                    child: SizedBox(
+                      height: 120,
+                      child: auction.imageLinks.isNotEmpty
+                          ? isSvg(auction.imageLinks.first)
+                              ? SvgPicture.network(
+                                  auction.imageLinks.first,
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                  placeholderBuilder: (context) => Container(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    alignment: Alignment.center,
+                                    color: greyColor,
+                                    child: const Icon(
+                                      Icons.image_not_supported,
+                                      size: 50,
+                                    ),
+                                  ),
+                                )
+                              : Image.network(
+                                  auction.imageLinks.first,
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    alignment: Alignment.center,
+                                    color: greyColor,
+                                    child: const Icon(
+                                      Icons.image_not_supported,
+                                      size: 50,
+                                    ),
+                                  ),
+                                )
+                          : Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              alignment: Alignment.center,
+                              color: greyColor,
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                size: 50,
+                              ),
+                            ),
                     ),
-                  ),
-            )
-      : Container(
-          width: double.infinity,
-          height: double.infinity,
-          alignment: Alignment.center,
-          color: greyColor,
-          child: const Icon(
-            Icons.image_not_supported,
-            size: 50,
-          ),
-        ),
-),
                   ),
                 ),
                 // Auction Details
@@ -206,8 +222,10 @@ child: SizedBox(
                         style: Theme.of(context)
                             .textTheme
                             .labelLarge!
-                            .copyWith(color: primaryVariantColor, fontSize: 10),
+                            .copyWith(color: primaryVariantColor, fontSize: 9),
                       ),
+                      const SizedBox(height: 3),
+                      AuctionCountdown(startDate: auction.startDate),
                     ],
                   ),
                 ),
