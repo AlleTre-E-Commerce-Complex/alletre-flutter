@@ -10,36 +10,69 @@ class AuctionService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<String?> _getAccessToken() async {
-    // Retrieve the access token from secure storage
     return await _storage.read(key: 'accessToken');
   }
 
-  Future<List<AuctionItem>> fetchUpcomingAuctions() async {
-    final accessToken = await _getAccessToken();
+  Future<List<AuctionItem>> fetchLiveAuctions() async {
+  final accessToken = await _getAccessToken();
+  if (accessToken == null) throw Exception('Access token not found');
 
-    if (accessToken == null) {
-      throw Exception('Access token not found');
-    }
-    
+  try {
     final response = await http.get(
-      Uri.parse('$baseUrl/auctions/user/up-comming'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-      },
+      Uri.parse('$baseUrl/auctions/user/live'),
+      headers: {'Authorization': 'Bearer $accessToken'},
     );
-    print('Response status: ${response.statusCode}');
-    print('Response body');
-    print(response.body);
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      final List<dynamic> auctions = data['data'];
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final List<dynamic> auctions = responseData['data'] ?? [];
       return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-    } else if (response.statusCode == 401) {
-      // Implement token refresh here if needed
-      throw Exception('Authentication failed: Please login again');
-    } else if (response.statusCode == 403) {
-      throw Exception('Access denied: User may be blocked');
+    } else {
+      print('Live auctions fetch failed with status: ${response.statusCode}');
+      return [];
+    }
+  } catch (e, stackTrace) {
+    print('Error fetching live auctions: $e');
+    print(stackTrace);
+    return [];
+  }
+}
+
+
+Future<List<AuctionItem>> fetchListedProducts() async {
+  final accessToken = await _getAccessToken();
+  if (accessToken == null) throw Exception('Access token not found');
+
+  final response = await http.get(
+    Uri.parse('$baseUrl/auctions/getAllListed-products'),
+    headers: {'Authorization': 'Bearer $accessToken'},
+  );
+
+  print('Listed Products Response Code: ${response.statusCode}');
+
+  if (response.statusCode == 200) {
+    final List<dynamic> auctions = json.decode(response.body)['data'];
+    return auctions.map((json) => AuctionItem.fromJson(json)).toList();
+  } else {
+    throw Exception('Failed to load listed products: ${response.statusCode}');
+  }
+}
+
+  Future<List<AuctionItem>> fetchUpcomingAuctions() async {
+    final accessToken = await _getAccessToken();
+    if (accessToken == null) throw Exception('Access token not found');
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/auctions/user/up-comming'),
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    // print('Upcoming Auctions Response Code: ${response.statusCode}');
+    // print('Upcoming Auctions Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> auctions = json.decode(response.body)['data'];
+      return auctions.map((json) => AuctionItem.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load upcoming auctions: ${response.statusCode}');
     }
@@ -47,43 +80,21 @@ class AuctionService {
 
   Future<List<AuctionItem>> fetchExpiredAuctions() async {
     final accessToken = await _getAccessToken();
+    if (accessToken == null) throw Exception('Access token not found');
 
-    if (accessToken == null) {
-      throw Exception('Access token not found');
-    }
-    
     final response = await http.get(
       Uri.parse('$baseUrl/auctions/user/expired-auctions'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-      },
+      headers: {'Authorization': 'Bearer $accessToken'},
     );
-    print('Response status: ${response.statusCode}');
-    print('Response body');
-    print(response.body);
+
+    print('Expired Auctions Response Code: ${response.statusCode}');
+    // print('Expired Auctions Response Body: ${response.body}');
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      final List<dynamic> auctions = data['data'];
-
-      // Debugging auction image URLs
-      for (var auction in auctions) {
-        var imageLinks = auction['product']['images'];
-        if (imageLinks != null && imageLinks.isNotEmpty) {
-          for (var image in imageLinks) {
-            print('Image URL: ${image['imageLink']}'); // Debugging log
-          }
-        }
-      }
-
+      final List<dynamic> auctions = json.decode(response.body)['data'];
       return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-    } else if (response.statusCode == 401) {
-      // Implement token refresh here if needed
-      throw Exception('Authentication failed: Please login again');
-    } else if (response.statusCode == 403) {
-      throw Exception('Access denied: User may be blocked');
     } else {
       throw Exception('Failed to load expired auctions: ${response.statusCode}');
     }
   }
-  }
+}

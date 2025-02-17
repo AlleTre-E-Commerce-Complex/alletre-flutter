@@ -27,6 +27,8 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     super.initState();
     // API calls happen after the widget is built, using Future.microtask.
     Future.microtask(() async {
+      await context.read<AuctionProvider>().getLiveAuctions();
+      await context.read<AuctionProvider>().getListedProducts();
       await context.read<AuctionProvider>().getUpcomingAuctions();
       await context.read<AuctionProvider>().getExpiredAuctions();
     });
@@ -36,8 +38,13 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   Widget build(BuildContext context) {
     final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
-    final upcoming = auctionProvider.upcomingAuctions;
-    final expired = auctionProvider.expiredAuctions;
+
+  //   print("Live Auctions Count: ${auctionProvider.liveAuctions.length}");
+  // print("Upcoming Auctions Count: ${auctionProvider.upcomingAuctions.length}");
+  // print("Expired Auctions Count: ${auctionProvider.expiredAuctions.length}");
+    // final live = auctionProvider.liveAuctions;
+    // final upcoming = auctionProvider.upcomingAuctions;
+    // final expired = auctionProvider.expiredAuctions;
 
     return Scaffold(
       appBar: const HomeAppbar(),
@@ -58,25 +65,33 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
             //   Center(child: Text(error))
             // else
 
-            const AuctionListWidget(
+            AuctionListWidget(
               title: 'Live Auctions',
               subtitle: 'Live Deals, Real-Time Wins!',
-              auctions: [],
+              auctions: auctionProvider.isLoadingLive
+                  ? []
+                  : auctionProvider.liveAuctions,
             ),
-            const AuctionListWidget(
+            AuctionListWidget(
               title: 'Listed Products',
               subtitle: 'Find and Reach the Product',
-              auctions: [],
+              auctions: auctionProvider.isLoadingListedProducts
+                  ? []
+                  : auctionProvider.listedProducts
             ),
             AuctionListWidget(
               title: 'Upcoming Auctions',
               subtitle: 'Coming Soon: Get Ready to Bid!',
-              auctions: upcoming,
+              auctions: auctionProvider.isLoadingUpcoming
+                  ? []
+                  : auctionProvider.upcomingAuctions,
             ),
             AuctionListWidget(
               title: 'Expired Auctions',
               subtitle: 'The Best Deals You Missed',
-              auctions: expired,
+              auctions: auctionProvider.isLoadingExpired
+                  ? []
+                  : auctionProvider.expiredAuctions,
             ),
           ],
         ),
