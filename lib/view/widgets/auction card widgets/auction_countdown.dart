@@ -12,7 +12,7 @@ class AuctionCountdown extends StatelessWidget {
       final remainingTime = getRemainingTime();
       yield remainingTime;
       if (remainingTime == null) break; // Stop updating if expired
-      // await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
     }
   }
 
@@ -31,17 +31,62 @@ class AuctionCountdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    
+    if (startDate.isAfter(now)) {
+      return StreamBuilder<String?>(
+        stream: getRemainingTimeStream(),
+        builder: (context, snapshot) {
+          final remainingTime = snapshot.data ?? getRemainingTime();
+          if (!snapshot.hasData || remainingTime == null) return const SizedBox();
+          
+          return RichText(
+            text: TextSpan(
+              text: 'Ending Time:\n',
+              style: const TextStyle(
+                color: primaryVariantColor,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+              children: [
+                TextSpan(
+                  text: remainingTime,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    
     return StreamBuilder<String?>(
       stream: getRemainingTimeStream(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == null) return const SizedBox(); // Hide if expired
-        return Text('Start Date:\n${
-          snapshot.data ?? getRemainingTime()}',
-          style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                color: primaryVariantColor,
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
+        return RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            text: 'Start Date:\n',
+            style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                  color: primaryVariantColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+            children: [
+              TextSpan(
+                text: snapshot.data ?? getRemainingTime(),
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
+            ],
+          ),
         );
       },
     );

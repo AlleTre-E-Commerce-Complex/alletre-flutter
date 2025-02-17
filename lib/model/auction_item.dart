@@ -24,60 +24,127 @@ class AuctionItem {
   });
 
   factory AuctionItem.fromJson(Map<String, dynamic> json) {
+  try {
     // Safely handle nested product data
     final product = json['product'] as Map<String, dynamic>? ?? {};
+    
+    // Safely handle image list with detailed error logging
+    List<String> imageLinks = [];
+    try {
+      final List<dynamic>? images = product['images'] as List<dynamic>?;
+      if (images != null) {
+        imageLinks = images
+            .where((image) => image != null && image is Map<String, dynamic>)
+            .map((image) {
+              final imageLink = (image as Map<String, dynamic>)['imageLink'] as String?;
+              return imageLink ?? '';
+            })
+            .where((link) => link.isNotEmpty)
+            .toList();
+      }
+    } catch (e) {
+      print('Error parsing images: $e');
+      print('Product data: $product');
+    }
 
-    // Safely handle image list
-    final List<dynamic> images = (product['images'] as List<dynamic>?) ?? [];
-    final List<String> imageLinks = images
-        .map((image) => (image as Map<String, dynamic>)['imageLink'] as String? ?? '')
-        .where((link) => link.isNotEmpty)
-        .toList();
+    // Parse dates with validation
+    DateTime startDate;
+    DateTime expiryDate;
+    try {
+      startDate = DateTime.parse(json['startDate'] as String);
+      expiryDate = DateTime.parse(json['expiryDate'] as String);
+    } catch (e) {
+      print('Error parsing dates: $e');
+      startDate = DateTime.now();
+      expiryDate = DateTime.now().add(const Duration(days: 1));
+    }
 
-    // final List<dynamic> images = json['product']['images'];
-    // // ignore: unnecessary_null_comparison
-    // final List<String> imageLinks = images != null
-    //     ? images.map((image) => image['imageLink'] as String? ?? '').toList()
-    //     : [];
+     // Safely get bid count
+    int bidCount = 0;
+    try {
+      final countMap = json['_count'];
+      if (countMap is Map<String, dynamic>) {
+        bidCount = countMap['bids'] as int? ?? 0;
+      }
+    } catch (e) {
+      print('Error parsing bid count: $e');
+    }
 
-    // Safely handle counts
-    final counts = json['_count'] as Map<String, dynamic>? ?? {};
+    return AuctionItem(
+      id: json['id'] as int? ?? 0,
+      title: product['title'] as String? ?? 'No Title',
+      price: product['price']?.toString() ?? '0',
+      bids: bidCount,
+      description: product['description'] as String? ?? 'No Description',
+      startBidAmount: json['startBidAmount']?.toString() ?? '0',
+      status: json['status'] as String? ?? 'UNKNOWN',
+      startDate: startDate,
+      expiryDate: expiryDate,
+      imageLinks: imageLinks,
+    );
+  } catch (e, stackTrace) {
+    print('Error in AuctionItem.fromJson: $e');
+    print('JSON data: $json');
+    print(stackTrace);
+    rethrow;
+  }
+}
 
-  //   return AuctionItem(
-  //     id: json['id'],
-  //     title: json['product']['title'] ?? 'No Title',
-  //     price: json['product']['price'] ?? '0',
-  //     bids: json['_count']['bids'] ?? '0',
-  //     description: json['product']['description'] ?? 'No Description',
-  //     startBidAmount: json['startBidAmount'] ?? '0',
-  //     status: json['status'] ?? 'UNKNOWN',
-  //     startDate: json['startDate'] != null
-  //         ? DateTime.parse(json['startDate'])
+  // factory AuctionItem.fromJson(Map<String, dynamic> json) {
+  //   // Safely handle nested product data
+  //   final product = json['product'] as Map<String, dynamic>? ?? {};
+
+  //   // Safely handle image list
+  //   final List<dynamic> images = (product['images'] as List<dynamic>?) ?? [];
+  //   final List<String> imageLinks = images
+  //       .map((image) => (image as Map<String, dynamic>)['imageLink'] as String? ?? '')
+  //       .where((link) => link.isNotEmpty)
+  //       .toList();
+
+  //   // final List<dynamic> images = json['product']['images'];
+  //   // // ignore: unnecessary_null_comparison
+  //   // final List<String> imageLinks = images != null
+  //   //     ? images.map((image) => image['imageLink'] as String? ?? '').toList()
+  //   //     : [];
+
+  //   // Safely handle counts
+  //   final counts = json['_count'] as Map<String, dynamic>? ?? {};
+
+  // //   return AuctionItem(
+  // //     id: json['id'],
+  // //     title: json['product']['title'] ?? 'No Title',
+  // //     price: json['product']['price'] ?? '0',
+  // //     bids: json['_count']['bids'] ?? '0',
+  // //     description: json['product']['description'] ?? 'No Description',
+  // //     startBidAmount: json['startBidAmount'] ?? '0',
+  // //     status: json['status'] ?? 'UNKNOWN',
+  // //     startDate: json['startDate'] != null
+  // //         ? DateTime.parse(json['startDate'])
+  // //         : DateTime.now(),
+  // //     expiryDate: json['expiryDate'] != null
+  // //         ? DateTime.parse(json['expiryDate'])
+  // //         : DateTime.now(),
+  // //     imageLinks: imageLinks,
+  // //   );
+  // // }
+
+  // return AuctionItem(
+  //     id: json['id'] as int? ?? 0,
+  //     title: product['title'] as String? ?? 'No Title',
+  //     price: product['price']?.toString() ?? '0',
+  //     bids: counts['bids'] as int? ?? 0,
+  //     description: product['description'] as String? ?? 'No Description',
+  //     startBidAmount: json['startBidAmount']?.toString() ?? '0',
+  //     status: json['status'] as String? ?? 'UNKNOWN',
+  //     startDate: json['startDate'] != null 
+  //         ? DateTime.parse(json['startDate'] as String)
   //         : DateTime.now(),
   //     expiryDate: json['expiryDate'] != null
-  //         ? DateTime.parse(json['expiryDate'])
+  //         ? DateTime.parse(json['expiryDate'] as String)
   //         : DateTime.now(),
   //     imageLinks: imageLinks,
   //   );
   // }
-
-  return AuctionItem(
-      id: json['id'] as int? ?? 0,
-      title: product['title'] as String? ?? 'No Title',
-      price: product['price']?.toString() ?? '0',
-      bids: counts['bids'] as int? ?? 0,
-      description: product['description'] as String? ?? 'No Description',
-      startBidAmount: json['startBidAmount']?.toString() ?? '0',
-      status: json['status'] as String? ?? 'UNKNOWN',
-      startDate: json['startDate'] != null 
-          ? DateTime.parse(json['startDate'] as String)
-          : DateTime.now(),
-      expiryDate: json['expiryDate'] != null
-          ? DateTime.parse(json['expiryDate'] as String)
-          : DateTime.now(),
-      imageLinks: imageLinks,
-    );
-  }
 
   /// Determines if the auction is active
   bool isActive() {

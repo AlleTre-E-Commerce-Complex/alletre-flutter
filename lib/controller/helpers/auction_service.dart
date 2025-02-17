@@ -19,25 +19,45 @@ class AuctionService {
 
   try {
     final response = await http.get(
-      Uri.parse('$baseUrl/auctions/user/live'),
+      Uri.parse('$baseUrl/auctions/user/main'),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
 
+    print('Live Auctions Response Code: ${response.statusCode}');
+
     if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
-      final List<dynamic> auctions = responseData['data'] ?? [];
-      return auctions.map((json) => AuctionItem.fromJson(json)).toList();
+      print('Parsing response body...');
+      final jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+      
+      final List<dynamic> auctions = jsonResponse['data'] as List<dynamic>;
+      print('Number of auctions received: ${auctions.length}');
+
+      List<AuctionItem> parsedAuctions = [];
+      for (var i = 0; i < auctions.length; i++) {
+        try {
+          print('Parsing auction $i...');
+          final auction = AuctionItem.fromJson(auctions[i]);
+          print('Successfully parsed auction $i: ${auction.title}');
+          parsedAuctions.add(auction);
+        } catch (e, stackTrace) {
+          print('Error parsing auction $i:');
+          print('Data: ${auctions[i]}');
+          print('Error: $e');
+          print('Stack trace: $stackTrace');
+        }
+      }
+      
+      print('Successfully parsed ${parsedAuctions.length} auctions');
+      return parsedAuctions;
     } else {
-      print('Live auctions fetch failed with status: ${response.statusCode}');
-      return [];
+      throw Exception('Failed to load live auctions: ${response.statusCode}');
     }
   } catch (e, stackTrace) {
-    print('Error fetching live auctions: $e');
+    print('Error in fetchLiveAuctions: $e');
     print(stackTrace);
-    return [];
+    throw Exception('Failed to fetch live auctions: $e');
   }
 }
-
 
 Future<List<AuctionItem>> fetchListedProducts() async {
   final accessToken = await _getAccessToken();

@@ -48,12 +48,19 @@ class AuctionProvider with ChangeNotifier {
   notifyListeners();
 
   try {
+    print('Starting to fetch live auctions...');
     final auctions = await _auctionService.fetchLiveAuctions();
+    print('Received ${auctions.length} live auctions from service');
     _liveAuctions = auctions;
-  } catch (e) {
+    print('Updated live auctions in provider');
+  } catch (e, stackTrace) {
+    print('Error in getLiveAuctions:');
+    print(e);
+    print(stackTrace);
     _errorLive = e.toString();
   } finally {
     _isLoadingLive = false;
+    print('Notifying listeners about live auctions update');
     notifyListeners();
   }
 }

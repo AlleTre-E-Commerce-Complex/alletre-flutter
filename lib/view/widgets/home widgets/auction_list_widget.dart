@@ -10,13 +10,31 @@ class AuctionListWidget extends StatelessWidget {
   final String title;
   final String subtitle;
   final List<AuctionItem> auctions;
+  final bool isLoading;
+  final String? error;
 
   const AuctionListWidget({
     super.key,
     required this.title,
     required this.subtitle,
     required this.auctions,
+    this.isLoading = false,
+    this.error,
   });
+
+  double _calculateListHeight(List<AuctionItem> auctions) {
+    try {
+      final now = DateTime.now();
+      // Check if any auction is active (between start and expiry date)
+      bool hasActiveAuctions = auctions.any((auction) => 
+        auction.startDate.isBefore(now) && auction.expiryDate.isAfter(now)
+      );
+      return hasActiveAuctions ? 270 : 240;
+    } catch (e) {
+      print('Error calculating list height: $e');
+      return 270; // Default height if there's an error
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +58,30 @@ class AuctionListWidget extends StatelessWidget {
                 ?.copyWith(color: greyColor, fontSize: 13),
           ),
           const SizedBox(height: 10),
+          if (error != null)
+            Center(
+              child: Text(
+                error!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.red,
+                    ),
+              ),
+            )
+          else if (auctions.isEmpty)
+            SizedBox(
+              height: 200,
+              child: Center(
+                child: Text(
+                  'No auctions available',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            )
+          else
           // Horizontal scrollable list of cards
           SizedBox(
-            height: auctions.any((auction) => auction.startDate.isBefore(DateTime.now())) ? 240 : 270,
+            // height: auctions.any((auction) => auction.startDate.isBefore(DateTime.now())) ? 240 : 270,
+            height: _calculateListHeight(auctions),
             child: ListView.builder(
               scrollDirection: Axis.horizontal, // Make it horizontal
               itemCount: auctions.length,
@@ -222,9 +261,9 @@ class AuctionListWidget extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .labelLarge!
-                            .copyWith(color: primaryVariantColor, fontSize: 9),
+                            .copyWith(color: primaryVariantColor, fontSize: 10),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 4),
                       AuctionCountdown(startDate: auction.startDate),
                     ],
                   ),

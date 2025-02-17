@@ -36,12 +36,17 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building HomeScreenContent');
     final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
 
-  //   print("Live Auctions Count: ${auctionProvider.liveAuctions.length}");
-  // print("Upcoming Auctions Count: ${auctionProvider.upcomingAuctions.length}");
-  // print("Expired Auctions Count: ${auctionProvider.expiredAuctions.length}");
+    print('Live auctions count: ${auctionProvider.liveAuctions.length}');
+    print('Live auctions loading: ${auctionProvider.isLoadingLive}');
+    print('Live auctions error: ${auctionProvider.errorLive}');
+
+    //   print("Live Auctions Count: ${auctionProvider.liveAuctions.length}");
+    // print("Upcoming Auctions Count: ${auctionProvider.upcomingAuctions.length}");
+    // print("Expired Auctions Count: ${auctionProvider.expiredAuctions.length}");
     // final live = auctionProvider.liveAuctions;
     // final upcoming = auctionProvider.upcomingAuctions;
     // final expired = auctionProvider.expiredAuctions;
@@ -65,20 +70,28 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
             //   Center(child: Text(error))
             // else
 
+//             AuctionListWidget(
+//   title: 'Live Auctions',
+//   subtitle: 'Live Deals, Real-Time Wins!',
+//   auctions: auctionProvider.isLoadingLive
+//       ? []
+//       : auctionProvider.errorLive != null
+//           ? [] // You might want to show an error state instead
+//           : auctionProvider.liveAuctions,
+// ),
             AuctionListWidget(
               title: 'Live Auctions',
               subtitle: 'Live Deals, Real-Time Wins!',
-              auctions: auctionProvider.isLoadingLive
-                  ? []
-                  : auctionProvider.liveAuctions,
+              auctions: auctionProvider.liveAuctions,
+              isLoading: auctionProvider.isLoadingLive,
+              error: auctionProvider.errorLive,
             ),
             AuctionListWidget(
-              title: 'Listed Products',
-              subtitle: 'Find and Reach the Product',
-              auctions: auctionProvider.isLoadingListedProducts
-                  ? []
-                  : auctionProvider.listedProducts
-            ),
+                title: 'Listed Products',
+                subtitle: 'Find and Reach the Product',
+                auctions: auctionProvider.isLoadingListedProducts
+                    ? []
+                    : auctionProvider.listedProducts),
             AuctionListWidget(
               title: 'Upcoming Auctions',
               subtitle: 'Coming Soon: Get Ready to Bid!',
