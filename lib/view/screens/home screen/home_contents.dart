@@ -1,5 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
-
+// ignore_for_file: use_build_context_synchronously, avoid_print
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
@@ -40,16 +39,17 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
 
-    print('Live auctions count: ${auctionProvider.liveAuctions.length}');
-    print('Live auctions loading: ${auctionProvider.isLoadingLive}');
-    print('Live auctions error: ${auctionProvider.errorLive}');
+    // print('Live auctions count: ${auctionProvider.liveAuctions.length}');
+    // print('Live auctions loading: ${auctionProvider.isLoadingLive}');
+    // print('Live auctions error: ${auctionProvider.errorLive}');
 
-    //   print("Live Auctions Count: ${auctionProvider.liveAuctions.length}");
+    // log('Listed products count: ${auctionProvider.listedProducts.length}');
+    // log('Listed products loading: ${auctionProvider.isLoadingListedProducts}');
+    // log('Listed products error: ${auctionProvider.errorListedProducts}');
+
+    // print("Live Auctions Count: ${auctionProvider.liveAuctions.length}");
     // print("Upcoming Auctions Count: ${auctionProvider.upcomingAuctions.length}");
     // print("Expired Auctions Count: ${auctionProvider.expiredAuctions.length}");
-    // final live = auctionProvider.liveAuctions;
-    // final upcoming = auctionProvider.upcomingAuctions;
-    // final expired = auctionProvider.expiredAuctions;
 
     return Scaffold(
       appBar: const HomeAppbar(),
@@ -63,22 +63,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
             const ChipWidget(),
             const SizedBox(height: 15),
             const CarouselBannerWidget(),
-            const SizedBox(height: 5),
-            // if (isLoading)
-            //   const Center(child: CircularProgressIndicator())
-            // else if (error != null)
-            //   Center(child: Text(error))
-            // else
-
-//             AuctionListWidget(
-//   title: 'Live Auctions',
-//   subtitle: 'Live Deals, Real-Time Wins!',
-//   auctions: auctionProvider.isLoadingLive
-//       ? []
-//       : auctionProvider.errorLive != null
-//           ? [] // You might want to show an error state instead
-//           : auctionProvider.liveAuctions,
-// ),
+            const SizedBox(height: 16),
             AuctionListWidget(
               title: 'Live Auctions',
               subtitle: 'Live Deals, Real-Time Wins!',
@@ -87,11 +72,12 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               error: auctionProvider.errorLive,
             ),
             AuctionListWidget(
-                title: 'Listed Products',
-                subtitle: 'Find and Reach the Product',
-                auctions: auctionProvider.isLoadingListedProducts
-                    ? []
-                    : auctionProvider.listedProducts),
+              title: 'Listed Products',
+              subtitle: 'Find and Reach the Product',
+              auctions: auctionProvider.listedProducts,
+              isLoading: auctionProvider.isLoadingListedProducts,
+              error: auctionProvider.errorListedProducts,
+            ),
             AuctionListWidget(
               title: 'Upcoming Auctions',
               subtitle: 'Coming Soon: Get Ready to Bid!',

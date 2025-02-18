@@ -3,7 +3,6 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import '../auction card widgets/auction_countdown.dart';
 
 class AuctionListWidget extends StatelessWidget {
@@ -26,11 +25,11 @@ class AuctionListWidget extends StatelessWidget {
     try {
       final now = DateTime.now();
       // Check if any auction is active (between start and expiry date)
-      bool hasActiveAuctions = auctions.any((auction) => 
-        auction.startDate.isBefore(now) && auction.expiryDate.isAfter(now)
-      );
-      return hasActiveAuctions ? 270 : 240;
+      bool hasActiveAuctions = auctions.any((auction) =>
+          auction.startDate.isBefore(now) && auction.expiryDate.isAfter(now));
+      return hasActiveAuctions ? 270 : 270;
     } catch (e) {
+      // ignore: avoid_print
       print('Error calculating list height: $e');
       return 270; // Default height if there's an error
     }
@@ -39,7 +38,7 @@ class AuctionListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -58,26 +57,26 @@ class AuctionListWidget extends StatelessWidget {
                 ?.copyWith(color: greyColor, fontSize: 13),
           ),
           const SizedBox(height: 10),
-          if (error != null)
-            Center(
-              child: Text(
-                error!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.red,
-                    ),
-              ),
-            )
-          else if (auctions.isEmpty)
-            SizedBox(
-              height: 200,
-              child: Center(
-                child: Text(
-                  'No auctions available',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-            )
-          else
+          // if (error != null)
+          //   Center(
+          //     child: Text(
+          //       error!,
+          //       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          //             color: Colors.red,
+          //           ),
+          //     ),
+          //   )
+          // else if (auctions.isEmpty)
+          //   SizedBox(
+          //     height: 200,
+          //     child: Center(
+          //       child: Text(
+          //         'No auctions available',
+          //         style: Theme.of(context).textTheme.bodyMedium,
+          //       ),
+          //     ),
+          //   )
+          // else
           // Horizontal scrollable list of cards
           SizedBox(
             // height: auctions.any((auction) => auction.startDate.isBefore(DateTime.now())) ? 240 : 270,
@@ -133,9 +132,10 @@ class AuctionListWidget extends StatelessWidget {
     return extension == 'svg';
   }
 
-   String getRemainingTime(DateTime startDate) {
+  String getRemainingTime(DateTime startDate) {
     final DateTime now = DateTime.now();
-    final Duration difference = startDate.isAfter(now) ? startDate.difference(now) : Duration.zero;
+    final Duration difference =
+        startDate.isAfter(now) ? startDate.difference(now) : Duration.zero;
 
     if (difference.inDays > 0) {
       return '${difference.inDays} day(s) remaining';
@@ -228,14 +228,13 @@ class AuctionListWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (title != 'Listed Products')
                       buildStatusText(context, auction.status),
                       const SizedBox(height: 5),
                       Text(
                         auction.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(fontSize: 15),
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 6),
                       Container(
@@ -247,7 +246,7 @@ class AuctionListWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          'AED ${auction.startBidAmount}',
+                          'AED ${title == 'Listed Products' ? auction.productListingPrice : auction.startBidAmount}',
                           style: Theme.of(context)
                               .textTheme
                               .labelSmall!

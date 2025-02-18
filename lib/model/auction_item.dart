@@ -1,7 +1,12 @@
+// ignore_for_file: avoid_print
+
+import 'dart:developer';
+
 class AuctionItem {
   final int id;
   final String title;
   final String price;
+  final String productListingPrice;
   final int bids;
   final String description;
   final String startBidAmount;
@@ -14,6 +19,7 @@ class AuctionItem {
     required this.id,
     required this.title,
     required this.price,
+    required this.productListingPrice,
     required this.bids,
     required this.description,
     required this.startBidAmount,
@@ -26,12 +32,13 @@ class AuctionItem {
   factory AuctionItem.fromJson(Map<String, dynamic> json) {
   try {
     // Safely handle nested product data
-    final product = json['product'] as Map<String, dynamic>? ?? {};
+    final item = json['product'] as Map<String, dynamic>? ?? {};
+    // log('Parsing product data: $product'); // Log product data
     
     // Safely handle image list with detailed error logging
     List<String> imageLinks = [];
     try {
-      final List<dynamic>? images = product['images'] as List<dynamic>?;
+      final List<dynamic>? images = item['images'] as List<dynamic>?;
       if (images != null) {
         imageLinks = images
             .where((image) => image != null && image is Map<String, dynamic>)
@@ -43,8 +50,8 @@ class AuctionItem {
             .toList();
       }
     } catch (e) {
-      print('Error parsing images: $e');
-      print('Product data: $product');
+      log('Error parsing images: $e');
+      log('Product data: $item');
     }
 
     // Parse dates with validation
@@ -72,10 +79,11 @@ class AuctionItem {
 
     return AuctionItem(
       id: json['id'] as int? ?? 0,
-      title: product['title'] as String? ?? 'No Title',
-      price: product['price']?.toString() ?? '0',
+      title: item['title'] as String? ?? 'No Title',
+      price: item['price']?.toString() ?? '0',
+      productListingPrice: json['ProductListingPrice'] ?? '0',
       bids: bidCount,
-      description: product['description'] as String? ?? 'No Description',
+      description: item['description'] as String? ?? 'No Description',
       startBidAmount: json['startBidAmount']?.toString() ?? '0',
       status: json['status'] as String? ?? 'UNKNOWN',
       startDate: startDate,
@@ -83,7 +91,7 @@ class AuctionItem {
       imageLinks: imageLinks,
     );
   } catch (e, stackTrace) {
-    print('Error in AuctionItem.fromJson: $e');
+    log('Error in AuctionItem.fromJson: $e');
     print('JSON data: $json');
     print(stackTrace);
     rethrow;
