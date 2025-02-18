@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <g id="Apple_icon" data-name="Apple icon" transform="translate(-668 -204)">
+    <g id="apple" transform="translate(632.664 204)">
+      <g id="Group_704" data-name="Group 704" transform="translate(47.188)">
+        <g id="Group_703" data-name="Group 703" transform="translate(0)">
+          <path id="Path_873" data-name="Path 873" d="M252.418,0a5.632,5.632,0,0,0-3.646,1.974,4.891,4.891,0,0,0-1.194,3.8A4.753,4.753,0,0,0,251.257,3.9,5.281,5.281,0,0,0,252.418,0Z" transform="translate(-247.522)"/>
+        </g>
+      </g>
+      <g id="Group_706" data-name="Group 706" transform="translate(37.336 5.617)">
+        <g id="Group_705" data-name="Group 705">
+          <path id="Path_874" data-name="Path 874" d="M57.141,122.274a6.075,6.075,0,0,0-4.585-2.434c-2.152,0-3.063,1.03-4.558,1.03-1.542,0-2.713-1.027-4.575-1.027a6.225,6.225,0,0,0-5.01,3.028c-1.735,2.691-1.438,7.75,1.374,12.06,1.006,1.542,2.35,3.276,4.108,3.291,1.564.015,2.005-1,4.125-1.014s2.521,1.028,4.083,1.011c1.759-.013,3.177-1.935,4.183-3.477a17.293,17.293,0,0,0,1.549-2.91A5.291,5.291,0,0,1,57.141,122.274Z" transform="translate(-37.336 -119.84)"/>
+        </g>
+      </g>
+    </g>
+    <rect id="Rectangle_551" data-name="Rectangle 551" width="24" height="24" transform="translate(668 204)" fill="none"/>
+  </g>
+</svg>

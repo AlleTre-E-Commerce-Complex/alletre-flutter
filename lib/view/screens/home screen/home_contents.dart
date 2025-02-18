@@ -1,0 +1,114 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/utils/extras/common_navbar.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/chip_widget.dart';
+import '../../widgets/home widgets/auction_list_widget.dart';
+import '../../widgets/home widgets/bottom_navbar.dart';
+import '../../widgets/home widgets/carousel_banner_widget.dart';
+import '../../widgets/home widgets/create_auction_button.dart';
+import '../../widgets/home widgets/home_appbar.dart';
+import '../../widgets/home widgets/search_field_widget.dart';
+
+class HomeScreenContent extends StatefulWidget {
+  const HomeScreenContent({super.key});
+
+  @override
+  State<HomeScreenContent> createState() => _HomeScreenContentState();
+}
+
+class _HomeScreenContentState extends State<HomeScreenContent> {
+  @override
+  void initState() {
+    super.initState();
+    // API calls happen after the widget is built, using Future.microtask.
+    Future.microtask(() async {
+      await context.read<AuctionProvider>().getLiveAuctions();
+      await context.read<AuctionProvider>().getListedProducts();
+      await context.read<AuctionProvider>().getUpcomingAuctions();
+      await context.read<AuctionProvider>().getExpiredAuctions();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print('Building HomeScreenContent');
+    final loginState = context.watch<LoggedInProvider>().isLoggedIn;
+    final auctionProvider = context.watch<AuctionProvider>();
+
+    // print('Live auctions count: ${auctionProvider.liveAuctions.length}');
+    // print('Live auctions loading: ${auctionProvider.isLoadingLive}');
+    // print('Live auctions error: ${auctionProvider.errorLive}');
+
+    // log('Listed products count: ${auctionProvider.listedProducts.length}');
+    // log('Listed products loading: ${auctionProvider.isLoadingListedProducts}');
+    // log('Listed products error: ${auctionProvider.errorListedProducts}');
+
+    // print("Live Auctions Count: ${auctionProvider.liveAuctions.length}");
+    // print("Upcoming Auctions Count: ${auctionProvider.upcomingAuctions.length}");
+    // print("Expired Auctions Count: ${auctionProvider.expiredAuctions.length}");
+
+    return Scaffold(
+      appBar: const HomeAppbar(),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 9),
+            const SearchFieldWidget(isNavigable: true),
+            const SizedBox(height: 5),
+            const ChipWidget(),
+            const SizedBox(height: 15),
+            const CarouselBannerWidget(),
+            const SizedBox(height: 16),
+            AuctionListWidget(
+              title: 'Live Auctions',
+              subtitle: 'Live Deals, Real-Time Wins!',
+              auctions: auctionProvider.liveAuctions,
+              isLoading: auctionProvider.isLoadingLive,
+              error: auctionProvider.errorLive,
+            ),
+            AuctionListWidget(
+              title: 'Listed Products',
+              subtitle: 'Find and Reach the Product',
+              auctions: auctionProvider.listedProducts,
+              isLoading: auctionProvider.isLoadingListedProducts,
+              error: auctionProvider.errorListedProducts,
+            ),
+            AuctionListWidget(
+              title: 'Upcoming Auctions',
+              subtitle: 'Coming Soon: Get Ready to Bid!',
+              auctions: auctionProvider.isLoadingUpcoming
+                  ? []
+                  : auctionProvider.upcomingAuctions,
+            ),
+            AuctionListWidget(
+              title: 'Expired Auctions',
+              subtitle: 'The Best Deals You Missed',
+              auctions: auctionProvider.isLoadingExpired
+                  ? []
+                  : auctionProvider.expiredAuctions,
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: const CreateAuctionButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).bottomAppBarTheme.color,
+        height: Theme.of(context).bottomAppBarTheme.height,
+        child: loginState
+            ? NavBarUtils.buildAuthenticatedNavBar(
+                context,
+                onTabChange: (index) {
+                  context.read<TabIndexProvider>().updateIndex(index);
+                },
+              )
+            : const BottomNavBar(),
+      ),
+    );
+  }
+}
