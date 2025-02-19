@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 Color getStatusColor(String status) {
     switch (status) {
       case "WAITING_FOR_PAYMENT":
-        return  errorColor; // Material Green
+        return  errorColor;
+        case "SOLD":
+        return  errorColor;
       case "EXPIRED":
-        return const Color(0xFF9E9E9E); // Material Grey
+        return const Color(0xFF9E9E9E);
       case "ACTIVE":
-        return activeColor; // Material Blue
+        return activeColor;
       case "IN_SCHEDULED":
         return scheduledColor;
       default:
-        return const Color(0xFF757575); // Default Grey
+        return const Color(0xFF757575);
     }
   }
 

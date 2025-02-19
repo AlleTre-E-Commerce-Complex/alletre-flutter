@@ -1,8 +1,10 @@
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import '../auction card widgets/auction_countdown.dart';
 
 class AuctionListWidget extends StatelessWidget {
@@ -11,6 +13,7 @@ class AuctionListWidget extends StatelessWidget {
   final List<AuctionItem> auctions;
   final bool isLoading;
   final String? error;
+  final String placeholder;
 
   const AuctionListWidget({
     super.key,
@@ -19,6 +22,7 @@ class AuctionListWidget extends StatelessWidget {
     required this.auctions,
     this.isLoading = false,
     this.error,
+    required this.placeholder,
   });
 
   double _calculateListHeight(List<AuctionItem> auctions) {
@@ -66,32 +70,55 @@ class AuctionListWidget extends StatelessWidget {
           //           ),
           //     ),
           //   )
-          // else if (auctions.isEmpty)
-          //   SizedBox(
-          //     height: 200,
-          //     child: Center(
-          //       child: Text(
-          //         'No auctions available',
-          //         style: Theme.of(context).textTheme.bodyMedium,
-          //       ),
-          //     ),
-          //   )
-          // else
-          // Horizontal scrollable list of cards
-          SizedBox(
-            // height: auctions.any((auction) => auction.startDate.isBefore(DateTime.now())) ? 240 : 270,
-            height: _calculateListHeight(auctions),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal, // Make it horizontal
-              itemCount: auctions.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 7.0),
-                  child: _buildAuctionCard(context, auctions[index]),
-                );
-              },
+          if (auctions.isEmpty)
+            Column(
+              children: [
+                SizedBox(
+                  height: 50,
+                  child: Center(
+                    child: Text(
+                      placeholder,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(color: primaryColor, fontSize: 13),
+                    ),
+                  ),
+                ),
+                if (title == "Live Auctions")
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(58, 33),
+                      maximumSize: const Size(112, 33),
+                      backgroundColor: primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      context.read<TabIndexProvider>().updateIndex(19);
+                    },
+                    child: const Text("Create Now",
+                        style: TextStyle(color: secondaryColor, fontSize: 10)),
+                  ),
+              ],
+            )
+          else
+            // Horizontal scrollable list of cards
+            SizedBox(
+              // height: auctions.any((auction) => auction.startDate.isBefore(DateTime.now())) ? 240 : 270,
+              height: _calculateListHeight(auctions),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal, // Make it horizontal
+                itemCount: auctions.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 7.0),
+                    child: _buildAuctionCard(context, auctions[index]),
+                  );
+                },
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -154,135 +181,137 @@ class AuctionListWidget extends StatelessWidget {
 
     return SizedBox(
       width: cardWidth,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: borderColor),
-        ),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Inner Card for Image
-                Card(
-                  color: placeholderColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  margin: const EdgeInsets.all(0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: SizedBox(
-                      height: 120,
-                      child: auction.imageLinks.isNotEmpty
-                          ? isSvg(auction.imageLinks.first)
-                              ? SvgPicture.network(
-                                  auction.imageLinks.first,
-                                  width: double.infinity,
-                                  fit: BoxFit.contain,
-                                  placeholderBuilder: (context) => Container(
+      child: SingleChildScrollView (
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: borderColor),
+          ),
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Inner Card for Image
+                  Card(
+                    color: placeholderColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    margin: const EdgeInsets.all(0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: SizedBox(
+                        height: 120,
+                        child: auction.imageLinks.isNotEmpty
+                            ? isSvg(auction.imageLinks.first)
+                                ? SvgPicture.network(
+                                    auction.imageLinks.first,
                                     width: double.infinity,
-                                    height: double.infinity,
-                                    alignment: Alignment.center,
-                                    color: greyColor,
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      size: 50,
+                                    fit: BoxFit.contain,
+                                    placeholderBuilder: (context) => Container(
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      alignment: Alignment.center,
+                                      color: greyColor,
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                        size: 50,
+                                      ),
                                     ),
-                                  ),
-                                )
-                              : Image.network(
-                                  auction.imageLinks.first,
-                                  width: double.infinity,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
+                                  )
+                                : Image.network(
+                                    auction.imageLinks.first,
                                     width: double.infinity,
-                                    height: double.infinity,
-                                    alignment: Alignment.center,
-                                    color: greyColor,
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      size: 50,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Container(
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      alignment: Alignment.center,
+                                      color: greyColor,
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                        size: 50,
+                                      ),
                                     ),
-                                  ),
-                                )
-                          : Container(
-                              width: double.infinity,
-                              height: double.infinity,
-                              alignment: Alignment.center,
-                              color: greyColor,
-                              child: const Icon(
-                                Icons.image_not_supported,
-                                size: 50,
+                                  )
+                            : Container(
+                                width: double.infinity,
+                                height: double.infinity,
+                                alignment: Alignment.center,
+                                color: greyColor,
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  size: 50,
+                                ),
                               ),
-                            ),
+                      ),
                     ),
                   ),
-                ),
-                // Auction Details
-                Padding(
-                  padding: const EdgeInsets.only(
-                      left: 8.0, right: 8.0, top: 10.0, bottom: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (title != 'Listed Products')
-                      buildStatusText(context, auction.status),
-                      const SizedBox(height: 5),
-                      Text(
-                        auction.title,
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            fontSize: 13, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 1),
-                        decoration: BoxDecoration(
-                          border:
-                              Border.all(color: onSecondaryColor, width: 1.2),
-                          borderRadius: BorderRadius.circular(4),
+                  // Auction Details
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 8.0, right: 8.0, top: 10.0, bottom: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (title != 'Listed Products')
+                          buildStatusText(context, auction.status),
+                        const SizedBox(height: 5),
+                        Text(
+                          auction.title,
+                          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              fontSize: 13, fontWeight: FontWeight.w600),
                         ),
-                        child: Text(
-                          'AED ${title == 'Listed Products' ? auction.productListingPrice : auction.startBidAmount}',
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 1),
+                          decoration: BoxDecoration(
+                            border:
+                                Border.all(color: onSecondaryColor, width: 1.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'AED ${title == 'Listed Products' ? auction.productListingPrice : auction.startBidAmount}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall!
+                                .copyWith(
+                                    fontWeight: FontWeight.w600, fontSize: 10),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Total Bids: ${auction.bids}",
                           style: Theme.of(context)
                               .textTheme
-                              .labelSmall!
-                              .copyWith(
-                                  fontWeight: FontWeight.w600, fontSize: 10),
+                              .labelLarge!
+                              .copyWith(color: primaryVariantColor, fontSize: 10),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Total Bids: ${auction.bids}",
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge!
-                            .copyWith(color: primaryVariantColor, fontSize: 10),
-                      ),
-                      const SizedBox(height: 4),
-                      AuctionCountdown(startDate: auction.startDate),
+                        const SizedBox(height: 4),
+                        AuctionCountdown(startDate: auction.startDate),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildIconButton(Icons.bookmark_outline_outlined),
+                      const SizedBox(width: 8),
+                      _buildIconButton(FontAwesomeIcons.shareFromSquare),
                     ],
                   ),
                 ),
-              ],
-            ),
-            Positioned(
-              child: Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildIconButton(Icons.bookmark_outline_outlined),
-                    const SizedBox(width: 8),
-                    _buildIconButton(FontAwesomeIcons.shareFromSquare),
-                  ],
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

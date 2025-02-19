@@ -70,6 +70,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               auctions: auctionProvider.liveAuctions,
               isLoading: auctionProvider.isLoadingLive,
               error: auctionProvider.errorLive,
+              placeholder: 'No live auctions at the moment.\nPlace your auction right away.',
             ),
             AuctionListWidget(
               title: 'Listed Products',
@@ -77,6 +78,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               auctions: auctionProvider.listedProducts,
               isLoading: auctionProvider.isLoadingListedProducts,
               error: auctionProvider.errorListedProducts,
+              placeholder: 'No products listed for sale.',
             ),
             AuctionListWidget(
               title: 'Upcoming Auctions',
@@ -84,6 +86,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               auctions: auctionProvider.isLoadingUpcoming
                   ? []
                   : auctionProvider.upcomingAuctions,
+                  placeholder: 'No upcoming auctions available.',
             ),
             AuctionListWidget(
               title: 'Expired Auctions',
@@ -91,6 +94,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               auctions: auctionProvider.isLoadingExpired
                   ? []
                   : auctionProvider.expiredAuctions,
+                  placeholder: 'No expired auctions to display.',
             ),
           ],
         ),
