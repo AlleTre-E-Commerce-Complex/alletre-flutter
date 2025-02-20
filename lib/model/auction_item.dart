@@ -104,7 +104,7 @@ class AuctionItem {
           // json['location'] is Map<String, dynamic> &&
           json['location']['country'] != null &&
           json['location']['city'] != null
-    ? "${json['location']['city']['nameEn'] ?? 'Unknown City'}, ${json['location']['country']['nameEn'] ?? 'Unknown Country'}"
+    ? "${json['location']['city']['nameEn'] ?? 'Unknown City'},\n${json['location']['country']['nameEn'] ?? 'Unknown Country'}"
     : 'Unknown Location',
       // duration: json['createdAt'],
       createdAt: createdAt,
