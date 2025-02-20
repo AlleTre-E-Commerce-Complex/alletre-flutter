@@ -527,7 +527,7 @@ class AuctionListWidget extends StatelessWidget {
                                   color: primaryVariantColor, fontSize: 10),
                         ),
                         const SizedBox(height: 5),
-                        if (title != 'Listed Products')
+                        if (title != 'Listed Products' && title != 'Expired Auctions')
                           AuctionCountdown(
                             startDate: auction.startDate,
                             endDate: auction.expiryDate,
@@ -574,6 +574,8 @@ class AuctionListWidget extends StatelessWidget {
       displayStatus = "SOLD";
     } else if (status == "IN_SCHEDULED") {
       displayStatus = "SCHEDULED";
+    } else if (status == "CANCELLED_BEFORE_EXP_DATE") {
+      displayStatus = "CANCELLED";
     }
 
     return Container(

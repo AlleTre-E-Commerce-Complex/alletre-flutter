@@ -4,14 +4,14 @@ Color getStatusColor(String status) {
     switch (status) {
       case "WAITING_FOR_PAYMENT":
         return  errorColor;
-        case "SOLD":
-        return  errorColor;
       case "EXPIRED":
         return const Color(0xFF9E9E9E);
       case "ACTIVE":
         return activeColor;
       case "IN_SCHEDULED":
         return scheduledColor;
+      case "CANCELLED_BEFORE_EXP_DATE":
+        return primaryColor;
       default:
         return const Color(0xFF757575);
     }
