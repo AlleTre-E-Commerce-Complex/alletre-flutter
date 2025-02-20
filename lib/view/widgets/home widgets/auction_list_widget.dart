@@ -338,6 +338,8 @@ import 'package:provider/provider.dart';
 import '../auction card widgets/auction_countdown.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../auction card widgets/image_placeholder.dart';
+
 class AuctionListWidget extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -463,16 +465,16 @@ class AuctionListWidget extends StatelessWidget {
                                   width: double.infinity,
                                   fit: BoxFit.contain,
                                   placeholderBuilder: (context) =>
-                                      const _PlaceholderImage(),
+                                      const PlaceholderImage(),
                                 )
                               : Image.network(
                                   auction.imageLinks.first,
                                   width: double.infinity,
                                   fit: BoxFit.contain,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      const _PlaceholderImage(),
+                                      const PlaceholderImage(),
                                 )
-                          : const _PlaceholderImage(),
+                          : const PlaceholderImage(),
                     ),
                   ),
                 ),
@@ -607,23 +609,5 @@ class AuctionListWidget extends StatelessWidget {
     final String path = uri.path;
     final String extension = path.split('.').last.toLowerCase();
     return extension == 'svg';
-  }
-}
-
-class _PlaceholderImage extends StatelessWidget {
-  const _PlaceholderImage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      alignment: Alignment.center,
-      color: greyColor,
-      child: const Icon(
-        Icons.image_not_supported,
-        size: 50,
-      ),
-    );
   }
 }
