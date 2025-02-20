@@ -165,33 +165,31 @@ class SwitchWithField extends StatelessWidget {
                             },
                           );
 
-                          if (selectedDate != null) {
-                            // Select Time
-                            TimeOfDay? selectedTime =
-                                await CustomTimePicker.showTimePickerDialog(
-                                    context);
-                            if (selectedTime != null) {
-                              // Combine Date and Time
-                              DateTime combinedDateTime = DateTime(
-                                selectedDate.year,
-                                selectedDate.month,
-                                selectedDate.day,
-                                selectedTime.hour,
-                                selectedTime.minute,
-                              );
+                          // Select Time
+                          TimeOfDay? selectedTime =
+                              await CustomTimePicker.showTimePickerDialog(
+                                  context);
+                          if (selectedTime != null) {
+                            // Combine Date and Time
+                            DateTime combinedDateTime = DateTime(
+                              selectedDate!.year,
+                              selectedDate.month,
+                              selectedDate.day,
+                              selectedTime.hour,
+                              selectedTime.minute,
+                            );
 
-                              // Format Date and Time
-                              // Format as single string with date and time
-                              final formattedDateTime =
-                                  DateFormat('yyyy-MM-dd, hh:mm a')
-                                      .format(combinedDateTime);
-                              startDateController?.text = formattedDateTime;
-                              // Store time separately if needed
-                              startTimeController?.text = DateFormat('hh:mm a')
-                                  .format(combinedDateTime);
-                            }
+                            // Format Date and Time
+                            // Format as single string with date and time
+                            final formattedDateTime =
+                                DateFormat('yyyy-MM-dd, hh:mm a')
+                                    .format(combinedDateTime);
+                            startDateController?.text = formattedDateTime;
+                            // Store time separately if needed
+                            startTimeController?.text = DateFormat('hh:mm a')
+                                .format(combinedDateTime);
                           }
-                        },
+                                                },
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),

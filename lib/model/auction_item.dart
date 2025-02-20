@@ -8,6 +8,9 @@ class AuctionItem {
   final String price;
   final String productListingPrice;
   final int bids;
+  final String location;
+  // final String duration;
+  final DateTime createdAt;
   final String description;
   final String startBidAmount;
   String status;
@@ -21,6 +24,9 @@ class AuctionItem {
     required this.price,
     required this.productListingPrice,
     required this.bids,
+    required this.location,
+    // required this.duration,
+    required this.createdAt, 
     required this.description,
     required this.startBidAmount,
     required this.status,
@@ -54,16 +60,27 @@ class AuctionItem {
       log('Product data: $item');
     }
 
+    DateTime createdAt = DateTime.now();
+  try {
+    if (json['createdAt'] != null) {
+      createdAt = DateTime.parse(json['createdAt'] as String);
+    }
+  } catch (e) {
+    print('Error parsing createdAt: $e');
+  }
+
     // Parse dates with validation
-    DateTime startDate;
-    DateTime expiryDate;
+    DateTime startDate = DateTime.now();
+    DateTime expiryDate = startDate.add(const Duration(days: 1));
     try {
-      startDate = DateTime.parse(json['startDate'] as String);
-      expiryDate = DateTime.parse(json['expiryDate'] as String);
+      if (json['startDate'] != null) {
+        startDate = DateTime.parse(json['startDate'] as String);
+      }
+      if (json['expiryDate'] != null) {
+        expiryDate = DateTime.parse(json['expiryDate'] as String);
+      }
     } catch (e) {
       print('Error parsing dates: $e');
-      startDate = DateTime.now();
-      expiryDate = DateTime.now().add(const Duration(days: 1));
     }
 
      // Safely get bid count
@@ -83,6 +100,14 @@ class AuctionItem {
       price: item['price']?.toString() ?? '0',
       productListingPrice: json['ProductListingPrice'] ?? '0',
       bids: bidCount,
+      location: json['location'] != null &&
+          // json['location'] is Map<String, dynamic> &&
+          json['location']['country'] != null &&
+          json['location']['city'] != null
+    ? "${json['location']['city']['nameEn'] ?? 'Unknown City'}, ${json['location']['country']['nameEn'] ?? 'Unknown Country'}"
+    : 'Unknown Location',
+      // duration: json['createdAt'],
+      createdAt: createdAt,
       description: item['description'] as String? ?? 'No Description',
       startBidAmount: json['startBidAmount']?.toString() ?? '0',
       status: json['status'] as String? ?? 'UNKNOWN',
