@@ -9,7 +9,7 @@ import 'package:alletre_app/model/auction_item.dart';
 class AuctionProvider with ChangeNotifier {
   final AuctionService _auctionService = AuctionService();
   List<AuctionItem> _liveAuctions = [];
-  final List<AuctionItem> _listedProducts = [];
+  List<AuctionItem> _listedProducts = [];
   List<AuctionItem> _upcomingAuctions = [];
   List<AuctionItem> _expiredAuctions = [];
   final bool _isLoading = false;
@@ -19,6 +19,8 @@ class AuctionProvider with ChangeNotifier {
   bool _isLoadingListedProducts = false;
   bool _isLoadingUpcoming = false;
   bool _isLoadingExpired = false;
+
+  bool _isFirstLoad = true;
 
   String? _errorLive;
   String? _errorListedProducts;
@@ -70,35 +72,6 @@ class AuctionProvider with ChangeNotifier {
     }
   }
 
-  // Future<void> getListedProducts() async {
-  //   if (_isLoadingListedProducts) return;
-
-  //   _isLoadingListedProducts = true;
-  //   _errorListedProducts = null;
-  //   notifyListeners();
-
-  //   try {
-  //     log('Starting to fetch listed products...', name: 'AuctionProvider');
-  //     final auctions = await _auctionService.fetchListedProducts();
-  //     log('Successfully received ${auctions.length} listed products',
-  //         name: 'AuctionProvider');
-  //     _listedProducts = auctions;
-  //     log('Listed products updated in provider. First item: ${_listedProducts.firstOrNull?.title}',
-  //         name: 'AuctionProvider');
-  //   } catch (e, stackTrace) {
-  //     log('Error fetching listed products',
-  //         name: 'AuctionProvider', error: e, stackTrace: stackTrace);
-  //     print(e);
-  //     print(stackTrace);
-  //     _errorListedProducts = e.toString();
-  //   } finally {
-  //     _isLoadingListedProducts = false;
-  //     notifyListeners();
-  //     log('Listed products update complete. Total items: ${_listedProducts.length}',
-  //         name: 'AuctionProvider');
-  //   }
-  // }
-
   Future<void> getListedProducts() async {
     if (_isLoadingListedProducts) return;
 
@@ -108,8 +81,12 @@ class AuctionProvider with ChangeNotifier {
 
     try {
       log('Fetching listed products...');
+      if (_isFirstLoad) {
+      _listedProducts.clear(); // Clear the list only during the first load
+      _isFirstLoad = false;
+    }
       final auctions = await _auctionService.fetchListedProducts(_currentPage);
-       _listedProducts.addAll(auctions);
+       _listedProducts =auctions;
       log('Listed Products Fetched: ${_listedProducts.length}');
       // Check if there are more pages to fetch
       if (_currentPage < _totalPages) {
