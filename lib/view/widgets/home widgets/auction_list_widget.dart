@@ -395,21 +395,28 @@ class AuctionListWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (title == "Live Auctions")
+                if (title == "Live Auctions" || title == "Listed Products")
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(58, 33),
-                      maximumSize: const Size(112, 33),
+                      minimumSize: const Size(58, 32),
+                      maximumSize: const Size(108, 32),
                       backgroundColor: primaryColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     onPressed: () {
-                      context.read<TabIndexProvider>().updateIndex(19);
+                      if (title == "Live Auctions") {
+                        context.read<TabIndexProvider>().updateIndex(19);
+                      } else if (title == "Listed Products") {
+                        context.read<TabIndexProvider>().updateIndex(20);
+                      }
                     },
-                    child: const Text("Create Now",
-                        style: TextStyle(color: secondaryColor, fontSize: 10)),
+                    child: Text(
+                      title == "Live Auctions" ? "Create Now" : "List Product",
+                      style:
+                          const TextStyle(color: secondaryColor, fontSize: 9),
+                    ),
                   ),
               ],
             )
@@ -527,7 +534,8 @@ class AuctionListWidget extends StatelessWidget {
                                   color: primaryVariantColor, fontSize: 10),
                         ),
                         const SizedBox(height: 5),
-                        if (title != 'Listed Products' && title != 'Expired Auctions')
+                        if (title != 'Listed Products' &&
+                            title != 'Expired Auctions')
                           AuctionCountdown(
                             startDate: auction.startDate,
                             endDate: auction.expiryDate,

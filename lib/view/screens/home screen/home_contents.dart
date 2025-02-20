@@ -87,7 +87,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 auctions: auctionProvider.listedProducts,
                 isLoading: auctionProvider.isLoadingListedProducts,
                 error: auctionProvider.errorListedProducts,
-                placeholder: 'No products listed for sale.',
+                placeholder: 'No products listed for sale.\nList your product here.',
               ),
               AuctionListWidget(
                 title: 'Upcoming Auctions',
