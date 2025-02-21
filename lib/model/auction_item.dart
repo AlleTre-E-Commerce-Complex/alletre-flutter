@@ -112,7 +112,7 @@ class AuctionItem {
         description: item['description'] as String? ?? 'No Description',
         startBidAmount: json['startBidAmount']?.toString() ?? '0',
         status: json['status'] as String? ?? 'UNKNOWN',
-        hasBuyNow: true,
+        hasBuyNow: json['isBuyNowAllowed'] as bool? ?? false,
         startDate: startDate,
         expiryDate: expiryDate,
         imageLinks: imageLinks,
