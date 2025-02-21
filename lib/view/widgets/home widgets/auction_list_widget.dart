@@ -387,7 +387,7 @@ class AuctionListWidget extends StatelessWidget {
             ),
             // Bookmark and Share buttons
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(6),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -438,8 +438,8 @@ class AuctionListWidget extends StatelessWidget {
         color: borderColor,
         shape: BoxShape.circle,
       ),
-      padding: const EdgeInsets.all(4),
-      child: Icon(icon, size: 14, color: onSecondaryColor),
+      padding: const EdgeInsets.all(5),
+      child: Icon(icon, size: 15, color: onSecondaryColor),
     );
   }
 
