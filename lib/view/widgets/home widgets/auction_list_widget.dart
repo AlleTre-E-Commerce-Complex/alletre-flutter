@@ -140,10 +140,9 @@ class AuctionListWidget extends StatelessWidget {
               children: [
                 // Image Section
                 Card(
-                  color: placeholderColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  // shape: RoundedRectangleBorder(
+                  //   borderRadius: BorderRadius.circular(10),
+                  // ),
                   margin: const EdgeInsets.all(0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
@@ -439,7 +438,7 @@ class AuctionListWidget extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       padding: const EdgeInsets.all(5),
-      child: Icon(icon, size: 15, color: onSecondaryColor),
+      child: Icon(icon, size: 13, color: onSecondaryColor),
     );
   }
 
