@@ -28,6 +28,19 @@ class AuctionListWidget extends StatelessWidget {
     required this.placeholder,
   });
 
+  double getCardHeight() {
+    switch (title) {
+      case "Live Auctions":
+        return 338; // Taller to accommodate the countdown and the buttons
+      case "Listed Products":
+        return 332; // Tall enough for location and view details button
+      case "Upcoming Auctions":
+        return 290; // Bit shorter since no buttons
+      default:
+        return 250; // for expired auctions
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -92,7 +105,7 @@ class AuctionListWidget extends StatelessWidget {
             )
           else
             SizedBox(
-              height: 332, // Fixed height for all cases
+              height: getCardHeight(), // Fixed height for each section
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: auctions.length,
@@ -156,6 +169,7 @@ class AuctionListWidget extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 // Content Section
                 Expanded(
                   child: Container(
@@ -168,7 +182,6 @@ class AuctionListWidget extends StatelessWidget {
                           buildStatusText(context, auction.status),
                           const SizedBox(height: 5),
                         ],
-
                         // Title
                         SizedBox(
                           height: 32, // Fixed height for title
@@ -184,7 +197,6 @@ class AuctionListWidget extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-
                         // Price
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -208,10 +220,9 @@ class AuctionListWidget extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-
                         // Location/Bids Section
                         SizedBox(
-                          height: title == "Listed Products" ? 42 : 14,
+                          height: title == "Listed Products" ? 42 : 12,
                           child: title == "Listed Products"
                               ? Text.rich(
                                   TextSpan(
@@ -253,7 +264,6 @@ class AuctionListWidget extends StatelessWidget {
                                 ),
                         ),
                         const SizedBox(height: 8),
-
                         // Countdown/Listed Time Section
                         if (title != 'Listed Products' &&
                             title != 'Expired Auctions')
@@ -274,9 +284,83 @@ class AuctionListWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 5),
                           // View Details Button
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 32),
+                              backgroundColor: primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            onPressed: () {},
+                            child: const Text(
+                              'View Details',
+                              style: TextStyle(
+                                color: secondaryColor,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                        // Auction Card Action Buttons
+                        if (title == "Live Auctions") ...[
+                          const SizedBox(height: 5),
+                          if (auction.hasBuyNow)
+                            // Two buttons in half-width
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 63, // Adjust width as needed
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: const Size(0, 31),
+                                      backgroundColor: primaryColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 4),
+                                    ),
+                                    onPressed: () {},
+                                    child: const Text(
+                                      'Bid Now',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: secondaryColor,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                SizedBox(
+                                  width: 63, // Adjust width as needed
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: const Size(0, 31),
+                                      backgroundColor: primaryColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 4),
+                                    ),
+                                    onPressed: () {},
+                                    child: const Text(
+                                      'Buy Now',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: secondaryColor,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            // Single full-width button
+                            ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 32),
                                 backgroundColor: primaryColor,
@@ -286,14 +370,13 @@ class AuctionListWidget extends StatelessWidget {
                               ),
                               onPressed: () {},
                               child: const Text(
-                                'View Details',
+                                'Bid Now',
                                 style: TextStyle(
                                   color: secondaryColor,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                 ),
                               ),
                             ),
-                          ),
                         ],
                       ],
                     ),

@@ -46,7 +46,7 @@ class AuctionCountdown extends StatelessWidget {
 
     String timeValue;
     if (days > 0) {
-      timeValue = '$days days: $hours hrs: $minutes min:\n$seconds sec';
+      timeValue = '$days days: $hours hrs: $minutes min';
     } else if (hours > 0) {
       timeValue = '$hours hrs: $minutes min: $seconds sec';
     } else {
