@@ -92,7 +92,7 @@ class AuctionListWidget extends StatelessWidget {
             )
           else
             SizedBox(
-              height: 330, // Fixed height for all cases
+              height: 332, // Fixed height for all cases
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: auctions.length,
@@ -249,10 +249,11 @@ class AuctionListWidget extends StatelessWidget {
                                 .copyWith(
                                     color: primaryVariantColor, fontSize: 10),
                           ),
+                          const SizedBox(height: 2),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(58, 32),
-                              maximumSize: const Size(108, 32),
+                              minimumSize: const Size(58, 31),
+                              maximumSize: const Size(108, 31),
                               backgroundColor: primaryColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -260,7 +261,7 @@ class AuctionListWidget extends StatelessWidget {
                             ),
                             onPressed: () {},
                             child: const Text(
-                              'Vew Details',
+                              'View Details',
                               style:
                                   TextStyle(color: secondaryColor, fontSize: 9),
                             ),
