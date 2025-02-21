@@ -297,7 +297,7 @@ class AuctionListWidget extends StatelessWidget {
                               'View Details',
                               style: TextStyle(
                                 color: secondaryColor,
-                                fontSize: 12,
+                                fontSize: 11,
                               ),
                             ),
                           ),
@@ -310,7 +310,7 @@ class AuctionListWidget extends StatelessWidget {
                             Row(
                               children: [
                                 SizedBox(
-                                  width: 63, // Adjust width as needed
+                                  width: 63,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                       minimumSize: const Size(0, 31),
@@ -334,7 +334,7 @@ class AuctionListWidget extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 SizedBox(
-                                  width: 63, // Adjust width as needed
+                                  width: 63,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                       minimumSize: const Size(0, 31),
