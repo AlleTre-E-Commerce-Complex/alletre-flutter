@@ -338,7 +338,8 @@ class AuctionListWidget extends StatelessWidget {
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                       minimumSize: const Size(0, 31),
-                                      backgroundColor: primaryColor,
+                                      backgroundColor: secondaryColor,
+                                      side: const BorderSide(color: primaryColor),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(6),
                                       ),
@@ -350,7 +351,7 @@ class AuctionListWidget extends StatelessWidget {
                                       'Buy Now',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: secondaryColor,
+                                        color: primaryColor,
                                         fontSize: 10,
                                       ),
                                     ),
