@@ -7,7 +7,7 @@ class AuctionCountdown extends StatelessWidget {
   final DateTime endDate;
 
   const AuctionCountdown({
-    super.key, 
+    super.key,
     required this.startDate,
     required this.endDate,
   });
@@ -21,18 +21,18 @@ class AuctionCountdown extends StatelessWidget {
 
   Map<String, String> getFormattedTime() {
     final DateTime now = DateTime.now();
-    
+
     // If auction hasn't started yet, show time until start
     if (now.isBefore(startDate)) {
       final Duration difference = startDate.difference(now);
       return formatDuration(difference, 'Starting in:');
     }
-    
+
     // If auction has ended, show expired
     if (now.isAfter(endDate)) {
       return {'prefix': '', 'time': 'Auction Ended'};
     }
-    
+
     // If auction is live, show time until end
     final Duration difference = endDate.difference(now);
     return formatDuration(difference, 'Ending in:');
@@ -52,7 +52,7 @@ class AuctionCountdown extends StatelessWidget {
     } else {
       timeValue = '$minutes min: $seconds sec';
     }
-    
+
     return {'prefix': prefix, 'time': timeValue};
   }
 
@@ -71,10 +71,10 @@ class AuctionCountdown extends StatelessWidget {
           return Text(
             timeValue,
             style: Theme.of(context).textTheme.labelSmall!.copyWith(
-              color: primaryVariantColor,
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: primaryVariantColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
           );
         }
         return RichText(
@@ -83,18 +83,18 @@ class AuctionCountdown extends StatelessWidget {
               TextSpan(
                 text: '$prefix\n',
                 style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                  color: primaryVariantColor,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: primaryVariantColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               TextSpan(
                 text: timeValue,
                 style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                  color: primaryVariantColor,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: primaryVariantColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),

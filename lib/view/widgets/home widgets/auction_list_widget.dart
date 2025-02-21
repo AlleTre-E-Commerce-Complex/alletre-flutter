@@ -125,6 +125,7 @@ class AuctionListWidget extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Image Section
                 Card(
                   color: placeholderColor,
                   shape: RoundedRectangleBorder(
@@ -134,7 +135,7 @@ class AuctionListWidget extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: SizedBox(
-                      height: 120, // Fixed image height
+                      height: 120,
                       child: auction.imageLinks.isNotEmpty
                           ? isSvg(auction.imageLinks.first)
                               ? SvgPicture.network(
@@ -155,29 +156,41 @@ class AuctionListWidget extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Content Section
                 Expanded(
-                  child: Padding(
+                  child: Container(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (title != 'Listed Products')
+                        // Status (if not Listed Products)
+                        if (title != 'Listed Products') ...[
                           buildStatusText(context, auction.status),
-                        const SizedBox(height: 5),
-                        Text(
-                          auction.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.w600),
+                          const SizedBox(height: 5),
+                        ],
+
+                        // Title
+                        SizedBox(
+                          height: 32, // Fixed height for title
+                          child: Text(
+                            auction.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                          ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 10),
+
+                        // Price
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 1),
+                            horizontal: 7,
+                            vertical: 1,
+                          ),
                           decoration: BoxDecoration(
                             border:
                                 Border.all(color: onSecondaryColor, width: 1.2),
@@ -189,50 +202,59 @@ class AuctionListWidget extends StatelessWidget {
                                 .textTheme
                                 .labelSmall!
                                 .copyWith(
-                                    fontWeight: FontWeight.w600, fontSize: 10),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        title == "Listed Products"
-                            ? Text.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "Location:\n",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge!
-                                          .copyWith(
-                                            color: primaryVariantColor,
-                                            fontSize: 10,
-                                          ),
-                                    ),
-                                    TextSpan(
-                                      text: auction.location,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge!
-                                          .copyWith(
+                        const SizedBox(height: 10),
+
+                        // Location/Bids Section
+                        SizedBox(
+                          height: title == "Listed Products" ? 42 : 14,
+                          child: title == "Listed Products"
+                              ? Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "Location:\n",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge!
+                                            .copyWith(
                                               color: primaryVariantColor,
-                                              fontSize: 10),
-                                    ),
-                                  ],
+                                              fontSize: 10,
+                                            ),
+                                      ),
+                                      TextSpan(
+                                        text: auction.location,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge!
+                                            .copyWith(
+                                              color: primaryVariantColor,
+                                              fontSize: 10,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              : Text(
+                                  "Total Bids: ${auction.bids}",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge!
+                                      .copyWith(
+                                        color: primaryVariantColor,
+                                        fontSize: 10,
+                                      ),
                                 ),
-                                maxLines:
-                                    3, // Total max lines (1 for label + 2 for location value)
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            : Text(
-                                "Total Bids: ${auction.bids}",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge!
-                                    .copyWith(
-                                      color: primaryVariantColor,
-                                      fontSize: 10,
-                                    ),
-                              ),
-                        const SizedBox(height: 5),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Countdown/Listed Time Section
                         if (title != 'Listed Products' &&
                             title != 'Expired Auctions')
                           AuctionCountdown(
@@ -240,30 +262,36 @@ class AuctionListWidget extends StatelessWidget {
                             endDate: auction.expiryDate,
                           ),
                         if (title == "Listed Products") ...[
-                          const SizedBox(height: 2),
                           Text(
                             "Listed: ${timeago.format(auction.createdAt, locale: 'en_custom')}",
                             style: Theme.of(context)
                                 .textTheme
                                 .labelLarge!
                                 .copyWith(
-                                    color: primaryVariantColor, fontSize: 10),
+                                  color: primaryVariantColor,
+                                  fontSize: 10,
+                                ),
                           ),
-                          const SizedBox(height: 2),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(58, 31),
-                              maximumSize: const Size(108, 31),
-                              backgroundColor: primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                          const SizedBox(height: 5),
+                          // View Details Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 32),
+                                backgroundColor: primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
                               ),
-                            ),
-                            onPressed: () {},
-                            child: const Text(
-                              'View Details',
-                              style:
-                                  TextStyle(color: secondaryColor, fontSize: 9),
+                              onPressed: () {},
+                              child: const Text(
+                                'View Details',
+                                style: TextStyle(
+                                  color: secondaryColor,
+                                  fontSize: 11,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -273,6 +301,7 @@ class AuctionListWidget extends StatelessWidget {
                 ),
               ],
             ),
+            // Bookmark and Share buttons
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
