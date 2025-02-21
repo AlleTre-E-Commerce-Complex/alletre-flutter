@@ -434,7 +434,7 @@ class AuctionListWidget extends StatelessWidget {
   Widget _buildIconButton(IconData icon) {
     return Container(
       decoration: BoxDecoration(
-        color: borderColor,
+        color: buttonBgColor,
         shape: BoxShape.circle,
       ),
       padding: const EdgeInsets.all(5),
