@@ -31,36 +31,47 @@ class AuctionListWidget extends StatelessWidget {
   double getCardHeight() {
     switch (title) {
       case "Live Auctions":
-        return 338; // Taller to accommodate the countdown and the buttons
+        return 337; // Taller to accommodate the countdown and the buttons
       case "Listed Products":
         return 332; // Tall enough for location and view details button
       case "Upcoming Auctions":
-        return 290; // Bit shorter since no buttons
+        return 288; // Bit shorter since no buttons
       default:
-        return 250; // for expired auctions
+        return 248; // for expired auctions
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 16),
+      padding: const EdgeInsets.only(top: 6, left: 16, right: 16, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            title,
-            style:
-                Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 17),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style:
+                    Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 15),
+              ),
+              TextButton(
+                onPressed: () {}, 
+                child: Text('See all', style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13))
+              ),
+            ], 
           ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: greyColor, fontSize: 13),
+          Transform.translate(
+            offset: const Offset(0, -10),
+            child: Text(
+              subtitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: greyColor, fontSize: 12),
+            ),
           ),
           const SizedBox(height: 10),
           if (auctions.isEmpty)
@@ -111,7 +122,7 @@ class AuctionListWidget extends StatelessWidget {
                 itemCount: auctions.length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.only(right: 7.0),
+                    padding: const EdgeInsets.only(right: 7),
                     child: _buildAuctionCard(context, auctions[index]),
                   );
                 },
@@ -129,6 +140,7 @@ class AuctionListWidget extends StatelessWidget {
     return SizedBox(
       width: cardWidth,
       child: Card(
+        margin: const EdgeInsets.all(0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
           side: BorderSide(color: borderColor),
@@ -262,7 +274,7 @@ class AuctionListWidget extends StatelessWidget {
                                       ),
                                 ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 9),
                         // Countdown/Listed Time Section
                         if (title != 'Listed Products' &&
                             title != 'Expired Auctions')
@@ -281,7 +293,7 @@ class AuctionListWidget extends StatelessWidget {
                                   fontSize: 10,
                                 ),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 12),
                           // View Details Button
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -303,7 +315,7 @@ class AuctionListWidget extends StatelessWidget {
                         ],
                         // Auction Card Action Buttons
                         if (title == "Live Auctions") ...[
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 12),
                           if (auction.hasBuyNow)
                             // Two buttons in half-width
                             Row(
