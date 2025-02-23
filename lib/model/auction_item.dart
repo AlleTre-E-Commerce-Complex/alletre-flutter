@@ -25,7 +25,6 @@ class AuctionItem {
     required this.productListingPrice,
     required this.bids,
     required this.location,
-    // required this.duration,
     required this.createdAt,
     required this.description,
     required this.startBidAmount,
@@ -103,7 +102,6 @@ class AuctionItem {
         productListingPrice: json['ProductListingPrice'] ?? '0',
         bids: bidCount,
         location: json['location'] != null &&
-                // json['location'] is Map<String, dynamic> &&
                 json['location']['country'] != null &&
                 json['location']['city'] != null
             ? "${json['location']['city']['nameEn'] ?? 'Unknown City'},\n${json['location']['country']['nameEn'] ?? 'Unknown Country'}"

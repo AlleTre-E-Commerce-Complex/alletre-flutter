@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
 
 Color getStatusColor(String status) {
-    switch (status) {
-      case "WAITING_FOR_PAYMENT":
-        return  errorColor;
-      case "EXPIRED":
-        return const Color(0xFF9E9E9E);
-      case "ACTIVE":
-        return activeColor;
-      case "IN_SCHEDULED":
-        return scheduledColor;
-      case "CANCELLED_BEFORE_EXP_DATE":
-        return primaryColor;
-      default:
-        return const Color(0xFF757575);
-    }
+  switch (status) {
+    case "WAITING_FOR_PAYMENT":
+      return errorColor;
+    case "EXPIRED":
+      return const Color(0xFF9E9E9E);
+    case "ACTIVE":
+      return activeColor;
+    case "IN_SCHEDULED":
+      return scheduledColor;
+    case "CANCELLED_BEFORE_EXP_DATE":
+      return primaryColor;
+    default:
+      return const Color(0xFF757575);
   }
+}
+
+double getCardHeight(String title) {
+  switch (title) {
+    case "Live Auctions":
+      return 337; // Taller to accommodate the countdown and the buttons
+    case "Listed Products":
+      return 333; // Tall enough for location and view details button
+    case "Upcoming Auctions":
+      return 288; // Bit shorter since no buttons
+    default:
+      return 248; // For expired auctions
+  }
+}
 
 // Define color palette
 const Color onSecondaryColor = Color(0xFF000000);
@@ -45,7 +58,8 @@ Color telegramColor = const Color(0xFF0088CC);
 Color whatsappColor = const Color(0xFF25D366);
 Color snapchatColor = const Color(0xFFFFCC00);
 
-const TextStyle radioTextStyle = TextStyle(fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500);
+const TextStyle radioTextStyle = TextStyle(
+    fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500);
 
 ThemeData customTheme() {
   return ThemeData(

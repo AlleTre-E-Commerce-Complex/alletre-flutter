@@ -25,52 +25,6 @@ import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dar
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/profile%20screen/profile_screen.dart';
 
-// class MainStack extends StatelessWidget {
-//   const MainStack({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final PageController pageController = PageController();
-
-//     return Consumer<TabIndexProvider>(
-//       builder: (context, tabIndexProvider, _) {
-//          // Add print statement for debugging
-//         // ignore: avoid_print
-//         print('Current index: ${tabIndexProvider.selectedIndex}');
-        
-//         return IndexedStack(
-//           index: tabIndexProvider.selectedIndex,
-//           children: [
-//             const OnboardingPages(), //index 0
-//             const HomeScreenContent(), // index 1
-//             LoginPage(), // index 2
-//             SignUpPage(), // index 3
-//             const ProfileScreen(), // index 4
-//             const FaqScreen(), // index 5
-//             const EditProfileScreen(), // index 6
-//             const PurchaseScreen(), // index 7
-//             const BidsScreen(), // index 8
-//             OnboardingPage3(pageController: pageController), // index 9
-//             const ProductDetailsScreen(), // index 10
-//             CategoriesPage(), // index 11
-//             const SubCategoryPage(categoryName: "Default"), // index 12 
-//             const SearchScreen(), // index 13
-//             const SettingsScreen(), // index 14
-//             const TermsAndConditions(), // index 15
-//             const ContactUsScreen(), // index 16
-//             const AuctionDetailsScreen(), //index 17
-//             const ShippingDetailsScreen(), //index 18
-//             const AddLocationScreen(), //index 19
-//             const ListProductsScreen(), //index 20
-//             const GoogleMapScreen(), //index 21
-//             const PaymentDetailsScreen() //index 22
-//           ],
-//         );
-//       },
-//     );
-//   }
-// }
-
 class MainStack extends StatelessWidget {
   const MainStack({super.key});
 
@@ -122,6 +76,8 @@ class MainStack extends StatelessWidget {
         return const GoogleMapScreen();
       case 22:
         return const PaymentDetailsScreen();
+      case 23:
+        // return const AllAuctionsScreen(title: title, auctions: auctions);
       default:
         return const HomeScreenContent();
     }
@@ -143,23 +99,6 @@ class MainStack extends StatelessWidget {
               );
             },
           ),
-          // bottomNavigationBar: BottomAppBar(
-          //   color: Theme.of(context).bottomAppBarTheme.color,
-          //   height: Theme.of(context).bottomAppBarTheme.height,
-          //   child: Consumer<LoggedInProvider>(
-          //     builder: (context, loginProvider, _) {
-          //       return loginProvider.isLoggedIn
-          //           ? NavBarUtils.buildAuthenticatedNavBar(
-          //               context,
-          //               onTabChange: (index) {
-          //                 Navigator.of(context).popUntil((route) => route.isFirst);
-          //                 tabIndexProvider.updateIndex(index);
-          //               },
-          //             )
-          //           : const BottomNavBar();
-          //     },
-          //   ),
-          // ),
         );
       },
     );

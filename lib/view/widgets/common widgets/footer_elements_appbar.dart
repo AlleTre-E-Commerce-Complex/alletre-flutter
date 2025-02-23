@@ -26,7 +26,7 @@ class NavbarElementsAppbar extends StatelessWidget implements PreferredSizeWidge
         title!,
         style: const TextStyle(
           color: secondaryColor,
-          fontSize: 20,
+          fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
       ),
