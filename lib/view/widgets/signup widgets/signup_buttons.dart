@@ -2,6 +2,7 @@
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -182,7 +183,12 @@ class SignupButtons extends StatelessWidget {
                 onTap: () {
                   userProvider.resetCheckboxes();
                   userProvider.resetSignupForm();
-                  Navigator.pushReplacementNamed(context, AppRoutes.login);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoginPage()
+                      ),
+                    );
                 },
                 child: const Text(
                   'Login Now',

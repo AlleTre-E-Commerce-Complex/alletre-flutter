@@ -76,8 +76,6 @@ class MainStack extends StatelessWidget {
         return const GoogleMapScreen();
       case 22:
         return const PaymentDetailsScreen();
-      case 23:
-        // return const AllAuctionsScreen(title: title, auctions: auctions);
       default:
         return const HomeScreenContent();
     }

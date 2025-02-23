@@ -1,5 +1,6 @@
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -19,8 +20,8 @@ class CommonAppBar extends StatelessWidget {
         icon: const Icon(Icons.arrow_back, color: secondaryColor, size: 22),
         onPressed: () {
           userProvider.resetCheckboxes();
-          Navigator.pop(context);
-        },
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreenContent()));
+                  },
       ),
       title: SizedBox(
         width: 210,
