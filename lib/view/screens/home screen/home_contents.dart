@@ -105,6 +105,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                     : auctionProvider.expiredAuctions,
                     placeholder: 'No expired auctions to display.',
               ),
+              const SizedBox(height: 12)
             ],
           ),
         ),

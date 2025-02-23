@@ -44,7 +44,7 @@ class AuctionListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 6, left: 16, right: 16, bottom: 16),
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -54,17 +54,22 @@ class AuctionListWidget extends StatelessWidget {
             children: [
               Text(
                 title,
-                style:
-                    Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 15),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge!
+                    .copyWith(fontSize: 15),
               ),
               TextButton(
-                onPressed: () {}, 
-                child: Text('See all', style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13))
-              ),
-            ], 
+                  onPressed: () {},
+                  child: Text('See all',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(fontSize: 13))),
+            ],
           ),
           Transform.translate(
-            offset: const Offset(0, -10),
+            offset: const Offset(0, -12),
             child: Text(
               subtitle,
               style: Theme.of(context)
@@ -140,7 +145,7 @@ class AuctionListWidget extends StatelessWidget {
     return SizedBox(
       width: cardWidth,
       child: Card(
-        margin: const EdgeInsets.all(0),
+        margin: const EdgeInsets.only(right: 5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
           side: BorderSide(color: borderColor),
@@ -195,7 +200,7 @@ class AuctionListWidget extends StatelessWidget {
                         ],
                         // Title
                         SizedBox(
-                          height: 32, // Fixed height for title
+                          height: 34, // Fixed height for title
                           child: Text(
                             auction.title,
                             maxLines: 2,
@@ -293,7 +298,7 @@ class AuctionListWidget extends StatelessWidget {
                                   fontSize: 10,
                                 ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           // View Details Button
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -315,7 +320,7 @@ class AuctionListWidget extends StatelessWidget {
                         ],
                         // Auction Card Action Buttons
                         if (title == "Live Auctions") ...[
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           if (auction.hasBuyNow)
                             // Two buttons in half-width
                             Row(
@@ -350,7 +355,8 @@ class AuctionListWidget extends StatelessWidget {
                                     style: ElevatedButton.styleFrom(
                                       minimumSize: const Size(0, 31),
                                       backgroundColor: secondaryColor,
-                                      side: const BorderSide(color: primaryColor),
+                                      side:
+                                          const BorderSide(color: primaryColor),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(6),
                                       ),
