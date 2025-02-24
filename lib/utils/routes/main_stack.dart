@@ -12,7 +12,6 @@ import 'package:alletre_app/view/screens/list%20products%20screen/list_products_
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
-import 'package:alletre_app/view/screens/search%20screen/search_screen.dart';
 import 'package:alletre_app/view/screens/settings%20screen/settings_screen.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categories_screen.dart';
