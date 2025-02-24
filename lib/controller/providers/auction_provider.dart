@@ -47,6 +47,30 @@ class AuctionProvider with ChangeNotifier {
   int _currentPage = 1;
   int _totalPages = 1;
 
+  String _searchQuery = "";
+  String get searchQuery => _searchQuery;
+
+List<AuctionItem> _filteredLiveAuctions = [];
+List<AuctionItem> _filteredListedProducts = [];
+List<AuctionItem> _filteredUpcomingAuctions = [];
+List<AuctionItem> _filteredExpiredAuctions = [];
+
+void searchItems(String query) {
+  _searchQuery = query.toLowerCase();
+  
+  _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+  _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+  _filteredUpcomingAuctions = _upcomingAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+  _filteredExpiredAuctions = _expiredAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+
+  notifyListeners();
+}
+
+List<AuctionItem> get filteredLiveAuctions => _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
+List<AuctionItem> get filteredListedProducts => _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
+List<AuctionItem> get filteredUpcomingAuctions => _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
+List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
+
   Future<void> getLiveAuctions() async {
     if (_isLoadingLive) return;
 

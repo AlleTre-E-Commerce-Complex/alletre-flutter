@@ -1,3 +1,4 @@
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +37,9 @@ class SearchFieldWidget extends StatelessWidget {
           padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
           child: TextField(
             autofocus: autofocus,
-            onChanged: onChanged,
+             onChanged: (value) {
+    context.read<AuctionProvider>().searchItems(value);
+  },
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               hintText: 'Search on Alletre',

@@ -24,7 +24,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String productDetails = '/productDetails';
   static const String auctionDetails = '/auctionDetails';
-  static const String search = '/search';
+  // static const String search = '/search';
   static const String purchases = '/purchases';
   static const String bids = '/bids';
   static const String profile = '/profile';
@@ -45,7 +45,7 @@ class AppRoutes {
       home: (context) => const HomeScreenContent(),
       productDetails: (context) => const ProductDetailsScreen(),
       auctionDetails: (context) => const AuctionDetailsScreen(),
-      search: (context) => const SearchScreen(),
+      // search: (context) => const SearchScreen(),
       purchases: (context) => const PurchaseScreen(),
       bids: (context) => const BidsScreen(),
       profile: (context) => const ProfileScreen(),

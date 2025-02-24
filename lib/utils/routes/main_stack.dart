@@ -56,8 +56,8 @@ class MainStack extends StatelessWidget {
         return CategoriesPage();
       case 12:
         return const SubCategoryPage(categoryName: "Default");
-      case 13:
-        return const SearchScreen();
+      // case 13:
+      //   return const SearchScreen();
       case 14:
         return const SettingsScreen();
       case 15:

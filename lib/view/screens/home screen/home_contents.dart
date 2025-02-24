@@ -21,6 +21,8 @@ class HomeScreenContent extends StatefulWidget {
 }
 
 class _HomeScreenContentState extends State<HomeScreenContent> {
+  String searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -39,12 +41,21 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
 
+    // // Function to filter auctions based on searchQuery
+    // List<AuctionItem> filterAuctions(List<AuctionItem> auctions) {
+    //   if (searchQuery.isEmpty) return auctions;
+    //   return auctions.where((auction) {
+    //     // Adjust this filtering logic as needed, e.g. using title, description, etc.
+    //     return auction.title.toLowerCase().contains(searchQuery.toLowerCase());
+    //   }).toList();
+    // }
+
     Future<void> refreshHomePage() async {
-    await auctionProvider.getLiveAuctions();
-    await auctionProvider.getListedProducts();
-    await auctionProvider.getUpcomingAuctions();
-    await auctionProvider.getExpiredAuctions();
-  }
+      await auctionProvider.getLiveAuctions();
+      await auctionProvider.getListedProducts();
+      await auctionProvider.getUpcomingAuctions();
+      await auctionProvider.getExpiredAuctions();
+    }
 
     // print('Live auctions count: ${auctionProvider.liveAuctions.length}');
     // print('Live auctions loading: ${auctionProvider.isLoadingLive}');
@@ -67,7 +78,14 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 9),
-              const SearchFieldWidget(isNavigable: true),
+              SearchFieldWidget(
+                isNavigable: false,
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+              ),
               const SizedBox(height: 5),
               const ChipWidget(),
               const SizedBox(height: 15),
@@ -76,34 +94,42 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               AuctionListWidget(
                 title: 'Live Auctions',
                 subtitle: 'Live Deals, Real-Time Wins!',
-                auctions: auctionProvider.liveAuctions,
+                auctions: auctionProvider.filteredLiveAuctions,
                 isLoading: auctionProvider.isLoadingLive,
                 error: auctionProvider.errorLive,
-                placeholder: 'No live auctions at the moment.\nPlace your auction right away.',
+                placeholder:
+                    'No live auctions at the moment.\nPlace your auction right away.',
               ),
               AuctionListWidget(
                 title: 'Listed Products',
                 subtitle: 'Find and Reach the Product',
-                auctions: auctionProvider.listedProducts,
+                auctions: auctionProvider.filteredListedProducts,
                 isLoading: auctionProvider.isLoadingListedProducts,
                 error: auctionProvider.errorListedProducts,
-                placeholder: 'No products listed for sale.\nList your product here.',
+                placeholder:
+                    'No products listed for sale.\nList your product here.',
               ),
               AuctionListWidget(
                 title: 'Upcoming Auctions',
                 subtitle: 'Coming Soon: Get Ready to Bid!',
-                auctions: auctionProvider.isLoadingUpcoming
-                    ? []
-                    : auctionProvider.upcomingAuctions,
-                    placeholder: 'No upcoming auctions available.',
+                auctions: auctionProvider.filteredUpcomingAuctions,
+                // auctions: auctionProvider.isLoadingUpcoming
+                //     ? []
+                //     : auctionProvider.filteredUpcomingAuctions,
+                isLoading: auctionProvider.isLoadingUpcoming,
+                error: auctionProvider.errorUpcoming,
+                placeholder: 'No upcoming auctions available.',
               ),
               AuctionListWidget(
                 title: 'Expired Auctions',
                 subtitle: 'The Best Deals You Missed',
-                auctions: auctionProvider.isLoadingExpired
-                    ? []
-                    : auctionProvider.expiredAuctions,
-                    placeholder: 'No expired auctions to display.',
+                auctions: auctionProvider.filteredExpiredAuctions,
+                // auctions: auctionProvider.isLoadingExpired
+                //     ? []
+                //     : auctionProvider.filteredExpiredAuctions,
+                isLoading: auctionProvider.isLoadingExpired,
+                error: auctionProvider.errorExpired,
+                placeholder: 'No expired auctions to display.',
               ),
               const SizedBox(height: 12)
             ],

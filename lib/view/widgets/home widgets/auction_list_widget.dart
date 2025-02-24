@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -7,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../../screens/all auctions screen/all_auctions_screen.dart';
 import '../auction card widgets/auction_card.dart';
 import 'package:shimmer/shimmer.dart';
-// import 'package:shimmer_animation/shimmer_animation.dart';
+import 'shimmer_loading.dart';
 
 class AuctionListWidget extends StatelessWidget {
   final String title;
@@ -16,6 +17,9 @@ class AuctionListWidget extends StatelessWidget {
   final bool isLoading;
   final String? error;
   final String placeholder;
+  // final String emptyMessage;
+  // final bool searchActive;
+  // final bool showButton;
 
   const AuctionListWidget({
     super.key,
@@ -25,6 +29,9 @@ class AuctionListWidget extends StatelessWidget {
     this.isLoading = false,
     this.error,
     required this.placeholder,
+    // required this.emptyMessage,
+    // required this.searchActive,
+    // required this.showButton,
   });
 
   @override
@@ -76,11 +83,13 @@ class AuctionListWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
+
           /// **Shimmer Loading Effect**
           if (isLoading)
             SizedBox(
               height: getCardHeight(title), // Set consistent height
               child: ListView.builder(
+                key: const PageStorageKey('shimmerList'),
                 scrollDirection: Axis.horizontal,
                 itemCount: auctions.length,
                 itemBuilder: (context, index) {
@@ -89,14 +98,11 @@ class AuctionListWidget extends StatelessWidget {
                     child: Shimmer.fromColors(
                       baseColor: borderColor,
                       highlightColor: shimmerColor,
-                      child: Container(
-                        width: (MediaQuery.of(context).size.width - 32 - 10) / 2,
-                        height: getCardHeight(title),
-                        decoration: BoxDecoration(
-                          color: buttonBgColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
+                      child: ShimmerLoading(
+                          width:
+                              (MediaQuery.of(context).size.width - 32 - 10) / 2,
+                          height: getCardHeight(title),
+                          title: title),
                     ),
                   );
                 },
@@ -109,7 +115,9 @@ class AuctionListWidget extends StatelessWidget {
                   height: 50,
                   child: Center(
                     child: Text(
-                      placeholder,
+                      _searchQueryIsActive(context)
+                          ? "Searched item not found."
+                          : placeholder,
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium!
@@ -117,7 +125,8 @@ class AuctionListWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (title == "Live Auctions" || title == "Listed Products")
+                if (!_searchQueryIsActive(context) &&
+                    (title == "Live Auctions" || title == "Listed Products"))
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(58, 32),
@@ -200,5 +209,10 @@ class AuctionListWidget extends StatelessWidget {
     final String path = uri.path;
     final String extension = path.split('.').last.toLowerCase();
     return extension == 'svg';
+  }
+
+  bool _searchQueryIsActive(BuildContext context) {
+    final provider = context.read<AuctionProvider>();
+    return provider.searchQuery.isNotEmpty;
   }
 }
