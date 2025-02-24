@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../screens/all auctions screen/all_auctions_screen.dart';
 import '../auction card widgets/auction_card.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
+
 
 class AuctionListWidget extends StatelessWidget {
   final String title;
@@ -74,7 +76,35 @@ class AuctionListWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          if (auctions.isEmpty)
+          /// **Shimmer Loading Effect**
+          if (isLoading)
+            SizedBox(
+              height: getCardHeight(title), // Set consistent height
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 3, // Shows 3 shimmer placeholders
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 7),
+                    child: Shimmer(
+                      duration: const Duration(seconds: 2),
+                      interval: const Duration(milliseconds: 500),
+                      color: Colors.grey.shade300,
+                      enabled: true,
+                      child: Container(
+                        width: (MediaQuery.of(context).size.width - 32 - 10) / 2,
+                        height: getCardHeight(title),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
+          else if (auctions.isEmpty)
             Column(
               children: [
                 SizedBox(
