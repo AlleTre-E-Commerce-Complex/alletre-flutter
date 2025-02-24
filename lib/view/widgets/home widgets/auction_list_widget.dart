@@ -82,7 +82,7 @@ class AuctionListWidget extends StatelessWidget {
               height: getCardHeight(title), // Set consistent height
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: auctions.length, // Shows 3 shimmer placeholders
+                itemCount: auctions.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 7),
