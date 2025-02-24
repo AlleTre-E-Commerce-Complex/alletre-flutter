@@ -43,6 +43,7 @@ const Color selectedIndex = Color(0xFFCDAF89);
 Color buttonBgColor = Colors.grey.shade200;
 Color borderColor = Colors.grey.shade300;
 Color placeholderColor = Colors.grey.shade100;
+Color shimmerColor = Colors.grey.shade400;
 Color avatarColor = Colors.grey.shade600;
 Color dividerColor = Colors.black54;
 const Color greyColor = Colors.grey;
