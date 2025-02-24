@@ -6,6 +6,7 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/widgets/login%20widgets/success_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class LoginButtons extends StatelessWidget {
@@ -129,6 +130,70 @@ class LoginButtons extends StatelessWidget {
                   ),
           ),
           const SizedBox(height: 16),
+          Row(
+          children: [
+            Expanded(child: Divider(color: dividerColor)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text('OR',
+                  style: TextStyle(
+                      color: dividerColor, fontWeight: FontWeight.w500)),
+            ),
+            Expanded(
+              child: Divider(color: dividerColor),
+            ),
+
+          ],
+        ),
+          const SizedBox(height: 16),
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 50),
+            side: const BorderSide(color: primaryColor),
+            padding: const EdgeInsets.only(right: 18),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: () {},
+            child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset('assets/icons/google_icon.svg',
+                  width: 15, height: 15),
+              const SizedBox(width: 10),
+              const Text(
+                'Login with Google',
+                style: TextStyle(color: primaryColor, fontSize: 14), 
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 50),
+            side: const BorderSide(color: primaryColor),
+            padding: const EdgeInsets.only(right: 26),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: () {},
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset('assets/icons/apple_icon.svg',
+                  width: 15, height: 15),
+              const SizedBox(width: 10),
+              const Text(
+                'Login up with Apple',
+                style: TextStyle(color: primaryColor, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
