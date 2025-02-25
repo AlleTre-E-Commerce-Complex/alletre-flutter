@@ -10,7 +10,7 @@ class PurchaseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavbarElementsAppbar(title: 'Purchases'),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Purchases'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

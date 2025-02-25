@@ -19,12 +19,10 @@ Color getStatusColor(String status) {
 
 double getCardHeight(String title) {
   switch (title) {
-    case "Live Auctions":
+    case "Live Auctions" || "Upcoming Auctions":
       return 337; // Taller to accommodate the countdown and the buttons
     case "Listed Products":
       return 333; // Tall enough for location and view details button
-    case "Upcoming Auctions":
-      return 288; // Bit shorter since no buttons
     default:
       return 248; // For expired auctions
   }

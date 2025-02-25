@@ -7,6 +7,7 @@ import 'package:alletre_app/controller/providers/focus_state_provider.dart';
 import 'package:alletre_app/controller/providers/language_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:app_links/app_links.dart';
@@ -61,6 +62,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => LocationProvider()),
           ChangeNotifierProvider(create: (_) => ShareProvider()),
           ChangeNotifierProvider(create: (_) => AuctionImageProvider()),
+          ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ],
         child: MaterialApp(
           navigatorKey: navigatorKey,

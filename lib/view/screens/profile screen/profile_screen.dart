@@ -24,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: const NavbarElementsAppbar(title: 'Profile'),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Profile'),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

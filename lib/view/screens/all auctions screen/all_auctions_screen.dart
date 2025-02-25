@@ -1,10 +1,12 @@
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
-import 'package:alletre_app/view/widgets/auction card widgets/auction_card.dart';
+import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_card.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
+import '../../widgets/home widgets/search_field_widget.dart';
 
 class AllAuctionsScreen extends StatelessWidget {
   final String title;
@@ -23,69 +25,104 @@ class AllAuctionsScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - 32 - 10) / 2;
     final cardHeight = getCardHeight(title);
-    
+
+    // Create a filtered list based on the search query from AuctionProvider
+    final auctionProvider = context.watch<AuctionProvider>();
+    final filteredAuctions = auctionProvider.searchQuery.isEmpty
+        ? auctions
+        : auctions
+            .where((auction) =>
+                auction.title
+                    .toLowerCase()
+                    .contains(auctionProvider.searchQuery.toLowerCase()))
+            .toList();
+
     return Scaffold(
       appBar: NavbarElementsAppbar(
-        title: title,
+        appBarTitle: title,
         showBackButton: true,
       ),
-      body: auctions.isEmpty
-          ? Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Text(
-                    placeholder,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: onSecondaryColor, fontSize: 13),
-                  ),
-                ),
-                if (title == "Live Auctions" || title == "Listed Products")
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(58, 32),
-                      maximumSize: const Size(108, 32),
-                      backgroundColor: primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+      body: Column(
+        children: [
+          const SizedBox(height: 9),
+          SearchFieldWidget(
+            isNavigable: false,
+            onChanged: (value) {
+              auctionProvider.searchItems(value);
+            },
+          ),
+          const SizedBox(height: 9),
+          // Expanded content below the search field
+          Expanded(
+            child: filteredAuctions.isEmpty
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Center(
+                        child: Text(
+                          placeholder,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(
+                                  color: onSecondaryColor, fontSize: 13),
+                        ),
                       ),
-                    ),
-                    onPressed: () {
-                      if (title == "Live Auctions") {
-                        context.read<TabIndexProvider>().updateIndex(19);
-                      } else if (title == "Listed Products") {
-                        context.read<TabIndexProvider>().updateIndex(20);
-                      }
-                    },
-                    child: Text(
-                      title == "Live Auctions" ? "Create Now" : "List Product",
-                      style: const TextStyle(color: secondaryColor, fontSize: 9),
+                      if (title == "Live Auctions" ||
+                          title == "Listed Products")
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(58, 32),
+                            maximumSize: const Size(108, 32),
+                            backgroundColor: primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            if (title == "Live Auctions") {
+                              context
+                                  .read<TabIndexProvider>()
+                                  .updateIndex(19);
+                            } else if (title == "Listed Products") {
+                              context
+                                  .read<TabIndexProvider>()
+                                  .updateIndex(20);
+                            }
+                          },
+                          child: Text(
+                            title == "Live Auctions"
+                                ? "Create Now"
+                                : "List Product",
+                            style: const TextStyle(
+                                color: secondaryColor, fontSize: 9),
+                          ),
+                        ),
+                    ],
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: GridView.builder(
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: cardWidth / cardHeight,
+                      ),
+                      itemCount: filteredAuctions.length,
+                      itemBuilder: (context, index) {
+                        return AuctionCard(
+                          auction: filteredAuctions[index],
+                          title: title,
+                          cardWidth: cardWidth,
+                        );
+                      },
                     ),
                   ),
-              ],
-            )
-          : Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 20,
-                  // Calculates childAspectRatio based on the desired height
-                  childAspectRatio: cardWidth / cardHeight,
-                ),
-                itemCount: auctions.length,
-                itemBuilder: (context, index) {
-                  return AuctionCard(
-                    auction: auctions[index],
-                    title: title,
-                    cardWidth: cardWidth,
-                  );
-                },
-              ),
-            ),
+          ),
+        ],
+      ),
     );
   }
 }

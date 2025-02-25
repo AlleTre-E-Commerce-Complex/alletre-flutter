@@ -10,7 +10,7 @@ class BidsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavbarElementsAppbar(title: 'Bids'),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Bids'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

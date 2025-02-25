@@ -41,15 +41,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
 
-    // // Function to filter auctions based on searchQuery
-    // List<AuctionItem> filterAuctions(List<AuctionItem> auctions) {
-    //   if (searchQuery.isEmpty) return auctions;
-    //   return auctions.where((auction) {
-    //     // Adjust this filtering logic as needed, e.g. using title, description, etc.
-    //     return auction.title.toLowerCase().contains(searchQuery.toLowerCase());
-    //   }).toList();
-    // }
-
     Future<void> refreshHomePage() async {
       await auctionProvider.getLiveAuctions();
       await auctionProvider.getListedProducts();
@@ -81,9 +72,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               SearchFieldWidget(
                 isNavigable: false,
                 onChanged: (value) {
-                  setState(() {
-                    searchQuery = value;
-                  });
+                  context.read<AuctionProvider>().searchItems(value);
                 },
               ),
               const SizedBox(height: 5),

@@ -1,9 +1,14 @@
+import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/wishlist_provider.dart';
+import 'package:alletre_app/utils/extras/search_highlight.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../auction card widgets/auction_countdown.dart';
 import '../auction card widgets/image_placeholder.dart';
@@ -78,17 +83,33 @@ class AuctionCard extends StatelessWidget {
                         // Title
                         SizedBox(
                           height: 34,
-                          child: Text(
-                            auction.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style:
-                                Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          child: Consumer<AuctionProvider>(
+                            builder: (context, auctionProvider, child) {
+                              return HighlightedText(
+                                fullText: auction.title,
+                                query: auctionProvider.searchQuery,
+                                normalStyle: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .copyWith(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
+                                highlightStyle: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      backgroundColor: Colors.yellow,
+                                    ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            },
                           ),
                         ),
+
                         const SizedBox(height: 10),
                         // Price
                         Container(
@@ -196,7 +217,8 @@ class AuctionCard extends StatelessWidget {
                           ),
                         ],
                         // Auction Card Action Buttons
-                        if (title == "Live Auctions") ...[
+                        if (title != 'Listed Products' &&
+                            title != 'Expired Auctions') ...[
                           const SizedBox(height: 10),
                           if (auction.hasBuyNow)
                             Row(
@@ -277,18 +299,22 @@ class AuctionCard extends StatelessWidget {
                 ),
               ],
             ),
-            // Bookmark and Share buttons
-            Padding(
-              padding: const EdgeInsets.all(6),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildIconButton(Icons.bookmark_outline_outlined),
-                  const SizedBox(width: 8),
-                  _buildIconButton(FontAwesomeIcons.shareFromSquare),
-                ],
+            if (title != 'Expired Auctions')
+              // Bookmark and Share buttons
+              Padding(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (title != 'Listed Products')
+                      _buildIconButton(
+                          context, FontAwesomeIcons.bookmark, auction),
+                    const SizedBox(width: 8),
+                    _buildIconButton(
+                        context, FontAwesomeIcons.shareFromSquare, auction),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -324,14 +350,38 @@ class AuctionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconButton(IconData icon) {
+  Widget _buildIconButton(
+      BuildContext context, IconData icon, AuctionItem auction) {
+    final wishlistProvider = Provider.of<WishlistProvider>(context);
+    final isWishlisted = wishlistProvider.isWishlisted(auction.id);
+
     return Container(
       decoration: BoxDecoration(
         color: buttonBgColor,
         shape: BoxShape.circle,
       ),
-      padding: const EdgeInsets.all(5),
-      child: Icon(icon, size: 13, color: onSecondaryColor),
+      padding: const EdgeInsets.all(6),
+      child: GestureDetector(
+        onTap: () async {
+          if (icon == FontAwesomeIcons.bookmark) {
+            wishlistProvider.toggleWishlist(auction);
+          } else if (icon == FontAwesomeIcons.shareFromSquare) {
+            await Share.share(
+              'Check out this auction: ${auction.title}\nStarting bid: AED ${auction.startBidAmount}',
+              subject: 'Interesting Auction on Alletre',
+            );
+          }
+        },
+        child: Icon(
+          icon == FontAwesomeIcons.bookmark && isWishlisted
+              ? Icons.bookmark
+              : icon,
+          size: 12,
+          color: icon == FontAwesomeIcons.bookmark && isWishlisted
+              ? primaryColor
+              : onSecondaryColor,
+        ),
+      ),
     );
   }
 
