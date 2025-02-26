@@ -41,3 +41,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Large files
+jdk-11.0.2.jdk/Contents/Home/lib/src.zip
+jdk-11.0.2.jdk/Contents/Home/lib/modules
+jdk-11.tar.gz
