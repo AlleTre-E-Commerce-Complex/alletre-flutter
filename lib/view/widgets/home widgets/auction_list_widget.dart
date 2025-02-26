@@ -91,7 +91,7 @@ class AuctionListWidget extends StatelessWidget {
               child: ListView.builder(
                 key: const PageStorageKey('shimmerList'),
                 scrollDirection: Axis.horizontal,
-                itemCount: auctions.length,
+                itemCount: 3, // Show 3 shimmer items while loading
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 7),
@@ -107,6 +107,73 @@ class AuctionListWidget extends StatelessWidget {
                   );
                 },
               ),
+            )
+          else if (error != null)
+            Column(
+              children: [
+                SizedBox(
+                  height: 50,
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, 
+                             color: Theme.of(context).colorScheme.error,
+                             size: 16),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            "Unable to load auctions. Please check your connection.",
+                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 13
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(58, 32),
+                    maximumSize: const Size(120, 32),
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    // Trigger refresh for this section
+                    if (title == 'Live Auctions') {
+                      context.read<AuctionProvider>().getLiveAuctions();
+                    } else if (title == 'Listed Products') {
+                      context.read<AuctionProvider>().getListedProducts();
+                    } else if (title == 'Upcoming Auctions') {
+                      context.read<AuctionProvider>().getUpcomingAuctions();
+                    } else if (title == 'Expired Auctions') {
+                      context.read<AuctionProvider>().getExpiredAuctions();
+                    }
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.refresh, 
+                           color: secondaryColor,
+                           size: 12),
+                      const SizedBox(width: 4),
+                      Text(
+                        "Retry",
+                        style: const TextStyle(
+                          color: secondaryColor,
+                          fontSize: 9
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             )
           else if (auctions.isEmpty)
             Column(

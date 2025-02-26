@@ -1,0 +1,2 @@
+/Users/abdulrahman/CascadeProjects/alletre/android/app/.cxx/Debug/1j25481f/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/abdulrahman/CascadeProjects/alletre/android/app/.cxx/Debug/1j25481f/armeabi-v7a/CMakeFiles/rebuild_cache.dir
