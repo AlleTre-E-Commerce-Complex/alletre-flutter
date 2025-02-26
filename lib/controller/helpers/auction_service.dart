@@ -39,123 +39,126 @@ class AuctionService {
   // }
 
   Future<List<AuctionItem>> fetchLiveAuctions() async {
-    final accessToken = await _getAccessToken();
-    if (accessToken == null) throw Exception('Access token not found');
-
     try {
+      final accessToken = await _getAccessToken();
+      final headers = accessToken != null 
+          ? {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}
+          : {'Content-Type': 'application/json'};
+
       final response = await http.get(
         Uri.parse('$baseUrl/auctions/user/main'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: headers,
       );
 
-      // print('Live Auctions Response Code: ${response.statusCode}');
+      print('Live Auctions Response Code: ${response.statusCode}');
+      print('Live Auctions Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
-        // print('Parsing response body...');
-        final jsonResponse = json.decode(response.body) as Map<String, dynamic>;
-
-        final List<dynamic> auctions = jsonResponse['data'] as List<dynamic>;
-        // print('Number of auctions received: ${auctions.length}');
-
-        List<AuctionItem> parsedAuctions = [];
-        for (var i = 0; i < auctions.length; i++) {
-          try {
-            // print('Parsing auction $i...');
-            final auction = AuctionItem.fromJson(auctions[i]);
-            // print('Successfully parsed auction $i: ${auction.title}');
-            parsedAuctions.add(auction);
-          } catch (e, stackTrace) {
-            // print('Error parsing auction $i:');
-            // print('Data: ${auctions[i]}');
-            // print('Error: $e');
-            print('Stack trace: $stackTrace');
-          }
-        }
-
-        // print('Successfully parsed ${parsedAuctions.length} auctions');
-        return parsedAuctions;
+        final jsonResponse = json.decode(response.body);
+        final List<dynamic> auctions = jsonResponse['data'];
+        return auctions.map((json) => AuctionItem.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load live auctions: ${response.statusCode}');
+        print('Failed to load live auctions: ${response.statusCode}');
+        return [];
       }
-    } catch (e, stackTrace) {
-      // print('Error in fetchLiveAuctions: $e');
-      print(stackTrace);
-      throw Exception('Failed to fetch live auctions: $e');
+    } catch (e) {
+      print('Error fetching live auctions: $e');
+      return [];
     }
   }
 
   Future<List<AuctionItem>> fetchListedProducts(int page) async {
-  final accessToken = await _getAccessToken();
-  if (accessToken == null) throw Exception('Access token not found');
+    try {
+      final accessToken = await _getAccessToken();
+      final headers = accessToken != null 
+          ? {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}
+          : {'Content-Type': 'application/json'};
 
-  final response = await http.get(
-    Uri.parse('$baseUrl/auctions/listedProducts/getAllListed-products?perPage=20'),
-    headers: {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json'
-      },
-  );
+      final response = await http.get(
+        Uri.parse('$baseUrl/auctions/listedProducts/getAllListed-products?perPage=20&page=$page'),
+        headers: headers,
+      );
 
-  print('Listed Products Response Code: ${response.statusCode}');
-  print('Listed Products Response Body: ${response.body}');
+      print('Listed Products Response Code: ${response.statusCode}');
+      print('Listed Products Response Body: ${response.body}');
 
-  if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      final List<dynamic> auctions = jsonResponse['data'];
-      final pagination = jsonResponse['pagination'];
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        final List<dynamic> auctions = jsonResponse['data'];
+        final pagination = jsonResponse['pagination'];
 
-      // Check pagination details
-      final totalPages = pagination['totalPages'];
-      final totalItems = pagination['totalItems'];
+        // Check pagination details
+        final totalPages = pagination['totalPages'];
+        final totalItems = pagination['totalItems'];
 
-      print('Fetched page: $page, Total pages: $totalPages, Total items: $totalItems');
+        print('Fetched page: $page, Total pages: $totalPages, Total items: $totalItems');
 
-      // Return the list of auction items
-      return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load listed products: ${response.statusCode}');
+        return auctions.map((json) => AuctionItem.fromJson(json)).toList();
+      } else {
+        print('Failed to load listed products: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching listed products: $e');
+      return [];
     }
   }
 
   Future<List<AuctionItem>> fetchUpcomingAuctions() async {
-    final accessToken = await _getAccessToken();
-    if (accessToken == null) throw Exception('Access token not found');
+    try {
+      final accessToken = await _getAccessToken();
+      final headers = accessToken != null 
+          ? {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}
+          : {'Content-Type': 'application/json'};
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/auctions/user/up-comming'),
-      headers: {'Authorization': 'Bearer $accessToken'},
-    );
+      final response = await http.get(
+        Uri.parse('$baseUrl/auctions/user/up-comming'),
+        headers: headers,
+      );
 
-    // print('Upcoming Auctions Response Code: ${response.statusCode}');
-    // print('Upcoming Auctions Response Body: ${response.body}');
+      print('Upcoming Auctions Response Code: ${response.statusCode}');
+      print('Upcoming Auctions Response Body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      final List<dynamic> auctions = json.decode(response.body)['data'];
-      return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-    } else {
-      throw Exception(
-          'Failed to load upcoming auctions: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        final List<dynamic> auctions = jsonResponse['data'];
+        return auctions.map((json) => AuctionItem.fromJson(json)).toList();
+      } else {
+        print('Failed to load upcoming auctions: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching upcoming auctions: $e');
+      return [];
     }
   }
 
   Future<List<AuctionItem>> fetchExpiredAuctions() async {
-    final accessToken = await _getAccessToken();
-    if (accessToken == null) throw Exception('Access token not found');
+    try {
+      final accessToken = await _getAccessToken();
+      final headers = accessToken != null 
+          ? {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}
+          : {'Content-Type': 'application/json'};
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/auctions/user/expired-auctions'),
-      headers: {'Authorization': 'Bearer $accessToken'},
-    );
+      final response = await http.get(
+        Uri.parse('$baseUrl/auctions/user/expired-auctions'),
+        headers: headers,
+      );
 
-    // print('Expired Auctions Response Code: ${response.statusCode}');
-    // print('Expired Auctions Response Body: ${response.body}');
+      print('Expired Auctions Response Code: ${response.statusCode}');
+      print('Expired Auctions Response Body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      final List<dynamic> auctions = json.decode(response.body)['data'];
-      return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-    } else {
-      throw Exception(
-          'Failed to load expired auctions: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        final List<dynamic> auctions = jsonResponse['data'];
+        return auctions.map((json) => AuctionItem.fromJson(json)).toList();
+      } else {
+        print('Failed to load expired auctions: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching expired auctions: $e');
+      return [];
     }
   }
 }

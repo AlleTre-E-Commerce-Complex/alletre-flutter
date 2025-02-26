@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../auction card widgets/auction_countdown.dart';
 import '../auction card widgets/image_placeholder.dart';
+import '../../screens/item_details/item_details.dart';
 
 class AuctionCard extends StatelessWidget {
   final AuctionItem auction;
@@ -179,8 +180,7 @@ class AuctionCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 9),
                         // Countdown/Listed Time Section
-                        if (title != 'Listed Products' &&
-                            title != 'Expired Auctions')
+                        if (title != 'Expired Auctions')
                           AuctionCountdown(
                             startDate: auction.startDate,
                             endDate: auction.expiryDate,
@@ -206,7 +206,7 @@ class AuctionCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                             ),
-                            onPressed: () {},
+                            onPressed: () => _navigateToDetails(context, auction),
                             child: const Text(
                               'View Details',
                               style: TextStyle(
@@ -235,7 +235,7 @@ class AuctionCard extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 4),
                                     ),
-                                    onPressed: () {},
+                                    onPressed: () => _navigateToDetails(context, auction),
                                     child: const Text(
                                       'Bid Now',
                                       textAlign: TextAlign.center,
@@ -261,7 +261,7 @@ class AuctionCard extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 4),
                                     ),
-                                    onPressed: () {},
+                                    onPressed: () => _navigateToDetails(context, auction),
                                     child: const Text(
                                       'Buy Now',
                                       textAlign: TextAlign.center,
@@ -283,7 +283,7 @@ class AuctionCard extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
-                              onPressed: () {},
+                              onPressed: () => _navigateToDetails(context, auction),
                               child: const Text(
                                 'Bid Now',
                                 style: TextStyle(
@@ -317,6 +317,15 @@ class AuctionCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _navigateToDetails(BuildContext context, AuctionItem auction) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ItemDetailsScreen(item: auction),
       ),
     );
   }
