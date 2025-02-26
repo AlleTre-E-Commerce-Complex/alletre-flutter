@@ -7,10 +7,10 @@ class ImageCarousel extends StatefulWidget {
   final Function(int)? onImageTap;
 
   const ImageCarousel({
-    Key? key,
+    super.key,
     required this.images,
     this.onImageTap,
-  }) : super(key: key);
+  });
 
   @override
   State<ImageCarousel> createState() => _ImageCarouselState();

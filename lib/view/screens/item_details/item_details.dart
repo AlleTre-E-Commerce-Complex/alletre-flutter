@@ -12,9 +12,9 @@ class ItemDetailsScreen extends StatelessWidget {
   final AuctionItem item;
 
   const ItemDetailsScreen({
-    Key? key,
+    super.key,
     required this.item,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
