@@ -13,6 +13,31 @@ class AuctionService {
     return await _storage.read(key: 'accessToken');
   }
 
+  // Future<Map<String, dynamic>> fetchAuctionDetails(int auctionId) async {
+  //   final accessToken = await _getAccessToken();
+  //   if (accessToken == null) throw Exception('Access token not found');
+
+  //   try {
+  //     final response = await http.get(
+  //       Uri.parse('$baseUrl/auctions/user/$auctionId/details'),
+  //       headers: {'Authorization': 'Bearer $accessToken'},
+  //     );
+
+  //     print('Auction Details Response Code: ${response.statusCode}');
+      
+  //     if (response.statusCode == 200) {
+  //       final jsonResponse = json.decode(response.body);
+  //       return jsonResponse['data'];
+  //     } else {
+  //       throw Exception('Failed to load auction details: ${response.statusCode}');
+  //     }
+  //   } catch (e, stackTrace) {
+  //     print('Error in fetchAuctionDetails: $e');
+  //     print(stackTrace);
+  //     throw Exception('Failed to fetch auction details: $e');
+  //   }
+  // }
+
   Future<List<AuctionItem>> fetchLiveAuctions() async {
     final accessToken = await _getAccessToken();
     if (accessToken == null) throw Exception('Access token not found');

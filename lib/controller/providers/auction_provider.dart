@@ -8,6 +8,7 @@ import 'package:alletre_app/model/auction_item.dart';
 
 class AuctionProvider with ChangeNotifier {
   final AuctionService _auctionService = AuctionService();
+    // Map<String, dynamic>? _auctionDetails;
   List<AuctionItem> _liveAuctions = [];
   List<AuctionItem> _listedProducts = [];
   List<AuctionItem> _upcomingAuctions = [];
@@ -15,6 +16,7 @@ class AuctionProvider with ChangeNotifier {
   final bool _isLoading = false;
   String? _error;
 
+  // Map<String, dynamic>? get auctionDetails => _auctionDetails;
   bool _isLoadingLive = false;
   bool _isLoadingListedProducts = false;
   bool _isLoadingUpcoming = false;
@@ -70,6 +72,28 @@ List<AuctionItem> get filteredLiveAuctions => _searchQuery.isEmpty ? _liveAuctio
 List<AuctionItem> get filteredListedProducts => _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
 List<AuctionItem> get filteredUpcomingAuctions => _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
 List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
+
+// Future<void> getAuctionDetails(int auctionId) async {
+//     if (_isLoading) return;
+
+//     _isLoading = true;
+//     _error = null;
+//     notifyListeners();
+
+//     try {
+//       print('Fetching details for auction ID: $auctionId');
+//       final details = await _auctionService.fetchAuctionDetails(auctionId);
+//       _auctionDetails = details;
+//       print('Successfully fetched auction details');
+//     } catch (e, stackTrace) {
+//       print('Error in getAuctionDetails: $e');
+//       print(stackTrace);
+//       _error = e.toString();
+//     } finally {
+//       _isLoading = false;
+//       notifyListeners();
+//     }
+//   }
 
   Future<void> getLiveAuctions() async {
     if (_isLoadingLive) return;
