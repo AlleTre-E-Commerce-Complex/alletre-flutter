@@ -21,22 +21,11 @@ class AuctionProvider with ChangeNotifier {
   bool _isLoadingExpired = false;
 
   bool _isFirstLoad = true;
-  bool get isFirstLoad => _isFirstLoad;
 
   String? _errorLive;
   String? _errorListedProducts;
   String? _errorUpcoming;
   String? _errorExpired;
-
-  DateTime? _lastRefreshTime;
-  Duration _refreshCooldown = const Duration(seconds: 5);
-
-  bool get _canRefresh => _lastRefreshTime == null || 
-      DateTime.now().difference(_lastRefreshTime!) > _refreshCooldown;
-
-  Future<void> _setRefreshTime() async {
-    _lastRefreshTime = DateTime.now();
-  }
 
   List<AuctionItem> get liveAuctions => _liveAuctions;
   List<AuctionItem> get listedProducts => _listedProducts;
@@ -61,52 +50,48 @@ class AuctionProvider with ChangeNotifier {
   String _searchQuery = "";
   String get searchQuery => _searchQuery;
 
-  List<AuctionItem> _filteredLiveAuctions = [];
-  List<AuctionItem> _filteredListedProducts = [];
-  List<AuctionItem> _filteredUpcomingAuctions = [];
-  List<AuctionItem> _filteredExpiredAuctions = [];
+List<AuctionItem> _filteredLiveAuctions = [];
+List<AuctionItem> _filteredListedProducts = [];
+List<AuctionItem> _filteredUpcomingAuctions = [];
+List<AuctionItem> _filteredExpiredAuctions = [];
 
-  void searchItems(String query) {
-    _searchQuery = query.toLowerCase();
-    
-    _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-    _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-    _filteredUpcomingAuctions = _upcomingAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-    _filteredExpiredAuctions = _expiredAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+void searchItems(String query) {
+  _searchQuery = query.toLowerCase();
+  
+  _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+  _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+  _filteredUpcomingAuctions = _upcomingAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+  _filteredExpiredAuctions = _expiredAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
 
-    notifyListeners();
-  }
+  notifyListeners();
+}
 
-  List<AuctionItem> get filteredLiveAuctions => _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
-  List<AuctionItem> get filteredListedProducts => _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
-  List<AuctionItem> get filteredUpcomingAuctions => _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
-  List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
+List<AuctionItem> get filteredLiveAuctions => _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
+List<AuctionItem> get filteredListedProducts => _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
+List<AuctionItem> get filteredUpcomingAuctions => _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
+List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
 
   Future<void> getLiveAuctions() async {
-    if (_isLoadingLive || !_canRefresh) return;
+    if (_isLoadingLive) return;
 
     _isLoadingLive = true;
     _errorLive = null;
     notifyListeners();
 
     try {
-      print('Fetching live auctions...');
+      // print('Starting to fetch live auctions...');
       final auctions = await _auctionService.fetchLiveAuctions();
+      // print('Received ${auctions.length} live auctions from service');
       _liveAuctions = auctions;
-      _filteredLiveAuctions = auctions;
-      print('Live Auctions Fetched: ${auctions.length}');
-      _isFirstLoad = false;
-    } catch (e) {
-      print('Error in getLiveAuctions: $e');
+      // print('Updated live auctions in provider');
+    } catch (e, stackTrace) {
+      // print('Error in getLiveAuctions:');
+      print(e);
+      print(stackTrace);
       _errorLive = e.toString();
-      // Only clear auctions on first load or network errors
-      if (_isFirstLoad || e.toString().contains('Network error')) {
-        _liveAuctions = [];
-        _filteredLiveAuctions = [];
-      }
     } finally {
       _isLoadingLive = false;
-      await _setRefreshTime();
+      // print('Notifying listeners about live auctions update');
       notifyListeners();
     }
   }
@@ -119,21 +104,27 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      print('Fetching listed products...');
+      log('Fetching listed products...');
       if (_isFirstLoad) {
-        _listedProducts.clear();
-        _filteredListedProducts.clear();
-        _isFirstLoad = false;
-      }
+      _listedProducts.clear(); // Clear the list only during the first load
+      _isFirstLoad = false;
+    }
       final auctions = await _auctionService.fetchListedProducts(_currentPage);
-      _listedProducts = auctions;
-      _filteredListedProducts = auctions;
-      print('Listed Products Fetched: ${auctions.length}');
+       _listedProducts =auctions;
+      log('Listed Products Fetched: ${_listedProducts.length}');
+      // Check if there are more pages to fetch
+      if (_currentPage < _totalPages) {
+        _currentPage++;
+      }
+
+      // Update the total pages if the pagination info is provided
+      final pagination = await _auctionService.fetchListedProducts(_currentPage);
+      if (pagination.isNotEmpty) {
+        _totalPages = pagination.length;  // Here, update the total pages
+      }
     } catch (e) {
-      print('Error fetching listed products: $e');
       _errorListedProducts = e.toString();
-      _listedProducts = [];
-      _filteredListedProducts = [];
+      log('Error fetching listed products: $_errorListedProducts');
     } finally {
       _isLoadingListedProducts = false;
       notifyListeners();
@@ -148,16 +139,13 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      print('Fetching upcoming auctions...');
+      // print('Fetching upcoming auctions...');
       final auctions = await _auctionService.fetchUpcomingAuctions();
       _upcomingAuctions = auctions;
-      _filteredUpcomingAuctions = auctions;
-      print('Upcoming Auctions Fetched: ${auctions.length}');
+      // print('Upcoming Auctions Fetched: ${_upcomingAuctions.length}');
     } catch (e) {
-      print('Error fetching upcoming auctions: $e');
       _errorUpcoming = e.toString();
-      _upcomingAuctions = [];
-      _filteredUpcomingAuctions = [];
+      // print('Error fetching upcoming auctions: $_error');
     } finally {
       _isLoadingUpcoming = false;
       notifyListeners();
@@ -172,16 +160,18 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      print('Fetching expired auctions...');
+      // print('Fetching expired auctions...');
       final auctions = await _auctionService.fetchExpiredAuctions();
       _expiredAuctions = auctions;
-      _filteredExpiredAuctions = auctions;
-      print('Expired Auctions Fetched: ${auctions.length}');
-    } catch (e) {
-      print('Error fetching expired auctions: $e');
+      if (auctions.isNotEmpty) {
+        _expiredAuctions = auctions;
+      } else {
+        print('No expired auctions found');
+      }
+    } catch (e, stackTrace) {
       _errorExpired = e.toString();
-      _expiredAuctions = [];
-      _filteredExpiredAuctions = [];
+      // print('Error fetching expired auctions: $_error');
+      print(stackTrace);
     } finally {
       _isLoadingExpired = false;
       notifyListeners();
