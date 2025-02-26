@@ -123,6 +123,25 @@ class AuctionItem {
     }
   }
 
+  factory AuctionItem.empty() {
+    return AuctionItem(
+      id: 0,
+      title: '',
+      description: '',
+      imageLinks: [],
+      price: '0',
+      productListingPrice: '0',
+      startBidAmount: '0',
+      startDate: DateTime.now(),
+      expiryDate: DateTime.now(),
+      createdAt: DateTime.now(),
+      status: '',
+      location: '',
+      bids: 0,
+      hasBuyNow: false,
+    );
+  }
+
   /// Determines if the auction is active
   bool isActive() {
     final now = DateTime.now();

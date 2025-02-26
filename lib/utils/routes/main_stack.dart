@@ -1,5 +1,5 @@
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
-import 'package:alletre_app/view/screens/auction%20screen/auction_details_screen.dart';
+import 'package:alletre_app/view/screens/item_details/item_details.dart';
 import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/shipping_details_screen.dart';
@@ -23,6 +23,7 @@ import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
 import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dart';
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/profile%20screen/profile_screen.dart';
+import 'package:alletre_app/model/auction_item.dart';
 
 class MainStack extends StatelessWidget {
   const MainStack({super.key});
@@ -64,7 +65,7 @@ class MainStack extends StatelessWidget {
       case 16:
         return const ContactUsScreen();
       case 17:
-        return const AuctionDetailsScreen();
+        return ItemDetailsScreen(item: AuctionItem.empty());
       case 18:
         return const ShippingDetailsScreen();
       case 19:
