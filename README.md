@@ -1,17 +1,49 @@
-# alletre_app
+# Alletre App
 
-A new Flutter project.
+## Development Setup
 
-## Getting Started
+### Prerequisites
 
-This project is a starting point for a Flutter application.
+1. **JDK Setup**
+   - Download and install JDK 11 from [Oracle's website](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
+   - Set up JAVA_HOME environment variable:
+     
+     For macOS/Linux:
+     ```bash
+     export JAVA_HOME=/path/to/your/jdk
+     export PATH=$JAVA_HOME/bin:$PATH
+     ```
+     
+     For Windows:
+     ```
+     Set JAVA_HOME=C:\path\to\your\jdk
+     Add %JAVA_HOME%\bin to your PATH
+     ```
 
-A few resources to get you started if this is your first Flutter project:
+2. **Flutter Setup**
+   - Follow the [Flutter installation guide](https://flutter.dev/docs/get-started/install)
+   - Run `flutter doctor` to verify your setup
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Getting Started
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# alletre
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/fahad7tt/alletre.git
+   cd alletre
+   ```
+
+2. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+3. Run the app:
+   ```bash
+   flutter run
+   ```
+
+### Development Guidelines
+
+- Ensure you have the correct JDK version (11) installed
+- Do not commit JDK or other large binary files to the repository
+- Use the provided .gitignore file to prevent accidental commits of large files
