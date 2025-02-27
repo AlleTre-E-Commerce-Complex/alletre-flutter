@@ -2,35 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'image_placeholder.dart';
 
-class ImageCarousel extends StatefulWidget {
+class ImageCarousel extends StatelessWidget {
   final List<String> images;
   final Function(int)? onImageTap;
 
-  const ImageCarousel({
+  ImageCarousel({
     super.key,
     required this.images,
     this.onImageTap,
   });
 
-  @override
-  State<ImageCarousel> createState() => _ImageCarouselState();
-}
-
-class _ImageCarouselState extends State<ImageCarousel> {
-  late PageController _pageController;
-  int _currentPage = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
+  final PageController _pageController = PageController();
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
 
   bool _isSvg(String url) {
     return url.toLowerCase().endsWith('.svg');
@@ -38,7 +21,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.images.isEmpty) {
+    if (images.isEmpty) {
       return const PlaceholderImage();
     }
 
@@ -47,21 +30,19 @@ class _ImageCarouselState extends State<ImageCarousel> {
         PageView.builder(
           controller: _pageController,
           onPageChanged: (index) {
-            setState(() {
-              _currentPage = index;
-            });
+            _currentPage.value = index;
           },
-          itemCount: widget.images.length,
+          itemCount: images.length,
           itemBuilder: (context, index) {
             return GestureDetector(
-              onTap: () => widget.onImageTap?.call(index),
-              child: _isSvg(widget.images[index])
+              onTap: () => onImageTap?.call(index),
+              child: _isSvg(images[index])
                   ? SvgPicture.network(
-                      widget.images[index],
+                      images[index],
                       fit: BoxFit.contain,
                     )
                   : Image.network(
-                      widget.images[index],
+                      images[index],
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return const PlaceholderImage();
@@ -70,27 +51,32 @@ class _ImageCarouselState extends State<ImageCarousel> {
             );
           },
         ),
-        if (widget.images.length > 1)
+        if (images.length > 1)
           Positioned(
             bottom: 10,
             left: 0,
             right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                widget.images.length,
-                (index) => Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentPage == index
-                        ? Theme.of(context).primaryColor
-                        : Colors.grey.withOpacity(0.5),
+            child: ValueListenableBuilder<int>(
+              valueListenable: _currentPage,
+              builder: (context, currentPage, child) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    images.length,
+                    (index) => Container(
+                      width: 8,
+                      height: 8,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: currentPage == index
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey.withOpacity(0.5),
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
       ],
