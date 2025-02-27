@@ -4,11 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_countdown.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:alletre_app/services/category_service.dart';
 import 'package:alletre_app/services/api/category_api_service.dart';
+
+import '../../widgets/auction card widgets/auction_countdown.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final AuctionItem item;
@@ -24,7 +25,7 @@ class ItemDetailsScreen extends StatelessWidget {
     print('Loading subcategories for item: ${item.title}');
     print('Category ID: ${item.categoryId}');
     print('Subcategory ID: ${item.subCategoryId}');
-    
+
     if (item.categoryId > 0) {
       try {
         await CategoryApiService.initializeSubCategories(item.categoryId);
@@ -47,7 +48,8 @@ class ItemDetailsScreen extends StatelessWidget {
         }
 
         final categoryName = CategoryService.getCategoryName(item.categoryId);
-        final subcategoryName = CategoryService.getSubCategoryName(item.subCategoryId);
+        final subcategoryName =
+            CategoryService.getSubCategoryName(item.subCategoryId);
 
         print('Retrieved names:');
         print('- Category name: $categoryName');
@@ -112,9 +114,7 @@ class ItemDetailsScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Category and Subcategory
-        _buildCategoryInfo(context),
-        const SizedBox(height: 16),
+        
 
         // Bid Amount Input
         Container(
@@ -139,7 +139,8 @@ class ItemDetailsScreen extends StatelessWidget {
                     icon: const Icon(Icons.remove),
                     onPressed: () {
                       final currentValue = bidAmount.value;
-                      if (currentValue > double.parse(item.startBidAmount) + 50) {
+                      if (currentValue >
+                          double.parse(item.startBidAmount) + 50) {
                         bidAmount.value = currentValue - 50;
                       }
                     },
@@ -158,7 +159,10 @@ class ItemDetailsScreen extends StatelessWidget {
                           ),
                           child: Text(
                             'AED ${value.toStringAsFixed(2)}',
-                            style: Theme.of(context).textTheme.titleMedium!.copyWith(color: onSecondaryColor),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(color: onSecondaryColor),
                             textAlign: TextAlign.center,
                           ),
                         );
@@ -398,17 +402,14 @@ class ItemDetailsScreen extends StatelessWidget {
                     children: [
                       if (title == 'Live Auctions' ||
                           title == 'Upcoming Auctions')
-                        Text(
-                          'Current Bid\nAED ${item.startBidAmount}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15),
-                        )
-                      else if (title == 'Listed Products')
+                      Text(
+                        'Current Bid\nAED ${item.startBidAmount}',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15),
+                      ),
+                      if (title == 'Listed Products')
                         Text(
                           'Selling Price\nAED ${item.productListingPrice}',
                           style: Theme.of(context)
@@ -435,12 +436,12 @@ class ItemDetailsScreen extends StatelessWidget {
                       title != 'Expired Auctions') ...[
                     Row(
                       children: [
-                        Icon(
-                          FontAwesomeIcons.clock,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        const SizedBox(width: 8),
+                        // Icon(
+                        //   FontAwesomeIcons.clock,
+                        //   size: 16,
+                        //   color: Theme.of(context).colorScheme.secondary,
+                        // ),
+                        // const SizedBox(width: 8),
                         AuctionCountdown(
                           startDate: item.startDate,
                           endDate: item.expiryDate,
@@ -468,7 +469,11 @@ class ItemDetailsScreen extends StatelessWidget {
                       ],
                     ),
 
-                  // Category, Subcategory, and Bid Section
+                  // Category and Subcategory
+                  _buildCategoryInfo(context),
+                  const SizedBox(height: 16),
+
+                  // Bid Section for non-listed products
                   if (title != 'Listed Products') _buildBidSection(context),
 
                   // Auction Info Cards
