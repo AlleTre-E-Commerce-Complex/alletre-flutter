@@ -65,7 +65,7 @@ class MainStack extends StatelessWidget {
       case 16:
         return const ContactUsScreen();
       case 17:
-        return ItemDetailsScreen(item: AuctionItem.empty());
+        return ItemDetailsScreen(item: AuctionItem.empty(), title: '');
       case 18:
         return const ShippingDetailsScreen();
       case 19:

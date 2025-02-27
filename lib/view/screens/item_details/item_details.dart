@@ -7,28 +7,24 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_countdown.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:share_plus/share_plus.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final AuctionItem item;
+  final String title;
 
   const ItemDetailsScreen({
     super.key,
     required this.item,
+    required this.title,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(item.title),
+        title: Text(item.title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
         actions: [
-          // Share button
-          IconButton(
-            icon: const Icon(FontAwesomeIcons.shareFromSquare ),
-            onPressed: () {
-              // Implement share functionality
-            },
-          ),
           // Wishlist button
           Consumer<WishlistProvider>(
             builder: (context, wishlistProvider, child) {
@@ -36,11 +32,26 @@ class ItemDetailsScreen extends StatelessWidget {
               return IconButton(
                 icon: Icon(
                   isInWishlist ? Icons.bookmark : FontAwesomeIcons.bookmark,
-                  color: isInWishlist ? Colors.red : null,
+                  color: isInWishlist ? primaryColor : null,
+                  size: 18
                 ),
                 onPressed: () => wishlistProvider.toggleWishlist(item),
+                padding: const EdgeInsets.only(right: 2),
+                constraints: const BoxConstraints(),
               );
             },
+          ),
+          // Share button
+          IconButton(
+            icon: const Icon(FontAwesomeIcons.shareFromSquare, size: 18),
+            onPressed: () {
+              Share.share(
+              'Check out this auction: ${item.title}\nStarting bid: AED ${item.startBidAmount}',
+              subject: 'Interesting Auction on Alletre',
+            );
+            },
+            padding: const EdgeInsets.only(right: 16),
+            constraints: const BoxConstraints(),
           ),
         ],
       ),
@@ -68,22 +79,53 @@ class ItemDetailsScreen extends StatelessWidget {
                   // Title and Price
                   Text(
                     item.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 18),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
+
+                  //Status
+                  if(title != 'Listed Products')
+                  Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: getStatusColor(item.status).withAlpha(26),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        getDisplayStatus(item.status),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: getStatusColor(item.status),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                                      const SizedBox(height: 15),
+
                   Row(
                     children: [
-                      Text(
-                        'Current Price: \$${item.price}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
+                      if (title == 'Live Auctions' || title == 'Upcoming Auctions')
+                        Text(
+                          'Current Bid:\nAED ${item.startBidAmount}',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15
+                              ),
+                        )
+                      else if (title == 'Listed Products')
+                        Text(
+                          'Selling Price:\nAED ${item.productListingPrice}',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15
+                              ),
+                        ),
                       if (item.hasBuyNow) ...[
                         const SizedBox(width: 16),
                         Text(
-                          'Buy Now: \$${item.productListingPrice}',
+                          'Buy Now:\nAED ${item.buyNowPrice}',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ],
@@ -91,8 +133,8 @@ class ItemDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Status and Time
-                  if (item.status != 'Listed Products') ...[
+                  // Time
+                  if (title != 'Listed Products' && title != 'Expired Auctions') ...[
                     Row(
                       children: [
                         Icon(
@@ -108,16 +150,13 @@ class ItemDetailsScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'Status: ${item.status}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: _getStatusColor(item.status),
-                          ),
-                    ),
+
+                    
                   ],
                   const SizedBox(height: 16),
 
-                  // Location and Creation Date
+                  if(title == 'Listed Products')
+                  // Location
                   Row(
                     children: [
                       Icon(
@@ -129,13 +168,6 @@ class ItemDetailsScreen extends StatelessWidget {
                       Text(
                         item.location,
                         style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const Spacer(),
-                      Text(
-                        'Posted ${timeago.format(item.createdAt)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey,
-                            ),
                       ),
                     ],
                   ),
@@ -160,7 +192,7 @@ class ItemDetailsScreen extends StatelessWidget {
                         child: _buildInfoCard(
                           context,
                           'Starting Bid',
-                          '\$${item.startBidAmount}',
+                          'AED ${item.startBidAmount}',
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -260,18 +292,33 @@ class ItemDetailsScreen extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  Color _getStatusColor(String status) {
+  // Color _getStatusColor(String status) {
+  //   switch (status.toUpperCase()) {
+  //     case 'LIVE':
+  //       return Colors.green;
+  //     case 'UPCOMING':
+  //       return Colors.blue;
+  //     case 'EXPIRED':
+  //       return Colors.red;
+  //     case 'SOLD':
+  //       return Colors.purple;
+  //     default:
+  //       return Colors.grey;
+  //   }
+  // }
+
+  String getDisplayStatus(String status) {
     switch (status.toUpperCase()) {
-      case 'LIVE':
-        return Colors.green;
+      case 'ACTIVE':
+        return 'Active';
       case 'UPCOMING':
-        return Colors.blue;
+        return 'Upcoming';
       case 'EXPIRED':
-        return Colors.red;
+        return 'Expired';
       case 'SOLD':
-        return Colors.purple;
+        return 'Sold';
       default:
-        return Colors.grey;
+        return 'Unknown';
     }
   }
 }

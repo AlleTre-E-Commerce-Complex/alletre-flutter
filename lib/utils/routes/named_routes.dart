@@ -42,7 +42,7 @@ class AppRoutes {
       signup: (context) => SignUpPage(),
       login: (context) => LoginPage(),
       home: (context) => const HomeScreenContent(),
-      productDetails: (context) => const ProductDetailsScreen(),
+      productDetails: (context) => const AuctionDetailsScreen(),
       auctionDetails: (context) => const AuctionDetailsScreen(),
       // search: (context) => const SearchScreen(),
       purchases: (context) => const PurchaseScreen(),

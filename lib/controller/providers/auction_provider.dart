@@ -130,21 +130,25 @@ List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expired
     try {
       log('Fetching listed products...');
       if (_isFirstLoad) {
-      _listedProducts.clear(); // Clear the list only during the first load
-      _isFirstLoad = false;
-    }
-      final auctions = await _auctionService.fetchListedProducts(_currentPage);
-       _listedProducts =auctions;
-      log('Listed Products Fetched: ${_listedProducts.length}');
-      // Check if there are more pages to fetch
-      if (_currentPage < _totalPages) {
-        _currentPage++;
+        _listedProducts.clear(); // Clear the list only during the first load
+        _isFirstLoad = false;
       }
-
-      // Update the total pages if the pagination info is provided
-      final pagination = await _auctionService.fetchListedProducts(_currentPage);
-      if (pagination.isNotEmpty) {
-        _totalPages = pagination.length;  // Here, update the total pages
+      
+      final auctions = await _auctionService.fetchListedProducts(_currentPage);
+      if (auctions.isNotEmpty) {
+        if (_currentPage == 1) {
+          _listedProducts = auctions; // Replace list only on first page
+        } else {
+          _listedProducts.addAll(auctions); // Append for subsequent pages
+        }
+        log('Listed Products Fetched: ${_listedProducts.length}');
+        
+        // Increment page only if we got data
+        _currentPage++;
+      } else {
+        // No more data, reset pagination
+        _currentPage = 1;
+        _isFirstLoad = true;
       }
     } catch (e) {
       _errorListedProducts = e.toString();

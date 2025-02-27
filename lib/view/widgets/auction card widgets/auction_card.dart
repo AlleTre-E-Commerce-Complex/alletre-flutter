@@ -179,8 +179,8 @@ class AuctionCard extends StatelessWidget {
                                 ),
                         ),
                         const SizedBox(height: 9),
-                        // Countdown/Listed Time Section
-                        if (title != 'Expired Auctions')
+                        // Countdown Section
+                        if (title != 'Expired Auctions' && title != 'Listed Products')
                           AuctionCountdown(
                             startDate: auction.startDate,
                             endDate: auction.expiryDate,
@@ -325,7 +325,10 @@ class AuctionCard extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ItemDetailsScreen(item: auction),
+        builder: (context) => ItemDetailsScreen(
+          item: auction,
+          title: title,
+        ),
       ),
     );
   }

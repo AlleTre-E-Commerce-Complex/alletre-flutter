@@ -12,6 +12,7 @@ class AuctionItem {
   final DateTime createdAt;
   final String description;
   final String startBidAmount;
+  final String buyNowPrice;
   String status;
   bool hasBuyNow;
   final DateTime startDate;
@@ -28,6 +29,7 @@ class AuctionItem {
     required this.createdAt,
     required this.description,
     required this.startBidAmount,
+    required this.buyNowPrice,
     required this.status,
     required this.hasBuyNow,
     required this.startDate,
@@ -109,6 +111,7 @@ class AuctionItem {
         createdAt: createdAt,
         description: item['description'] as String? ?? 'No Description',
         startBidAmount: json['startBidAmount']?.toString() ?? '0',
+        buyNowPrice: json['buyNowPrice']?.toString() ?? '0',
         status: json['status'] as String? ?? 'UNKNOWN',
         hasBuyNow: json['isBuyNowAllowed'] as bool? ?? false,
         startDate: startDate,
@@ -132,6 +135,7 @@ class AuctionItem {
       price: '0',
       productListingPrice: '0',
       startBidAmount: '0',
+      buyNowPrice: '0',
       startDate: DateTime.now(),
       expiryDate: DateTime.now(),
       createdAt: DateTime.now(),
