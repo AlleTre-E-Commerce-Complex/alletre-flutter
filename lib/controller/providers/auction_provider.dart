@@ -47,7 +47,6 @@ class AuctionProvider with ChangeNotifier {
   String? get errorExpired => _errorExpired;
 
   int _currentPage = 1;
-  int _totalPages = 1;
 
   String _searchQuery = "";
   String get searchQuery => _searchQuery;

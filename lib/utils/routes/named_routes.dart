@@ -1,5 +1,4 @@
 import 'package:alletre_app/view/screens/auction%20screen/auction_details_screen.dart';
-import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/edit_profile_screen.dart';

@@ -6,7 +6,6 @@ import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_countdown.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel.dart';
-import 'package:timeago/timeago.dart' as timeago;
 import 'package:share_plus/share_plus.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
@@ -23,7 +22,7 @@ class ItemDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(item.title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+        title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
         actions: [
           // Wishlist button
           Consumer<WishlistProvider>(
