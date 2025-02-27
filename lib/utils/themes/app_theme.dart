@@ -24,7 +24,7 @@ double getCardHeight(String title) {
     case "Listed Products":
       return 333; // Tall enough for location and view details button
     default:
-      return 248; // For expired auctions
+      return 250; // For expired auctions
   }
 }
 

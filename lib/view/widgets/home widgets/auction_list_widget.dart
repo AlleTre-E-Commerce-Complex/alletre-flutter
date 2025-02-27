@@ -109,48 +109,52 @@ class AuctionListWidget extends StatelessWidget {
               ),
             )
           else if (auctions.isEmpty)
-            Column(
-              children: [
-                SizedBox(
-                  height: 50,
-                  child: Center(
-                    child: Text(
-                      _searchQueryIsActive(context)
-                          ? "Searched item not found."
-                          : placeholder,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(color: onSecondaryColor, fontSize: 13),
-                    ),
-                  ),
-                ),
-                if (!_searchQueryIsActive(context) &&
-                    (title == "Live Auctions" || title == "Listed Products"))
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(58, 32),
-                      maximumSize: const Size(108, 32),
-                      backgroundColor: primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+            (() {
+              print('AuctionListWidget: No auctions to display for "$title"');
+              print('isLoading: $isLoading, error: $error');
+              print('searchActive: ${_searchQueryIsActive(context)}');
+              return Column(
+                children: [
+                  SizedBox(
+                    height: 50,
+                    child: Center(
+                      child: Text(
+                        _searchQueryIsActive(context)
+                            ? "Searched item not found."
+                            : placeholder,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(color: onSecondaryColor, fontSize: 13),
                       ),
                     ),
-                    onPressed: () {
-                      if (title == "Live Auctions") {
-                        context.read<TabIndexProvider>().updateIndex(19);
-                      } else if (title == "Listed Products") {
-                        context.read<TabIndexProvider>().updateIndex(20);
-                      }
-                    },
-                    child: Text(
-                      title == "Live Auctions" ? "Create Now" : "List Product",
-                      style:
-                          const TextStyle(color: secondaryColor, fontSize: 9),
-                    ),
                   ),
-              ],
-            )
+                  if (!_searchQueryIsActive(context) &&
+                      (title == "Live Auctions" || title == "Listed Products"))
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(58, 32),
+                        maximumSize: const Size(108, 32),
+                        backgroundColor: primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {
+                        if (title == "Live Auctions") {
+                          context.read<TabIndexProvider>().updateIndex(19);
+                        } else if (title == "Listed Products") {
+                          context.read<TabIndexProvider>().updateIndex(20);
+                        }
+                      },
+                      child: Text(
+                        title == "Live Auctions" ? "Create Now" : "List Product",
+                        style: const TextStyle(color: secondaryColor, fontSize: 9),
+                      ),
+                    ),
+                ],
+              );
+            })()
           else
             SizedBox(
               height: getCardHeight(title), // Fixed height for each section

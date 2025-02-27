@@ -2,11 +2,11 @@
 
 import 'dart:convert';
 import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class AuctionService {
-  final String baseUrl = 'https://www.alletre.com/api';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<String?> _getAccessToken() async {
@@ -46,7 +46,7 @@ class AuctionService {
           : {'Content-Type': 'application/json'};
 
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/user/main'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main'),
         headers: headers,
       );
 
@@ -75,7 +75,7 @@ class AuctionService {
           : {'Content-Type': 'application/json'};
 
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/listedProducts/getAllListed-products?perPage=20&page=$page'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?perPage=20&page=$page'),
         headers: headers,
       );
 
@@ -104,6 +104,7 @@ class AuctionService {
     }
   }
 
+
   Future<List<AuctionItem>> fetchUpcomingAuctions() async {
     try {
       final accessToken = await _getAccessToken();
@@ -112,7 +113,7 @@ class AuctionService {
           : {'Content-Type': 'application/json'};
 
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/user/up-comming'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming'),
         headers: headers,
       );
 
@@ -141,7 +142,7 @@ class AuctionService {
           : {'Content-Type': 'application/json'};
 
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/user/expired-auctions'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions'),
         headers: headers,
       );
 
