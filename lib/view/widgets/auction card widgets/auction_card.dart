@@ -420,6 +420,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../auction card widgets/auction_countdown.dart';
 import '../auction card widgets/image_placeholder.dart';
 import '../../screens/item_details/item_details.dart';
+
 class AuctionCard extends StatelessWidget {
   final AuctionItem auction;
   final String title;

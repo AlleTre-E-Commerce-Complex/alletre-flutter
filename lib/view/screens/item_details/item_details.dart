@@ -240,7 +240,7 @@ class ItemDetailsScreen extends StatelessWidget {
           color: Theme.of(context).cardColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: (0.1 * 255)),
               blurRadius: 4,
               offset: const Offset(0, -2),
             ),
@@ -284,13 +284,13 @@ class ItemDetailsScreen extends StatelessWidget {
   String getDisplayStatus(String status) {
     switch (status.toUpperCase()) {
       case 'ACTIVE':
-        return 'Active';
-      case 'UPCOMING':
-        return 'Upcoming';
+        return 'ACTIVE';
+      case 'IN_SCHEDULED':
+        return 'SCHEDULED';
       case 'EXPIRED':
-        return 'Expired';
+        return 'EXPIRED';
       case 'SOLD':
-        return 'Sold';
+        return 'SOLD';
       default:
         return 'Unknown';
     }

@@ -189,11 +189,14 @@ List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expired
     try {
       // print('Fetching expired auctions...');
       final auctions = await _auctionService.fetchExpiredAuctions();
-      _expiredAuctions = auctions;
-      if (auctions.isNotEmpty) {
-        _expiredAuctions = auctions;
-      } else {
-        print('No expired auctions found');
+      
+      // Filter out auctions with CANCELLED_BEFORE_EXP_DATE status
+      _expiredAuctions = auctions.where((auction) => 
+        auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE'
+      ).toList();
+      
+      if (_expiredAuctions.isEmpty) {
+        print('No valid expired auctions found');
       }
     } catch (e, stackTrace) {
       _errorExpired = e.toString();
