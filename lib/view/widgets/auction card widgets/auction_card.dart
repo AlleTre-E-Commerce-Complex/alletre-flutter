@@ -531,7 +531,7 @@ class AuctionCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'AED ${title == 'Listed Products' ? NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : NumberFormat.decimalPattern().format(double.tryParse(auction.startBidAmount))}',
+                            'AED ${title == 'Listed Products' ? NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : NumberFormat.decimalPattern().format(double.tryParse(auction.currentBid))}',
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall!
@@ -780,7 +780,7 @@ class AuctionCard extends StatelessWidget {
             wishlistProvider.toggleWishlist(auction);
           } else if (icon == FontAwesomeIcons.shareFromSquare) {
             await Share.share(
-              'Check out this auction: ${auction.title}\nStarting bid: AED ${auction.startBidAmount}',
+              'Check out this auction: ${auction.title}\nStarting bid: AED ${auction.startBidAmount}\nCurrent bid: AED ${auction.currentBid}',
               subject: 'Interesting Auction on Alletre',
             );
           }

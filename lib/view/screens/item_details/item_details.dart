@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/model/auction_item.dart';
@@ -107,15 +108,15 @@ class ItemDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildBidSection(BuildContext context) {
-    final ValueNotifier<double> bidAmount = ValueNotifier<double>(
-      double.parse(item.startBidAmount) + 50,
+    final ValueNotifier<String> bidAmount = ValueNotifier<String>(
+      item.currentBid.isEmpty ? item.startBidAmount : item.currentBid,
     );
+
+    final String minimumBid = item.currentBid.isEmpty ? item.startBidAmount : item.currentBid;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        
-
         // Bid Amount Input
         Container(
           padding: const EdgeInsets.all(16),
@@ -138,33 +139,24 @@ class ItemDetailsScreen extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.remove),
                     onPressed: () {
-                      final currentValue = bidAmount.value;
-                      if (currentValue >
-                          double.parse(item.startBidAmount) + 50) {
-                        bidAmount.value = currentValue - 50;
+                      final currentValue = double.parse(bidAmount.value);
+                      final minBid = double.parse(minimumBid);
+                      if (currentValue > minBid) {
+                        bidAmount.value = (currentValue - 50).toString();
                       }
                     },
                   ),
                   Expanded(
-                    child: ValueListenableBuilder<double>(
+                    child: ValueListenableBuilder<String>(
                       valueListenable: bidAmount,
                       builder: (context, value, child) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: const Color.fromARGB(255, 37, 27, 27)),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'AED ${value.toStringAsFixed(2)}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(color: onSecondaryColor),
-                            textAlign: TextAlign.center,
-                          ),
+                        return Text(
+                          'AED ${NumberFormat.decimalPattern().format(double.parse(value))}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(fontWeight: FontWeight.bold, color: onSecondaryColor),
+                          textAlign: TextAlign.center,
                         );
                       },
                     ),
@@ -172,7 +164,8 @@ class ItemDetailsScreen extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () {
-                      bidAmount.value = bidAmount.value + 50;
+                      final currentValue = double.parse(bidAmount.value);
+                      bidAmount.value = (currentValue + 50).toString();
                     },
                   ),
                 ],
@@ -293,7 +286,7 @@ class ItemDetailsScreen extends StatelessWidget {
         return 'SCHEDULED';
       case 'EXPIRED':
         return 'EXPIRED';
-      case 'SOLD':
+      case 'WAITING_FOR_PAYMENT':
         return 'SOLD';
       default:
         return 'Unknown';
@@ -327,7 +320,7 @@ class ItemDetailsScreen extends StatelessWidget {
             icon: const Icon(FontAwesomeIcons.shareFromSquare, size: 18),
             onPressed: () {
               Share.share(
-                'Check out this auction: ${item.title}\nStarting bid: AED ${item.startBidAmount}',
+                'Check out this auction: ${item.title}\nStarting bid: AED ${item.startBidAmount}\nCurrent bid: AED ${item.currentBid}',
                 subject: 'Interesting Auction on Alletre',
               );
             },
@@ -398,17 +391,24 @@ class ItemDetailsScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 16),
+
+                  // Category and Subcategory
+                  _buildCategoryInfo(context),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       if (title == 'Live Auctions' ||
                           title == 'Upcoming Auctions')
-                      Text(
-                        'Current Bid\nAED ${item.startBidAmount}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: primaryColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15),
-                      ),
+                        Text(
+                          'Current Bid\nAED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15),
+                        ),
                       if (title == 'Listed Products')
                         Text(
                           'Selling Price\nAED ${item.productListingPrice}',
@@ -468,10 +468,6 @@ class ItemDetailsScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-
-                  // Category and Subcategory
-                  _buildCategoryInfo(context),
-                  const SizedBox(height: 16),
 
                   // Bid Section for non-listed products
                   if (title != 'Listed Products') _buildBidSection(context),
