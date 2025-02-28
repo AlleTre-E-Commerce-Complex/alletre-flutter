@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -9,8 +10,8 @@ import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel
 import 'package:share_plus/share_plus.dart';
 import 'package:alletre_app/services/category_service.dart';
 import 'package:alletre_app/services/api/category_api_service.dart';
-
 import '../../widgets/auction card widgets/auction_countdown.dart';
+import '../image_view/full_screen_image.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final AuctionItem item;
@@ -339,7 +340,15 @@ class ItemDetailsScreen extends StatelessWidget {
               child: ImageCarousel(
                 images: item.imageLinks,
                 onImageTap: (index) {
-                  // Implement full-screen image view
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImageView(
+                        imageUrls: item.imageLinks,
+                        initialIndex: index,
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
