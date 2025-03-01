@@ -3,12 +3,14 @@
 import 'dart:developer';
 
 import 'package:alletre_app/controller/helpers/auction_service.dart';
+import 'package:alletre_app/controller/helpers/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
 
 class AuctionProvider with ChangeNotifier {
+  final SocketService _socketService = SocketService();
   final AuctionService _auctionService = AuctionService();
-    // Map<String, dynamic>? _auctionDetails;
+  // Map<String, dynamic>? _auctionDetails;
   List<AuctionItem> _liveAuctions = [];
   List<AuctionItem> _listedProducts = [];
   List<AuctionItem> _upcomingAuctions = [];
@@ -36,6 +38,167 @@ class AuctionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  void initializeSocket() {
+    _socketService.connect();
+
+    // Listen for connection state changes
+    _socketService.connectionState.listen((state) {
+      switch (state) {
+        case SocketConnectionState.connected:
+          _error = null;
+          break;
+        case SocketConnectionState.disconnected:
+          _error = 'Connection lost. Reconnecting...';
+          break;
+        case SocketConnectionState.error:
+          _error = 'Connection error. Please check your internet connection.';
+          break;
+        default:
+          break;
+      }
+      notifyListeners();
+    });
+
+    // Listen for auction updates
+    _socketService.auctionUpdates.listen((data) {
+      _handleAuctionUpdate(data);
+    });
+
+    // Listen for bid updates
+    _socketService.bidUpdates.listen((data) {
+      _handleBidUpdate(data);
+    });
+
+    // Listen for errors
+    _socketService.errors.listen((error) {
+      _error = error;
+      notifyListeners();
+    });
+  }
+
+  void _handleAuctionUpdate(Map<String, dynamic> data) {
+    final String auctionId = data['auctionId']?.toString() ?? '';
+    final String updateType = data['type'] ?? '';
+    final Map<String, dynamic> updateData = data['data'] ?? {};
+
+    switch (updateType) {
+      case 'status_change':
+        _updateAuctionStatus(auctionId, updateData);
+        break;
+      case 'new_auction':
+        _addNewAuction(updateData);
+        break;
+      case 'auction_ended':
+        _handleAuctionEnded(auctionId);
+        break;
+    }
+  }
+
+  void _handleBidUpdate(Map<String, dynamic> data) {
+    final String auctionId = data['auctionId']?.toString() ?? '';
+    final String newBid = data['amount']?.toString() ?? '0';
+    final int totalBids = data['totalBids'] ?? 0;
+    
+    void updateList(List<AuctionItem> list) {
+      final index = list.indexWhere((item) => item.id.toString() == auctionId);
+      if (index != -1) {
+        final updatedItem = list[index].copyWith(
+          currentBid: newBid,
+          bids: totalBids,
+        );
+        list[index] = updatedItem;
+      }
+    }
+
+    updateList(_liveAuctions);
+    updateList(_listedProducts);
+    notifyListeners();
+  }
+
+  void _updateAuctionBid(String auctionId, Map<String, dynamic> bidData) {
+    void updateList(List<AuctionItem> list) {
+      final index = list.indexWhere((item) => item.id.toString() == auctionId);
+      if (index != -1) {
+        final updatedItem = list[index].copyWith(
+          currentBid: bidData['currentBid'],
+          bids: bidData['bids'],
+        );
+        list[index] = updatedItem;
+      }
+    }
+
+    updateList(_liveAuctions);
+    updateList(_listedProducts);
+    updateList(_upcomingAuctions);
+    notifyListeners();
+  }
+
+  void _updateAuctionStatus(String auctionId, Map<String, dynamic> statusData) {
+    // Remove from old status list and add to new status list
+    final auction = [..._liveAuctions, ..._listedProducts, ..._upcomingAuctions, ..._expiredAuctions]
+        .firstWhere(
+          (item) => item.id.toString() == auctionId,
+          orElse: () => AuctionItem.fromJson(statusData), // Create a new item if not found
+        );
+
+    final updatedAuction = auction.copyWith(
+      status: statusData['status'],
+      expiryDate: statusData['expiryDate'] != null ? DateTime.parse(statusData['expiryDate']) : null,
+    );
+
+    // Remove from all lists
+    _liveAuctions.removeWhere((item) => item.id.toString() == auctionId);
+    _listedProducts.removeWhere((item) => item.id.toString() == auctionId);
+    _upcomingAuctions.removeWhere((item) => item.id.toString() == auctionId);
+    _expiredAuctions.removeWhere((item) => item.id.toString() == auctionId);
+
+    // Add to appropriate list
+    switch (statusData['status']) {
+      case 'live':
+        _liveAuctions.add(updatedAuction);
+        break;
+      case 'listed':
+        _listedProducts.add(updatedAuction);
+        break;
+      case 'upcoming':
+        _upcomingAuctions.add(updatedAuction);
+        break;
+      case 'expired':
+        _expiredAuctions.add(updatedAuction);
+        break;
+    }
+
+    notifyListeners();
+  }
+
+  void _addNewAuction(Map<String, dynamic> auctionData) {
+    final newAuction = AuctionItem.fromJson(auctionData);
+    
+    switch (newAuction.status) {
+      case 'live':
+        _liveAuctions.add(newAuction);
+        break;
+      case 'listed':
+        _listedProducts.add(newAuction);
+        break;
+      case 'upcoming':
+        _upcomingAuctions.add(newAuction);
+        break;
+    }
+    
+    notifyListeners();
+  }
+
+  void _handleAuctionEnded(String auctionId) {
+    // Remove from all lists
+    _liveAuctions.removeWhere((item) => item.id.toString() == auctionId);
+    _listedProducts.removeWhere((item) => item.id.toString() == auctionId);
+    _upcomingAuctions.removeWhere((item) => item.id.toString() == auctionId);
+    _expiredAuctions.removeWhere((item) => item.id.toString() == auctionId);
+
+    notifyListeners();
+  }
+
   bool get isLoadingLive => _isLoadingLive;
   bool get isLoadingListedProducts => _isLoadingListedProducts;
   bool get isLoadingUpcoming => _isLoadingUpcoming;
@@ -51,48 +214,38 @@ class AuctionProvider with ChangeNotifier {
   String _searchQuery = "";
   String get searchQuery => _searchQuery;
 
-List<AuctionItem> _filteredLiveAuctions = [];
-List<AuctionItem> _filteredListedProducts = [];
-List<AuctionItem> _filteredUpcomingAuctions = [];
-List<AuctionItem> _filteredExpiredAuctions = [];
+  List<AuctionItem> _filteredLiveAuctions = [];
+  List<AuctionItem> _filteredListedProducts = [];
+  List<AuctionItem> _filteredUpcomingAuctions = [];
+  List<AuctionItem> _filteredExpiredAuctions = [];
 
-void searchItems(String query) {
-  _searchQuery = query.toLowerCase();
+  void searchItems(String query) {
+    _searchQuery = query.toLowerCase();
   
-  _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-  _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-  _filteredUpcomingAuctions = _upcomingAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-  _filteredExpiredAuctions = _expiredAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredUpcomingAuctions = _upcomingAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredExpiredAuctions = _expiredAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
 
-  notifyListeners();
-}
+    notifyListeners();
+  }
 
-List<AuctionItem> get filteredLiveAuctions => _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
-List<AuctionItem> get filteredListedProducts => _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
-List<AuctionItem> get filteredUpcomingAuctions => _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
-List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
+  List<AuctionItem> get filteredLiveAuctions => _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
+  List<AuctionItem> get filteredListedProducts => _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
+  List<AuctionItem> get filteredUpcomingAuctions => _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
+  List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
 
-// Future<void> getAuctionDetails(int auctionId) async {
-//     if (_isLoading) return;
+  Future<bool> placeBid(String auctionId, double amount) async {
+    return await _socketService.placeBid(auctionId, amount);
+  }
 
-//     _isLoading = true;
-//     _error = null;
-//     notifyListeners();
+  void joinAuctionRoom(String auctionId) {
+    _socketService.joinAuctionRoom(auctionId);
+  }
 
-//     try {
-//       print('Fetching details for auction ID: $auctionId');
-//       final details = await _auctionService.fetchAuctionDetails(auctionId);
-//       _auctionDetails = details;
-//       print('Successfully fetched auction details');
-//     } catch (e, stackTrace) {
-//       print('Error in getAuctionDetails: $e');
-//       print(stackTrace);
-//       _error = e.toString();
-//     } finally {
-//       _isLoading = false;
-//       notifyListeners();
-//     }
-//   }
+  void leaveAuctionRoom(String auctionId) {
+    _socketService.leaveAuctionRoom(auctionId);
+  }
 
   Future<void> getLiveAuctions() async {
     if (_isLoadingLive) return;
@@ -206,5 +359,11 @@ List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expired
       _isLoadingExpired = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _socketService.dispose();
+    super.dispose();
   }
 }

@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => UserProvider()),
-          ChangeNotifierProvider(create: (context) => AuctionProvider()),
+          ChangeNotifierProvider(create: (context) => AuctionProvider()..initializeSocket()),
           // ChangeNotifierProvider(create: (context) => AuctionDetailsProvider()),
           ChangeNotifierProvider(create: (context) => LanguageProvider()),
           ChangeNotifierProvider(create: (context) => CategoryState()),

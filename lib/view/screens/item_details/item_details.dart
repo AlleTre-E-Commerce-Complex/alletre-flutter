@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +24,7 @@ class ItemDetailsScreen extends StatelessWidget {
     required this.title,
   });
 
-  Future<void> _loadSubCategories() async {
+  Future<void> _loadSubCategories(BuildContext context) async {
     print('Loading subcategories for item: ${item.title}');
     print('Category ID: ${item.categoryId}');
     print('Subcategory ID: ${item.subCategoryId}');
@@ -41,7 +42,7 @@ class ItemDetailsScreen extends StatelessWidget {
 
   Widget _buildCategoryInfo(BuildContext context) {
     return FutureBuilder<void>(
-      future: _loadSubCategories(),
+      future: _loadSubCategories(context),
       builder: (context, snapshot) {
         // Debug the FutureBuilder state
         print('FutureBuilder state: ${snapshot.connectionState}');
@@ -50,54 +51,75 @@ class ItemDetailsScreen extends StatelessWidget {
         }
 
         final categoryName = CategoryService.getCategoryName(item.categoryId);
-        final subcategoryName =
-            CategoryService.getSubCategoryName(item.subCategoryId);
+        final subcategoryName = CategoryService.getSubCategoryName(item.subCategoryId);
 
         print('Retrieved names:');
         print('- Category name: $categoryName');
         print('- Subcategory name: $subcategoryName');
 
-        return Row(
+        return Column(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            // Category box
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(color: borderColor),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Category',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: greyColor,
+                          color: onSecondaryColor,
+                          fontSize: 13
                         ),
                   ),
-                  const SizedBox(height: 4),
+                  const Spacer(),
                   Text(
                     categoryName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                           color: onSecondaryColor,
+                          fontSize: 13
                         ),
+                    softWrap: true,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+
+            const SizedBox(height: 18),
+
+            // Sub Category box
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(color: borderColor),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Sub Category',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: greyColor,
+                          color: onSecondaryColor,
+                          fontSize: 13
                         ),
                   ),
-                  const SizedBox(height: 4),
+                  const Spacer(),
                   Text(
                     subcategoryName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                           color: onSecondaryColor,
+                          fontSize: 13
                         ),
+                    softWrap: true,
                   ),
                 ],
               ),
@@ -110,10 +132,14 @@ class ItemDetailsScreen extends StatelessWidget {
 
   Widget _buildBidSection(BuildContext context) {
     final ValueNotifier<String> bidAmount = ValueNotifier<String>(
-      item.currentBid.isEmpty ? item.startBidAmount : item.currentBid,
+      item.currentBid.isEmpty
+          ? item.startBidAmount
+          : item.currentBid,
     );
 
-    final String minimumBid = item.currentBid.isEmpty ? item.startBidAmount : item.currentBid;
+    final String minimumBid = item.currentBid.isEmpty
+        ? item.startBidAmount
+        : item.currentBid;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +182,9 @@ class ItemDetailsScreen extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium!
-                              .copyWith(fontWeight: FontWeight.bold, color: onSecondaryColor),
+                              .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: onSecondaryColor),
                           textAlign: TextAlign.center,
                         );
                       },
@@ -294,28 +322,52 @@ class ItemDetailsScreen extends StatelessWidget {
     }
   }
 
+  Color getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'ACTIVE':
+        return Colors.green;
+      case 'IN_SCHEDULED':
+        return Colors.blue;
+      case 'EXPIRED':
+        return Colors.red;
+      case 'WAITING_FOR_PAYMENT':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Handle joining/leaving auction room in build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+      auctionProvider.joinAuctionRoom(item.id.toString());
+    });
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(item.title,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+        title: Center(
+          child: Text(item.title,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        ),
         actions: [
           // Wishlist button
-          Consumer<WishlistProvider>(
-            builder: (context, wishlistProvider, child) {
-              final isInWishlist = wishlistProvider.isWishlisted(item.id);
-              return IconButton(
-                icon: Icon(
-                    isInWishlist ? Icons.bookmark : FontAwesomeIcons.bookmark,
-                    color: isInWishlist ? primaryColor : null,
-                    size: 18),
-                onPressed: () => wishlistProvider.toggleWishlist(item),
-                padding: const EdgeInsets.only(right: 2),
-                constraints: const BoxConstraints(),
-              );
-            },
-          ),
+          if (title != 'Listed Products')
+            Consumer<WishlistProvider>(
+              builder: (context, wishlistProvider, child) {
+                final isInWishlist = wishlistProvider.isWishlisted(item.id);
+                return IconButton(
+                  icon: Icon(
+                      isInWishlist ? Icons.bookmark : FontAwesomeIcons.bookmark,
+                      color: isInWishlist ? primaryColor : null,
+                      size: 18),
+                  onPressed: () => wishlistProvider.toggleWishlist(item),
+                  padding: const EdgeInsets.only(right: 2),
+                  constraints: const BoxConstraints(),
+                );
+              },
+            ),
           // Share button
           IconButton(
             icon: const Icon(FontAwesomeIcons.shareFromSquare, size: 18),
@@ -330,181 +382,177 @@ class ItemDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Image carousel
-            SizedBox(
-              height: 300,
-              child: ImageCarousel(
-                images: item.imageLinks,
-                onImageTap: (index) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FullScreenImageView(
-                        imageUrls: item.imageLinks,
-                        initialIndex: index,
+      body: PopScope(
+        onPopInvoked: (didPop) {
+          if (didPop) {
+            // Leave the auction room when navigating away
+            final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+            auctionProvider.leaveAuctionRoom(item.id.toString());
+          }
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Image carousel
+              SizedBox(
+                height: 300,
+                child: ImageCarousel(
+                  images: item.imageLinks,
+                  onImageTap: (index) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FullScreenImageView(
+                          imageUrls: item.imageLinks,
+                          initialIndex: index,
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
 
-            // Item details section
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title and Price
-                  Text(
-                    item.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .copyWith(fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
-
-                  //Status
-                  if (title != 'Listed Products')
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: getStatusColor(item.status).withAlpha(26),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        getDisplayStatus(item.status),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: getStatusColor(item.status),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+              // Item details section
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title and Price
+                    Text(
+                      item.title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(fontWeight: FontWeight.w600, fontSize: 14),
                     ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 10),
 
-                  // Description
-                  Text(
-                    'Description',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item.description,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 16),
+                    //Status
+                    if (title != 'Listed Products')
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: getStatusColor(item.status).withAlpha(26),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          getDisplayStatus(item.status),
+                          style: TextStyle(
+                            fontSize: 8,
+                            color: getStatusColor(item.status),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
 
-                  // Category and Subcategory
-                  _buildCategoryInfo(context),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      if (title == 'Live Auctions' ||
-                          title == 'Upcoming Auctions')
-                        Text(
-                          'Current Bid\nAED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15),
-                        ),
-                      if (title == 'Listed Products')
-                        Text(
-                          'Selling Price\nAED ${item.productListingPrice}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15),
-                        ),
-                      if (item.hasBuyNow) ...[
-                        const SizedBox(width: 16),
-                        Text(
-                          'Buy Now:\nAED ${item.buyNowPrice}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
+                    // Description
+                    Text(
+                      'Description',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      item.description,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(fontSize: 13),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Category and Subcategory
+                    _buildCategoryInfo(context),
+                    const SizedBox(height: 16),
+
+                    // Time
+                    if (title != 'Listed Products' &&
+                        title != 'Expired Auctions') ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          AuctionCountdown(
+                            startDate: item.startDate,
+                            endDate: item.expiryDate,
+                          ),
+                          _buildInfoCard(
+                            context,
+                            'Total Bids',
+                            item.bids.toString(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                     ],
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // Time
-                  if (title != 'Listed Products' &&
-                      title != 'Expired Auctions') ...[
                     Row(
                       children: [
-                        // Icon(
-                        //   FontAwesomeIcons.clock,
-                        //   size: 16,
-                        //   color: Theme.of(context).colorScheme.secondary,
-                        // ),
-                        // const SizedBox(width: 8),
-                        AuctionCountdown(
-                          startDate: item.startDate,
-                          endDate: item.expiryDate,
-                        ),
+                        if (title == 'Live Auctions' ||
+                            title == 'Upcoming Auctions')
+                          Text(
+                            'Current Bid\nAED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15),
+                          ),
+                        if (title == 'Listed Products')
+                          Text(
+                            'Selling Price\nAED ${item.productListingPrice}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15),
+                          ),
+                        if (item.hasBuyNow) ...[
+                          const SizedBox(width: 16),
+                          Text(
+                            'Buy Now:\nAED ${item.buyNowPrice}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
+
+                    if (title == 'Listed Products')
+                      // Location
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            item.location,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+
+                    // Bid Section for non-listed products
+                    if (title != 'Listed Products')
+                      _buildBidSection(context),
                   ],
-                  const SizedBox(height: 16),
-
-                  if (title == 'Listed Products')
-                    // Location
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          item.location,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-
-                  // Bid Section for non-listed products
-                  if (title != 'Listed Products') _buildBidSection(context),
-
-                  // Auction Info Cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildInfoCard(
-                          context,
-                          'Starting Bid',
-                          'AED ${item.startBidAmount}',
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildInfoCard(
-                          context,
-                          'Total Bids',
-                          item.bids.toString(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: _buildBottomBar(context),
