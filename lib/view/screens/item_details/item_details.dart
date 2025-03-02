@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -161,6 +162,36 @@ class ItemDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildBidSection(BuildContext context) {
+    if (title == 'Listed Products') {
+      return Column(
+        children: [
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                // Handle view details action
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: Text(
+                'View Contact Details',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(color: secondaryColor, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     final ValueNotifier<String> bidAmount = ValueNotifier<String>(
       item.currentBid.isEmpty ? item.startBidAmount : item.currentBid,
     );
@@ -183,16 +214,20 @@ class ItemDetailsScreen extends StatelessWidget {
               ValueListenableBuilder<String>(
                 valueListenable: bidAmount,
                 builder: (context, value, child) {
-                  final bool canDecrease = double.parse(value) > double.parse(minimumBid);
+                  final bool canDecrease =
+                      double.parse(value) > double.parse(minimumBid);
                   return Container(
                     height: 30,
                     width: 30,
                     decoration: BoxDecoration(
-                      color: canDecrease ? primaryColor : primaryColor.withAlpha(128),
+                      color: canDecrease
+                          ? primaryColor
+                          : primaryColor.withAlpha(128),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.remove, color: secondaryColor, size: 15),
+                      icon: const Icon(Icons.remove,
+                          color: secondaryColor, size: 15),
                       onPressed: canDecrease
                           ? () {
                               final currentValue = double.parse(value);
@@ -412,9 +447,16 @@ class ItemDetailsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(FontAwesomeIcons.shareFromSquare, size: 18),
             onPressed: () {
+              final String itemUrl =
+                  'https://alletre.com/items/${item.id}'; // Replace with your actual domain
               Share.share(
-                'Check out this auction: ${item.title}\nStarting bid: AED ${item.startBidAmount}\nCurrent bid: AED ${item.currentBid}',
-                subject: 'Interesting Auction on Alletre',
+                'Check out this ${title.toLowerCase()}: ${item.title}\n'
+                '${title == "Listed Products" ? "Price" : "Starting bid"}: AED ${item.startBidAmount}\n'
+                '${title != "Listed Products" ? "Current bid: AED ${item.currentBid}\n" : ""}'
+                '$itemUrl',
+                subject: title == "Listed Products"
+                    ? 'Interesting Product on Alletre'
+                    : 'Interesting Auction on Alletre',
               );
             },
             padding: const EdgeInsets.only(right: 16),
@@ -583,8 +625,7 @@ class ItemDetailsScreen extends StatelessWidget {
                               border: Border.all(color: avatarColor),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
                               children: [
                                 Text(
                                   'Selling Price',
@@ -598,18 +639,20 @@ class ItemDetailsScreen extends StatelessWidget {
                                       ),
                                 ),
                                 const SizedBox(
-                                    height:
-                                        5), // Spacing between title and value
-                                Text(
-                                  'AED ${item.productListingPrice}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        color: primaryColor,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
-                                      ),
+                                    width:
+                                        8), // Spacing between title and value
+                                Center(
+                                  child: Text(
+                                    'AED ${item.productListingPrice}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          color: primaryColor,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -619,13 +662,13 @@ class ItemDetailsScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              border: Border.all(color: primaryColor, width: 1.2),
+                              border:
+                                  Border.all(color: primaryColor, width: 1.2),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: InkWell(
                               onTap: () {},
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'Buy Now',
@@ -640,16 +683,18 @@ class ItemDetailsScreen extends StatelessWidget {
                                   const SizedBox(
                                       height:
                                           5), // Spacing between title and value
-                                  Text(
-                                    'AED ${item.buyNowPrice}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          color: primaryColor,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 12,
-                                        ),
+                                  Center(
+                                    child: Text(
+                                      'AED ${item.buyNowPrice}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -661,25 +706,132 @@ class ItemDetailsScreen extends StatelessWidget {
 
                     const SizedBox(height: 16),
 
-                    if (title == 'Listed Products')
-                      // Location
-                      Row(
+                    if (title == 'Listed Products') ...[
+                      // Location section
+                      const SizedBox(height: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.secondary,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                size: 30,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (item.itemLocation != null &&
+                                        item.itemLocation?.address != null) ...[
+                                      Text(
+                                        item.itemLocation?.address ??
+                                            'Address not available',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(fontSize: 13),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${item.itemLocation?.city ?? 'Unknown city'}, ${item.itemLocation?.country ?? 'Unknown country'}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600),
+                                      ),
+                                    ] else
+                                      Text(
+                                        'Location not available',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(fontSize: 13),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            item.location,
-                            style: Theme.of(context).textTheme.bodyLarge,
+                          const SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: () {
+                              if (item.itemLocation?.lat != null &&
+                                  item.itemLocation?.lng != null) {
+                                launchUrl(Uri.parse(
+                                    'https://www.google.com/maps/search/?api=1&query=${item.itemLocation!.lat},${item.itemLocation!.lng}'));
+                              }
+                            },
+                            child: Container(
+                              height: 200,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: avatarColor),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Stack(
+                                  children: [
+                                    if (item.itemLocation?.lat != null &&
+                                        item.itemLocation?.lng != null)
+                                      Image.network(
+                                        'https://maps.googleapis.com/maps/api/staticmap?center=${item.itemLocation?.lat},${item.itemLocation?.lng}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${item.itemLocation?.lat},${item.itemLocation?.lng}&key=AIzaSyB9ATxmePBJdgRl8mq4D1ahCRxHy99IFqg',
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return const Center(
+                                            child: Icon(Icons.map,
+                                                size: 50, color: Colors.grey),
+                                          );
+                                        },
+                                      )
+                                    else
+                                      const Center(
+                                        child: Icon(Icons.map,
+                                            size: 50, color: Colors.grey),
+                                      ),
+                                    Positioned(
+                                      right: 8,
+                                      bottom: 8,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.open_in_new,
+                                                size: 16,
+                                                color: Theme.of(context)
+                                                    .primaryColor),
+                                            const SizedBox(width: 4),
+                                            Text('View Larger Map',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
+                    ],
 
-                    // Bid Section for non-listed products
-                    if (title != 'Listed Products') const SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     _buildBidSection(context),
                   ],
                 ),

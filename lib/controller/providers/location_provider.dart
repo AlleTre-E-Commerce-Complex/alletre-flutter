@@ -6,8 +6,8 @@ class LocationProvider with ChangeNotifier {
   String? selectedState;
   String? selectedCity;
   
-  final List<Location> _locations = [];
-  List<Location> get locations => _locations;
+  final List<LocationModel> _locations = [];
+  List<LocationModel> get locations => _locations;
 
   void updateCountry(String? country) {
     selectedCountry = country;
@@ -24,7 +24,7 @@ class LocationProvider with ChangeNotifier {
     notifyListeners();
   }
   
-  void addLocation(Location location) {
+  void addLocation(LocationModel location) {
     _locations.add(location);
     notifyListeners();
   }

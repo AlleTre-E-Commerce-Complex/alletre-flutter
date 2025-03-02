@@ -1,11 +1,11 @@
-class Location {
+class LocationModel {
   String country;
   String city;
   String address;
   String phone;
   String addressLabel;
 
-  Location({
+  LocationModel({
     required this.country,
     required this.city,
     required this.address,

@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
-
 import 'dart:developer';
+import 'package:alletre_app/model/item_location.dart';
 
 class AuctionItem {
   final int id;
@@ -8,7 +8,7 @@ class AuctionItem {
   final String price;
   final String productListingPrice;
   final int bids;
-  final String location;
+  final Location? itemLocation;
   final DateTime createdAt;
   final String description;
   final String startBidAmount;
@@ -23,6 +23,7 @@ class AuctionItem {
   final int subCategoryId;
   final String categoryName;
   final String subCategoryName;
+  final bool isAuctionProduct;
 
   AuctionItem({
     required this.id,
@@ -30,7 +31,7 @@ class AuctionItem {
     required this.price,
     required this.productListingPrice,
     required this.bids,
-    required this.location,
+    required this.itemLocation,
     required this.createdAt,
     required this.description,
     required this.startBidAmount,
@@ -45,6 +46,7 @@ class AuctionItem {
     required this.subCategoryId,
     required this.categoryName,
     required this.subCategoryName,
+    required this.isAuctionProduct,
   });
 
   // Add copyWith method for real-time updates
@@ -54,7 +56,7 @@ class AuctionItem {
     String? price,
     String? productListingPrice,
     int? bids,
-    String? location,
+    Location? itemLocation,
     DateTime? createdAt,
     String? description,
     String? startBidAmount,
@@ -69,6 +71,7 @@ class AuctionItem {
     int? subCategoryId,
     String? categoryName,
     String? subCategoryName,
+    bool? isAuctionProduct,
   }) {
     return AuctionItem(
       id: id ?? this.id,
@@ -76,7 +79,7 @@ class AuctionItem {
       price: price ?? this.price,
       productListingPrice: productListingPrice ?? this.productListingPrice,
       bids: bids ?? this.bids,
-      location: location ?? this.location,
+      itemLocation: itemLocation ?? this.itemLocation,
       createdAt: createdAt ?? this.createdAt,
       description: description ?? this.description,
       startBidAmount: startBidAmount ?? this.startBidAmount,
@@ -91,6 +94,7 @@ class AuctionItem {
       subCategoryId: subCategoryId ?? this.subCategoryId,
       categoryName: categoryName ?? this.categoryName,
       subCategoryName: subCategoryName ?? this.subCategoryName,
+      isAuctionProduct: isAuctionProduct ?? this.isAuctionProduct,
     );
   }
 
@@ -102,17 +106,6 @@ class AuctionItem {
       // Get category and subcategory information
       final categoryId = item['categoryId'] as int? ?? 0;
       final subCategoryId = item['subCategoryId'] as int? ?? 0;
-
-      // Get the latest bid amount if available
-      String currentBid = json['startBidAmount'] ?? '0';
-      if (json['bids'] != null &&
-          json['bids'] is List &&
-          (json['bids'] as List).isNotEmpty) {
-        final latestBid = json['bids'][0];
-        if (latestBid != null && latestBid['amount'] != null) {
-          currentBid = latestBid['amount'];
-        }
-      }
 
       // Handle images from product data
       List<String> imageLinks = [];
@@ -157,7 +150,6 @@ class AuctionItem {
         print('Error parsing dates: $e');
       }
 
-      // Safely get bid count
       int bidCount = 0;
       try {
         final countMap = json['_count'];
@@ -168,34 +160,47 @@ class AuctionItem {
         print('Error parsing bid count: $e');
       }
 
+      // Get the latest bid amount if available
+      String currentBid = json['startBidAmount'] ?? '0';
+      if (json['bids'] != null &&
+          json['bids'] is List &&
+          (json['bids'] as List).isNotEmpty) {
+        final latestBid = json['bids'][0];
+        if (latestBid != null && latestBid['amount'] != null) {
+          currentBid = latestBid['amount'];
+        }
+      }
+
+      Location? itemLocation;
+      if (json['location'] != null) {
+        itemLocation = Location.fromJson(json['location']);
+      }
+
       return AuctionItem(
-          id: json['id'] as int? ?? 0,
-          title: item['title'] as String? ?? 'No Title',
-          price: item['price']?.toString() ?? '0',
-          productListingPrice: json['ProductListingPrice'] ?? '0',
-          bids: bidCount,
-          location: json['location'] != null &&
-                  json['location']['country'] != null &&
-                  json['location']['city'] != null
-              ? "${json['location']['city']['nameEn'] ?? 'Unknown City'},\n${json['location']['country']['nameEn'] ?? 'Unknown Country'}"
-              : 'Unknown Location',
-          createdAt: createdAt,
-          description: item['description'] as String? ?? 'No Description',
-          startBidAmount: json['startBidAmount']?.toString() ?? '0',
-          currentBid: currentBid,
-          buyNowPrice: json['buyNowPrice']?.toString() ?? '0',
-          status: json['status'] as String? ?? 'UNKNOWN',
-          hasBuyNow: json['isBuyNowAllowed'] as bool? ?? false,
-          startDate: startDate,
-          expiryDate: expiryDate,
-          imageLinks: imageLinks,
-          categoryId: categoryId,
-          subCategoryId: subCategoryId,
-          categoryName: '',
-          subCategoryName: '');
+        id: json['id'] as int? ?? 0,
+        title: item['title'] as String? ?? 'No Title',
+        price: item['price']?.toString() ?? '0',
+        productListingPrice: json['ProductListingPrice'] ?? '0',
+        bids: bidCount,
+        itemLocation: itemLocation,
+        createdAt: createdAt,
+        description: item['description'] as String? ?? 'No Description',
+        startBidAmount: json['startBidAmount']?.toString() ?? '0',
+        currentBid: currentBid,
+        buyNowPrice: json['buyNowPrice']?.toString() ?? '0',
+        status: json['status'] as String? ?? '',
+        hasBuyNow: json['isBuyNowAllowed'] as bool? ?? false,
+        startDate: startDate,
+        expiryDate: expiryDate,
+        imageLinks: imageLinks,
+        categoryId: categoryId,
+        subCategoryId: subCategoryId,
+        categoryName: '',
+        subCategoryName: '',
+        isAuctionProduct: item['isAuctionProduct'] as bool? ?? false,
+      );
     } catch (e, stackTrace) {
-      log('Error in AuctionItem.fromJson: $e');
-      log('Stack trace: $stackTrace');
+      log('Error parsing AuctionItem: $e\n$stackTrace');
       return AuctionItem.empty();
     }
   }
@@ -215,13 +220,14 @@ class AuctionItem {
       expiryDate: DateTime.now(),
       createdAt: DateTime.now(),
       status: '',
-      location: '',
+      itemLocation: null,
       bids: 0,
       hasBuyNow: false,
       categoryId: 0,
       subCategoryId: 0,
       categoryName: '',
       subCategoryName: '',
+      isAuctionProduct: false,
     );
   }
 
