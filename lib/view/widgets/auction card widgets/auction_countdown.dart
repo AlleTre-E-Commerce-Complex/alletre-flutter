@@ -5,11 +5,17 @@ import 'package:flutter/material.dart';
 class AuctionCountdown extends StatelessWidget {
   final DateTime startDate;
   final DateTime endDate;
+  final TextStyle? textStyle;
+  final TextStyle? prefixStyle;
+  final String? customPrefix;
 
   const AuctionCountdown({
     super.key,
     required this.startDate,
     required this.endDate,
+    this.textStyle,
+    this.prefixStyle,
+    this.customPrefix,
   });
 
   Stream<Map<String, String>> getTimeStream() async* {
@@ -25,7 +31,7 @@ class AuctionCountdown extends StatelessWidget {
     // If auction hasn't started yet, show time until start
     if (now.isBefore(startDate)) {
       final Duration difference = startDate.difference(now);
-      return formatDuration(difference, 'Starting in:');
+      return formatDuration(difference, customPrefix ?? 'Starting in:');
     }
 
     // If auction has ended, show expired
@@ -35,7 +41,7 @@ class AuctionCountdown extends StatelessWidget {
 
     // If auction is live, show time until end
     final Duration difference = endDate.difference(now);
-    return formatDuration(difference, 'Ending in:');
+    return formatDuration(difference, customPrefix ?? 'Ending in:');
   }
 
   Map<String, String> formatDuration(Duration duration, String prefix) {
@@ -70,11 +76,12 @@ class AuctionCountdown extends StatelessWidget {
         if (timeValue == 'Auction Ended') {
           return Text(
             timeValue,
-            style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                  color: primaryVariantColor,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
+            style: textStyle ??
+                Theme.of(context).textTheme.labelSmall!.copyWith(
+                      color: primaryVariantColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
           );
         }
         return RichText(
@@ -82,7 +89,7 @@ class AuctionCountdown extends StatelessWidget {
             children: [
               TextSpan(
                 text: '$prefix\n',
-                style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                style: prefixStyle ?? textStyle ?? Theme.of(context).textTheme.labelSmall!.copyWith(
                       color: primaryVariantColor,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -90,7 +97,7 @@ class AuctionCountdown extends StatelessWidget {
               ),
               TextSpan(
                 text: timeValue,
-                style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                style: textStyle ?? Theme.of(context).textTheme.labelSmall!.copyWith(
                       color: primaryVariantColor,
                       fontSize: 10,
                       fontWeight: FontWeight.w600,

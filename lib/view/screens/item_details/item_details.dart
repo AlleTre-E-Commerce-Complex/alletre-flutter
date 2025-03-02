@@ -51,7 +51,8 @@ class ItemDetailsScreen extends StatelessWidget {
         }
 
         final categoryName = CategoryService.getCategoryName(item.categoryId);
-        final subcategoryName = CategoryService.getSubCategoryName(item.subCategoryId);
+        final subcategoryName =
+            CategoryService.getSubCategoryName(item.subCategoryId);
 
         print('Retrieved names:');
         print('- Category name: $categoryName');
@@ -62,29 +63,28 @@ class ItemDetailsScreen extends StatelessWidget {
             // Category box
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                border: Border.all(color: borderColor),
-                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: avatarColor),
+                borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Category',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: onSecondaryColor,
-                          fontSize: 13
-                        ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: onSecondaryColor, fontSize: 13),
                   ),
                   const Spacer(),
                   Text(
                     categoryName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: onSecondaryColor,
-                          fontSize: 13
-                        ),
+                        fontWeight: FontWeight.w500,
+                        color: onSecondaryColor,
+                        fontSize: 13),
                     softWrap: true,
                   ),
                 ],
@@ -96,29 +96,28 @@ class ItemDetailsScreen extends StatelessWidget {
             // Sub Category box
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                border: Border.all(color: borderColor),
-                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: avatarColor),
+                borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Sub Category',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: onSecondaryColor,
-                          fontSize: 13
-                        ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: onSecondaryColor, fontSize: 13),
                   ),
                   const Spacer(),
                   Text(
                     subcategoryName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: onSecondaryColor,
-                          fontSize: 13
-                        ),
+                        fontWeight: FontWeight.w500,
+                        color: onSecondaryColor,
+                        fontSize: 13),
                     softWrap: true,
                   ),
                 ],
@@ -130,79 +129,114 @@ class ItemDetailsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildEnhancedAuctionCountdown(BuildContext context) {
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: avatarColor),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AuctionCountdown(
+            startDate: item.startDate,
+            endDate: item.expiryDate,
+            customPrefix: 'Time Left',
+            prefixStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: onSecondaryColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+            textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: primaryColor,
+                  fontSize: 12,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBidSection(BuildContext context) {
     final ValueNotifier<String> bidAmount = ValueNotifier<String>(
-      item.currentBid.isEmpty
-          ? item.startBidAmount
-          : item.currentBid,
+      item.currentBid.isEmpty ? item.startBidAmount : item.currentBid,
     );
 
-    final String minimumBid = item.currentBid.isEmpty
-        ? item.startBidAmount
-        : item.currentBid;
+    final String minimumBid =
+        item.currentBid.isEmpty ? item.startBidAmount : item.currentBid;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Bid Amount Input
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            border: Border.all(color: const Color.fromARGB(255, 37, 27, 27)),
-            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: onSecondaryColor, width: 1.4),
+            borderRadius: BorderRadius.circular(6),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                'Place your bid',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: greyColor,
+              ValueListenableBuilder<String>(
+                valueListenable: bidAmount,
+                builder: (context, value, child) {
+                  final bool canDecrease = double.parse(value) > double.parse(minimumBid);
+                  return Container(
+                    height: 30,
+                    width: 30,
+                    decoration: BoxDecoration(
+                      color: canDecrease ? primaryColor : primaryColor.withAlpha(128),
+                      borderRadius: BorderRadius.circular(6),
                     ),
+                    child: IconButton(
+                      icon: const Icon(Icons.remove, color: secondaryColor, size: 15),
+                      onPressed: canDecrease
+                          ? () {
+                              final currentValue = double.parse(value);
+                              bidAmount.value = (currentValue - 50).toString();
+                            }
+                          : null,
+                    ),
+                  );
+                },
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove),
-                    onPressed: () {
-                      final currentValue = double.parse(bidAmount.value);
-                      final minBid = double.parse(minimumBid);
-                      if (currentValue > minBid) {
-                        bidAmount.value = (currentValue - 50).toString();
-                      }
-                    },
-                  ),
-                  Expanded(
-                    child: ValueListenableBuilder<String>(
-                      valueListenable: bidAmount,
-                      builder: (context, value, child) {
-                        return Text(
-                          'AED ${NumberFormat.decimalPattern().format(double.parse(value))}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: onSecondaryColor),
-                          textAlign: TextAlign.center,
-                        );
-                      },
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      final currentValue = double.parse(bidAmount.value);
-                      bidAmount.value = (currentValue + 50).toString();
-                    },
-                  ),
-                ],
+              Expanded(
+                child: ValueListenableBuilder<String>(
+                  valueListenable: bidAmount,
+                  builder: (context, value, child) {
+                    return Text(
+                      'AED ${NumberFormat.decimalPattern().format(double.parse(value))}',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: onSecondaryColor,
+                          fontSize: 15),
+                      textAlign: TextAlign.center,
+                    );
+                  },
+                ),
+              ),
+              Container(
+                height: 30,
+                width: 30,
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.add, color: secondaryColor, size: 15),
+                  onPressed: () {
+                    final currentValue = double.parse(bidAmount.value);
+                    bidAmount.value = (currentValue + 50).toString();
+                  },
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
         // Submit Bid Button
         SizedBox(
@@ -213,9 +247,9 @@ class ItemDetailsScreen extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(6),
               ),
             ),
             child: Text(
@@ -223,7 +257,7 @@ class ItemDetailsScreen extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
-                  ?.copyWith(color: Colors.white),
+                  ?.copyWith(color: secondaryColor, fontSize: 16),
             ),
           ),
         ),
@@ -233,25 +267,29 @@ class ItemDetailsScreen extends StatelessWidget {
 
   Widget _buildInfoCard(BuildContext context, String title, String value) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: avatarColor),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: greyColor,
-                ),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: onSecondaryColor, fontSize: 13),
           ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold, color: onSecondaryColor),
+          const SizedBox(height: 3),
+          Center(
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: primaryColor,
+                  fontSize: 16),
+            ),
           ),
         ],
       ),
@@ -341,7 +379,8 @@ class ItemDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Handle joining/leaving auction room in build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+      final auctionProvider =
+          Provider.of<AuctionProvider>(context, listen: false);
       auctionProvider.joinAuctionRoom(item.id.toString());
     });
 
@@ -349,7 +388,8 @@ class ItemDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Center(
           child: Text(item.title,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              style:
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
         ),
         actions: [
           // Wishlist button
@@ -383,10 +423,12 @@ class ItemDetailsScreen extends StatelessWidget {
         ],
       ),
       body: PopScope(
+        canPop: true,
+        // ignore: deprecated_member_use
         onPopInvoked: (didPop) {
           if (didPop) {
-            // Leave the auction room when navigating away
-            final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+            final auctionProvider =
+                Provider.of<AuctionProvider>(context, listen: false);
             auctionProvider.leaveAuctionRoom(item.id.toString());
           }
         },
@@ -469,63 +511,154 @@ class ItemDetailsScreen extends StatelessWidget {
 
                     // Category and Subcategory
                     _buildCategoryInfo(context),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 22),
 
-                    // Time
+                    // Time and Bids
                     if (title != 'Listed Products' &&
                         title != 'Expired Auctions') ...[
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          AuctionCountdown(
-                            startDate: item.startDate,
-                            endDate: item.expiryDate,
-                          ),
                           _buildInfoCard(
                             context,
                             'Total Bids',
                             item.bids.toString(),
                           ),
+                          const Spacer(),
+                          _buildEnhancedAuctionCountdown(context),
                         ],
                       ),
                       const SizedBox(height: 8),
                     ],
-                    const SizedBox(height: 16),
-
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         if (title == 'Live Auctions' ||
                             title == 'Upcoming Auctions')
-                          Text(
-                            'Current Bid\nAED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                    color: primaryColor,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 15),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.5,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: avatarColor),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Current Bid',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          color: onSecondaryColor,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                        ),
+                                  ),
+                                  const SizedBox(
+                                      height:
+                                          5), // Spacing between title and value
+                                  Center(
+                                    child: Text(
+                                      'AED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            color: primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         if (title == 'Listed Products')
-                          Text(
-                            'Selling Price\nAED ${item.productListingPrice}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                    color: primaryColor,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 15),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: avatarColor),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Selling Price',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        color: onSecondaryColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                      ),
+                                ),
+                                const SizedBox(
+                                    height:
+                                        5), // Spacing between title and value
+                                Text(
+                                  'AED ${item.productListingPrice}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
                         if (item.hasBuyNow) ...[
-                          const SizedBox(width: 16),
-                          Text(
-                            'Buy Now:\nAED ${item.buyNowPrice}',
-                            style: Theme.of(context).textTheme.titleMedium,
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: primaryColor, width: 1.2),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: InkWell(
+                              onTap: () {},
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Buy Now',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: onSecondaryColor,
+                                          fontSize: 13,
+                                        ),
+                                  ),
+                                  const SizedBox(
+                                      height:
+                                          5), // Spacing between title and value
+                                  Text(
+                                    'AED ${item.buyNowPrice}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: primaryColor,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ],
                     ),
+
                     const SizedBox(height: 16),
 
                     if (title == 'Listed Products')
@@ -546,8 +679,8 @@ class ItemDetailsScreen extends StatelessWidget {
                       ),
 
                     // Bid Section for non-listed products
-                    if (title != 'Listed Products')
-                      _buildBidSection(context),
+                    if (title != 'Listed Products') const SizedBox(height: 12),
+                    _buildBidSection(context),
                   ],
                 ),
               ),
