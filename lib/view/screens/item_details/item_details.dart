@@ -136,7 +136,7 @@ class ItemDetailsScreen extends StatelessWidget {
 
   Widget _buildEnhancedAuctionCountdown(BuildContext context) {
     return Container(
-      width: 220,
+      width: 260,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         border: Border.all(color: avatarColor),
@@ -187,21 +187,25 @@ class ItemDetailsScreen extends StatelessWidget {
                                     "https://wa.me/${user.phoneNumber}?text=$message";
                                 launchUrl(Uri.parse(whatsappUrl));
                               },
-                              icon: const Icon(Icons.chat),
-                              label: Text('Chat', style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: secondaryColor, fontSize: 16)),
+                              icon: const Icon(FontAwesomeIcons.whatsapp,
+                                  color: secondaryColor),
+                              label: Text('Chat',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                          color: secondaryColor, fontSize: 16)),
                               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
+                                backgroundColor: primaryColor,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: () {
@@ -257,6 +261,19 @@ class ItemDetailsScreen extends StatelessWidget {
                                                 TextButton(
                                                   onPressed: () =>
                                                       Navigator.pop(context),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        secondaryColor,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      side: const BorderSide(
+                                                          color: primaryColor),
+                                                    ),
+                                                  ),
                                                   child: const Text('Close'),
                                                 ),
                                                 const SizedBox(width: 8),
@@ -266,6 +283,19 @@ class ItemDetailsScreen extends StatelessWidget {
                                                         'tel:${user.phoneNumber}';
                                                     launchUrl(Uri.parse(url));
                                                   },
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        secondaryColor,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      side: const BorderSide(
+                                                          color: primaryColor),
+                                                    ),
+                                                  ),
                                                   child: const Text('Call Now'),
                                                 ),
                                               ],
@@ -277,20 +307,24 @@ class ItemDetailsScreen extends StatelessWidget {
                                   },
                                 );
                               },
-                              icon: const Icon(Icons.call),
-                              label: Text('Call', style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: secondaryColor, fontSize: 16),
-),
+                              icon: const Icon(Icons.call, color: primaryColor),
+                              label: Text(
+                                'Call',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                        color: primaryColor, fontSize: 16),
+                              ),
                               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-
+                                backgroundColor: secondaryColor,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  side: const BorderSide(color: primaryColor),
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -299,20 +333,20 @@ class ItemDetailsScreen extends StatelessWidget {
                         onPressed: () {
                           contactProvider.toggleContactButtons(item.id);
                         },
-                                      style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
                         child: Text(
                           'View Contact Details',
                           style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: secondaryColor, fontSize: 16),),
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: secondaryColor, fontSize: 16),
+                        ),
                       );
               },
             ),
@@ -640,7 +674,7 @@ class ItemDetailsScreen extends StatelessWidget {
                           .bodyLarge!
                           .copyWith(fontWeight: FontWeight.w600, fontSize: 14),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
 
                     //Status
                     if (title != 'Listed Products')
@@ -660,7 +694,93 @@ class ItemDetailsScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 15),
+
+                    // View Details button
+                    TextButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Row(
+                              children: [
+                                const Icon(Icons.info_outline,
+                                    color: primaryColor),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Item Specifications',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildSpecificationRow(
+                                      'Brand:', 'iPhone'),
+                                  _buildSpecificationRow(
+                                      'Model:', '16 Pro Max 512GB'),
+                                  _buildSpecificationRow(
+                                      'Color:', 'Desert Titanium'),
+                                  const Divider(color: greyColor),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'About This Brand:',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                                child: const Text('Close'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.info_outline, size: 14),
+                      label: Text(
+                        'View Details',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 11),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        alignment: Alignment.centerLeft,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
 
                     // Description
                     Text(
@@ -970,6 +1090,36 @@ class ItemDetailsScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: _buildBottomBar(context),
+    );
+  }
+
+  Widget _buildSpecificationRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

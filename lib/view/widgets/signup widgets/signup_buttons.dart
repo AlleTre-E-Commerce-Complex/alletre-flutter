@@ -6,6 +6,7 @@ import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:alletre_app/controller/services/oauth_service.dart';
 
 class SignupButtons extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -193,7 +194,38 @@ class SignupButtons extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: () {},
+          onPressed: () async {
+            final oAuthService = OAuthService();
+            final result = await oAuthService.signInWithGoogle();
+
+            if (!context.mounted) return;
+
+            if (result['success']) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Registration successful! Please check your email for verification instructions.',
+                  ),
+                  backgroundColor: activeColor,
+                  duration: Duration(seconds: 4),
+                ),
+              );
+              
+              Future.delayed(const Duration(seconds: 2), () {
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, AppRoutes.login);
+                }
+              });
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(result['message'].toString()),
+                  backgroundColor: avatarColor,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          },
             child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -217,7 +249,38 @@ class SignupButtons extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: () {},
+          onPressed: () async {
+            final oAuthService = OAuthService();
+            final result = await oAuthService.signInWithApple();
+
+            if (!context.mounted) return;
+
+            if (result['success']) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Registration successful! Please check your email for verification instructions.',
+                  ),
+                  backgroundColor: activeColor,
+                  duration: Duration(seconds: 4),
+                ),
+              );
+              
+              Future.delayed(const Duration(seconds: 2), () {
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, AppRoutes.login);
+                }
+              });
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(result['message'].toString()),
+                  backgroundColor: avatarColor,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

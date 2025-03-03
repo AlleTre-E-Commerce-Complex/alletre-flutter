@@ -83,8 +83,9 @@ class LoginButtons extends StatelessWidget {
                         Provider.of<LoggedInProvider>(context, listen: false)
                             .logIn();
 
-                            // First update the tab index to home
-            Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
+                        // First update the tab index to home
+                        Provider.of<TabIndexProvider>(context, listen: false)
+                            .updateIndex(1);
 
                         if (!context.mounted) return;
 
@@ -127,125 +128,124 @@ class LoginButtons extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Row(
-          children: [
-            Expanded(child: Divider(color: dividerColor)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text('OR',
-                  style: TextStyle(
-                      color: dividerColor, fontWeight: FontWeight.w500)),
-            ),
-            Expanded(
-              child: Divider(color: dividerColor),
-            ),
-
-          ],
-        ),
+            children: [
+              Expanded(child: Divider(color: dividerColor)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text('OR',
+                    style: TextStyle(
+                        color: dividerColor, fontWeight: FontWeight.w500)),
+              ),
+              Expanded(
+                child: Divider(color: dividerColor),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            padding: const EdgeInsets.only(right: 18),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              side: const BorderSide(color: primaryColor),
+              padding: const EdgeInsets.only(right: 18),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-          ),
-         onPressed: () {},
-    // userProvider.isLoading
-    // ? null
-    // : () async {
-    //     final result = await userProvider.handleGoogleSignIn(context);
-        
-    //     if (!context.mounted) return;
+            onPressed: () {},
+            // userProvider.isLoading
+            // ? null
+            // : () async {
+            //     final result = await userProvider.handleGoogleSignIn(context);
 
-    //     if (result['success']) {
-    //       // Update logged in state
-    //       Provider.of<LoggedInProvider>(context, listen: false).logIn();
-          
-    //       // Update tab index to home
-    //       Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
-          
-    //       // Show success dialog
-    //       showDialog(
-    //         context: context,
-    //         barrierDismissible: false,
-    //         builder: (context) => buildSuccessDialog(context),
-    //       );
-    //     } else {
-    //       ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //           content: Text(result['message']),
-    //           backgroundColor: avatarColor,
-    //           duration: const Duration(seconds: 2),
-    //         ),
-    //       );
-    //     }
-    //   },
+            //     if (!context.mounted) return;
+
+            //     if (result['success']) {
+            //       // Update logged in state
+            //       Provider.of<LoggedInProvider>(context, listen: false).logIn();
+
+            //       // Update tab index to home
+            //       Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
+
+            //       // Show success dialog
+            //       showDialog(
+            //         context: context,
+            //         barrierDismissible: false,
+            //         builder: (context) => buildSuccessDialog(context),
+            //       );
+            //     } else {
+            //       ScaffoldMessenger.of(context).showSnackBar(
+            //         SnackBar(
+            //           content: Text(result['message']),
+            //           backgroundColor: avatarColor,
+            //           duration: const Duration(seconds: 2),
+            //         ),
+            //       );
+            //     }
+            //   },
             child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/google_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Login with Google',
-                style: TextStyle(color: primaryColor, fontSize: 14), 
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            padding: const EdgeInsets.only(right: 26),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset('assets/icons/google_icon.svg',
+                    width: 15, height: 15),
+                const SizedBox(width: 10),
+                const Text(
+                  'Login with Google',
+                  style: TextStyle(color: primaryColor, fontSize: 14),
+                ),
+              ],
             ),
           ),
-           onPressed: (){},
-    // userProvider.isLoading
-    // ? null
-    // : () async {
-    //     final result = await userProvider.handleAppleSignIn(context);
-        
-    //     if (!context.mounted) return;
-
-    //     if (result['success']) {
-    //       Provider.of<LoggedInProvider>(context, listen: false).logIn();
-    //       Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
-          
-    //       showDialog(
-    //         context: context,
-    //         barrierDismissible: false,
-    //         builder: (context) => buildSuccessDialog(context),
-    //       );
-    //     } else {
-    //       ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //           content: Text(result['message']),
-    //           backgroundColor: avatarColor,
-    //           duration: const Duration(seconds: 2),
-    //         ),
-    //       );
-    //     }
-    //   },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/apple_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Login up with Apple',
-                style: TextStyle(color: primaryColor, fontSize: 14),
+          const SizedBox(height: 16),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              side: const BorderSide(color: primaryColor),
+              padding: const EdgeInsets.only(right: 26),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-            ],
+            ),
+            onPressed: () {},
+            // userProvider.isLoading
+            // ? null
+            // : () async {
+            //     final result = await userProvider.handleAppleSignIn(context);
+
+            //     if (!context.mounted) return;
+
+            //     if (result['success']) {
+            //       Provider.of<LoggedInProvider>(context, listen: false).logIn();
+            //       Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
+
+            //       showDialog(
+            //         context: context,
+            //         barrierDismissible: false,
+            //         builder: (context) => buildSuccessDialog(context),
+            //       );
+            //     } else {
+            //       ScaffoldMessenger.of(context).showSnackBar(
+            //         SnackBar(
+            //           content: Text(result['message']),
+            //           backgroundColor: avatarColor,
+            //           duration: const Duration(seconds: 2),
+            //         ),
+            //       );
+            //     }
+            //   },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset('assets/icons/apple_icon.svg',
+                    width: 15, height: 15),
+                const SizedBox(width: 10),
+                const Text(
+                  'Login up with Apple',
+                  style: TextStyle(color: primaryColor, fontSize: 14),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -262,11 +262,9 @@ class LoginButtons extends StatelessWidget {
                   userProvider.resetCheckboxes();
                   userProvider.resetSignupForm();
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SignUpPage()
-                      ),
-                    );
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpPage()),
+                  );
                 },
                 child: const Text(
                   'Register Now',
