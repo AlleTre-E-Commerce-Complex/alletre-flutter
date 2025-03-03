@@ -1,5 +1,6 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
+import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/search_highlight.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,11 +17,13 @@ import '../../screens/item_details/item_details.dart';
 
 class AuctionCard extends StatelessWidget {
   final AuctionItem auction;
+  final UserModel user;
   final String title;
   final double cardWidth;
   const AuctionCard({
     super.key,
     required this.auction,
+    required this.user,
     required this.title,
     required this.cardWidth,
   });
@@ -28,7 +31,7 @@ class AuctionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Determine spacing based on the auction type
     final double titleToBidSpacing = title == 'Expired Auctions' ? 0 : 10;
-    
+
     return SizedBox(
       width: cardWidth,
       child: Card(
@@ -124,9 +127,7 @@ class AuctionCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'AED ${title == 'Listed Products' ? 
-                                NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : 
-                                NumberFormat.decimalPattern().format(double.tryParse(auction.currentBid))}',
+                            'AED ${title == 'Listed Products' ? NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : NumberFormat.decimalPattern().format(double.tryParse(auction.currentBid))}',
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall!
@@ -155,11 +156,12 @@ class AuctionCard extends StatelessWidget {
                                             ),
                                       ),
                                       TextSpan(
-                                        text: title == 'Listed Products' 
-                                            ? (auction.itemLocation != null 
-                                                ? '${auction.itemLocation?.city},\n${auction.itemLocation?.country}' 
+                                        text: title == 'Listed Products'
+                                            ? (auction.itemLocation != null
+                                                ? '${auction.itemLocation?.city},\n${auction.itemLocation?.country}'
                                                 : 'Location not available')
-                                            : (auction.itemLocation?.address ?? 'Location not available'),
+                                            : (auction.itemLocation?.address ??
+                                                'Location not available'),
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelLarge!
@@ -186,8 +188,8 @@ class AuctionCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 9),
                         // Countdown Section
-                        if (title != 'Expired Auctions' && 
-                            title != 'Listed Products' && 
+                        if (title != 'Expired Auctions' &&
+                            title != 'Listed Products' &&
                             !auction.isAuctionProduct)
                           AuctionCountdown(
                             startDate: auction.startDate,
@@ -214,7 +216,8 @@ class AuctionCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                             ),
-                            onPressed: () => _navigateToDetails(context, auction),
+                            onPressed: () =>
+                                _navigateToDetails(context, auction, user),
                             child: const Text(
                               'View Details',
                               style: TextStyle(
@@ -243,7 +246,8 @@ class AuctionCard extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 4),
                                     ),
-                                    onPressed: () => _navigateToDetails(context, auction),
+                                    onPressed: () =>
+                                        _navigateToDetails(context, auction, user),
                                     child: const Text(
                                       'Bid Now',
                                       textAlign: TextAlign.center,
@@ -269,7 +273,8 @@ class AuctionCard extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 4),
                                     ),
-                                    onPressed: () => _navigateToDetails(context, auction),
+                                    onPressed: () => _navigateToDetails(
+                                        context, auction, user),
                                     child: const Text(
                                       'Buy Now',
                                       textAlign: TextAlign.center,
@@ -291,7 +296,8 @@ class AuctionCard extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
-                              onPressed: () => _navigateToDetails(context, auction),
+                              onPressed: () =>
+                                  _navigateToDetails(context, auction, user),
                               child: const Text(
                                 'Bid Now',
                                 style: TextStyle(
@@ -328,17 +334,21 @@ class AuctionCard extends StatelessWidget {
       ),
     );
   }
-  void _navigateToDetails(BuildContext context, AuctionItem auction) {
+
+  void _navigateToDetails(
+      BuildContext context, AuctionItem auction, UserModel user) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ItemDetailsScreen(
+          user: user,
           item: auction,
           title: title,
         ),
       ),
     );
   }
+
   Widget _buildStatusText(BuildContext context, String status) {
     final baseColor = getStatusColor(status);
     String displayStatus = status;
@@ -365,6 +375,7 @@ class AuctionCard extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildIconButton(
       BuildContext context, IconData icon, AuctionItem auction) {
     final wishlistProvider = Provider.of<WishlistProvider>(context);
@@ -380,13 +391,16 @@ class AuctionCard extends StatelessWidget {
           if (icon == FontAwesomeIcons.bookmark) {
             wishlistProvider.toggleWishlist(auction);
           } else if (icon == FontAwesomeIcons.shareFromSquare) {
-            final String itemUrl = 'https://alletre.com/items/${auction.id}'; // Replace with your actual domain
+            final String itemUrl =
+                'https://alletre.com/items/${auction.id}'; // Replace with your actual domain
             await Share.share(
               'Check out this ${title.toLowerCase()}: ${auction.title}\n'
               '${title == "Listed Products" ? "Price" : "Starting bid"}: AED ${title == "Listed Products" ? auction.productListingPrice : auction.startBidAmount}\n'
               '${auction.itemLocation?.address != null ? "Location: ${auction.itemLocation!.address}\n" : ""}'
               '$itemUrl',
-              subject: title == "Listed Products" ? 'Interesting Product on Alletre' : 'Interesting Auction on Alletre',
+              subject: title == "Listed Products"
+                  ? 'Interesting Product on Alletre'
+                  : 'Interesting Auction on Alletre',
             );
           }
         },
@@ -402,6 +416,7 @@ class AuctionCard extends StatelessWidget {
       ),
     );
   }
+
   bool _isSvg(String url) {
     final Uri uri = Uri.parse(url);
     final String path = uri.path;

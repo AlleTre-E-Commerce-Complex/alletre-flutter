@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ import 'shimmer_loading.dart';
 
 class AuctionListWidget extends StatelessWidget {
   final String title;
+  final UserModel user;
   final String subtitle;
   final List<AuctionItem> auctions;
   final bool isLoading;
@@ -24,6 +26,7 @@ class AuctionListWidget extends StatelessWidget {
   const AuctionListWidget({
     super.key,
     required this.title,
+    required this.user,
     required this.subtitle,
     required this.auctions,
     this.isLoading = false,
@@ -59,6 +62,7 @@ class AuctionListWidget extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => AllAuctionsScreen(
                           title: title,
+                          user: user,
                           auctions: auctions,
                           placeholder: placeholder,
                         ),
@@ -148,8 +152,11 @@ class AuctionListWidget extends StatelessWidget {
                         }
                       },
                       child: Text(
-                        title == "Live Auctions" ? "Create Now" : "List Product",
-                        style: const TextStyle(color: secondaryColor, fontSize: 9),
+                        title == "Live Auctions"
+                            ? "Create Now"
+                            : "List Product",
+                        style:
+                            const TextStyle(color: secondaryColor, fontSize: 9),
                       ),
                     ),
                 ],
@@ -165,6 +172,7 @@ class AuctionListWidget extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(right: 7),
                     child: AuctionCard(
+                      user: user,
                       auction: auctions[index],
                       title: title,
                       cardWidth:

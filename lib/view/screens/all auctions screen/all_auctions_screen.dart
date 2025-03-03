@@ -1,5 +1,6 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
@@ -10,11 +11,13 @@ import '../../widgets/home widgets/search_field_widget.dart';
 
 class AllAuctionsScreen extends StatelessWidget {
   final String title;
+  final UserModel user;
   final List<AuctionItem> auctions;
   final String placeholder;
 
   const AllAuctionsScreen({
     super.key,
+    required this.user,
     required this.title,
     required this.auctions,
     required this.placeholder,
@@ -115,6 +118,7 @@ class AllAuctionsScreen extends StatelessWidget {
                         return AuctionCard(
                           auction: filteredAuctions[index],
                           title: title,
+                          user: user,
                           cardWidth: cardWidth,
                         );
                       },

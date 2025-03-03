@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
+import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
@@ -81,6 +82,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               const CarouselBannerWidget(),
               const SizedBox(height: 16),
               AuctionListWidget(
+                user: UserModel.empty(),
                 title: 'Live Auctions',
                 subtitle: 'Live Deals, Real-Time Wins!',
                 auctions: auctionProvider.filteredLiveAuctions,
@@ -90,6 +92,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                     'No live auctions at the moment.\nPlace your auction right away.',
               ),
               AuctionListWidget(
+                user: UserModel.empty(),
                 title: 'Listed Products',
                 subtitle: 'Find and Reach the Product',
                 auctions: auctionProvider.filteredListedProducts,
@@ -99,6 +102,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                     'No products listed for sale.\nList your product here.',
               ),
               AuctionListWidget(
+                user: UserModel.empty(),
                 title: 'Upcoming Auctions',
                 subtitle: 'Coming Soon: Get Ready to Bid!',
                 auctions: auctionProvider.filteredUpcomingAuctions,
@@ -110,6 +114,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 placeholder: 'No upcoming auctions available.',
               ),
               AuctionListWidget(
+                user: UserModel.empty(),
                 title: 'Expired Auctions',
                 subtitle: 'The Best Deals You Missed',
                 auctions: auctionProvider.filteredExpiredAuctions,

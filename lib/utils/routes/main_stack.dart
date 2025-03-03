@@ -1,3 +1,4 @@
+import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
 import 'package:alletre_app/view/screens/item_details/item_details.dart';
 import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
@@ -65,7 +66,7 @@ class MainStack extends StatelessWidget {
       case 16:
         return const ContactUsScreen();
       case 17:
-        return ItemDetailsScreen(item: AuctionItem.empty(), title: '');
+        return ItemDetailsScreen(item: AuctionItem.empty(), title: '', user: UserModel.empty());
       case 18:
         return const ShippingDetailsScreen();
       case 19:

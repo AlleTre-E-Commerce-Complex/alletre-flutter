@@ -1,5 +1,6 @@
 import 'package:alletre_app/controller/providers/auction_image_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/contact_provider.dart';
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/category_state.dart';
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => ShareProvider()),
           ChangeNotifierProvider(create: (_) => AuctionImageProvider()),
           ChangeNotifierProvider(create: (_) => WishlistProvider()),
+          ChangeNotifierProvider(create: (_) => ContactButtonProvider()),
         ],
         child: MaterialApp(
           navigatorKey: navigatorKey,

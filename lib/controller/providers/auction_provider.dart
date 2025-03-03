@@ -115,23 +115,23 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void _updateAuctionBid(String auctionId, Map<String, dynamic> bidData) {
-    void updateList(List<AuctionItem> list) {
-      final index = list.indexWhere((item) => item.id.toString() == auctionId);
-      if (index != -1) {
-        final updatedItem = list[index].copyWith(
-          currentBid: bidData['currentBid'],
-          bids: bidData['bids'],
-        );
-        list[index] = updatedItem;
-      }
-    }
+  // void _updateAuctionBid(String auctionId, Map<String, dynamic> bidData) {
+  //   void updateList(List<AuctionItem> list) {
+  //     final index = list.indexWhere((item) => item.id.toString() == auctionId);
+  //     if (index != -1) {
+  //       final updatedItem = list[index].copyWith(
+  //         currentBid: bidData['currentBid'],
+  //         bids: bidData['bids'],
+  //       );
+  //       list[index] = updatedItem;
+  //     }
+  //   }
 
-    updateList(_liveAuctions);
-    updateList(_listedProducts);
-    updateList(_upcomingAuctions);
-    notifyListeners();
-  }
+  //   updateList(_liveAuctions);
+  //   updateList(_listedProducts);
+  //   updateList(_upcomingAuctions);
+  //   notifyListeners();
+  // }
 
   void _updateAuctionStatus(String auctionId, Map<String, dynamic> statusData) {
     // Remove from old status list and add to new status list

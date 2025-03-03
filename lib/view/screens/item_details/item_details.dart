@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/contact_provider.dart';
+import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,11 +19,13 @@ import '../image_view/full_screen_image.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final AuctionItem item;
+  final UserModel user;
   final String title;
 
   const ItemDetailsScreen({
     super.key,
     required this.item,
+    required this.user,
     required this.title,
   });
 
@@ -161,31 +165,156 @@ class ItemDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBidSection(BuildContext context) {
+  Widget _buildBidSection(
+      BuildContext context, String title, AuctionItem item) {
     if (title == 'Listed Products') {
       return Column(
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // Handle view details action
-              },
-              style: ElevatedButton.styleFrom(
+            child: Consumer<ContactButtonProvider>(
+              builder: (context, contactProvider, child) {
+                return contactProvider.isShowingContactButtons(item.id)
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                final message = Uri.encodeComponent(
+                                    "Hello, I would like to inquire about your product listed on Alletre.");
+                                final whatsappUrl =
+                                    "https://wa.me/${user.phoneNumber}?text=$message";
+                                launchUrl(Uri.parse(whatsappUrl));
+                              },
+                              icon: const Icon(Icons.chat),
+                              label: Text('Chat', style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(color: secondaryColor, fontSize: 16)),
+                              style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              child: Text(
-                'View Contact Details',
-                style: Theme.of(context)
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(20),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Text(
+                                              'Contact Number',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Text(
+                                              'You can connect on',
+                                              style: TextStyle(
+                                                color: Colors.grey[700],
+                                              ),
+                                            ),
+                                            Text(
+                                              user.phoneNumber,
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              "Don't forget to mention Alletre when you call",
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 20),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('Close'),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                ElevatedButton(
+                                                  onPressed: () {
+                                                    final url =
+                                                        'tel:${user.phoneNumber}';
+                                                    launchUrl(Uri.parse(url));
+                                                  },
+                                                  child: const Text('Call Now'),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              icon: const Icon(Icons.call),
+                              label: Text('Call', style: Theme.of(context)
                     .textTheme
                     .titleMedium
                     ?.copyWith(color: secondaryColor, fontSize: 16),
+),
+                              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
+
+                            ),
+                          ),
+                        ],
+                      )
+                    : ElevatedButton(
+                        onPressed: () {
+                          contactProvider.toggleContactButtons(item.id);
+                        },
+                                      style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+
+                        child: Text(
+                          'View Contact Details',
+                          style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(color: secondaryColor, fontSize: 16),),
+                      );
+              },
             ),
           ),
         ],
@@ -832,7 +961,7 @@ class ItemDetailsScreen extends StatelessWidget {
                     ],
 
                     const SizedBox(height: 12),
-                    _buildBidSection(context),
+                    _buildBidSection(context, title, item),
                   ],
                 ),
               ),
