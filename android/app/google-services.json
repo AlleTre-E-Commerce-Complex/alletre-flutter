@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1043853491459",
+    "project_id": "alletre-auctions",
+    "storage_bucket": "alletre-auctions.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043853491459:android:54cb3c69b44ac184f6bd36",
+        "android_client_info": {
+          "package_name": "com.alletre.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043853491459-2ntuv0c6mp761tuk8f1hb78ilp746pg0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.alletre.app",
+            "certificate_hash": "264dcf942d5cbd50fa97481fec6ad91d2e89c18f"
+          }
+        },
+        {
+          "client_id": "1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDgbclpNusftI8wyGVLOKtviWHperC9Mc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1043853491459-1ul5h5bjnnnhck1p4q7uq5o1hgataoi4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.alletre.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

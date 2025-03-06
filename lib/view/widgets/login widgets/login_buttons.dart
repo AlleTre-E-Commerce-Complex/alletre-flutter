@@ -1,7 +1,10 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/controller/services/apple_auth.dart';
+import 'package:alletre_app/controller/services/google_auth.dart';
+import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/widgets/login%20widgets/success_dialog.dart';
@@ -10,9 +13,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class LoginButtons extends StatelessWidget {
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
+  final AppleAuthService _appleAuthService = AppleAuthService();
   final GlobalKey<FormState> formKey;
 
-  const LoginButtons({super.key, required this.formKey});
+  LoginButtons({super.key, required this.formKey});
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +156,46 @@ class LoginButtons extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            onPressed: () {},
+            onPressed: () async {
+              var user = await _googleAuthService.signInWithGoogle();
+              if (user != null) {
+                print("Signed in as ${user.user?.displayName}");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Login successful',
+                    ),
+                    backgroundColor: activeColor,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+
+                Provider.of<LoggedInProvider>(context, listen: false)
+                            .logIn();
+
+                        // First update the tab index to home
+                        Provider.of<TabIndexProvider>(context, listen: false)
+                            .updateIndex(1);
+
+                        if (!context.mounted) return;
+
+                Future.delayed(const Duration(seconds: 2), () {
+                  if (context.mounted) {
+                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                  }
+                });
+              } else {
+                // Authentication failed or user canceled login
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content:
+                        const Text('Google sign-in failed. Please try again.'),
+                    backgroundColor: avatarColor,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
             // userProvider.isLoading
             // ? null
             // : () async {
@@ -205,7 +249,37 @@ class LoginButtons extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            onPressed: () {},
+            onPressed: () async {
+              var user = await _appleAuthService.signInWithApple();
+              if (user != null) {
+                print("Signed in as ${user.displayName}");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Login successful',
+                    ),
+                    backgroundColor: activeColor,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+
+                Future.delayed(const Duration(seconds: 2), () {
+                  if (context.mounted) {
+                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                  }
+                });
+              } else {
+                // Authentication failed or user canceled login
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content:
+                        const Text('Apple sign-in is not supported on this platform'),
+                    backgroundColor: avatarColor,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
             // userProvider.isLoading
             // ? null
             // : () async {
@@ -239,7 +313,7 @@ class LoginButtons extends StatelessWidget {
                     width: 15, height: 15),
                 const SizedBox(width: 10),
                 const Text(
-                  'Login up with Apple',
+                  'Login with Apple',
                   style: TextStyle(color: primaryColor, fontSize: 14),
                 ),
               ],

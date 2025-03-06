@@ -1,17 +1,22 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
+import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/controller/services/apple_auth.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:alletre_app/controller/services/oauth_service.dart';
+import 'package:alletre_app/controller/services/google_auth.dart';
 
 class SignupButtons extends StatelessWidget {
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
+  final AppleAuthService _appleAuthService = AppleAuthService();
   final GlobalKey<FormState> formKey;
 
-  const SignupButtons({super.key, required this.formKey});
+  SignupButtons({super.key, required this.formKey});
 
   @override
   Widget build(BuildContext context) {
@@ -170,131 +175,137 @@ class SignupButtons extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Row(
-          children: [
-            Expanded(child: Divider(color: dividerColor)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text('OR',
-                  style: TextStyle(
-                      color: dividerColor, fontWeight: FontWeight.w500)),
-            ),
-            Expanded(
-              child: Divider(color: dividerColor),
-            ),
-
-          ],
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            padding: const EdgeInsets.only(right: 18),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            children: [
+              Expanded(child: Divider(color: dividerColor)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text('OR',
+                    style: TextStyle(
+                        color: dividerColor, fontWeight: FontWeight.w500)),
+              ),
+              Expanded(
+                child: Divider(color: dividerColor),
+              ),
+            ],
           ),
-          onPressed: () async {
-            final oAuthService = OAuthService();
-            final result = await oAuthService.signInWithGoogle();
-
-            if (!context.mounted) return;
-
-            if (result['success']) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Registration successful! Please check your email for verification instructions.',
+          const SizedBox(height: 16),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              side: const BorderSide(color: primaryColor),
+              padding: const EdgeInsets.only(right: 18),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              var user = await _googleAuthService.signInWithGoogle();
+              if (user != null) {
+                print("Signed in as ${user.user?.displayName}");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Registration successful',
+                    ),
+                    backgroundColor: activeColor,
+                    duration: Duration(seconds: 3),
                   ),
-                  backgroundColor: activeColor,
-                  duration: Duration(seconds: 4),
-                ),
-              );
-              
-              Future.delayed(const Duration(seconds: 2), () {
-                if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, AppRoutes.login);
-                }
-              });
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(result['message'].toString()),
-                  backgroundColor: avatarColor,
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            }
-          },
+                );
+
+                Provider.of<LoggedInProvider>(context, listen: false)
+                            .logIn();
+
+                        // First update the tab index to home
+                        Provider.of<TabIndexProvider>(context, listen: false)
+                            .updateIndex(1);
+
+                        if (!context.mounted) return;
+
+                Future.delayed(const Duration(seconds: 2), () {
+                  if (context.mounted) {
+                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                  }
+                });
+              } else {
+                // Authentication failed or user canceled login
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content:
+                        const Text('Google sign-up failed. Please try again.'),
+                    backgroundColor: avatarColor,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
             child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/google_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Sign up with Google',
-                style: TextStyle(color: primaryColor, fontSize: 14), 
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            side: const BorderSide(color: primaryColor),
-            padding: const EdgeInsets.only(right: 26),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset('assets/icons/google_icon.svg',
+                    width: 15, height: 15),
+                const SizedBox(width: 10),
+                const Text(
+                  'Sign up with Google',
+                  style: TextStyle(color: primaryColor, fontSize: 14),
+                ),
+              ],
             ),
           ),
-          onPressed: () async {
-            final oAuthService = OAuthService();
-            final result = await oAuthService.signInWithApple();
-
-            if (!context.mounted) return;
-
-            if (result['success']) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Registration successful! Please check your email for verification instructions.',
-                  ),
-                  backgroundColor: activeColor,
-                  duration: Duration(seconds: 4),
-                ),
-              );
-              
-              Future.delayed(const Duration(seconds: 2), () {
-                if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, AppRoutes.login);
-                }
-              });
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(result['message'].toString()),
-                  backgroundColor: avatarColor,
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            }
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset('assets/icons/apple_icon.svg',
-                  width: 15, height: 15),
-              const SizedBox(width: 10),
-              const Text(
-                'Sign up with Apple',
-                style: TextStyle(color: primaryColor, fontSize: 14),
+          const SizedBox(height: 16),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              side: const BorderSide(color: primaryColor),
+              padding: const EdgeInsets.only(right: 26),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-            ],
+            ),
+            onPressed: () async {
+              var user = await _appleAuthService.signInWithApple();
+              if (user != null) {
+                print("Signed in as ${user.displayName}");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Registration successful',
+                    ),
+                    backgroundColor: activeColor,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+
+                Future.delayed(const Duration(seconds: 2), () {
+                  if (context.mounted) {
+                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                  }
+                });
+              } else {
+                // Authentication failed or user canceled login
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content:
+                        const Text('Apple sign-up is not supported on this platform'),
+                    backgroundColor: avatarColor,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset('assets/icons/apple_icon.svg',
+                    width: 15, height: 15),
+                const SizedBox(width: 10),
+                const Text(
+                  'Sign up with Apple',
+                  style: TextStyle(color: primaryColor, fontSize: 14),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
           // Login link
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -312,11 +323,9 @@ class SignupButtons extends StatelessWidget {
                   userProvider.resetCheckboxes();
                   userProvider.resetSignupForm();
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginPage()
-                      ),
-                    );
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
                 },
                 child: const Text(
                   'Login Now',

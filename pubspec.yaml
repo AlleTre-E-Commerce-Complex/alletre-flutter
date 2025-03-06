@@ -54,10 +54,10 @@ dependencies:
   timeago:
   shimmer:
   photo_view:
-  firebase_auth:
-  firebase_core:
-  google_sign_in:
-  sign_in_with_apple:
+  firebase_auth: ^5.5.1
+  firebase_core: ^3.12.1
+  google_sign_in: ^6.2.2
+  sign_in_with_apple: ^6.1.4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

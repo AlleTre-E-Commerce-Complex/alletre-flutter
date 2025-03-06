@@ -30,7 +30,7 @@ class AuctionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Determine spacing based on the auction type
-    final double titleToBidSpacing = title == 'Expired Auctions' ? 0 : 10;
+    const double titleToBidSpacing = 10;
 
     return SizedBox(
       width: cardWidth,

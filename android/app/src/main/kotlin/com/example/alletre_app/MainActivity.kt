@@ -1,4 +1,4 @@
-package com.example.alletre_app
+package com.alletre.app
 
 import io.flutter.embedding.android.FlutterActivity
 

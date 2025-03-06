@@ -4,6 +4,8 @@ Color getStatusColor(String status) {
   switch (status) {
     case "WAITING_FOR_PAYMENT":
       return errorColor;
+    case "SOLD":
+      return errorColor;
     case "EXPIRED":
       return const Color(0xFF9E9E9E);
     case "ACTIVE":
@@ -24,7 +26,7 @@ double getCardHeight(String title) {
     case "Listed Products":
       return 333; // Tall enough for location and view details button
     default:
-      return 250; // For expired auctions
+      return 253; // For expired auctions
   }
 }
 
