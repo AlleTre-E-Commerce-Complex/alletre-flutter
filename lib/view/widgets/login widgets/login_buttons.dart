@@ -161,12 +161,14 @@ class LoginButtons extends StatelessWidget {
               if (user != null) {
                 print("Signed in as ${user.user?.displayName}");
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Login successful',
+                  SnackBar(
+                    content: Center(
+                      child: Text(
+                        'Logged in as ${user.user?.displayName}',
+                      ),
                     ),
                     backgroundColor: activeColor,
-                    duration: Duration(seconds: 3),
+                    duration: const Duration(seconds: 3),
                   ),
                 );
 
@@ -252,14 +254,16 @@ class LoginButtons extends StatelessWidget {
             onPressed: () async {
               var user = await _appleAuthService.signInWithApple();
               if (user != null) {
-                print("Signed in as ${user.displayName}");
+                print("Signed-in as ${user.displayName}");
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Login successful',
+                  SnackBar(
+                    content: Center(
+                      child: Text(
+                        'Logged in as ${user.displayName}',
+                      ),
                     ),
                     backgroundColor: activeColor,
-                    duration: Duration(seconds: 3),
+                    duration: const Duration(seconds: 3),
                   ),
                 );
 

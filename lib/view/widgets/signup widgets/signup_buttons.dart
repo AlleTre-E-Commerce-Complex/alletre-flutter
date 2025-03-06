@@ -203,23 +203,24 @@ class SignupButtons extends StatelessWidget {
               if (user != null) {
                 print("Signed in as ${user.user?.displayName}");
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Registration successful',
+                  SnackBar(
+                    content: Center(
+                      child: Text(
+                        'Registration successful.\nWelcome ${user.user?.displayName}',
+                      ),
                     ),
                     backgroundColor: activeColor,
-                    duration: Duration(seconds: 3),
+                    duration: const Duration(seconds: 3),
                   ),
                 );
 
-                Provider.of<LoggedInProvider>(context, listen: false)
-                            .logIn();
+                Provider.of<LoggedInProvider>(context, listen: false).logIn();
 
-                        // First update the tab index to home
-                        Provider.of<TabIndexProvider>(context, listen: false)
-                            .updateIndex(1);
+                // First update the tab index to home
+                Provider.of<TabIndexProvider>(context, listen: false)
+                    .updateIndex(1);
 
-                        if (!context.mounted) return;
+                if (!context.mounted) return;
 
                 Future.delayed(const Duration(seconds: 2), () {
                   if (context.mounted) {
@@ -266,12 +267,14 @@ class SignupButtons extends StatelessWidget {
               if (user != null) {
                 print("Signed in as ${user.displayName}");
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Registration successful',
+                  SnackBar(
+                    content: Center(
+                      child: Text(
+                        'Registration successful.\nWelcome ${user.displayName}',
+                      ),
                     ),
                     backgroundColor: activeColor,
-                    duration: Duration(seconds: 3),
+                    duration: const Duration(seconds: 3),
                   ),
                 );
 
@@ -284,8 +287,8 @@ class SignupButtons extends StatelessWidget {
                 // Authentication failed or user canceled login
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content:
-                        const Text('Apple sign-up is not supported on this platform'),
+                    content: const Text(
+                        'Apple sign-up is not supported on this platform'),
                     backgroundColor: avatarColor,
                     duration: const Duration(seconds: 3),
                   ),
