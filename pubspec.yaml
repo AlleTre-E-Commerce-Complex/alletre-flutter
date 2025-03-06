@@ -30,39 +30,39 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  intl: ^0.20.2
-  image_picker: ^1.1.2 
-  flutter_switch: ^0.3.2 
-  font_awesome_flutter: ^10.8.0
-  url_launcher: ^6.3.1
-  provider: ^6.1.2
-  flutter_svg: ^2.0.16
-  carousel_slider: ^5.0.0
-  slide_to_act: ^2.0.2
-  intl_phone_number_input: ^0.7.4
-  package_info_plus: ^8.1.2
-  permission_handler: ^11.3.1
-  csc_picker_plus: ^0.0.3
-  google_maps_flutter: ^2.10.0
-  geolocator: ^13.0.2
-  geocoding: ^3.0.0
-  http: ^1.3.0
-  flutter_secure_storage: ^9.2.4
-  app_links: ^6.3.3
-  socket_io_client: ^2.0.3+1
-  share_plus: ^10.1.4
-  timeago: ^3.2.2
-  shimmer: ^3.0.0
-  photo_view: ^0.15.0
-  firebase_auth: ^4.16.0
-  firebase_core: ^2.24.2
-  google_sign_in: ^6.1.6
-  sign_in_with_apple: ^5.0.0
+  intl:
+  image_picker:
+  flutter_switch:
+  font_awesome_flutter:
+  url_launcher:
+  provider:
+  flutter_svg:
+  carousel_slider:
+  slide_to_act:
+  intl_phone_number_input:
+  package_info_plus:
+  permission_handler:
+  csc_picker_plus:
+  google_maps_flutter:
+  geolocator:
+  geocoding:
+  http:
+  flutter_secure_storage:
+  app_links:
+  socket_io_client:
+  share_plus:
+  timeago:
+  shimmer:
+  photo_view:
+  firebase_auth:
+  firebase_core:
+  google_sign_in:
+  sign_in_with_apple:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  dio: ^5.8.0+1
+  dio:
 
 dev_dependencies:
   flutter_test:
