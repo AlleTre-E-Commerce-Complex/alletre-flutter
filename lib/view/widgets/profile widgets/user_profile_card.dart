@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -26,7 +28,7 @@ class UserProfileCard extends StatelessWidget {
     final displayName = userProvider.displayName.isNotEmpty
         ? userProvider.displayName
         : 'Username';
-    final authMethod = userProvider.authMethod;
+    // final authMethod = userProvider.authMethod;
     final photoUrl = userProvider.photoUrl;
 
     return Theme(
@@ -51,11 +53,12 @@ class UserProfileCard extends StatelessWidget {
                     Row(
                       children: [
                         // Profile image based on auth method
-                        if (authMethod == 'google' ||
-                            authMethod == 'apple' && photoUrl != null)
+                        if (photoUrl != null)
                           CircleAvatar(
                             radius: 36,
-                            backgroundImage: NetworkImage(photoUrl!),
+                            backgroundImage: photoUrl.startsWith('http')
+                                ? NetworkImage(photoUrl)
+                                : FileImage(File(photoUrl)) as ImageProvider,
                             backgroundColor: buttonBgColor,
                           )
                         else if (user.profileImagePath != null)

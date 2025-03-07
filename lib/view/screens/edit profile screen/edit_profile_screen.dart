@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -59,8 +62,11 @@ class EditProfileScreen extends StatelessWidget {
                 UserProfileCard(
                   user: user,
                   buttonText: "Upload Photo",
-                  onButtonPressed: () {
-                    // upload photo functionality
+                  onButtonPressed: () async {
+                    final File? newImage = await pickImageFromGallery();
+                    if (newImage != null) {
+                      await userProvider.updateProfilePhoto(newImage);
+                    }
                   },
                 ),
                 const SizedBox(height: 4),

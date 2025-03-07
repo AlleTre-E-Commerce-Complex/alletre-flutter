@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
@@ -62,6 +64,21 @@ class UserProvider with ChangeNotifier {
 
   String? get photoUrl => _photoUrl;
   bool? get emailVerified => _emailVerified;
+
+  // Update profile photo
+  Future<void> updateProfilePhoto(File photo) async {
+    try {
+      setLoading(true);
+      // TODO: Upload photo to Firebase Storage
+      // For now, just update the local state
+      _photoUrl = photo.path;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating profile photo: $e');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   PhoneNumber get currentPhoneNumber => PhoneNumber(
         // phoneNumber: _user.phoneNumber,
