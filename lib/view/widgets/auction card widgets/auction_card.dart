@@ -114,7 +114,7 @@ class AuctionCard extends StatelessWidget {
                           ),
                         ),
                         // Reduced spacing for Expired Auctions
-                        SizedBox(height: titleToBidSpacing),
+                        const SizedBox(height: titleToBidSpacing),
                         // Price
                         Container(
                           padding: const EdgeInsets.symmetric(

@@ -1,6 +1,7 @@
 import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -19,6 +20,9 @@ class UserProvider with ChangeNotifier {
   String _isoCode = 'AE';  // Store country ISO code
   bool _isLoading = false;
   String _lastValidationMessage = '';
+  String _authMethod = 'custom'; // 'custom', 'google', or 'apple'
+  String? _displayName;
+  String? _photoUrl;
 
   final UserService _userService = UserService();
 
@@ -35,6 +39,9 @@ class UserProvider with ChangeNotifier {
   String? get defaultAddress => _defaultAddress;
   bool get isLoading => _isLoading;
   String get lastValidationMessage => _lastValidationMessage;
+  String get authMethod => _authMethod;
+  String get displayName => _displayName ?? _user.name;
+  String? get photoUrl => _photoUrl;
 
   PhoneNumber get currentPhoneNumber => PhoneNumber(
     // phoneNumber: _user.phoneNumber,
@@ -226,6 +233,17 @@ class UserProvider with ChangeNotifier {
   return true;
 }
 
+// Method to update user info after Firebase authentication
+  void setFirebaseUserInfo(User? firebaseUser, String method) {
+    if (firebaseUser != null) {
+      _authMethod = method;
+      _displayName = firebaseUser.displayName;
+      _user.email = firebaseUser.email ?? '';
+      _photoUrl = firebaseUser.photoURL;
+      notifyListeners();
+    }
+  }
+
   Future<Map<String, dynamic>> login() async {
     if (!validateLoginForm()) {
       return {
@@ -250,6 +268,7 @@ class UserProvider with ChangeNotifier {
       // );
       
       if (result['success']) {
+         _authMethod = 'custom';
         if (_rememberPassword) {
           // Save credentials if remember password is checked
           await _storage.write(key: 'saved_email', value: email);
@@ -284,6 +303,10 @@ class UserProvider with ChangeNotifier {
     await _userService.logout(); // Added logout method to match UserService
     resetLoginForm();
     resetSignupForm();
+    _authMethod = 'custom';
+    _displayName = null;
+    _photoUrl = null;
+    notifyListeners();
   }
 
   Future<Map<String, String?>> getTokens() async {

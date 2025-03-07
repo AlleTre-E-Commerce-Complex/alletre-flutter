@@ -157,14 +157,20 @@ class LoginButtons extends StatelessWidget {
               ),
             ),
             onPressed: () async {
-              var user = await _googleAuthService.signInWithGoogle();
-              if (user != null) {
-                print("Signed in as ${user.user?.displayName}");
+              var userCredential = await _googleAuthService.signInWithGoogle();
+              if (userCredential != null && userCredential.user != null) {
+                final user = userCredential.user!;
+                print("Signed in as ${user.displayName}");
+
+                // Store the user info in the provider
+                Provider.of<UserProvider>(context, listen: false)
+                    .setFirebaseUserInfo(user, 'google');
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Center(
                       child: Text(
-                        'Logged in as ${user.user?.displayName}',
+                        'Logged in as ${user.displayName}',
                       ),
                     ),
                     backgroundColor: activeColor,
@@ -172,14 +178,13 @@ class LoginButtons extends StatelessWidget {
                   ),
                 );
 
-                Provider.of<LoggedInProvider>(context, listen: false)
-                            .logIn();
+                Provider.of<LoggedInProvider>(context, listen: false).logIn();
 
-                        // First update the tab index to home
-                        Provider.of<TabIndexProvider>(context, listen: false)
-                            .updateIndex(1);
+                // First update the tab index to home
+                Provider.of<TabIndexProvider>(context, listen: false)
+                    .updateIndex(1);
 
-                        if (!context.mounted) return;
+                if (!context.mounted) return;
 
                 Future.delayed(const Duration(seconds: 2), () {
                   if (context.mounted) {
@@ -198,36 +203,6 @@ class LoginButtons extends StatelessWidget {
                 );
               }
             },
-            // userProvider.isLoading
-            // ? null
-            // : () async {
-            //     final result = await userProvider.handleGoogleSignIn(context);
-
-            //     if (!context.mounted) return;
-
-            //     if (result['success']) {
-            //       // Update logged in state
-            //       Provider.of<LoggedInProvider>(context, listen: false).logIn();
-
-            //       // Update tab index to home
-            //       Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
-
-            //       // Show success dialog
-            //       showDialog(
-            //         context: context,
-            //         barrierDismissible: false,
-            //         builder: (context) => buildSuccessDialog(context),
-            //       );
-            //     } else {
-            //       ScaffoldMessenger.of(context).showSnackBar(
-            //         SnackBar(
-            //           content: Text(result['message']),
-            //           backgroundColor: avatarColor,
-            //           duration: const Duration(seconds: 2),
-            //         ),
-            //       );
-            //     }
-            //   },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -255,6 +230,11 @@ class LoginButtons extends StatelessWidget {
               var user = await _appleAuthService.signInWithApple();
               if (user != null) {
                 print("Signed-in as ${user.displayName}");
+
+                // Store the user info in the provider
+                Provider.of<UserProvider>(context, listen: false)
+                    .setFirebaseUserInfo(user, 'apple');
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Center(
@@ -267,6 +247,12 @@ class LoginButtons extends StatelessWidget {
                   ),
                 );
 
+                Provider.of<LoggedInProvider>(context, listen: false).logIn();
+                Provider.of<TabIndexProvider>(context, listen: false)
+                    .updateIndex(1);
+
+                if (!context.mounted) return;
+
                 Future.delayed(const Duration(seconds: 2), () {
                   if (context.mounted) {
                     Navigator.pushReplacementNamed(context, AppRoutes.login);
@@ -276,40 +262,14 @@ class LoginButtons extends StatelessWidget {
                 // Authentication failed or user canceled login
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content:
-                        const Text('Apple sign-in is not supported on this platform'),
+                    content: const Text(
+                        'Apple sign-in is not supported on this platform'),
                     backgroundColor: avatarColor,
                     duration: const Duration(seconds: 3),
                   ),
                 );
               }
             },
-            // userProvider.isLoading
-            // ? null
-            // : () async {
-            //     final result = await userProvider.handleAppleSignIn(context);
-
-            //     if (!context.mounted) return;
-
-            //     if (result['success']) {
-            //       Provider.of<LoggedInProvider>(context, listen: false).logIn();
-            //       Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
-
-            //       showDialog(
-            //         context: context,
-            //         barrierDismissible: false,
-            //         builder: (context) => buildSuccessDialog(context),
-            //       );
-            //     } else {
-            //       ScaffoldMessenger.of(context).showSnackBar(
-            //         SnackBar(
-            //           content: Text(result['message']),
-            //           backgroundColor: avatarColor,
-            //           duration: const Duration(seconds: 2),
-            //         ),
-            //       );
-            //     }
-            //   },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

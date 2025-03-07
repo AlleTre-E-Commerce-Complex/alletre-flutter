@@ -199,14 +199,20 @@ class SignupButtons extends StatelessWidget {
               ),
             ),
             onPressed: () async {
-              var user = await _googleAuthService.signInWithGoogle();
-              if (user != null) {
-                print("Signed in as ${user.user?.displayName}");
+              var userCredential = await _googleAuthService.signInWithGoogle();
+              if (userCredential != null && userCredential.user != null) {
+                final user = userCredential.user!;
+                print("Signed in as ${user.displayName}");
+
+                // Store the user info in the provider
+                Provider.of<UserProvider>(context, listen: false)
+                    .setFirebaseUserInfo(user, 'google');
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Center(
                       child: Text(
-                        'Registration successful.\nWelcome ${user.user?.displayName}',
+                        'Registration successful.\nWelcome ${user.displayName}',
                       ),
                     ),
                     backgroundColor: activeColor,
@@ -215,8 +221,6 @@ class SignupButtons extends StatelessWidget {
                 );
 
                 Provider.of<LoggedInProvider>(context, listen: false).logIn();
-
-                // First update the tab index to home
                 Provider.of<TabIndexProvider>(context, listen: false)
                     .updateIndex(1);
 
@@ -266,6 +270,11 @@ class SignupButtons extends StatelessWidget {
               var user = await _appleAuthService.signInWithApple();
               if (user != null) {
                 print("Signed in as ${user.displayName}");
+
+                // Store the user info in the provider
+                Provider.of<UserProvider>(context, listen: false)
+                    .setFirebaseUserInfo(user, 'apple');
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Center(
@@ -277,6 +286,12 @@ class SignupButtons extends StatelessWidget {
                     duration: const Duration(seconds: 3),
                   ),
                 );
+
+                Provider.of<LoggedInProvider>(context, listen: false).logIn();
+                Provider.of<TabIndexProvider>(context, listen: false)
+                    .updateIndex(1);
+
+                if (!context.mounted) return;
 
                 Future.delayed(const Duration(seconds: 2), () {
                   if (context.mounted) {
