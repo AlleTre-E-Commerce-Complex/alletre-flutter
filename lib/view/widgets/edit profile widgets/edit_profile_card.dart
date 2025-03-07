@@ -5,14 +5,14 @@ class EditProfileCard extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  final Widget actionButton;
+  final Widget? actionButton;
 
   const EditProfileCard({
     super.key,
     required this.label,
     required this.value,
     required this.icon,
-    required this.actionButton,
+    this.actionButton,
   });
 
   @override
@@ -56,7 +56,7 @@ class EditProfileCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              actionButton,
+              if (actionButton != null) actionButton!,
             ],
           ),
         ),

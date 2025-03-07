@@ -10,19 +10,22 @@ class UserProvider with ChangeNotifier {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  
+
   final UserModel _user = UserModel();
   String? selectedAddress;
   final List<String> _addresses = []; // List of stored addresses
   String? _defaultAddress;
   bool _agreeToTerms = false;
   bool _rememberPassword = false;
-  String _isoCode = 'AE';  // Store country ISO code
+  String _isoCode = 'AE'; // Store country ISO code
   bool _isLoading = false;
   String _lastValidationMessage = '';
   String _authMethod = 'custom'; // 'custom', 'google', or 'apple'
   String? _displayName;
+  String? _displayNumber;
+  String? _displayEmail;
   String? _photoUrl;
+  bool? _emailVerified;
 
   final UserService _userService = UserService();
 
@@ -41,12 +44,29 @@ class UserProvider with ChangeNotifier {
   String get lastValidationMessage => _lastValidationMessage;
   String get authMethod => _authMethod;
   String get displayName => _displayName ?? _user.name;
+  String get displayNumber {
+    if (_displayNumber != null && _displayNumber!.isNotEmpty) {
+      return _displayNumber!;
+    }
+    return _user.phoneNumber.isNotEmpty
+        ? _user.phoneNumber
+        : 'Add Phone Number';
+  }
+
+  String get displayEmail {
+    if (_displayEmail != null && _displayEmail!.isNotEmpty) {
+      return _displayEmail!;
+    }
+    return _user.email.isNotEmpty ? _user.email : 'Add Email';
+  }
+
   String? get photoUrl => _photoUrl;
+  bool? get emailVerified => _emailVerified;
 
   PhoneNumber get currentPhoneNumber => PhoneNumber(
-    // phoneNumber: _user.phoneNumber,
-    isoCode: _isoCode,
-  );
+        // phoneNumber: _user.phoneNumber,
+        isoCode: _isoCode,
+      );
 
   // Setters for user fields
   void setName(String value) {
@@ -83,7 +103,8 @@ class UserProvider with ChangeNotifier {
 
   // Validation for login credentials
   bool validateLoginCredentials() {
-    return emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
+    return emailController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty;
   }
 
   // Checkbox handlers
@@ -147,43 +168,30 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // bool validateSignupForm() {
-  //   return _user.name.isNotEmpty &&
-  //          _user.email.isNotEmpty &&
-  //          _user.phoneNumber.isNotEmpty &&
-  //          _user.password.isNotEmpty &&
-  //          _agreeToTerms;
-  // }
-
   bool validateSignupForm() {
-  bool isValid = _user.name.isNotEmpty &&
-         _user.email.isNotEmpty &&
-         _user.phoneNumber.isNotEmpty &&
-         _user.password.isNotEmpty &&
-         _agreeToTerms;
+    bool isValid = _user.name.isNotEmpty &&
+        _user.email.isNotEmpty &&
+        _user.phoneNumber.isNotEmpty &&
+        _user.password.isNotEmpty &&
+        _agreeToTerms;
 
-  if (!isValid) {
-    String emptyFieldsMessage = FormValidators.getEmptyFieldsMessage(
-      _user.name,
-      _user.email,
-      _user.phoneNumber,
-      _user.password
-    );
-    
-    if (!_agreeToTerms) {
-      if (emptyFieldsMessage.isNotEmpty) {
-        emptyFieldsMessage += ' and accept the Terms & Conditions';
-      } else {
-        emptyFieldsMessage = 'Please accept the Terms & Conditions';
+    if (!isValid) {
+      String emptyFieldsMessage = FormValidators.getEmptyFieldsMessage(
+          _user.name, _user.email, _user.phoneNumber, _user.password);
+
+      if (!_agreeToTerms) {
+        if (emptyFieldsMessage.isNotEmpty) {
+          emptyFieldsMessage += ' and accept the Terms & Conditions';
+        } else {
+          emptyFieldsMessage = 'Please accept the Terms & Conditions';
+        }
       }
+
+      _lastValidationMessage = emptyFieldsMessage;
     }
-    
-    _lastValidationMessage = emptyFieldsMessage;
+
+    return isValid;
   }
-
-  return isValid;
-}
-
 
   Future<Map<String, dynamic>> signup() async {
     if (!validateSignupForm()) {
@@ -201,44 +209,46 @@ class UserProvider with ChangeNotifier {
         _user.phoneNumber,
         _user.password,
       );
-      
+
       if (result['success']) {
         resetSignupForm();
       }
-      
+
       return result;
     } finally {
       setLoading(false);
     }
   }
 
-  
   // bool validateLoginForm() {
   //   return emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
   // }
 
   bool validateLoginForm() {
-  if (emailController.text.isEmpty && passwordController.text.isEmpty) {
-    _lastValidationMessage = 'Please enter your email and password';
-    return false;
+    if (emailController.text.isEmpty && passwordController.text.isEmpty) {
+      _lastValidationMessage = 'Please enter your email and password';
+      return false;
+    }
+    if (emailController.text.isEmpty) {
+      _lastValidationMessage = 'Email is required';
+      return false;
+    }
+    if (passwordController.text.isEmpty) {
+      _lastValidationMessage = 'Password is required';
+      return false;
+    }
+    return true;
   }
-  if (emailController.text.isEmpty) {
-    _lastValidationMessage = 'Email is required';
-    return false;
-  }
-  if (passwordController.text.isEmpty) {
-    _lastValidationMessage = 'Password is required';
-    return false;
-  }
-  return true;
-}
 
 // Method to update user info after Firebase authentication
   void setFirebaseUserInfo(User? firebaseUser, String method) {
     if (firebaseUser != null) {
       _authMethod = method;
       _displayName = firebaseUser.displayName;
-      _user.email = firebaseUser.email ?? '';
+      _displayNumber = firebaseUser.phoneNumber;
+      _displayEmail = firebaseUser.email;
+      // OAuth providers (Google, Apple) have pre-verified emails
+      _emailVerified = (method == 'google' || method == 'apple') ? true : firebaseUser.emailVerified;
       _photoUrl = firebaseUser.photoURL;
       notifyListeners();
     }
@@ -257,18 +267,18 @@ class UserProvider with ChangeNotifier {
       // Trim whitespace from email
       final email = emailController.text.trim();
       final password = passwordController.text;
-      
+
       debugPrint('Attempting login for email: $email');
-      
+
       final result = await _userService.loginService(email, password);
 
       // final result = await _userService.login(
       //   emailController.text,
       //   passwordController.text,
       // );
-      
+
       if (result['success']) {
-         _authMethod = 'custom';
+        _authMethod = 'custom';
         if (_rememberPassword) {
           // Save credentials if remember password is checked
           await _storage.write(key: 'saved_email', value: email);
@@ -286,7 +296,7 @@ class UserProvider with ChangeNotifier {
 
         resetLoginForm(); // form reset on successful login
       }
-      
+
       return result;
     } catch (e) {
       debugPrint('Error in login process: $e');
@@ -305,12 +315,16 @@ class UserProvider with ChangeNotifier {
     resetSignupForm();
     _authMethod = 'custom';
     _displayName = null;
+    _displayNumber = null;
+    _displayEmail = null;
+    _emailVerified = null;
     _photoUrl = null;
     notifyListeners();
   }
 
   Future<Map<String, String?>> getTokens() async {
-    return await _userService.getTokens(); // Added getTokens to match UserService
+    return await _userService
+        .getTokens(); // Added getTokens to match UserService
   }
 
   void resetLoginForm() {
@@ -330,7 +344,6 @@ class UserProvider with ChangeNotifier {
     passwordController.clear();
     notifyListeners();
   }
-
 
   // Login method
   // Future<void> login() async {

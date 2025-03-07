@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/edit profile widgets/custom button widgets/add_phone_button.dart';
 import '../../widgets/edit profile widgets/custom button widgets/edit_name_button.dart';
-import '../../widgets/edit profile widgets/custom button widgets/verify_email_button.dart';
 import '../../widgets/edit profile widgets/edit_profile_card.dart';
 import '../../widgets/edit profile widgets/edit_profile_card_section.dart';
 import '../../widgets/edit profile widgets/edit_profile_login_option.dart';
@@ -18,6 +17,21 @@ class EditProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the current user info from the provider
+    final userProvider = Provider.of<UserProvider>(context);
+    final displayName = userProvider.displayName.isNotEmpty
+        ? userProvider.displayName
+        : 'Username';
+    final displayNumber = userProvider.displayNumber.isNotEmpty
+        ? userProvider.displayNumber
+        : 'Number';
+    final displayEmail = userProvider.displayEmail.isNotEmpty
+        ? userProvider.displayEmail
+        : 'Email';
+    final emailVerified = userProvider.emailVerified;
+    final authMethod = userProvider.authMethod;
+    final photoUrl = userProvider.photoUrl;
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -51,20 +65,23 @@ class EditProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 const EditProfileTitle(title: 'Personal Information'),
-                EditProfileCard(
-                  label: 'Username',
-                  value: 'username',
-                  icon: Icons.person,
-                  actionButton: EditNameButton(
-                    onPressed: () {
-                      // Handle edit action
-                    },
+                if (authMethod == 'google' ||
+                    authMethod == 'apple' && photoUrl != null)
+                  EditProfileCard(
+                    label: 'Username',
+                    value: displayName,
+                    icon: Icons.person,
+                    actionButton: EditNameButton(
+                      onPressed: () {
+                        // Handle edit action
+                      },
+                    ),
                   ),
-                ),
                 const SizedBox(height: 16),
                 EditProfileCard(
                   label: 'Primary Number',
-                  value: context.watch<UserProvider>().phoneNumber,
+                  // value: context.watch<UserProvider>().phoneNumber,
+                  value: displayNumber,
                   icon: Icons.phone,
                   actionButton: AddPhoneButton(
                     onPressed: () {
@@ -75,14 +92,33 @@ class EditProfileScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 EditProfileCard(
                   label: 'Primary Email',
-                  value: 'user@gmail.com',
+                  value: displayEmail,
                   icon: Icons.email,
-                  actionButton: VerifyEmailButton(
-                    onPressed: () {
-                      // Handle edit action
-                    },
-                  ),
+                  actionButton: emailVerified == true
+                      ? const Padding(
+                          padding: EdgeInsets.only(top: 16.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.verified,
+                                color: activeColor,
+                                size: 16,
+                              ),
+                              SizedBox(width: 3),
+                              Text(
+                                'Verified',
+                                style: TextStyle(
+                                  color: activeColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : null,
                 ),
+                
                 const SizedBox(height: 8),
                 Divider(height: 32, color: dividerColor, thickness: 0.5),
                 const EditProfileTitle(title: 'Address Book'),
@@ -204,6 +240,11 @@ class EditProfileScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.delete),
                   title: const Text('Delete my Account'),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Logout'),
                   onTap: () {},
                 ),
               ],

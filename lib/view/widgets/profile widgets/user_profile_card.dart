@@ -34,7 +34,6 @@ class UserProfileCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Card(
-          // color: buttonBgColor,
           color: primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
