@@ -1,38 +1,55 @@
-import 'package:alletre_app/utils/extras/text_button.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
-import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavBar extends StatelessWidget {
   const BottomNavBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        buildFixedSizeButton(
-          text: 'Login',
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => LoginPage()),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).bottomAppBarTheme.color,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
           ),
-          backgroundColor: secondaryColor,
-          borderColor: const Color.fromARGB(255, 253, 215, 222),
-          textStyle: Theme.of(context).textTheme.bodySmall!,
-        ),
-        buildFixedSizeButton(
-          text: 'Sign Up',
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SignUpPage()),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => Provider.of<TabIndexProvider>(context, listen: false).updateIndex(17),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: secondaryColor,
+                foregroundColor: Colors.black87,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: const Text('Login'),
+            ),
           ),
-          backgroundColor: primaryColor,
-          borderColor: secondaryColor,
-          textStyle: Theme.of(context).textTheme.bodyMedium!,
-        ),
-      ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => Provider.of<TabIndexProvider>(context, listen: false).updateIndex(18),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: const Text('Sign Up'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

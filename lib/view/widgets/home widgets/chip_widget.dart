@@ -28,7 +28,7 @@ class ChipWidget extends StatelessWidget {
               ),
               iconSize: 16,
               onTap: () {
-                context.read<TabIndexProvider>().updateIndex(11);
+                context.read<TabIndexProvider>().updateIndex(7);
               },
             ),
           ),

@@ -1,7 +1,6 @@
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
-import 'package:alletre_app/utils/extras/navbar_utils.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:alletre_app/view/widgets/profile%20widgets/profile_list_tile.dart';
@@ -115,16 +114,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).bottomAppBarTheme.color,
-        height: Theme.of(context).bottomAppBarTheme.height,
-        child: NavBarUtils.buildAuthenticatedNavBar(
-                context,
-                onTabChange: (index) {
-                  context.read<TabIndexProvider>().updateIndex(index);
-                },
-              )
       ),
     );
   }

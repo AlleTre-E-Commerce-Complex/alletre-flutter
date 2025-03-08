@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'controller/providers/login_state.dart';
-import 'view/screens/home screen/home_contents.dart';
 import 'view/screens/login screen/login_page.dart';
 import 'view/screens/splash screen/splash_screen.dart';
 
@@ -43,11 +42,10 @@ class MyApp extends StatelessWidget {
     final hasCompletedOnboarding = await userAuthService.hasCompletedOnboarding();
     
     if (isAuthenticated) {
-      // User is authenticated, go straight to home
-      // Also set LoggedInProvider to logged in
+      // User is authenticated, go straight to home via MainStack
       Provider.of<LoggedInProvider>(navigatorKey.currentContext!, listen: false).logIn();
-      Provider.of<TabIndexProvider>(navigatorKey.currentContext!, listen: false).updateIndex(1);
-      return const HomeScreenContent();
+      Provider.of<TabIndexProvider>(navigatorKey.currentContext!, listen: false).updateIndex(0); // Home tab
+      return const MainStack();
     } else if (hasCompletedOnboarding) {
       // User has seen onboarding but is not logged in, go to login
       return LoginPage();

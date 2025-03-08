@@ -3,12 +3,8 @@ import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
-import 'package:alletre_app/controller/providers/login_state.dart';
-import 'package:alletre_app/utils/extras/navbar_utils.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/chip_widget.dart';
 import '../../widgets/home widgets/auction_list_widget.dart';
-import '../../widgets/home widgets/bottom_navbar.dart';
 import '../../widgets/home widgets/carousel_banner_widget.dart';
 import '../../widgets/home widgets/create_auction_button.dart';
 import '../../widgets/home widgets/home_appbar.dart';
@@ -39,7 +35,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   @override
   Widget build(BuildContext context) {
     print('Building HomeScreenContent');
-    final loginState = context.watch<LoggedInProvider>().isLoggedIn;
+    // final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
 
     Future<void> refreshHomePage() async {
@@ -132,18 +128,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
       ),
       floatingActionButton: const CreateAuctionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).bottomAppBarTheme.color,
-        height: Theme.of(context).bottomAppBarTheme.height,
-        child: loginState
-            ? NavBarUtils.buildAuthenticatedNavBar(
-                context,
-                onTabChange: (index) {
-                  context.read<TabIndexProvider>().updateIndex(index);
-                },
-              )
-            : const BottomNavBar(),
-      ),
+
     );
   }
 }
