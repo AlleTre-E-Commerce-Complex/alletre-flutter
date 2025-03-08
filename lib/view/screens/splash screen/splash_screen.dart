@@ -17,14 +17,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 2), () {
-        _navigateToOnBoarding();
-      });
-    });
+    _initializeNavigation();
   }
 
-  void _navigateToOnBoarding() {
+  Future<void> _initializeNavigation() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const MainStack()),
     );
