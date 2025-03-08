@@ -1,10 +1,9 @@
 import 'package:alletre_app/controller/helpers/chip_widget_helper.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
 import 'package:alletre_app/view/screens/wishlist%20screen/wishlist_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ChipWidget extends StatelessWidget {
   final String? title;
@@ -28,7 +27,8 @@ class ChipWidget extends StatelessWidget {
               ),
               iconSize: 16,
               onTap: () {
-                context.read<TabIndexProvider>().updateIndex(7);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => CategoriesPage()));
               },
             ),
           ),
@@ -46,8 +46,8 @@ class ChipWidget extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            WishlistScreen(title: title ?? '', user: UserModel.empty())));
+                        builder: (context) => WishlistScreen(
+                            title: title ?? '', user: UserModel.empty())));
               },
             ),
           ),

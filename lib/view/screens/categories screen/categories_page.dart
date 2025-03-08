@@ -4,6 +4,7 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/categories%20widgets/categories_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/common widgets/footer_elements_appbar.dart';
 
 class CategoriesPage extends StatelessWidget {
   final List<Map<String, String>> categories = [
@@ -26,18 +27,8 @@ class CategoriesPage extends StatelessWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: secondaryColor),
-          onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(1);
-          },
-        ),
-        title:
-            const Text('Categories', style: TextStyle(color: secondaryColor)),
-      ),
+      appBar: const NavbarElementsAppbar(
+          appBarTitle: 'Categories', showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView.builder(
