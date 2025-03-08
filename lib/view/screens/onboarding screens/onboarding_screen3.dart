@@ -1,4 +1,5 @@
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/utils/images/images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -32,7 +33,12 @@ class OnboardingPage3 extends StatelessWidget {
               height: 60,
               sliderButtonIconSize: 17,
               sliderRotate: true,
-              onSubmit: () {
+              onSubmit: () async {
+                // Mark onboarding as completed
+  final userAuthService = UserAuthService();
+  await userAuthService.setOnboardingCompleted();
+
+                // ignore: use_build_context_synchronously
                 context.read<TabIndexProvider>().updateIndex(1); // Navigates to Home
                 return null;
               },

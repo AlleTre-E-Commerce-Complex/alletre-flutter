@@ -9,6 +9,7 @@ import 'package:alletre_app/controller/providers/language_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
+import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:app_links/app_links.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'controller/providers/login_state.dart';
+import 'view/screens/home screen/home_contents.dart';
 import 'view/screens/login screen/login_page.dart';
 import 'view/screens/splash screen/splash_screen.dart';
 
@@ -34,6 +36,26 @@ class MyApp extends StatelessWidget {
           initialUri.path == 'login') {
         return LoginPage();
       }
+
+      // Then check authentication status
+    final userAuthService = UserAuthService();
+    final isAuthenticated = await userAuthService.isAuthenticated();
+    final hasCompletedOnboarding = await userAuthService.hasCompletedOnboarding();
+    
+    if (isAuthenticated) {
+      // User is authenticated, go straight to home
+      // Also set LoggedInProvider to logged in
+      Provider.of<LoggedInProvider>(navigatorKey.currentContext!, listen: false).logIn();
+      Provider.of<TabIndexProvider>(navigatorKey.currentContext!, listen: false).updateIndex(1);
+      return const HomeScreenContent();
+    } else if (hasCompletedOnboarding) {
+      // User has seen onboarding but is not logged in, go to login
+      return LoginPage();
+    } else {
+      // New user, show onboarding
+      return const SplashScreen();
+    }
+
     } catch (e) {
       debugPrint('Error handling deep link: $e');
     }

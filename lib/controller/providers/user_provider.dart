@@ -1,6 +1,6 @@
 import 'dart:io';
-
 import 'package:alletre_app/controller/helpers/user_services.dart';
+import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -258,15 +258,22 @@ class UserProvider with ChangeNotifier {
   }
 
 // Method to update user info after Firebase authentication
-  void setFirebaseUserInfo(User? firebaseUser, String method) {
+  void setFirebaseUserInfo(User? firebaseUser, String method) async {
     if (firebaseUser != null) {
       _authMethod = method;
       _displayName = firebaseUser.displayName;
       _displayNumber = firebaseUser.phoneNumber;
       _displayEmail = firebaseUser.email;
       // OAuth providers (Google, Apple) have pre-verified emails
-      _emailVerified = (method == 'google' || method == 'apple') ? true : firebaseUser.emailVerified;
+      _emailVerified = (method == 'google' || method == 'apple')
+          ? true
+          : firebaseUser.emailVerified;
       _photoUrl = firebaseUser.photoURL;
+
+      // Save auth method
+      final userAuthService = UserAuthService();
+      await userAuthService.setAuthMethod(method);
+
       notifyListeners();
     }
   }
@@ -296,6 +303,11 @@ class UserProvider with ChangeNotifier {
 
       if (result['success']) {
         _authMethod = 'custom';
+
+        // Save auth method
+        final userAuthService = UserAuthService();
+        await userAuthService.setAuthMethod('custom');
+
         if (_rememberPassword) {
           // Save credentials if remember password is checked
           await _storage.write(key: 'saved_email', value: email);
@@ -328,6 +340,12 @@ class UserProvider with ChangeNotifier {
 
   Future<void> logout() async {
     await _userService.logout(); // Added logout method to match UserService
+
+    // Also handle Firebase logout if needed
+    if (_authMethod == 'google' || _authMethod == 'apple') {
+      await FirebaseAuth.instance.signOut();
+    }
+
     resetLoginForm();
     resetSignupForm();
     _authMethod = 'custom';
