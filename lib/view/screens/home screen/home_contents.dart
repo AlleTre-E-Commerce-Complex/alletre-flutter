@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
-import 'package:alletre_app/utils/extras/common_navbar.dart';
+import 'package:alletre_app/utils/extras/navbar_utils.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/chip_widget.dart';
 import '../../widgets/home widgets/auction_list_widget.dart';
 import '../../widgets/home widgets/bottom_navbar.dart';
