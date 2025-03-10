@@ -26,18 +26,16 @@ import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dar
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/profile%20screen/profile_screen.dart';
 import 'package:alletre_app/model/auction_item.dart';
-
-import '../../view/screens/splash screen/splash_screen.dart';
 import '../../view/widgets/home widgets/bottom_navbar.dart';
 
 class MainStack extends StatelessWidget {
   const MainStack({super.key});
 
   Widget _buildScreen(int index, bool isLoggedIn) {
-    // If not logged in, show splash screen first
-    if (!isLoggedIn && index == 0) {
-      return const SplashScreen();
-    }
+    // // If not logged in, show splash screen first
+    // if (!isLoggedIn && index == 0) {
+    //   return const SplashScreen();
+    // }
 
     switch (index) {
       case 0: // Home
@@ -116,11 +114,11 @@ class MainStack extends StatelessWidget {
             ),
           ),
           bottomNavigationBar: isLoggedIn
-              ? BottomNavBarUtils.buildAuthenticatedNavBar(
-                  context,
-                  onTabChange: (index) => tabIndexProvider.updateIndex(index),
-                )
-              : const BottomNavBar(),
+                  ? BottomNavBarUtils.buildAuthenticatedNavBar(
+                      context,
+                      onTabChange: (index) => tabIndexProvider.updateIndex(index),
+                    )
+                  : const BottomNavBar(),
         );
       },
     );

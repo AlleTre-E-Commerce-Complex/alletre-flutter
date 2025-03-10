@@ -1,52 +1,98 @@
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/utils/extras/text_button.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../screens/login screen/login_page.dart';
+import '../../screens/signup screen/signup_page.dart';
 
 class BottomNavBar extends StatelessWidget {
-  const BottomNavBar({super.key});
+  final bool isAuthenticated;
+  final Function(int)? onTabChange;
+
+  const BottomNavBar({
+    super.key,
+    this.isAuthenticated = false,
+    this.onTabChange,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).bottomAppBarTheme.color,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
+      height: isAuthenticated ? 60 : 70, // Increased height for unauthenticated users
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: const BoxDecoration(
+        color: primaryColor,
+      ),
+      child: isAuthenticated
+          ? _buildAuthenticatedNavBar(context)
+          : _buildUnauthenticatedNavBar(context),
+    );
+  }
+
+  Widget _buildAuthenticatedNavBar(BuildContext context) {
+    final tabIndex = Provider.of<TabIndexProvider>(context).selectedIndex;
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+      ),
+      child: BottomNavigationBar(
+        backgroundColor: primaryColor,
+        currentIndex: tabIndex,
+        onTap: onTabChange,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: selectedIndex,
+        unselectedItemColor: secondaryColor,
+        elevation: 0,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Purchases',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.gavel),
+            label: 'My Bids',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildUnauthenticatedNavBar(BuildContext context) {
+    return SizedBox(
+      height: 80, // Adjusted height to make buttons more spacious
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () => Provider.of<TabIndexProvider>(context, listen: false).updateIndex(17),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: secondaryColor,
-                foregroundColor: Colors.black87,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: const Text('Login'),
+          buildFixedSizeButton(
+            text: 'Login',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
             ),
+            backgroundColor: secondaryColor,
+            borderColor: primaryColor,
+            textStyle: Theme.of(context).textTheme.bodySmall!,
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () => Provider.of<TabIndexProvider>(context, listen: false).updateIndex(18),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: const Text('Sign Up'),
+          buildFixedSizeButton(
+            text: 'Sign Up',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SignUpPage()),
             ),
+            backgroundColor: primaryColor,
+            borderColor: secondaryColor,
+            textStyle: Theme.of(context).textTheme.bodyMedium!,
           ),
         ],
       ),

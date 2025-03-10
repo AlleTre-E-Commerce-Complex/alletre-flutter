@@ -1,11 +1,15 @@
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:alletre_app/view/widgets/settings%20widgets/settings_list_tile.dart';
 import 'package:alletre_app/view/widgets/settings%20widgets/settings_section_title.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import '../contact screen/contact_screen.dart';
+import '../user terms screen/user_terms.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -56,17 +60,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: secondaryColor),
-          onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(4);
-          },
-        ),
-        title: const Text('Settings', style: TextStyle(color: secondaryColor)),
-      ),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Settings', showBackButton: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 12),
         child: Column(
@@ -92,13 +86,13 @@ class SettingsScreen extends StatelessWidget {
             SettingsListTile(
               title: 'Contact us',
               onTap: () {
-                context.read<TabIndexProvider>().updateIndex(16);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactUsScreen()));
               },
             ),
             SettingsListTile(
               title: 'Terms and Conditions',
               onTap: () {
-                context.read<TabIndexProvider>().updateIndex(15);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsAndConditions()));
               },
             ),
             Divider(color: dividerColor, thickness: 0.5),

@@ -1,12 +1,15 @@
+// ignore_for_file: avoid_print
 import 'dart:math';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../screens/all auctions screen/all_auctions_screen.dart';
+import '../../screens/auction screen/product_details_screen.dart';
+import '../../screens/login screen/login_page.dart';
 import '../auction card widgets/auction_card.dart';
 import 'package:shimmer/shimmer.dart';
 import 'shimmer_loading.dart';
@@ -39,6 +42,8 @@ class AuctionListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
+
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 14),
       child: Column(
@@ -146,9 +151,27 @@ class AuctionListWidget extends StatelessWidget {
                       ),
                       onPressed: () {
                         if (title == "Live Auctions") {
-                          context.read<TabIndexProvider>().updateIndex(19);
+                          isLoggedIn
+                              ? Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ProductDetailsScreen()))
+                              : Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => LoginPage()));
                         } else if (title == "Listed Products") {
-                          context.read<TabIndexProvider>().updateIndex(20);
+                          isLoggedIn
+                              ? Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ProductDetailsScreen()))
+                              : Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => LoginPage()));
                         }
                       },
                       child: Text(

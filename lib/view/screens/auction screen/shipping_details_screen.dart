@@ -1,9 +1,10 @@
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/add_address_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/common widgets/footer_elements_appbar.dart';
 
 class ShippingDetailsScreen extends StatelessWidget {
   const ShippingDetailsScreen({super.key});
@@ -16,15 +17,8 @@ class ShippingDetailsScreen extends StatelessWidget {
     final defaultAddress = userProvider.defaultAddress;
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Create Auction',
-          style: TextStyle(color: secondaryColor, fontSize: 18),
-        ),
-      ),
+      appBar: const NavbarElementsAppbar(
+          appBarTitle: 'Create Auction', showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.only(left: 14, right: 14, top: 8, bottom: 8),
         child: Column(
@@ -157,7 +151,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      context.read<TabIndexProvider>().updateIndex(10);
+                      Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(80, 33),
@@ -177,7 +171,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                       isSubmitted.value = true;
                       final isValid = formKey.currentState!.validate();
                       if (isValid) {
-                        context.read<TabIndexProvider>().updateIndex(22);
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const PaymentDetailsScreen()));
                       }
                     },
                     style: ElevatedButton.styleFrom(

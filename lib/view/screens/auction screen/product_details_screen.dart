@@ -5,7 +5,9 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/create_auction_validators.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/home widgets/categories widgets/categories_data.dart';
+import 'auction_details_screen.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   const ProductDetailsScreen({super.key});
@@ -28,18 +30,8 @@ class ProductDetailsScreen extends StatelessWidget {
     const subCategories = CategoryData.subCategories;
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: secondaryColor),
-          onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(19);
-          },
-        ),
-        title: const Text('Create Auction',
-            style: TextStyle(color: secondaryColor, fontSize: 18)),
-      ),
+      appBar: const NavbarElementsAppbar(
+          appBarTitle: 'Create Auction', showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
         child: Form(
@@ -530,7 +522,7 @@ class ProductDetailsScreen extends StatelessWidget {
                             condition.value != null;
 
                         if (isValid) {
-                          context.read<TabIndexProvider>().updateIndex(17);
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const AuctionDetailsScreen()));
                         }
                       },
                       style: ElevatedButton.styleFrom(

@@ -677,7 +677,7 @@ class ItemDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 15),
 
                     //Status
-                    if (title != 'Listed Products')
+                    if (title != 'Listed Products')...[
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 3),
@@ -695,6 +695,7 @@ class ItemDetailsScreen extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(height: 15),
+                    ],
 
                     // View Details button
                     TextButton.icon(

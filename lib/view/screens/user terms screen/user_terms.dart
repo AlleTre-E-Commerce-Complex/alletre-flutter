@@ -1,10 +1,8 @@
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
-import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/user%20terms%20widgets/user_terms_header.dart';
 import 'package:alletre_app/view/widgets/user%20terms%20widgets/user_terms_introduction.dart';
 import 'package:alletre_app/view/widgets/user%20terms%20widgets/user_terms_section.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../../widgets/common widgets/footer_elements_appbar.dart';
 
 class TermsAndConditions extends StatelessWidget {
   const TermsAndConditions({super.key});
@@ -12,20 +10,7 @@ class TermsAndConditions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: secondaryColor),
-          onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(14);
-          },
-        ),
-        title: const Text(
-          'Terms and Conditions',
-          style: TextStyle(color: secondaryColor, fontSize: 18),
-        ),
-      ),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Terms and Conditions', showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(

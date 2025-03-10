@@ -1,5 +1,5 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +8,8 @@ import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_card.d
 import 'package:provider/provider.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/home widgets/search_field_widget.dart';
+import '../auction screen/product_details_screen.dart';
+import '../login screen/login_page.dart';
 
 class AllAuctionsScreen extends StatelessWidget {
   final String title;
@@ -25,6 +27,8 @@ class AllAuctionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
+    
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - 32 - 10) / 2;
     final cardHeight = getCardHeight(title);
@@ -84,13 +88,9 @@ class AllAuctionsScreen extends StatelessWidget {
                           ),
                           onPressed: () {
                             if (title == "Live Auctions") {
-                              context
-                                  .read<TabIndexProvider>()
-                                  .updateIndex(19);
+                              isLoggedIn ? Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())) : Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
                             } else if (title == "Listed Products") {
-                              context
-                                  .read<TabIndexProvider>()
-                                  .updateIndex(20);
+                              isLoggedIn ? Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())) : Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
                             }
                           },
                           child: Text(

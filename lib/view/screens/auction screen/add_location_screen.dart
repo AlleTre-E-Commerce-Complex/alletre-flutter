@@ -3,6 +3,7 @@ import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
+import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/add_address_screen.dart';
 import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ class AddLocationScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(1);
+            Navigator.pop(context);
           },
         ),
       ),
@@ -296,7 +297,7 @@ class AddLocationScreen extends StatelessWidget {
                           }
 
                           if (formKey.currentState?.validate() ?? false) {
-                            context.read<TabIndexProvider>().updateIndex(10);
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen()));
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

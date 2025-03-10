@@ -4,6 +4,7 @@ import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/services/apple_auth.dart';
 import 'package:alletre_app/controller/services/google_auth.dart';
+import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
@@ -174,21 +175,27 @@ class LoginButtons extends StatelessWidget {
                       ),
                     ),
                     backgroundColor: activeColor,
-                    duration: const Duration(seconds: 3),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
 
                 Provider.of<LoggedInProvider>(context, listen: false).logIn();
 
-                // First update the tab index to home
-                Provider.of<TabIndexProvider>(context, listen: false)
-                    .updateIndex(1);
+                // // First update the tab index to home
+                // Provider.of<TabIndexProvider>(context, listen: false)
+                //     .updateIndex(0);
 
                 if (!context.mounted) return;
 
                 Future.delayed(const Duration(seconds: 2), () {
                   if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const MainStack()),
+                      (Route<dynamic> route) =>
+                          false, // Removes all previous screens
+                    );
                   }
                 });
               } else {

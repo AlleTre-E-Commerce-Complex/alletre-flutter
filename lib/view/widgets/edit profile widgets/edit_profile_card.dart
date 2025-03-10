@@ -49,7 +49,7 @@ class EditProfileCard extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .bodyLarge
-                            ?.copyWith(fontSize: 14),
+                            ?.copyWith(fontSize: 13),
                       ),
                     ),
                   ],

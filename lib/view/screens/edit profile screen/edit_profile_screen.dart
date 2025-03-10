@@ -1,16 +1,14 @@
 import 'dart:io';
-
 import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/edit profile widgets/custom button widgets/add_phone_button.dart';
 import '../../widgets/edit profile widgets/custom button widgets/edit_name_button.dart';
 import '../../widgets/edit profile widgets/edit_profile_card.dart';
 import '../../widgets/edit profile widgets/edit_profile_card_section.dart';
-import '../../widgets/edit profile widgets/edit_profile_login_option.dart';
 import '../../widgets/edit profile widgets/edit_profile_title.dart';
 import '../../widgets/profile widgets/user_profile_card.dart';
 import 'add_address_screen.dart';
@@ -36,18 +34,8 @@ class EditProfileScreen extends StatelessWidget {
     final photoUrl = userProvider.photoUrl;
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: secondaryColor),
-          onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(4);
-          },
-        ),
-        title:
-            const Text('Edit Profile', style: TextStyle(color: secondaryColor)),
-      ),
+      appBar: const NavbarElementsAppbar(
+          appBarTitle: 'Edit Profile', showBackButton: true),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, child) {
           final user = userProvider.user;
@@ -216,26 +204,21 @@ class EditProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Divider(height: 20, color: dividerColor, thickness: 0.5),
-                const EditProfileTitle(title: 'Login Service'),
-                EditProfileLoginOption(
-                  svgPath: 'assets/icons/apple_icon.svg',
-                  label: 'Connect with Apple',
-                  isConnected: false,
-                  onTap: () {},
-                ),
-                EditProfileLoginOption(
-                  svgPath: 'assets/icons/google_icon.svg',
-                  label: 'Connect with Google',
-                  isConnected: true,
-                  onTap: () {},
-                ),
-                EditProfileLoginOption(
-                  svgPath: 'assets/icons/facebook_icon.svg',
-                  label: 'Connect with Facebook',
-                  isConnected: false,
-                  onTap: () {},
-                ),
+                // Divider(height: 20, color: dividerColor, thickness: 0.5),
+                // const EditProfileTitle(title: 'Login Service'),
+                // EditProfileLoginOption(
+                //   svgPath: 'assets/icons/apple_icon.svg',
+                //   label: 'Connect with Apple',
+                //   isConnected: false,
+                //   onTap: () {},
+                // ),
+                // EditProfileLoginOption(
+                //   svgPath: 'assets/icons/google_icon.svg',
+                //   label: 'Connect with Google',
+                //   isConnected: true,
+                //   onTap: () {},
+                // ),
+                // ),
                 Divider(height: 32, color: dividerColor, thickness: 0.5),
                 const EditProfileTitle(title: 'Settings'),
                 ListTile(
@@ -245,7 +228,7 @@ class EditProfileScreen extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(Icons.delete),
-                  title: const Text('Delete my Account'),
+                  title: const Text('Delete my account'),
                   onTap: () {},
                 ),
                 ListTile(

@@ -1,4 +1,7 @@
+import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
 import 'package:flutter/material.dart';
+
+final myRoute = MaterialPageRoute(builder: (context) => const HomeScreenContent());
 
 Color getStatusColor(String status) {
   switch (status) {

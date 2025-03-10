@@ -128,7 +128,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
       ),
       floatingActionButton: const CreateAuctionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-
     );
   }
 }

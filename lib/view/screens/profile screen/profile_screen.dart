@@ -1,5 +1,4 @@
 import 'package:alletre_app/controller/providers/share_provider.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
@@ -9,15 +8,21 @@ import 'package:alletre_app/view/widgets/profile%20widgets/user_profile_card.dar
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import '../edit profile screen/edit_profile_screen.dart';
+import '../faqs screen/faqs_screen.dart';
+import '../settings screen/settings_screen.dart';
+import '../wishlist screen/wishlist_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final String? title;
+  
+  const ProfileScreen({super.key, this.title});
 
   @override
   Widget build(BuildContext context) {
     final user = UserModel(
       name: "Username",
-      email: "fahad@example.com",
+      email: "email",
       phoneNumber: "+1234567890",
       profileImagePath: null, // Initially empty
     );
@@ -49,16 +54,22 @@ class ProfileScreen extends StatelessWidget {
               user: user,
               buttonText: "Edit Profile",
               onButtonPressed: () {
-                context.read<TabIndexProvider>().updateIndex(6);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfileScreen()));
               },
             ),
             const SizedBox(height: 4),
             const ProfileSectionTitle(title: 'Shopping'),
             ProfileListTile(
-              icon: Icons.favorite_border,
-              title: 'Watchlist',
-              subtitle: 'Keep tabs on watched items',
-              onTap: () {},
+              icon: Icons.bookmark_outline,
+              title: 'Wishlist',
+              subtitle: 'Keep tabs on wishlisted items',
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => WishlistScreen(
+                            title: title ?? '', user: UserModel.empty())));
+              },
             ),
             ProfileListTile(
               icon: Icons.sell_outlined,
@@ -72,20 +83,14 @@ class ProfileScreen extends StatelessWidget {
               subtitle: 'Active auctions and seller offers',
               onTap: () {},
             ),
-            ProfileListTile(
-              icon: Icons.visibility_outlined,
-              title: 'Recently viewed',
-              subtitle: 'Listings you recently viewed',
-              onTap: () {},
-            ),
             Divider(color: dividerColor, thickness: 0.5),
             const ProfileSectionTitle(title: 'About'),
             ProfileListTile(
               icon: Icons.help_outline,
-              title: 'FAQS',
+              title: 'FAQs',
               subtitle: 'Know more about the services',
               onTap: () {
-                context.read<TabIndexProvider>().updateIndex(5);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const FaqScreen()));
               },
             ),
             ProfileListTile(
@@ -109,7 +114,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'Settings',
               subtitle: 'View more settings',
               onTap: () {
-                context.read<TabIndexProvider>().updateIndex(14);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
               },
             ),
           ],

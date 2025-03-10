@@ -1,20 +1,17 @@
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:provider/provider.dart';
+import '../../screens/auction screen/product_details_screen.dart';
 
 class CreateAuctionButton extends StatelessWidget {
   const CreateAuctionButton({super.key});
 
   void _handleOptionSelected(BuildContext context, String option) {
     if (option == 'Create Auction') {
-      context
-          .read<TabIndexProvider>()
-          .updateIndex(19); // Navigate to Add Location Screen
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())); // Navigate to Add Location Screen
     } else if (option == 'List Products') {
-      context
-          .read<TabIndexProvider>()
-          .updateIndex(20); // Navigate to List Products
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())); // Navigate to List Products
     }
   }
 
@@ -55,18 +52,21 @@ class CreateAuctionButton extends StatelessWidget {
             child: FloatingActionButton.extended(
               onPressed: isLoggedIn
                   ? null
-                  : null, // Disabled handling within PopupMenuButton
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginPage(),
+                        ),
+                      );
+                    },
               label: Text(
                 'Sell Now',
                 style: TextStyle(
-                  color: isLoggedIn
-                      ? Theme.of(context).primaryColor
-                      : const Color(0xFFFFFFFF).withAlpha(102),
+                  color: Theme.of(context).primaryColor
                 ),
               ),
-              backgroundColor: isLoggedIn
-                  ? Theme.of(context).splashColor
-                  : const Color(0xFFBDBDBD).withAlpha(62),
+              backgroundColor: Theme.of(context).splashColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
