@@ -118,7 +118,7 @@ class ProductDetailsScreen extends StatelessWidget {
       if (subCategory == null) return {};
 
       switch (subCategory) {
-        case "Computers & Tablets":
+        case "Computers & tablets":
           return {
             "Color": {"type": "dropdown", "options": colorOptions},
             "Screen Size": {"type": "number"},
@@ -131,7 +131,7 @@ class ProductDetailsScreen extends StatelessWidget {
             "Brand": {"type": "text"},
             "Model": {"type": "text"},
           };
-        case "Cameras & Photos":
+        case "Cameras & photos":
           return {
             "Color": {"type": "dropdown", "options": colorOptions},
             "Camera Type": {"type": "dropdown", "options": cameraTypeOptions},

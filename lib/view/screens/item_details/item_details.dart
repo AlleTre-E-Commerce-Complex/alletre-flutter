@@ -22,12 +22,14 @@ class ItemDetailsScreen extends StatelessWidget {
   final UserModel user;
   final String title;
 
-  const ItemDetailsScreen({
+  ItemDetailsScreen({
     super.key,
     required this.item,
     required this.user,
     required this.title,
   });
+
+  final ValueNotifier<bool> _isBuyNowTapped = ValueNotifier(false);
 
   Future<void> _loadSubCategories(BuildContext context) async {
     print('Loading subcategories for item: ${item.title}');
@@ -136,7 +138,7 @@ class ItemDetailsScreen extends StatelessWidget {
 
   Widget _buildEnhancedAuctionCountdown(BuildContext context) {
     return Container(
-      width: 260,
+      width: 210,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         border: Border.all(color: avatarColor),
@@ -561,15 +563,15 @@ class ItemDetailsScreen extends StatelessWidget {
   Color getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'ACTIVE':
-        return Colors.green;
+        return activeColor;
       case 'IN_SCHEDULED':
-        return Colors.blue;
+        return scheduledColor;
       case 'EXPIRED':
-        return Colors.red;
+        return const Color(0xFF9E9E9E);
       case 'WAITING_FOR_PAYMENT':
-        return Colors.orange;
+        return errorColor;
       default:
-        return Colors.grey;
+        return const Color(0xFF757575);
     }
   }
 
@@ -677,7 +679,7 @@ class ItemDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 15),
 
                     //Status
-                    if (title != 'Listed Products')...[
+                    if (title != 'Listed Products') ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 3),
@@ -694,7 +696,7 @@ class ItemDetailsScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                    const SizedBox(height: 15),
+                      const SizedBox(height: 15),
                     ],
 
                     // View Details button
@@ -722,12 +724,10 @@ class ItemDetailsScreen extends StatelessWidget {
                             ),
                             content: SingleChildScrollView(
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  _buildSpecificationRow(
-                                      'Brand:', 'iPhone'),
+                                  _buildSpecificationRow('Brand:', 'iPhone'),
                                   _buildSpecificationRow(
                                       'Model:', '16 Pro Max 512GB'),
                                   _buildSpecificationRow(
@@ -766,13 +766,10 @@ class ItemDetailsScreen extends StatelessWidget {
                       icon: const Icon(Icons.info_outline, size: 14),
                       label: Text(
                         'View Details',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(
-                                color: primaryColor,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 11),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 11),
                       ),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -823,22 +820,65 @@ class ItemDetailsScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                     ],
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        if (title == 'Live Auctions' ||
-                            title == 'Upcoming Auctions')
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.5,
-                            child: Container(
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (title == 'Live Auctions' ||
+                              title == 'Upcoming Auctions')
+                            Expanded(
+                              // width: MediaQuery.of(context).size.width * 0.5,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: avatarColor),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Current Bid',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            color: onSecondaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13,
+                                          ),
+                                    ),
+                                    const SizedBox(
+                                        height:
+                                            5), // Spacing between title and value
+                                    Center(
+                                      child: Text(
+                                        'AED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              color: primaryColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 12,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          if (title == 'Listed Products')
+                            Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 border: Border.all(color: avatarColor),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Column(
+                              child: Row(
                                 children: [
                                   Text(
-                                    'Current Bid',
+                                    'Selling Price',
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleLarge
@@ -849,11 +889,11 @@ class ItemDetailsScreen extends StatelessWidget {
                                         ),
                                   ),
                                   const SizedBox(
-                                      height:
-                                          5), // Spacing between title and value
+                                      width:
+                                          8), // Spacing between title and value
                                   Center(
                                     child: Text(
-                                      'AED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
+                                      'AED ${item.productListingPrice}',
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleLarge
@@ -867,91 +907,70 @@ class ItemDetailsScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                          ),
-                        if (title == 'Listed Products')
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: avatarColor),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Selling Price',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        color: onSecondaryColor,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
+                          if (item.hasBuyNow) ...[
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: ValueListenableBuilder<bool>(
+                                  valueListenable: _isBuyNowTapped,
+                                  builder: (context, isTapped, child) {
+                                    return InkWell(
+                                      onTap: () {
+                                        _isBuyNowTapped.value = true;
+                                        Future.delayed(
+                                            const Duration(milliseconds: 100),
+                                            () {
+                                          _isBuyNowTapped.value = false;
+                                        });
+                                      },
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 6, horizontal: 8),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: primaryColor, width: 1.5),
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              'Buy Now',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.copyWith(
+                                                    color: onSecondaryColor,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 13,
+                                                  ),
+                                            ),
+                                            const SizedBox(
+                                                height:
+                                                    5), // Spacing between title and value
+                                            Center(
+                                              child: Text(
+                                                'AED ${item.buyNowPrice}',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge
+                                                    ?.copyWith(
+                                                      color: primaryColor,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 12,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                ),
-                                const SizedBox(
-                                    width:
-                                        8), // Spacing between title and value
-                                Center(
-                                  child: Text(
-                                    'AED ${item.productListingPrice}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          color: primaryColor,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 12,
-                                        ),
-                                  ),
-                                ),
-                              ],
+                                    );
+                                  }),
                             ),
-                          ),
-                        if (item.hasBuyNow) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: primaryColor, width: 1.2),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: InkWell(
-                              onTap: () {},
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Buy Now',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          color: onSecondaryColor,
-                                          fontSize: 13,
-                                        ),
-                                  ),
-                                  const SizedBox(
-                                      height:
-                                          5), // Spacing between title and value
-                                  Center(
-                                    child: Text(
-                                      'AED ${item.buyNowPrice}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            color: primaryColor,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
-                                          ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
 
                     const SizedBox(height: 16),

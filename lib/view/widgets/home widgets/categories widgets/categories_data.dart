@@ -11,11 +11,12 @@ class CategoryData {
     "Properties": ["House", "Townhouse", "Unit", "Villa", "Land", "Office"],
     "Cars": ["SUVs", "Sedans", "Electric"],
     "Electronic Devices": [
-      "Computers & Tablets",
-      "Cameras & Photos",
+      "Computers & tablets",
+      "Cameras & photos",
       "TVs & Audios",
       "Smart Phones",
-      "Accessories"
+      "Accessories",
+      "Home Appliances"
     ],
   };
 }
