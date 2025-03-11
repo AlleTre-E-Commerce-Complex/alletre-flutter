@@ -796,7 +796,7 @@ class ItemDetailsScreen extends StatelessWidget {
                           .bodyLarge!
                           .copyWith(fontSize: 13),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 16),
 
                     // Category and Subcategory
                     _buildCategoryInfo(context),
