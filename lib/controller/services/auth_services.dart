@@ -1,7 +1,10 @@
 // Create a new file: lib/controller/services/auth_service.dart
+import 'dart:convert';
+
 import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 
 class UserAuthService {
   final UserService _userService = UserService();
@@ -39,5 +42,39 @@ class UserAuthService {
   Future<bool> hasCompletedOnboarding() async {
     final completed = await _storage.read(key: 'onboarding_completed');
     return completed == 'true';
+  }
+
+  // Forgot Password
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${_userService.baseUrl}/auth/forget-password'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'Password reset instructions sent to your email',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Failed to process request',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An error occurred. Please try again later.',
+      };
+    }
   }
 }

@@ -4,6 +4,7 @@ import 'package:alletre_app/utils/validators/form_validators.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/common_obscure_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../screens/forgot password screen/forgot_password_screen.dart';
 
 class LoginFormFields extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -71,6 +72,12 @@ class LoginFormFields extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 15),
                 child: GestureDetector(
                   onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ForgotPasswordScreen(),
+                      ),
+                    );
                   },
                   child: const Text(
                     'Forgot Password?',
