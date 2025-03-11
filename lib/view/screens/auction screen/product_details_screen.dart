@@ -26,8 +26,225 @@ class ProductDetailsScreen extends StatelessWidget {
     final coverPhotoIndex =
         ValueNotifier<int?>(null); // Track selected cover photo
 
+    // Map to store the custom field controllers and dropdown values
+    final customFieldControllers = <String, TextEditingController>{};
+    final customFieldDropdownValues = <String, ValueNotifier<String?>>{};
+
     const categories = CategoryData.categories;
     const subCategories = CategoryData.subCategories;
+
+    // Define consistent label text style
+    const labelTextStyle = TextStyle(fontSize: 14);
+
+    // Define color options for dropdown
+    final List<String> colorOptions = [
+      'White',
+      'Black',
+      'Blue',
+      'Red',
+      'Green',
+      'Yellow',
+      'Orange',
+      'Purple',
+      'Brown',
+      'Pink',
+      'Cyan',
+      'Grey',
+      'Silver',
+      'Bronze',
+      'Golden',
+      'Pearl',
+      'Matte Black',
+      'Champagne',
+      'Other color',
+      'Multi color'
+    ];
+
+    // Define camera type options for dropdown
+    final List<String> cameraTypeOptions = [
+      'Digital',
+      'Compact',
+      'Mirrorless Interchangeable Lens',
+      'DSLR',
+      'Action Camera',
+      'Instant Camera',
+      '360 Camera',
+      'Other'
+    ];
+
+    // Define memory options for dropdown
+    final List<String> memoryOptions = [
+      '4GB',
+      '8GB',
+      '16GB',
+      '32GB',
+      '64GB',
+      '128GB',
+      '256GB',
+      '512GB',
+      '1TB',
+      '2TB'
+    ];
+
+    // Define material options for dropdown
+    final List<String> materialOptions = [
+      'ABS',
+      'Plastic',
+      'Metal',
+      'Silicon',
+      'Glass',
+      'Wood',
+      'Carbon Fiber',
+      'Leather',
+      'Other'
+    ];
+
+    // Define country options for dropdown
+    final List<String> countryOptions = ['United Arab Emirates'];
+
+    // Define city options for dropdown
+    final List<String> cityOptions = [
+      'Abu Dhabi',
+      'Ajman',
+      'Dubai',
+      'Fujairah',
+      'Ras al Khaimah',
+      'Sharjah',
+      'Umm al Quwain'
+    ];
+
+    // Define subcategory custom fields mapping
+    Map<String, dynamic> getSubCategoryFields(String? subCategory) {
+      if (subCategory == null) return {};
+
+      switch (subCategory) {
+        case "Computers & Tablets":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Screen Size": {"type": "number"},
+            "Operating System": {"type": "text"},
+            "Release Year": {"type": "number"},
+            "Region of Manufacture": {"type": "text"},
+            "RAM Size": {"type": "number"},
+            "Processor": {"type": "text"},
+            "Graphics Card": {"type": "text"},
+            "Brand": {"type": "text"},
+            "Model": {"type": "text"},
+          };
+        case "Cameras & Photos":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Camera Type": {"type": "dropdown", "options": cameraTypeOptions},
+            "Release Year": {"type": "number"},
+            "Region of Manufacture": {"type": "text"},
+            "Brand": {"type": "text"},
+            "Model": {"type": "text"},
+          };
+        case "Smart Phones":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Memory": {"type": "dropdown", "options": memoryOptions},
+            "Screen Size": {"type": "number"},
+            "Operating System": {"type": "text"},
+            "Release Year": {"type": "number"},
+            "Region of Manufacture": {"type": "text"},
+            "Brand": {"type": "text"},
+            "Model": {"type": "text"},
+          };
+        case "Accessories":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Material": {"type": "dropdown", "options": materialOptions},
+            "Type": {"type": "text"},
+            "Brand": {"type": "text"},
+            "Model": {"type": "text"},
+          };
+        case "TVs & Audios":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Screen Size": {"type": "number"},
+            "Release Year": {"type": "number"},
+            "Region of Manufacture": {"type": "text"},
+            "Brand": {"type": "text"},
+            "Model": {"type": "text"},
+          };
+        case "Home Appliances":
+          return {
+            "Age": {"type": "number"},
+            "Brand": {"type": "text"},
+            "Model": {"type": "text"},
+          };
+        case "Gold":
+        case "Diamond":
+        case "Silver":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Brand": {"type": "text"},
+            "Model": {"type": "text"},
+          };
+        case "House":
+        case "Townhouse":
+        case "Villa":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Country": {"type": "dropdown", "options": countryOptions},
+            "City": {"type": "dropdown", "options": cityOptions},
+            "Age": {"type": "number"},
+            "Number of Rooms": {"type": "number"},
+            "Total Area (Sq Ft)": {"type": "number"},
+            "Number of Floors": {"type": "number"},
+          };
+        case "Unit":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Country": {"type": "dropdown", "options": countryOptions},
+            "City": {"type": "dropdown", "options": cityOptions},
+            "Age": {"type": "number"},
+            "Number of Rooms": {"type": "number"},
+            "Total Area (Sq Ft)": {"type": "number"},
+          };
+        case "Land":
+          return {
+            "Country": {"type": "dropdown", "options": countryOptions},
+            "City": {"type": "dropdown", "options": cityOptions},
+            "Land Type": {"type": "text"},
+            "Total Area (Sq Ft)": {"type": "number"},
+          };
+        case "Office":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Country": {"type": "dropdown", "options": countryOptions},
+            "City": {"type": "dropdown", "options": cityOptions},
+            "Age": {"type": "number"},
+            "Number of Rooms": {"type": "number"},
+            "Total Area (Sq Ft)": {"type": "number"},
+          };
+        default:
+          return {};
+      }
+    }
+
+    // Function to initialize custom field controllers and dropdown values
+    void initializeCustomFieldControllers(String? subCategory) {
+      if (subCategory == null) return;
+
+      // Clear existing controllers and dropdown values
+      customFieldControllers.forEach((key, controller) {
+        controller.clear();
+      });
+      customFieldControllers.clear();
+      customFieldDropdownValues.clear();
+
+      // Create new controllers and dropdown values
+      final fields = getSubCategoryFields(subCategory);
+      fields.forEach((key, value) {
+        if (value["type"] == "text") {
+          customFieldControllers[key] = TextEditingController();
+        } else if (value["type"] == "dropdown") {
+          customFieldDropdownValues[key] = ValueNotifier<String?>(null);
+        }
+      });
+    }
 
     return Scaffold(
       appBar: const NavbarElementsAppbar(
@@ -62,6 +279,7 @@ class ProductDetailsScreen extends StatelessWidget {
                 controller: itemNameController,
                 decoration: InputDecoration(
                   labelText: "Item Name",
+                  labelStyle: labelTextStyle,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -76,14 +294,14 @@ class ProductDetailsScreen extends StatelessWidget {
                 ),
                 validator: CreateAuctionValidation.validateItemName,
               ),
-              const SizedBox(height: 10),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               ValueListenableBuilder<String?>(
                 valueListenable: categoryController,
                 builder: (context, selectedCategory, child) {
                   return DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: "Category",
+                      labelStyle: labelTextStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -113,6 +331,13 @@ class ProductDetailsScreen extends StatelessWidget {
                     onChanged: (value) {
                       categoryController.value = value;
                       subCategoryController.value = null; // Reset subcategory
+
+                      // Clear the custom field controllers when category changes
+                      customFieldControllers.forEach((key, controller) {
+                        controller.clear();
+                      });
+                      customFieldControllers.clear();
+                      customFieldDropdownValues.clear();
                     },
                     validator: CreateAuctionValidation.validateCategory,
                   );
@@ -130,7 +355,8 @@ class ProductDetailsScreen extends StatelessWidget {
                     builder: (context, selectedSubCategory, child) {
                       return DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: "Sub category",
+                          labelText: "Sub Category",
+                          labelStyle: labelTextStyle,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -160,6 +386,8 @@ class ProductDetailsScreen extends StatelessWidget {
                         }).toList(),
                         onChanged: (value) {
                           subCategoryController.value = value;
+                          // Initialize controllers for this subcategory
+                          initializeCustomFieldControllers(value);
                         },
                         validator: CreateAuctionValidation.validateSubCategory,
                       );
@@ -167,11 +395,212 @@ class ProductDetailsScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
+
+              // Dynamic Custom Fields based on selected subcategory
+              ValueListenableBuilder<String?>(
+                valueListenable: subCategoryController,
+                builder: (context, selectedSubCategory, child) {
+                  if (selectedSubCategory == null) {
+                    return const SizedBox();
+                  }
+
+                  final fields = getSubCategoryFields(selectedSubCategory);
+                  if (fields.isEmpty) {
+                    return const SizedBox();
+                  }
+
+                  // Get required fields map
+                  final requiredFields =
+                      CreateAuctionValidation.getRequiredFields(
+                          selectedSubCategory);
+
+                  // Ensure all fields have controllers or dropdown values
+                  fields.forEach((key, value) {
+                    if (value["type"] == "text" &&
+                        !customFieldControllers.containsKey(key)) {
+                      customFieldControllers[key] = TextEditingController();
+                    } else if (value["type"] == "dropdown" &&
+                        !customFieldDropdownValues.containsKey(key)) {
+                      customFieldDropdownValues[key] =
+                          ValueNotifier<String?>(null);
+                    }
+                  });
+
+                  return GridView.builder(
+                    key: ValueKey('grid-$selectedSubCategory'),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 3,
+                      mainAxisExtent:
+                          60, // Slightly increased to ensure error messages are visible
+                    ),
+                    itemCount: fields.length,
+                    itemBuilder: (context, index) {
+                      final fieldName = fields.keys.elementAt(index);
+                      final fieldValue = fields[fieldName];
+                      final isRequired = requiredFields[fieldName] ?? false;
+
+                      if (fieldValue["type"] == "text") {
+                        return TextFormField(
+                          controller: customFieldControllers[fieldName],
+                          decoration: InputDecoration(
+                            labelText: fieldName,
+                            labelStyle: const TextStyle(fontSize: 12),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 11),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: errorColor),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: errorColor),
+                            ),
+                            errorStyle: const TextStyle(
+                              fontSize: 9,
+                              height: 0.7,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          style: const TextStyle(fontSize: 12),
+                          validator: (value) {
+                            // if (fieldName == 'Model') {
+                            //   return CreateAuctionValidation.validateModel(
+                            //       value);
+                            // }
+                            return CreateAuctionValidation.validateCustomField(
+                              fieldName,
+                              value,
+                              'text',
+                              isRequired: isRequired,
+                            );
+                          },
+                        );
+                      } else if (fieldValue["type"] == "number") {
+                        return TextFormField(
+                          controller: customFieldControllers[fieldName],
+                          decoration: InputDecoration(
+                            labelText: fieldName,
+                            labelStyle: const TextStyle(fontSize: 12),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: errorColor),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: errorColor),
+                            ),
+                            errorStyle: const TextStyle(
+                              fontSize: 9,
+                              height: 0.7,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) =>
+                              CreateAuctionValidation.validateCustomField(
+                            fieldName,
+                            value,
+                            'number',
+                            isRequired: isRequired,
+                          ),
+                        );
+                      } else if (fieldValue["type"] == "dropdown") {
+                        return ValueListenableBuilder<String?>(
+                          valueListenable:
+                              customFieldDropdownValues[fieldName]!,
+                          builder: (context, selectedValue, child) {
+                            return DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText: fieldName,
+                                labelStyle: const TextStyle(fontSize: 12),
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 8),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide:
+                                      const BorderSide(color: errorColor),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide:
+                                      const BorderSide(color: errorColor),
+                                ),
+                                errorStyle: const TextStyle(
+                                  fontSize: 9,
+                                  height: 0.7,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              value: selectedValue,
+                              items: fieldValue["options"]
+                                  .map<DropdownMenuItem<String>>((option) {
+                                return DropdownMenuItem<String>(
+                                  value: option,
+                                  child: Text(
+                                    option,
+                                    style: const TextStyle(
+                                      color: onSecondaryColor,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                customFieldDropdownValues[fieldName]!.value =
+                                    value;
+                              },
+                              validator: (value) {
+                                // if (fieldName == 'Color') {
+                                //   return CreateAuctionValidation.validateColor(
+                                //       value);
+                                // }
+                                return CreateAuctionValidation
+                                    .validateCustomField(
+                                  fieldName,
+                                  value,
+                                  'select',
+                                  isRequired: isRequired,
+                                );
+                              },
+                              isExpanded: true,
+                            );
+                          },
+                        );
+                      }
+                      return null;
+                      // return const SizedBox();
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 5),
+
               TextFormField(
                 controller: descriptionController,
                 decoration: InputDecoration(
                   labelText: "Item Description",
+                  labelStyle: labelTextStyle,
                   alignLabelWithHint: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -183,6 +612,11 @@ class ProductDetailsScreen extends StatelessWidget {
                   focusedErrorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: errorColor),
+                  ),
+                  errorStyle: const TextStyle(
+                    fontSize: 12,
+                    height: 1.2,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 maxLines: 5,
@@ -224,9 +658,9 @@ class ProductDetailsScreen extends StatelessWidget {
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
-                          crossAxisSpacing: 10, // Increased spacing
+                          crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: 1, // Square aspect ratio
+                          childAspectRatio: 1,
                         ),
                         itemCount: 5,
                         itemBuilder: (context, index) {
@@ -258,8 +692,8 @@ class ProductDetailsScreen extends StatelessWidget {
                                     }
                                   },
                                   child: Container(
-                                    height: 120, // Explicit height
-                                    width: 120, // Explicit width
+                                    height: 120,
+                                    width: 120,
                                     decoration: BoxDecoration(
                                       border: Border.all(color: greyColor),
                                       borderRadius: BorderRadius.circular(10),
@@ -360,8 +794,8 @@ class ProductDetailsScreen extends StatelessWidget {
                             return GestureDetector(
                               onTap: () => pickMultipleImages(media),
                               child: Container(
-                                height: 120, // Match image container height
-                                width: 120, // Match image container width
+                                height: 120,
+                                width: 120,
                                 decoration: BoxDecoration(
                                   border: Border.all(color: greyColor),
                                   borderRadius: BorderRadius.circular(10),
@@ -435,7 +869,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           const Text("New", style: radioTextStyle),
                         ],
                       ),
-                      const SizedBox(width: 20), // Space between radio buttons
+                      const SizedBox(width: 20),
                       Row(
                         children: [
                           Radio<String>(
@@ -478,11 +912,24 @@ class ProductDetailsScreen extends StatelessWidget {
                       onPressed: () {
                         // Save as draft logic
                         isSubmitted.value = true;
-                        final isValid = formKey.currentState!.validate() &&
+
+                        // This will trigger the validators and show error messages
+                        final formValid = formKey.currentState!.validate();
+
+                        // Validate form including dropdown fields
+                        bool isDropdownsValid = true;
+                        customFieldDropdownValues.forEach((key, notifier) {
+                          if (notifier.value == null) {
+                            isDropdownsValid = false;
+                          }
+                        });
+
+                        final isValid = formValid &&
                             CreateAuctionValidation.validateMediaSection(
                                     media.value) ==
                                 null &&
-                            condition.value != null;
+                            condition.value != null &&
+                            isDropdownsValid;
 
                         if (isValid) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -515,14 +962,30 @@ class ProductDetailsScreen extends StatelessWidget {
                       onPressed: () {
                         // Set submitted to true to show validation errors
                         isSubmitted.value = true;
-                        final isValid = formKey.currentState!.validate() &&
+
+                        final formValid = formKey.currentState!.validate();
+
+                        // Validate form including dropdown fields
+                        bool isDropdownsValid = true;
+                        customFieldDropdownValues.forEach((key, notifier) {
+                          if (notifier.value == null) {
+                            isDropdownsValid = false;
+                          }
+                        });
+
+                        final isValid = formValid &&
                             CreateAuctionValidation.validateMediaSection(
                                     media.value) ==
                                 null &&
-                            condition.value != null;
+                            condition.value != null &&
+                            isDropdownsValid;
 
                         if (isValid) {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const AuctionDetailsScreen()));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AuctionDetailsScreen()));
                         }
                       },
                       style: ElevatedButton.styleFrom(

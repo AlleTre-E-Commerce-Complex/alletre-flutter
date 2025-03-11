@@ -12,9 +12,9 @@ class CategoryData {
     "Cars": ["SUVs", "Sedans", "Electric"],
     "Electronic Devices": [
       "Computers & Tablets",
-      "Cameras",
+      "Cameras & Photos",
       "TVs & Audios",
-      "Smartphones",
+      "Smart Phones",
       "Accessories"
     ],
   };
