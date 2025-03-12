@@ -31,6 +31,149 @@ class ItemDetailsScreen extends StatelessWidget {
 
   final ValueNotifier<bool> _isBuyNowTapped = ValueNotifier(false);
 
+  void _showDetailsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return DefaultTabController(
+          length: 3,
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Tabs
+                  const TabBar(
+                    labelColor: primaryColor,
+                    unselectedLabelColor: onSecondaryColor,
+                    indicatorColor: primaryColor,
+                    labelStyle: TextStyle(
+                      // Common style for selected tab text
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    unselectedLabelStyle: TextStyle(
+                      // Common style for unselected tab text
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    tabs: [
+                      Tab(text: 'Item Details'),
+                      Tab(text: 'Return Policy'),
+                      Tab(text: 'Warranty Policy'),
+                    ],
+                  ),
+
+                  // Tab Content
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _itemDetailsTab(),
+                        _returnPolicyTab(),
+                        _warrantyPolicyTab(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+// Tab Content Widgets
+  Widget _itemDetailsTab() {
+    return ListView(
+      padding: const EdgeInsets.all(8),
+      children: [
+        _itemDetailsTitle(),
+        _itemDetailsAbout(item.description),
+        const SizedBox(height: 14),
+        _itemDetailsContent(),
+      ],
+    );
+  }
+
+  Widget _returnPolicyTab() {
+    return const Center(child: Text('User reviews will be shown here.'));
+  }
+
+  Widget _warrantyPolicyTab() {
+    return const Center(
+        child: Text('Additional information about the product.'));
+  }
+
+  Widget _itemDetailsTitle() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Center(
+        child: Text(
+          'About The Brand',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: onSecondaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _itemDetailsAbout(String value) {
+    return Center(
+        child: Text(value,
+            style: const TextStyle(
+                color: onSecondaryColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 11)));
+  }
+
+  Widget _itemDetailsContent() {
+    return Column(
+      children: [
+        _buildDetailRow('Processor:', 'A18 Bionic'),
+        _buildDetailRow('RAM:', '12GB'),
+        _buildDetailRow('Storage:', '512GB'),
+        _buildDetailRow('Battery:', '4500mAh'),
+        _buildDetailRow('Display:', '6.7-inch OLED'),
+        _buildDetailRow('Camera:', '48MP Triple Camera'),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(String title, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      margin:
+          const EdgeInsets.symmetric(vertical: 4), // Adds spacing between rows
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200, // Light grey background
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 12),
+          ),
+          Text(
+            value,
+            style: const TextStyle(color: onSecondaryColor, fontWeight: FontWeight.w500, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _loadSubCategories(BuildContext context) async {
     print('Loading subcategories for item: ${item.title}');
     print('Category ID: ${item.categoryId}');
@@ -699,77 +842,17 @@ class ItemDetailsScreen extends StatelessWidget {
                       const SizedBox(height: 15),
                     ],
 
-                    // View Details button
+                    // View Details Button
                     TextButton.icon(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Row(
-                              children: [
-                                const Icon(Icons.info_outline,
-                                    color: primaryColor),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Item Specifications',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        color: primaryColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildSpecificationRow('Brand:', 'iPhone'),
-                                  _buildSpecificationRow(
-                                      'Model:', '16 Pro Max 512GB'),
-                                  _buildSpecificationRow(
-                                      'Color:', 'Desert Titanium'),
-                                  const Divider(color: greyColor),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'About This Brand:',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          color: primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                ],
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                ),
-                                child: const Text('Close'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                      onPressed: () => _showDetailsBottomSheet(context),
                       icon: const Icon(Icons.info_outline, size: 14),
                       label: Text(
                         'View Details',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: primaryColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 11),
+                              color: primaryColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 11,
+                            ),
                       ),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -1110,36 +1193,6 @@ class ItemDetailsScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: _buildBottomBar(context),
-    );
-  }
-
-  Widget _buildSpecificationRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
