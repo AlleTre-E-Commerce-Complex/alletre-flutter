@@ -11,8 +11,10 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp();
 
-  // Initialize categories
-  await CategoryApiService.initializeCategories();
+  // Initialize categories and subcategories
+  await CategoryApiService.initCategories();
+  // Initialize subcategories for Electronics (ID: 1)
+  await CategoryApiService.initSubCategories(1);
 
   timeago.setLocaleMessages('en_custom', CustomTimeagoMessages());
   runApp(const MyApp());

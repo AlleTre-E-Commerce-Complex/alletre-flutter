@@ -1,0 +1,111 @@
+{
+  "id": 2,
+  "nameAr": "أجهزة الكمبيوتر والأجهزة اللوحية",
+  "nameEn": "Computers & tablets",
+  "categoryId": 1,
+  "createdAt": "2025-02-20T11:02:53.191Z",
+  "imageLink": "https://firebasestorage.googleapis.com/v0/b/alletre-auctions.firebasestorage.app/o/uploadedImage-b21d80e0-11a0-45a1-abd5-3699bc042d6b.png?alt=media&token=b21d80e0-11a0-45a1-abd5-3699bc042d6b",
+  "imagePath": "uploadedImage-b21d80e0-11a0-45a1-abd5-3699bc042d6b.png",
+  "customFields": [
+    {
+      "id": 3,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "screenSize",
+      "resKey": "screenSize",
+      "type": "number",
+      "labelAr": "حجم الشاشة",
+      "labelEn": "Screen Size"
+    },
+    {
+      "id": 4,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "operatingSystem",
+      "resKey": "operatingSystem",
+      "type": "text",
+      "labelAr": "نظام التشغيل",
+      "labelEn": "Operating System"
+    },
+    {
+      "id": 5,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "releaseYear",
+      "resKey": "releaseYear",
+      "type": "number",
+      "labelAr": "سنة الاصدار",
+      "labelEn": "Release Year"
+    },
+    {
+      "id": 6,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "color",
+      "resKey": "color",
+      "type": "array",
+      "labelAr": "اللون",
+      "labelEn": "Color"
+    },
+    {
+      "id": 7,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "regionOfManufacture",
+      "resKey": "regionOfManufacture",
+      "type": "text",
+      "labelAr": "بلد المنشأ",
+      "labelEn": "Region Of Manufacture"
+    },
+    {
+      "id": 8,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "ramSize",
+      "resKey": "ramSize",
+      "type": "number",
+      "labelAr": "حجم الرامات",
+      "labelEn": "Ram Size"
+    },
+    {
+      "id": 9,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "processor",
+      "resKey": "processor",
+      "type": "text",
+      "labelAr": "بروسيسور",
+      "labelEn": "Processor"
+    },
+    {
+      "id": 10,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "brandId",
+      "resKey": "brand",
+      "type": "text",
+      "labelAr": "ماركة",
+      "labelEn": "Brand"
+    },
+    {
+      "id": 11,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "model",
+      "resKey": "model",
+      "type": "text",
+      "labelAr": "موديل",
+      "labelEn": "Model"
+    },
+    {
+      "id": 12,
+      "subCategoryId": 2,
+      "categoryId": null,
+      "key": "graphicCard",
+      "resKey": "graphicCard",
+      "type": "text",
+      "labelAr": "معالج الرسومات",
+      "labelEn": "Graphic Card"
+    }
+  ]
+}

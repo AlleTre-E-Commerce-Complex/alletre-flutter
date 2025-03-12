@@ -1,21 +1,26 @@
 // ignore_for_file: avoid_print
+
+import 'package:alletre_app/services/api/category_api_service.dart';
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/model/user_model.dart';
+import 'package:alletre_app/model/custom_field_model.dart';
+import 'package:alletre_app/services/category_service.dart';
+import 'package:alletre_app/services/custom_fields_service.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/contact_provider.dart';
-import 'package:alletre_app/model/user_model.dart';
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:alletre_app/controller/providers/wishlist_provider.dart';
+import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../widgets/auction card widgets/auction_countdown.dart';
+import '../image_view/full_screen_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:alletre_app/controller/providers/wishlist_provider.dart';
-import 'package:alletre_app/model/auction_item.dart';
-import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:alletre_app/services/category_service.dart';
-import 'package:alletre_app/services/api/category_api_service.dart';
-import '../../widgets/auction card widgets/auction_countdown.dart';
-import '../image_view/full_screen_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final AuctionItem item;
@@ -136,16 +141,351 @@ class ItemDetailsScreen extends StatelessWidget {
                 fontSize: 11)));
   }
 
+  Future<Map<String, dynamic>?> _loadItemDetails() async {
+    debugPrint('🔍 Loading details for item: ${item.title}');
+    debugPrint('📂 Category ID: ${item.categoryId}');
+
+    try {
+      // First, fetch subcategories for this category
+      debugPrint('🔄 Fetching subcategories for category: ${item.categoryId}');
+      final subCategoriesResponse = await http.get(
+        Uri.parse(
+            'https://www.alletre.com/api/categories/${item.categoryId}/subcategories'),
+      );
+
+      if (subCategoriesResponse.statusCode == 200) {
+        CategoryService.initializeSubCategories(subCategoriesResponse.body);
+      }
+
+      // Get subcategory name after initialization
+      final subCategoryName =
+          CategoryService.getSubCategoryName(item.subCategoryId);
+      debugPrint('✅ Found subcategory: $subCategoryName');
+
+      // Fetch custom fields
+      debugPrint(
+          '🔄 Fetching custom fields for subcategory: ${item.subCategoryId}');
+      final customFields =
+          await CustomFieldsService.getCustomFieldsBySubcategory(
+              item.subCategoryId.toString());
+
+      // For Electronics category, ensure all required fields are present
+      if (item.categoryId == 1) {
+        final requiredFields = [
+          CustomField(
+            id: 1,
+            subCategoryId: item.subCategoryId,
+            key: 'brand',
+            resKey: 'brand',
+            type: 'text',
+            labelAr: 'العلامة التجارية',
+            labelEn: 'Brand',
+            isRequired: true,
+          ),
+          CustomField(
+            id: 2,
+            subCategoryId: item.subCategoryId,
+            key: 'model',
+            resKey: 'model',
+            type: 'text',
+            labelAr: 'الموديل',
+            labelEn: 'Model',
+            isRequired: true,
+          ),
+          CustomField(
+            id: 3,
+            subCategoryId: item.subCategoryId,
+            key: 'screenSize',
+            resKey: 'screen_size',
+            type: 'number',
+            labelAr: 'حجم الشاشة',
+            labelEn: 'Screen Size',
+            unit: 'inches',
+          ),
+          CustomField(
+            id: 4,
+            subCategoryId: item.subCategoryId,
+            key: 'operatingSystem',
+            resKey: 'operating_system',
+            type: 'text',
+            labelAr: 'نظام التشغيل',
+            labelEn: 'Operating System',
+          ),
+          CustomField(
+            id: 5,
+            subCategoryId: item.subCategoryId,
+            key: 'releaseYear',
+            resKey: 'release_year',
+            type: 'number',
+            labelAr: 'سنة الإصدار',
+            labelEn: 'Release Year',
+            validation: 'year',
+          ),
+          CustomField(
+            id: 6,
+            subCategoryId: item.subCategoryId,
+            key: 'ramSize',
+            resKey: 'ram_size',
+            type: 'number',
+            labelAr: 'حجم الذاكرة',
+            labelEn: 'RAM Size',
+            unit: 'GB',
+          ),
+          CustomField(
+            id: 7,
+            subCategoryId: item.subCategoryId,
+            key: 'processor',
+            resKey: 'processor',
+            type: 'text',
+            labelAr: 'المعالج',
+            labelEn: 'Processor',
+          ),
+          CustomField(
+            id: 8,
+            subCategoryId: item.subCategoryId,
+            key: 'graphicCard',
+            resKey: 'graphic_card',
+            type: 'text',
+            labelAr: 'كرت الشاشة',
+            labelEn: 'Graphic Card',
+          ),
+          CustomField(
+            id: 9,
+            subCategoryId: item.subCategoryId,
+            key: 'color',
+            resKey: 'color',
+            type: 'select',
+            labelAr: 'اللون',
+            labelEn: 'Color',
+            isArray: true,
+          ),
+        ];
+
+        // Add any missing required fields
+        for (final field in requiredFields) {
+          if (!customFields.fields
+              .any((f) => f.key.toLowerCase() == field.key.toLowerCase())) {
+            customFields.fields.add(field);
+          }
+        }
+      }
+
+      debugPrint(
+          '📋 Available custom fields: ${customFields.fields.map((f) => f.labelEn).join(', ')}');
+
+      // Fetch auction details
+      debugPrint('🎯 Fetching auction details');
+      final response = await http.get(
+        Uri.parse(
+            'https://www.alletre.com/api/auctions/user/${item.id}/details'),
+      );
+
+      if (response.statusCode == 200) {
+        final responseJson = jsonDecode(response.body);
+        debugPrint('📦 Auction details received: $responseJson');
+
+        if (responseJson['success'] == true && responseJson['data'] != null) {
+          final data = responseJson['data'] as Map<String, dynamic>;
+          final product = data['product'] as Map<String, dynamic>?;
+
+          // Extract custom fields from product data
+          final customFieldValues = <String, dynamic>{};
+          if (product != null) {
+            // Add model if available
+            if (product['model'] != null) {
+              customFieldValues['model'] = product['model'];
+            }
+
+            // Add brand if available
+            if (product['brand'] != null) {
+              customFieldValues['brand'] = product['brand'];
+            }
+
+            // Add other custom fields if present
+            final productCustomFields =
+                product['customFields'] as Map<String, dynamic>?;
+            if (productCustomFields != null) {
+              customFieldValues.addAll(productCustomFields);
+            }
+          }
+
+          return {
+            'subCategoryName': subCategoryName,
+            'customFields': customFields.fields,
+            'filledValues': customFieldValues,
+          };
+        }
+      }
+    } catch (e, stackTrace) {
+      debugPrint('⚠️ Error loading item details: $e');
+      debugPrint('Stack trace: $stackTrace');
+    }
+    return null;
+  }
+
+  String _formatFieldValue(CustomField field, dynamic value) {
+    if (value == null) return '';
+
+    // Handle array fields first
+    if (field.isArray) {
+      if (field.key.toLowerCase().contains('color') ||
+          field.labelEn.toLowerCase().contains('color')) {
+        // Convert array or comma-separated string to formatted list
+        final colors = value is List ? value : value.toString().split(',');
+        return colors
+            .map((c) => c.toString().trim())
+            .where((c) => c.isNotEmpty)
+            .join(', ');
+      }
+      return value is List ? value.join(', ') : value.toString();
+    }
+
+    switch (field.type.toLowerCase()) {
+      case 'number':
+        final number = double.tryParse(value.toString());
+        if (number != null) {
+          // Format based on field's unit or validation type
+          if (field.unit?.toLowerCase() == 'gb') {
+            return '${number.toStringAsFixed(0)} GB';
+          } else if (field.unit?.toLowerCase() == 'inches') {
+            return '${number.toStringAsFixed(1)}"';
+          } else if (field.validation == 'year') {
+            final year = number.toInt();
+            // Validate year is between 1900 and next year
+            final currentYear = DateTime.now().year;
+            if (year >= 1900 && year <= currentYear + 1) {
+              return year.toString();
+            }
+            return 'Invalid Year';
+          }
+          // For other numeric fields, show decimals only if needed
+          return number
+              .toStringAsFixed(number.truncateToDouble() == number ? 0 : 1);
+        }
+        return value.toString();
+
+      case 'text':
+        final text = value.toString().trim();
+        // Special handling for required fields
+        if (field.isRequired && text.isEmpty) {
+          return 'Not Specified';
+        }
+        return text;
+
+      case 'select':
+        return value.toString().trim();
+
+      default:
+        return value.toString().trim();
+    }
+  }
+
   Widget _itemDetailsContent() {
-    return Column(
-      children: [
-        _buildDetailRow('Processor:', 'A18 Bionic'),
-        _buildDetailRow('RAM:', '12GB'),
-        _buildDetailRow('Storage:', '512GB'),
-        _buildDetailRow('Battery:', '4500mAh'),
-        _buildDetailRow('Display:', '6.7-inch OLED'),
-        _buildDetailRow('Camera:', '48MP Triple Camera'),
-      ],
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: _loadItemDetails(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(color: primaryColor),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          debugPrint('⚠️ Error in FutureBuilder: ${snapshot.error}');
+          return const SizedBox.shrink(); // Hide section on error
+        }
+
+        final data = snapshot.data;
+        final customFields = data?['customFields'] as List<CustomField>?;
+        final filledValues = data?['filledValues'] as Map<String, dynamic>?;
+        final subCategoryName = data?['subCategoryName'] as String?;
+
+        // Early return if no custom fields
+        if (customFields == null ||
+            filledValues == null ||
+            customFields.isEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (subCategoryName != null && subCategoryName.isNotEmpty)
+                _buildDetailRow('Category:', subCategoryName),
+            ],
+          );
+        }
+
+        // Sort fields based on our memory of field order for Electronics category
+        final fieldOrder = [
+          // Required text fields first
+          'brand', // Required text field
+          'model', // Required text field
+          // Number fields with units
+          'screen size', // Number field with inches unit
+          'ram size', // Number field with GB unit
+          // Validation fields
+          'release year', // Number field with year validation
+          // Regular text fields
+          'operating system', // Text field
+          'processor', // Text field
+          'graphic card', // Text field
+          'region of manufacture', // Text field
+          // Array fields last
+          'color', // Array of strings
+        ];
+
+        final sortedFields = List<CustomField>.from(customFields)
+          ..sort((a, b) {
+            // First, prioritize required fields
+            if (a.isRequired != b.isRequired) {
+              return a.isRequired ? -1 : 1;
+            }
+
+            // Then sort by field type groups and predefined order
+            final aIndex = fieldOrder.indexWhere((name) =>
+                a.key.toLowerCase().contains(name) ||
+                a.labelEn.toLowerCase().contains(name));
+            final bIndex = fieldOrder.indexWhere((name) =>
+                b.key.toLowerCase().contains(name) ||
+                b.labelEn.toLowerCase().contains(name));
+
+            if (aIndex == -1 && bIndex == -1) {
+              // If neither field is in the order list, sort by field type priority
+              final typeOrder = ['text', 'number', 'select'];
+              final aTypeIndex = typeOrder.indexOf(a.type.toLowerCase());
+              final bTypeIndex = typeOrder.indexOf(b.type.toLowerCase());
+              if (aTypeIndex != bTypeIndex) {
+                return aTypeIndex.compareTo(bTypeIndex);
+              }
+              // Within same type, sort alphabetically by English label
+              return a.labelEn.toLowerCase().compareTo(b.labelEn.toLowerCase());
+            }
+            if (aIndex == -1) return 1;
+            if (bIndex == -1) return -1;
+            return aIndex.compareTo(bIndex);
+          });
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Show subcategory if available
+            // if (subCategoryName != null && subCategoryName.isNotEmpty)
+            //   _buildDetailRow('Category:', subCategoryName),
+
+            // Show all fields in sorted order
+            ...sortedFields
+                .where((field) => filledValues[field.key] != null)
+                .map((field) {
+              final value = filledValues[field.key];
+              return _buildDetailRow(
+                '${field.labelEn}:',
+                _formatFieldValue(field, value),
+              );
+            }),
+          ],
+        );
+      },
     );
   }
 
@@ -163,50 +503,41 @@ class ItemDetailsScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 12),
+            style: const TextStyle(
+                color: onSecondaryColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 12),
           ),
           Text(
             value,
-            style: const TextStyle(color: onSecondaryColor, fontWeight: FontWeight.w500, fontSize: 12),
+            style: const TextStyle(
+                color: onSecondaryColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 12),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _loadSubCategories(BuildContext context) async {
-    print('Loading subcategories for item: ${item.title}');
-    print('Category ID: ${item.categoryId}');
-    print('Subcategory ID: ${item.subCategoryId}');
-
-    if (item.categoryId > 0) {
-      try {
-        await CategoryApiService.initializeSubCategories(item.categoryId);
-      } catch (e) {
-        print('Error in _loadSubCategories: $e');
-      }
-    } else {
-      print('Invalid category ID: ${item.categoryId}');
-    }
-  }
-
   Widget _buildCategoryInfo(BuildContext context) {
     return FutureBuilder<void>(
-      future: _loadSubCategories(context),
+      // First load the subcategories
+      future: CategoryApiService.initSubCategories(item.categoryId),
       builder: (context, snapshot) {
-        // Debug the FutureBuilder state
-        print('FutureBuilder state: ${snapshot.connectionState}');
-        if (snapshot.hasError) {
-          print('FutureBuilder error: ${snapshot.error}');
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+              child: CircularProgressIndicator(color: primaryColor));
         }
 
         final categoryName = CategoryService.getCategoryName(item.categoryId);
-        final subcategoryName =
+        final subCategoryName =
             CategoryService.getSubCategoryName(item.subCategoryId);
 
-        print('Retrieved names:');
-        print('- Category name: $categoryName');
-        print('- Subcategory name: $subcategoryName');
+        print(
+            'Building category info - Category: $categoryName, Subcategory: $subCategoryName');
+        print(
+            'Category ID: ${item.categoryId}, Subcategory ID: ${item.subCategoryId}');
 
         return Column(
           children: [
@@ -263,7 +594,7 @@ class ItemDetailsScreen extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    subcategoryName,
+                    subCategoryName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                         color: onSecondaryColor,
@@ -849,10 +1180,9 @@ class ItemDetailsScreen extends StatelessWidget {
                       label: Text(
                         'View Details',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: primaryColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 11,
-                            ),
+                            color: primaryColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 11),
                       ),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,

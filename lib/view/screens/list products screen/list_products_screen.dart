@@ -109,7 +109,7 @@ class ListProductsScreen extends StatelessWidget {
                     }).toList(),
                     onChanged: (value) {
                       categoryController.value = value;
-                      subCategoryController.value = null; // Reset subcategory
+                      subCategoryController.value = null; // Reset sub category
                     },
                     validator: CreateAuctionValidation.validateCategory,
                   );
