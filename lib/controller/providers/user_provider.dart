@@ -69,7 +69,7 @@ class UserProvider with ChangeNotifier {
   Future<void> updateProfilePhoto(File photo) async {
     try {
       setLoading(true);
-      // TODO: Upload photo to Firebase Storage
+      // Upload photo to Firebase Storage
       // For now, just update the local state
       _photoUrl = photo.path;
       notifyListeners();

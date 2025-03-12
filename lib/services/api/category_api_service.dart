@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:http/http.dart' as http;
 import 'package:alletre_app/services/category_service.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';

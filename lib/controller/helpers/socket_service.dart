@@ -1,4 +1,7 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
+// ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';

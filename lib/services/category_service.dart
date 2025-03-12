@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:alletre_app/model/category.dart';
 import 'package:alletre_app/model/sub_category.dart';
@@ -35,6 +37,7 @@ class CategoryService {
       print('Decoded JSON data: $data');
       
       if (data['success'] == true && data['data'] != null) {
+        // ignore: prefer_typing_uninitialized_variables
         var subCategoriesData;
         
         // Try different possible response structures
