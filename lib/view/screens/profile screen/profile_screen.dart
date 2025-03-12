@@ -62,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
             ProfileListTile(
               icon: Icons.bookmark_outline,
               title: 'Wishlist',
-              subtitle: 'Keep tabs on wishlisted items',
+              subtitle: 'Save and track your favorite items',
               onTap: () {
                 Navigator.push(
                     context,
@@ -73,14 +73,32 @@ class ProfileScreen extends StatelessWidget {
             ),
             ProfileListTile(
               icon: Icons.sell_outlined,
-              title: 'Selling',
-              subtitle: 'View the selling items',
+              title: 'My Auctions',
+              subtitle: 'Manage your auction listings',
               onTap: () {},
             ),
             ProfileListTile(
               icon: Icons.gavel,
-              title: 'Bids & offers',
-              subtitle: 'Active auctions and seller offers',
+              title: 'My Bids',
+              subtitle: 'Check the status of your bids',
+              onTap: () {},
+            ),
+            ProfileListTile(
+              icon: Icons.inventory_2_outlined,
+              title: 'My Products',
+              subtitle: 'Manage your selling items',
+              onTap: () {},
+            ),
+            ProfileListTile(
+              icon: Icons.shopping_cart_outlined,
+              title: 'Purchases',
+              subtitle: 'View order history and details',
+              onTap: () {},
+            ),
+            ProfileListTile(
+              icon: Icons.account_balance_wallet_outlined,
+              title: 'Wallet',
+              subtitle: 'Check your transaction record',
               onTap: () {},
             ),
             Divider(color: dividerColor, thickness: 0.5),
