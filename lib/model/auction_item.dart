@@ -4,6 +4,7 @@ import 'package:alletre_app/model/item_location.dart';
 
 class AuctionItem {
   final int id;
+  final int productId;
   final String title;
   final String price;
   final String productListingPrice;
@@ -27,6 +28,7 @@ class AuctionItem {
 
   AuctionItem({
     required this.id,
+    required this.productId,
     required this.title,
     required this.price,
     required this.productListingPrice,
@@ -52,6 +54,7 @@ class AuctionItem {
   // Add copyWith method for real-time updates
   AuctionItem copyWith({
     int? id,
+    int? productId,
     String? title,
     String? price,
     String? productListingPrice,
@@ -75,6 +78,7 @@ class AuctionItem {
   }) {
     return AuctionItem(
       id: id ?? this.id,
+      productId: productId ?? this.productId,
       title: title ?? this.title,
       price: price ?? this.price,
       productListingPrice: productListingPrice ?? this.productListingPrice,
@@ -100,6 +104,12 @@ class AuctionItem {
 
   factory AuctionItem.fromJson(Map<String, dynamic> json) {
     try {
+      // Extract the data
+    final data = json['data'] as Map<String, dynamic>?;
+
+    // Safely check if 'data' is not null and extract the productId
+    final productId = data?['productId'] as int? ?? 0;
+
       // Safely handle nested product data
       final item = json['product'] as Map<String, dynamic>? ?? {};
 
@@ -178,6 +188,7 @@ class AuctionItem {
 
       return AuctionItem(
         id: json['id'] as int? ?? 0,
+        productId: productId,
         title: item['title'] as String? ?? 'No Title',
         price: item['price']?.toString() ?? '0',
         productListingPrice: json['ProductListingPrice'] ?? '0',
@@ -208,6 +219,7 @@ class AuctionItem {
   factory AuctionItem.empty() {
     return AuctionItem(
       id: 0,
+      productId: 0,
       title: '',
       description: '',
       imageLinks: [],
