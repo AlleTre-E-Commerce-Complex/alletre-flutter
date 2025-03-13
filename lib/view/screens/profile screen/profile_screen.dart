@@ -104,6 +104,14 @@ class ProfileScreen extends StatelessWidget {
             Divider(color: dividerColor, thickness: 0.5),
             const ProfileSectionTitle(title: 'About'),
             ProfileListTile(
+              icon: Icons.policy,
+              title: 'Privacy Policy',
+              subtitle: 'Know how we protect your data',
+              onTap: () {
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => const FaqScreen()));
+              },
+            ),
+            ProfileListTile(
               icon: Icons.help_outline,
               title: 'FAQs',
               subtitle: 'Know more about the services',

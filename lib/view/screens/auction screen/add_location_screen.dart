@@ -9,6 +9,7 @@ import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/common widgets/address_card.dart';
 
 class AddLocationScreen extends StatelessWidget {
   const AddLocationScreen({super.key});
@@ -219,13 +220,11 @@ class AddLocationScreen extends StatelessWidget {
                       return Column(
                         children: [
                           for (final address in sortedAddresses)
-                            _buildAddressCard(
-                              context,
+                            AddressCard(
                               address: address,
                               isDefault: address == defaultAddress,
-                              onMakeDefault: () {
-                                userProvider.setDefaultAddress(address);
-                              },
+                              onMakeDefault: () =>
+                                  userProvider.setDefaultAddress(address),
                               onEdit: () async {
                                 final editedAddress = await Navigator.push(
                                   context,
@@ -240,9 +239,8 @@ class AddLocationScreen extends StatelessWidget {
                                       address, editedAddress);
                                 }
                               },
-                              onDelete: () {
-                                userProvider.removeAddress(address);
-                              },
+                              onDelete: () =>
+                                  userProvider.removeAddress(address),
                             ),
                         ],
                       );
@@ -297,7 +295,11 @@ class AddLocationScreen extends StatelessWidget {
                           }
 
                           if (formKey.currentState?.validate() ?? false) {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProductDetailsScreen()));
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -324,115 +326,6 @@ class AddLocationScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Helper method to build an address card
-  Widget _buildAddressCard(
-    BuildContext context, {
-    required String address,
-    required bool isDefault,
-    VoidCallback? onMakeDefault,
-    VoidCallback? onEdit,
-    VoidCallback? onDelete,
-  }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding:
-            EdgeInsets.fromLTRB(14, isDefault ? 2 : 14, 14, isDefault ? 14 : 2),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: isDefault ? 0 : 8, // Add spacing control based on isDefault
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (isDefault)
-                  Container(
-                    width: 50,
-                    height: 15,
-                    margin: const EdgeInsets.only(
-                        bottom: 0), // Removed bottom margin
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: primaryColor),
-                      borderRadius: BorderRadius.circular(4),
-                      color: primaryColor,
-                    ),
-                    child: const Text(
-                      'Default',
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: secondaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                if (isDefault)
-                  IconButton(
-                    icon: const Icon(Icons.edit, size: 18, color: primaryColor),
-                    onPressed: onEdit,
-                    padding: EdgeInsets.zero, // Removed padding
-                  ),
-              ],
-            ),
-            if (isDefault) const SizedBox(height: 0),
-            Text(
-              address,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                color: onSecondaryColor,
-              ),
-            ),
-            if (!isDefault)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 0),
-                    alignment: Alignment.bottomLeft,
-                    child: TextButton(
-                      onPressed: onMakeDefault,
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'Make Default',
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 128),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit,
-                            size: 18, color: primaryColor),
-                        onPressed: onEdit,
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon:
-                        const Icon(Icons.delete, size: 18, color: primaryColor),
-                    onPressed: onDelete,
-                  ),
-                ],
-              ),
           ],
         ),
       ),
