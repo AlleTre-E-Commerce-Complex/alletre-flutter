@@ -48,6 +48,9 @@ class AuctionCard extends StatelessWidget {
                 // Image Section
                 Card(
                   margin: const EdgeInsets.all(0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: SizedBox(
@@ -313,6 +316,26 @@ class AuctionCard extends StatelessWidget {
                 ),
               ],
             ),
+            Positioned(
+      top: 0,
+      left: 0,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: getStatusColor(auction.usageStatus),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
+        ),
+        child: Text(
+          auction.usageStatus,
+          style: TextStyle(
+            fontSize: 7,
+            color: secondaryColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    ),
             if (title != 'Expired Auctions')
               // Bookmark and Share buttons
               Padding(

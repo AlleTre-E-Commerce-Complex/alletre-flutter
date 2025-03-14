@@ -11,15 +11,19 @@ Color getStatusColor(String status) {
     case "SOLD":
       return errorColor;
     case "EXPIRED":
-      return const Color(0xFF9E9E9E);
+      return expiredColor;
     case "ACTIVE":
       return activeColor;
     case "IN_SCHEDULED":
       return scheduledColor;
     case "CANCELLED_BEFORE_EXP_DATE":
       return primaryColor;
+    case "USED":
+      return avatarColor;
+    case "NEW":
+      return primaryColor;
     default:
-      return const Color(0xFF757575);
+      return avatarColor;
   }
 }
 
@@ -49,6 +53,7 @@ Color borderColor = Colors.grey.shade300;
 Color placeholderColor = Colors.grey.shade100;
 Color shimmerColor = Colors.grey.shade400;
 Color avatarColor = Colors.grey.shade600;
+Color expiredColor = Colors.grey.shade700;
 Color dividerColor = Colors.black54;
 const Color greyColor = Colors.grey;
 final overlayColor = Color.alphaBlend(

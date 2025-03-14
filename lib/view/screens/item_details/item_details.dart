@@ -682,11 +682,11 @@ class ItemDetailsScreen extends StatelessWidget {
       case 'IN_SCHEDULED':
         return scheduledColor;
       case 'EXPIRED':
-        return const Color(0xFF9E9E9E);
+        return expiredColor;
       case 'WAITING_FOR_PAYMENT':
         return errorColor;
       default:
-        return const Color(0xFF757575);
+        return avatarColor;
     }
   }
 }
