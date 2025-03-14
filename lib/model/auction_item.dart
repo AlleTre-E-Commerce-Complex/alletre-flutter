@@ -6,6 +6,7 @@ import 'package:alletre_app/model/custom_field_model.dart';
 class AuctionItem {
   final int id;
   final int productId;
+  final String postedBy;
   final String title;
   final String price;
   final String productListingPrice;
@@ -17,6 +18,7 @@ class AuctionItem {
   final String currentBid;
   final String buyNowPrice;
   String status;
+  String usageStatus;
   bool hasBuyNow;
   final DateTime startDate;
   final DateTime expiryDate;
@@ -34,6 +36,7 @@ class AuctionItem {
   AuctionItem({
     required this.id,
     required this.productId,
+    required this.postedBy,
     required this.title,
     required this.price,
     required this.productListingPrice,
@@ -45,6 +48,7 @@ class AuctionItem {
     required this.currentBid,
     required this.buyNowPrice,
     required this.status,
+    required this.usageStatus,
     required this.hasBuyNow,
     required this.startDate,
     required this.expiryDate,
@@ -64,6 +68,7 @@ class AuctionItem {
   AuctionItem copyWith({
     int? id,
     int? productId,
+    String? postedBy,
     String? title,
     String? price,
     String? productListingPrice,
@@ -75,6 +80,7 @@ class AuctionItem {
     String? currentBid,
     String? buyNowPrice,
     String? status,
+    String? usageStatus,
     bool? hasBuyNow,
     DateTime? startDate,
     DateTime? expiryDate,
@@ -91,6 +97,7 @@ class AuctionItem {
     return AuctionItem(
       id: id ?? this.id,
       productId: productId ?? this.productId,
+      postedBy: postedBy ?? this.postedBy,
       title: title ?? this.title,
       price: price ?? this.price,
       productListingPrice: productListingPrice ?? this.productListingPrice,
@@ -102,6 +109,7 @@ class AuctionItem {
       currentBid: currentBid ?? this.currentBid,
       buyNowPrice: buyNowPrice ?? this.buyNowPrice,
       status: status ?? this.status,
+      usageStatus: usageStatus ?? this.usageStatus,
       hasBuyNow: hasBuyNow ?? this.hasBuyNow,
       startDate: startDate ?? this.startDate,
       expiryDate: expiryDate ?? this.expiryDate,
@@ -113,8 +121,10 @@ class AuctionItem {
       isAuctionProduct: isAuctionProduct ?? this.isAuctionProduct,
       customFields: customFields ?? customFields,
       product: product ?? this.product,
-      returnPolicyDescription: returnPolicyDescription ?? this.returnPolicyDescription,
-      warrantyPolicyDescription: warrantyPolicyDescription ?? this.warrantyPolicyDescription,
+      returnPolicyDescription:
+          returnPolicyDescription ?? this.returnPolicyDescription,
+      warrantyPolicyDescription:
+          warrantyPolicyDescription ?? this.warrantyPolicyDescription,
     );
   }
 
@@ -128,13 +138,14 @@ class AuctionItem {
 
       // Safely handle nested product data
       final product = json['product'] as Map<String, dynamic>? ?? {};
-      
+
       // Parse policy descriptions
       String? returnPolicyDescription;
       String? warrantyPolicyDescription;
       if (json['auctionId'] != null) {
         returnPolicyDescription = json['returnPolicyDescription'] as String?;
-        warrantyPolicyDescription = json['warrantyPolicyDescription'] as String?;
+        warrantyPolicyDescription =
+            json['warrantyPolicyDescription'] as String?;
       }
 
       // Get category and subcategory information
@@ -145,7 +156,8 @@ class AuctionItem {
       CategoryFields? customFields;
       if (json['customFields'] != null) {
         try {
-          customFields = CategoryFields.fromJson({'data': json['customFields']});
+          customFields =
+              CategoryFields.fromJson({'data': json['customFields']});
         } catch (e) {
           log('Error parsing custom fields: $e');
         }
@@ -223,6 +235,7 @@ class AuctionItem {
       return AuctionItem(
         id: json['id'] as int? ?? 0,
         productId: product['id'] as int? ?? 0,
+        postedBy: product['user']?['userName'] as String? ?? '',
         title: product['title'] as String? ?? '',
         price: json['price'] as String? ?? '0',
         productListingPrice: product['ProductListingPrice'] as String? ?? '0',
@@ -233,7 +246,8 @@ class AuctionItem {
         startBidAmount: json['startBidAmount'] as String? ?? '0',
         currentBid: currentBid,
         buyNowPrice: json['buyNowPrice'] as String? ?? '0',
-        status: json['status'] as String? ?? 'PENDING',
+        status: json['status'] as String? ?? '',
+        usageStatus: product['usageStatus'] as String? ?? '',
         hasBuyNow: json['isBuyNowAllowed'] as bool? ?? false,
         startDate: startDate,
         expiryDate: expiryDate,
@@ -258,6 +272,7 @@ class AuctionItem {
     return AuctionItem(
       id: 0,
       productId: 0,
+      postedBy: '',
       title: '',
       description: '',
       imageLinks: [],
@@ -270,6 +285,7 @@ class AuctionItem {
       expiryDate: DateTime.now(),
       createdAt: DateTime.now(),
       status: '',
+      usageStatus: '',
       itemLocation: null,
       bids: 0,
       hasBuyNow: false,
@@ -304,6 +320,7 @@ class AuctionItem {
       'id': id,
       'productId': productId,
       'title': title,
+      'postedBy': postedBy,
       'price': price,
       'productListingPrice': productListingPrice,
       'bids': bids,

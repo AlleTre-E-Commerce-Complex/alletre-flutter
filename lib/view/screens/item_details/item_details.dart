@@ -145,8 +145,41 @@ class ItemDetailsScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 12),
                     ],
+                    IntrinsicWidth(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          border: Border.all(color: Colors.grey[400]!),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.person, size: 14, color: onSecondaryColor),
+                            const SizedBox(width: 3),
+                            Text(
+                              'Posted by ',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .copyWith(
+                                      fontSize: 11, fontWeight: FontWeight.w600, color: onSecondaryColor),
+                            ),
+                            Text(
+                              item.postedBy,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge!
+                                  .copyWith(fontSize: 11, color: primaryColor, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
                     TextButton.icon(
                       onPressed: () => _showDetailsBottomSheet(context),
                       icon: const Icon(Icons.info_outline, size: 14),
@@ -262,7 +295,7 @@ class ItemDetailsScreen extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Center(
                                     child: Text(
-                                      'AED ${item.productListingPrice}',
+                                      'AED ${NumberFormat.decimalPattern().format(double.tryParse(item.productListingPrice) ?? 0.0)}',
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleLarge
@@ -543,7 +576,9 @@ class ItemDetailsScreen extends StatelessWidget {
     CategoryFields? mergedFields;
     try {
       // Fetch custom fields for the specific subcategory
-      final customFields = await CustomFieldsService.getCustomFieldsBySubcategory(item.subCategoryId.toString());
+      final customFields =
+          await CustomFieldsService.getCustomFieldsBySubcategory(
+              item.subCategoryId.toString());
       print('DEBUG: Custom fields fetched: $customFields');
 
       // Create a copy of custom fields to avoid modifying the original
@@ -558,15 +593,19 @@ class ItemDetailsScreen extends StatelessWidget {
       // Fetch item details based on whether it's an auction or listed product
       Map<String, dynamic>? itemDetails;
       try {
-        final String itemId = item.isAuctionProduct ? item.id.toString() : item.productId.toString();
+        final String itemId = item.isAuctionProduct
+            ? item.id.toString()
+            : item.productId.toString();
         print('\nDEBUG: Fetching item details');
         print('  - Using ID: $itemId');
-        print('  - Type: ${item.isAuctionProduct ? "Auction" : "Listed Product"}');
+        print(
+            '  - Type: ${item.isAuctionProduct ? "Auction" : "Listed Product"}');
 
         if (item.isAuctionProduct) {
           itemDetails = await CustomFieldsService.getAuctionDetails(itemId);
         } else if (item.productId > 0) {
-          itemDetails = await CustomFieldsService.getListedProductDetails(itemId);
+          itemDetails =
+              await CustomFieldsService.getListedProductDetails(itemId);
         } else {
           print('WARNING: Invalid product ID ${item.productId}');
         }
@@ -586,7 +625,8 @@ class ItemDetailsScreen extends StatelessWidget {
             mergedFields.updateFieldValues(customFieldsMap);
             print('  - Update complete');
           } else if (customFieldsMap != null) {
-            print('WARNING: Unexpected custom fields type: ${customFieldsMap.runtimeType}');
+            print(
+                'WARNING: Unexpected custom fields type: ${customFieldsMap.runtimeType}');
           }
         }
       } catch (e) {

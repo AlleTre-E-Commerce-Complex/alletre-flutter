@@ -230,9 +230,9 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Colors.grey[300],
+        border: Border.all(color: Colors.grey[400]!),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
