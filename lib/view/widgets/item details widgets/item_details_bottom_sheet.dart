@@ -1,16 +1,24 @@
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/model/custom_field_model.dart';
 
 class ItemDetailsBottomSheet extends StatelessWidget {
+  final String title;
   final AuctionItem item;
+  final CategoryFields? customFields;
 
-  const ItemDetailsBottomSheet({super.key, required this.item});
+  const ItemDetailsBottomSheet({
+    super.key,
+    required this.title,
+    required this.item,
+    this.customFields,
+  });
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: title == "Listed Products" ? 1 : 3,
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: SizedBox(
@@ -18,24 +26,30 @@ class ItemDetailsBottomSheet extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const TabBar(
+              TabBar(
                 labelColor: primaryColor,
                 unselectedLabelColor: onSecondaryColor,
                 indicatorColor: primaryColor,
-                labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                labelStyle:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                unselectedLabelStyle:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                 tabs: [
-                  Tab(text: 'Item Details'),
-                  Tab(text: 'Return Policy'),
-                  Tab(text: 'Warranty Policy'),
+                  const Tab(text: 'Item Details'),
+                  if (title != "Listed Products") ...[
+                    const Tab(text: 'Return Policy'),
+                    const Tab(text: 'Warranty Policy'),
+                  ],
                 ],
               ),
               Expanded(
                 child: TabBarView(
                   children: [
                     _itemDetailsTab(),
-                    _returnPolicyTab(),
-                    _warrantyPolicyTab(),
+                    if (title != "Listed Products") ...[
+                      _returnPolicyTab(),
+                      _warrantyPolicyTab(),
+                    ],
                   ],
                 ),
               ),
@@ -53,17 +67,264 @@ class ItemDetailsBottomSheet extends StatelessWidget {
         _itemDetailsTitle(),
         _itemDetailsAbout(item.description),
         const SizedBox(height: 14),
-        _itemDetailsContent('', ''),
+        ..._buildCustomFieldsContent()
       ],
     );
   }
 
+  List<Widget> _buildCustomFieldsContent() {
+    // Get product data from the item
+    final product = item.product;
+    if (product == null) return [];
+
+    // Get relevant fields based on subcategory
+    final List<String> relevantFields;
+    switch (item.subCategoryId) {
+      // Laptops subcategory
+      case 2:
+        relevantFields = [
+          'screenSize',
+          'operatingSystem',
+          'releaseYear',
+          'ramSize',
+          'processor',
+          'brand',
+          'model',
+          'color',
+          'graphicCard'
+        ];
+        break;
+
+      // Cameras & photos
+      case 3:
+        relevantFields = [
+          'releaseYear',
+          'color',
+          'regionOfManufacture',
+          'cameraType',
+          'brand',
+          'model'
+        ];
+        break;
+
+      // Smart Phones
+      case 5:
+        relevantFields = [
+          'screenSize',
+          'operatingSystem',
+          'releaseYear',
+          'color',
+          'brand',
+          'model',
+          'memory',
+          'regionOfManufacture'
+        ];
+        break;
+
+      // Accessories
+      case 6:
+        relevantFields = ['color', 'type', 'material', 'brand', 'model'];
+        break;
+
+      // TVs & Audios
+      case 4:
+        relevantFields = [
+          'screenSize',
+          'releaseYear',
+          'color',
+          'regionOfManufacture',
+          'brand',
+          'model'
+        ];
+        break;
+
+      // Home Appliances
+      case 1:
+        relevantFields = ['age', 'model', 'brand', 'color'];
+        break;
+
+      default:
+        relevantFields = [];
+    }
+
+    // Define the fields to display
+    Map<String, dynamic> fields = {};
+
+    // Helper function to format field value
+    String formatFieldValue(String key, dynamic value) {
+      if (value == null) return 'Not specified';
+
+      switch (key) {
+        case 'screenSize':
+          return '$value inches';
+        case 'ramSize':
+          return '$value GB';
+        case 'memory':
+          return value.toString(); // May already include GB
+        case 'color':
+          if (value is List) {
+            return value.join(', ');
+          }
+          return value.toString();
+        case 'brand':
+          return value.toString();
+        case 'releaseYear':
+          return value.toString();
+        case 'age':
+          return '$value years';
+        default:
+          return value.toString();
+      }
+    }
+
+    // Add fields that are relevant for this subcategory
+    for (var field in relevantFields) {
+      if (product[field] != null) {
+        String label;
+        switch (field) {
+          case 'screenSize':
+            label = 'Screen Size';
+            break;
+          case 'operatingSystem':
+            label = 'Operating System';
+            break;
+          case 'releaseYear':
+            label = 'Release Year';
+            break;
+          case 'ramSize':
+            label = 'RAM';
+            break;
+          case 'regionOfManufacture':
+            label = 'Region of Manufacture';
+            break;
+          case 'graphicCard':
+            label = 'Graphics Card';
+            break;
+          case 'cameraType':
+            label = 'Camera Type';
+            break;
+          default:
+            // Capitalize first letter of each word
+            label = field
+                .split(RegExp(r'(?=[A-Z])'))
+                .map((e) => e.substring(0, 1).toUpperCase() + e.substring(1))
+                .join(' ');
+        }
+        fields[label] = formatFieldValue(field, product[field]);
+      }
+    }
+
+    // If no fields to display, return empty list
+    if (fields.isEmpty) return [];
+
+    // Convert fields into pairs for grid layout
+    return fields.entries.map((entry) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6), // Consistent spacing
+        child: _buildFieldCard(label: entry.key, value: entry.value.toString()),
+      );
+    }).toList();
+  }
+
+  Widget _buildFieldCard({required String label, required String value}) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: onSecondaryColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 11,
+              color: onSecondaryColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _returnPolicyTab() {
-    return const Center(child: Text('User reviews will be shown here.'));
+    final String? returnPolicy = item.returnPolicyDescription;
+
+    bool isPlaceholder = returnPolicy == null || returnPolicy.trim().isEmpty;
+
+    return SizedBox(
+      width: double.infinity,
+      height: double.infinity,
+      child: isPlaceholder
+          ? const Center(
+              child: Text(
+                'No return policy has been specified for this item.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: onSecondaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                returnPolicy,
+                textAlign: TextAlign.start,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: onSecondaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+    );
   }
 
   Widget _warrantyPolicyTab() {
-    return const Center(child: Text('Additional information about the product.'));
+    final String? warrantyPolicy = item.warrantyPolicyDescription;
+
+    bool isPlaceholder =
+        warrantyPolicy == null || warrantyPolicy.trim().isEmpty;
+
+    return SizedBox(
+      width: double.infinity,
+      height: double.infinity,
+      child: isPlaceholder
+          ? const Center(
+              child: Text(
+                'No warranty policy has been specified for this item.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: onSecondaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                warrantyPolicy,
+                textAlign: TextAlign.start,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: onSecondaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+    );
   }
 
   Widget _itemDetailsTitle() {
@@ -72,7 +333,10 @@ class ItemDetailsBottomSheet extends StatelessWidget {
       child: Center(
         child: Text(
           'About The Brand',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: onSecondaryColor),
+          style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: onSecondaryColor),
         ),
       ),
     );
@@ -82,31 +346,8 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     return Center(
       child: Text(
         value,
-        style: const TextStyle(color: onSecondaryColor, fontWeight: FontWeight.w500, fontSize: 11),
-      ),
-    );
-  }
-
-  Widget _itemDetailsContent(String title, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 12),
-          ),
-          Text(
-            value,
-            style: const TextStyle(color: onSecondaryColor, fontWeight: FontWeight.w500, fontSize: 12),
-          ),
-        ],
+        style: const TextStyle(
+            color: onSecondaryColor, fontWeight: FontWeight.w500, fontSize: 11),
       ),
     );
   }

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -5,7 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/model/custom_field_model.dart';
 import 'package:alletre_app/model/user_model.dart';
+import 'package:alletre_app/services/custom_fields_service.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -34,14 +38,17 @@ class ItemDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+      final auctionProvider =
+          Provider.of<AuctionProvider>(context, listen: false);
       auctionProvider.joinAuctionRoom(item.id.toString());
     });
 
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: Text(item.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+          child: Text(item.title,
+              style:
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
         ),
         actions: [
           if (title != 'Listed Products')
@@ -49,7 +56,10 @@ class ItemDetailsScreen extends StatelessWidget {
               builder: (context, wishlistProvider, child) {
                 final isInWishlist = wishlistProvider.isWishlisted(item.id);
                 return IconButton(
-                  icon: Icon(isInWishlist ? Icons.bookmark : FontAwesomeIcons.bookmark, color: isInWishlist ? primaryColor : null, size: 18),
+                  icon: Icon(
+                      isInWishlist ? Icons.bookmark : FontAwesomeIcons.bookmark,
+                      color: isInWishlist ? primaryColor : null,
+                      size: 18),
                   onPressed: () => wishlistProvider.toggleWishlist(item),
                   padding: const EdgeInsets.only(right: 2),
                   constraints: const BoxConstraints(),
@@ -65,7 +75,9 @@ class ItemDetailsScreen extends StatelessWidget {
                 '${title == "Listed Products" ? "Price" : "Starting bid"}: AED ${item.startBidAmount}\n'
                 '${title != "Listed Products" ? "Current bid: AED ${item.currentBid}\n" : ""}'
                 '$itemUrl',
-                subject: title == "Listed Products" ? 'Interesting Product on Alletre' : 'Interesting Auction on Alletre',
+                subject: title == "Listed Products"
+                    ? 'Interesting Product on Alletre'
+                    : 'Interesting Auction on Alletre',
               );
             },
             padding: const EdgeInsets.only(right: 16),
@@ -77,7 +89,8 @@ class ItemDetailsScreen extends StatelessWidget {
         canPop: true,
         onPopInvokedWithResult: (didPop, result) {
           if (didPop) {
-            final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+            final auctionProvider =
+                Provider.of<AuctionProvider>(context, listen: false);
             auctionProvider.leaveAuctionRoom(item.id.toString());
           }
         },
@@ -109,12 +122,16 @@ class ItemDetailsScreen extends StatelessWidget {
                   children: [
                     Text(
                       item.title,
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                     const SizedBox(height: 15),
                     if (title != 'Listed Products') ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 3),
                         decoration: BoxDecoration(
                           color: getStatusColor(item.status).withAlpha(26),
                           borderRadius: BorderRadius.circular(4),
@@ -135,7 +152,10 @@ class ItemDetailsScreen extends StatelessWidget {
                       icon: const Icon(Icons.info_outline, size: 14),
                       label: Text(
                         'View Details',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: primaryColor, fontWeight: FontWeight.w500, fontSize: 11),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 11),
                       ),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -147,21 +167,29 @@ class ItemDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 15),
                     Text(
                       'Description',
-                      style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .copyWith(fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       item.description,
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(fontSize: 13),
                     ),
                     const SizedBox(height: 16),
                     ItemDetailsCategoryInfo(item: item),
                     const SizedBox(height: 22),
-                    if (title != 'Listed Products' && title != 'Expired Auctions') ...[
+                    if (title != 'Listed Products' &&
+                        title != 'Expired Auctions') ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          _buildInfoCard(context, 'Total Bids', item.bids.toString()),
+                          _buildInfoCard(
+                              context, 'Total Bids', item.bids.toString()),
                           const Spacer(),
                           _buildEnhancedAuctionCountdown(context),
                         ],
@@ -173,10 +201,12 @@ class ItemDetailsScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (title == 'Live Auctions' || title == 'Upcoming Auctions')
+                          if (title == 'Live Auctions' ||
+                              title == 'Upcoming Auctions')
                             Expanded(
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 8),
                                 decoration: BoxDecoration(
                                   border: Border.all(color: avatarColor),
                                   borderRadius: BorderRadius.circular(6),
@@ -185,13 +215,25 @@ class ItemDetailsScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       'Current Bid',
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 13),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                              color: onSecondaryColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13),
                                     ),
                                     const SizedBox(height: 5),
                                     Center(
                                       child: Text(
                                         'AED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
-                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: primaryColor, fontWeight: FontWeight.w600, fontSize: 12),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                                color: primaryColor,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12),
                                       ),
                                     ),
                                   ],
@@ -209,13 +251,25 @@ class ItemDetailsScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Selling Price',
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 13),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                            color: onSecondaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13),
                                   ),
                                   const SizedBox(width: 8),
                                   Center(
                                     child: Text(
                                       'AED ${item.productListingPrice}',
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(color: primaryColor, fontWeight: FontWeight.w600, fontSize: 12),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                              color: primaryColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 12),
                                     ),
                                   ),
                                 ],
@@ -230,28 +284,45 @@ class ItemDetailsScreen extends StatelessWidget {
                                   return InkWell(
                                     onTap: () {
                                       _isBuyNowTapped.value = true;
-                                      Future.delayed(const Duration(milliseconds: 100), () {
+                                      Future.delayed(
+                                          const Duration(milliseconds: 100),
+                                          () {
                                         _isBuyNowTapped.value = false;
                                       });
                                     },
                                     borderRadius: BorderRadius.circular(6),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6, horizontal: 8),
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: primaryColor, width: 1.5),
+                                        border: Border.all(
+                                            color: primaryColor, width: 1.5),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Column(
                                         children: [
                                           Text(
                                             'Buy Now',
-                                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 13),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge
+                                                ?.copyWith(
+                                                    color: onSecondaryColor,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 13),
                                           ),
                                           const SizedBox(height: 5),
                                           Center(
                                             child: Text(
                                               'AED ${item.buyNowPrice}',
-                                              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: primaryColor, fontWeight: FontWeight.w600, fontSize: 12),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.copyWith(
+                                                      color: primaryColor,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 12),
                                             ),
                                           ),
                                         ],
@@ -273,26 +344,42 @@ class ItemDetailsScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.location_on, size: 30, color: Theme.of(context).colorScheme.secondary),
+                              Icon(Icons.location_on,
+                                  size: 30,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (item.itemLocation != null && item.itemLocation?.address != null) ...[
+                                    if (item.itemLocation != null &&
+                                        item.itemLocation?.address != null) ...[
                                       Text(
-                                        item.itemLocation?.address ?? 'Address not available',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13),
+                                        item.itemLocation?.address ??
+                                            'Address not available',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(fontSize: 13),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         '${item.itemLocation?.city ?? 'Unknown city'}, ${item.itemLocation?.country ?? 'Unknown country'}',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600),
                                       ),
                                     ] else
                                       Text(
                                         'Location not available',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(fontSize: 13),
                                       ),
                                   ],
                                 ),
@@ -302,8 +389,10 @@ class ItemDetailsScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           GestureDetector(
                             onTap: () {
-                              if (item.itemLocation?.lat != null && item.itemLocation?.lng != null) {
-                                launchUrl(Uri.parse('https://www.google.com/maps/search/?api=1&query=${item.itemLocation!.lat},${item.itemLocation!.lng}'));
+                              if (item.itemLocation?.lat != null &&
+                                  item.itemLocation?.lng != null) {
+                                launchUrl(Uri.parse(
+                                    'https://www.google.com/maps/search/?api=1&query=${item.itemLocation!.lat},${item.itemLocation!.lng}'));
                               }
                             },
                             child: Container(
@@ -317,20 +406,24 @@ class ItemDetailsScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6),
                                 child: Stack(
                                   children: [
-                                    if (item.itemLocation?.lat != null && item.itemLocation?.lng != null)
+                                    if (item.itemLocation?.lat != null &&
+                                        item.itemLocation?.lng != null)
                                       Image.network(
                                         'https://maps.googleapis.com/maps/api/staticmap?center=${item.itemLocation?.lat},${item.itemLocation?.lng}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${item.itemLocation?.lat},${item.itemLocation?.lng}&key=AIzaSyB9ATxmePBJdgRl8mq4D1ahCRxHy99IFqg',
                                         fit: BoxFit.cover,
                                         width: double.infinity,
-                                        errorBuilder: (context, error, stackTrace) {
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
                                           return const Center(
-                                            child: Icon(Icons.map, size: 50, color: Colors.grey),
+                                            child: Icon(Icons.map,
+                                                size: 50, color: Colors.grey),
                                           );
                                         },
                                       )
                                     else
                                       const Center(
-                                        child: Icon(Icons.map, size: 50, color: Colors.grey),
+                                        child: Icon(Icons.map,
+                                            size: 50, color: Colors.grey),
                                       ),
                                     Positioned(
                                       right: 8,
@@ -339,14 +432,21 @@ class ItemDetailsScreen extends StatelessWidget {
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.open_in_new, size: 16, color: Theme.of(context).primaryColor),
+                                            Icon(Icons.open_in_new,
+                                                size: 16,
+                                                color: Theme.of(context)
+                                                    .primaryColor),
                                             const SizedBox(width: 4),
-                                            Text('View Larger Map', style: Theme.of(context).textTheme.bodySmall),
+                                            Text('View Larger Map',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall),
                                           ],
                                         ),
                                       ),
@@ -383,13 +483,19 @@ class ItemDetailsScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: onSecondaryColor, fontSize: 13),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: onSecondaryColor, fontSize: 13),
           ),
           const SizedBox(height: 3),
           Center(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: primaryColor, fontSize: 16),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: primaryColor,
+                  fontSize: 16),
             ),
           ),
         ],
@@ -412,25 +518,106 @@ class ItemDetailsScreen extends StatelessWidget {
             startDate: item.startDate,
             endDate: item.expiryDate,
             customPrefix: 'Time Left',
-            prefixStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: onSecondaryColor, fontSize: 13, fontWeight: FontWeight.w600),
-            textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: primaryColor, fontSize: 12),
+            prefixStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: onSecondaryColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w600),
+            textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600, color: primaryColor, fontSize: 12),
           ),
         ],
       ),
     );
   }
 
-  void _showDetailsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        return ItemDetailsBottomSheet(item: item);
-      },
-    );
+  void _showDetailsBottomSheet(BuildContext context) async {
+    print('\nDEBUG: Opening details bottom sheet');
+    print('DEBUG: Item details:');
+    print('  - ID: ${item.id}');
+    print('  - Title: ${item.title}');
+    print('  - Custom fields: ${item.customFields}');
+    print('  - Subcategory ID: ${item.subCategoryId}');
+    print('  - Is auction: ${item.isAuctionProduct}');
+    print('  - 🪪 Product ID: ${item.productId}');
+
+    CategoryFields? mergedFields;
+    try {
+      // Fetch custom fields for the specific subcategory
+      final customFields = await CustomFieldsService.getCustomFieldsBySubcategory(item.subCategoryId.toString());
+      print('DEBUG: Custom fields fetched: $customFields');
+
+      // Create a copy of custom fields to avoid modifying the original
+      mergedFields = CategoryFields(fields: List.from(customFields.fields));
+
+      // If item has custom fields, merge them
+      if (item.customFields != null) {
+        print('DEBUG: Merging with item custom fields');
+        mergedFields.mergeWith(item.customFields!);
+      }
+
+      // Fetch item details based on whether it's an auction or listed product
+      Map<String, dynamic>? itemDetails;
+      try {
+        final String itemId = item.isAuctionProduct ? item.id.toString() : item.productId.toString();
+        print('\nDEBUG: Fetching item details');
+        print('  - Using ID: $itemId');
+        print('  - Type: ${item.isAuctionProduct ? "Auction" : "Listed Product"}');
+
+        if (item.isAuctionProduct) {
+          itemDetails = await CustomFieldsService.getAuctionDetails(itemId);
+        } else if (item.productId > 0) {
+          itemDetails = await CustomFieldsService.getListedProductDetails(itemId);
+        } else {
+          print('WARNING: Invalid product ID ${item.productId}');
+        }
+
+        print('\nDEBUG: Processing item details');
+        print('  - Details found: ${itemDetails != null}');
+
+        // Update field values from item details if available
+        if (itemDetails != null) {
+          final customFieldsMap = itemDetails['customFields'];
+          print('  - Custom fields present: ${customFieldsMap != null}');
+          print('  - Custom fields type: ${customFieldsMap?.runtimeType}');
+
+          if (customFieldsMap is Map<String, dynamic>) {
+            print('\nDEBUG: Updating field values');
+            print('  - Fields to update: ${customFieldsMap.keys.toList()}');
+            mergedFields.updateFieldValues(customFieldsMap);
+            print('  - Update complete');
+          } else if (customFieldsMap != null) {
+            print('WARNING: Unexpected custom fields type: ${customFieldsMap.runtimeType}');
+          }
+        }
+      } catch (e) {
+        print('DEBUG: Error fetching item details: $e');
+        // Continue with custom fields even if item details fetch fails
+      }
+
+      print('DEBUG: Final merged fields: $mergedFields');
+    } catch (e) {
+      print('DEBUG: Error fetching custom fields: $e');
+      // If custom fields fetch fails, use item custom fields as fallback
+      mergedFields = item.customFields;
+    }
+
+    // Show bottom sheet with available fields
+    if (context.mounted) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (context) {
+          return ItemDetailsBottomSheet(
+            title: title,
+            item: item,
+            customFields: mergedFields,
+          );
+        },
+      );
+    }
   }
 
   String getDisplayStatus(String status) {

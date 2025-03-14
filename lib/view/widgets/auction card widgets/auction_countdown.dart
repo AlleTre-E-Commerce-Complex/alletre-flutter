@@ -55,9 +55,11 @@ class AuctionCountdown extends StatelessWidget {
       timeValue = '$days days: $hours hrs: $minutes min';
     } else if (hours > 0) {
       timeValue = '$hours hrs: $minutes min: $seconds sec';
-    } else {
-      timeValue = '$minutes min: $seconds sec';
-    }
+    } else if (minutes > 0) {
+    timeValue = '$minutes min: $seconds sec';
+  } else {
+    timeValue = '$seconds sec';
+  }
 
     return {'prefix': prefix, 'time': timeValue};
   }

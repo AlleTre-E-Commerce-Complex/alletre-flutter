@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 import 'dart:developer';
 import 'package:alletre_app/model/item_location.dart';
+import 'package:alletre_app/model/custom_field_model.dart';
 
 class AuctionItem {
   final int id;
@@ -25,6 +26,10 @@ class AuctionItem {
   final String categoryName;
   final String subCategoryName;
   final bool isAuctionProduct;
+  final CategoryFields? customFields;
+  final Map<String, dynamic>? product;
+  final String? returnPolicyDescription;
+  final String? warrantyPolicyDescription;
 
   AuctionItem({
     required this.id,
@@ -49,6 +54,10 @@ class AuctionItem {
     required this.categoryName,
     required this.subCategoryName,
     required this.isAuctionProduct,
+    this.customFields,
+    this.product,
+    this.returnPolicyDescription,
+    this.warrantyPolicyDescription,
   });
 
   // Add copyWith method for real-time updates
@@ -75,6 +84,9 @@ class AuctionItem {
     String? categoryName,
     String? subCategoryName,
     bool? isAuctionProduct,
+    Map<String, dynamic>? product,
+    String? returnPolicyDescription,
+    String? warrantyPolicyDescription,
   }) {
     return AuctionItem(
       id: id ?? this.id,
@@ -99,28 +111,50 @@ class AuctionItem {
       categoryName: categoryName ?? this.categoryName,
       subCategoryName: subCategoryName ?? this.subCategoryName,
       isAuctionProduct: isAuctionProduct ?? this.isAuctionProduct,
+      customFields: customFields ?? customFields,
+      product: product ?? this.product,
+      returnPolicyDescription: returnPolicyDescription ?? this.returnPolicyDescription,
+      warrantyPolicyDescription: warrantyPolicyDescription ?? this.warrantyPolicyDescription,
     );
   }
 
   factory AuctionItem.fromJson(Map<String, dynamic> json) {
     try {
       // Extract the data
-    final data = json['data'] as Map<String, dynamic>?;
+      // final data = json['data'] as Map<String, dynamic>?;
 
-    // Safely check if 'data' is not null and extract the productId
-    final productId = data?['productId'] as int? ?? 0;
+      // // Safely check if 'data' is not null and extract the productId
+      // final productId = data?['productId'] as int? ?? 0;
 
       // Safely handle nested product data
-      final item = json['product'] as Map<String, dynamic>? ?? {};
+      final product = json['product'] as Map<String, dynamic>? ?? {};
+      
+      // Parse policy descriptions
+      String? returnPolicyDescription;
+      String? warrantyPolicyDescription;
+      if (json['auctionId'] != null) {
+        returnPolicyDescription = json['returnPolicyDescription'] as String?;
+        warrantyPolicyDescription = json['warrantyPolicyDescription'] as String?;
+      }
 
       // Get category and subcategory information
-      final categoryId = item['categoryId'] as int? ?? 0;
-      final subCategoryId = item['subCategoryId'] as int? ?? 0;
+      final categoryId = product['categoryId'] as int? ?? 0;
+      final subCategoryId = product['subCategoryId'] as int? ?? 0;
+
+      // Parse custom fields if available
+      CategoryFields? customFields;
+      if (json['customFields'] != null) {
+        try {
+          customFields = CategoryFields.fromJson({'data': json['customFields']});
+        } catch (e) {
+          log('Error parsing custom fields: $e');
+        }
+      }
 
       // Handle images from product data
       List<String> imageLinks = [];
       try {
-        final List<dynamic>? images = item['images'] as List<dynamic>?;
+        final List<dynamic>? images = product['images'] as List<dynamic>?;
         if (images != null) {
           imageLinks = images
               .where((image) => image != null && image is Map<String, dynamic>)
@@ -134,7 +168,7 @@ class AuctionItem {
         }
       } catch (e) {
         log('Error parsing images: $e');
-        log('Product data: $item');
+        log('Product data: $product');
       }
 
       DateTime createdAt = DateTime.now();
@@ -188,31 +222,35 @@ class AuctionItem {
 
       return AuctionItem(
         id: json['id'] as int? ?? 0,
-        productId: productId,
-        title: item['title'] as String? ?? 'No Title',
-        price: item['price']?.toString() ?? '0',
-        productListingPrice: json['ProductListingPrice'] ?? '0',
+        productId: product['id'] as int? ?? 0,
+        title: product['title'] as String? ?? '',
+        price: json['price'] as String? ?? '0',
+        productListingPrice: product['ProductListingPrice'] as String? ?? '0',
         bids: bidCount,
         itemLocation: itemLocation,
         createdAt: createdAt,
-        description: item['description'] as String? ?? 'No Description',
-        startBidAmount: json['startBidAmount']?.toString() ?? '0',
+        description: product['description'] as String? ?? '',
+        startBidAmount: json['startBidAmount'] as String? ?? '0',
         currentBid: currentBid,
-        buyNowPrice: json['acceptedAmount']?.toString() ?? '0',
-        status: json['status'] as String? ?? '',
+        buyNowPrice: json['buyNowPrice'] as String? ?? '0',
+        status: json['status'] as String? ?? 'PENDING',
         hasBuyNow: json['isBuyNowAllowed'] as bool? ?? false,
         startDate: startDate,
         expiryDate: expiryDate,
         imageLinks: imageLinks,
         categoryId: categoryId,
         subCategoryId: subCategoryId,
-        categoryName: '',
-        subCategoryName: '',
-        isAuctionProduct: item['isAuctionProduct'] as bool? ?? false,
+        categoryName: product['category']?['nameEn'] as String? ?? '',
+        subCategoryName: product['subCategory']?['nameEn'] as String? ?? '',
+        isAuctionProduct: product['isAuctionProduct'] as bool? ?? true,
+        customFields: customFields,
+        product: product,
+        returnPolicyDescription: returnPolicyDescription,
+        warrantyPolicyDescription: warrantyPolicyDescription,
       );
-    } catch (e, stackTrace) {
-      log('Error parsing AuctionItem: $e\n$stackTrace');
-      return AuctionItem.empty();
+    } catch (e) {
+      log('Error creating AuctionItem: $e');
+      rethrow;
     }
   }
 
@@ -240,6 +278,8 @@ class AuctionItem {
       categoryName: '',
       subCategoryName: '',
       isAuctionProduct: false,
+      customFields: null,
+      product: null,
     );
   }
 
@@ -257,5 +297,34 @@ class AuctionItem {
     }
     final difference = expiryDate.difference(now);
     return "${difference.inDays} days : ${difference.inHours % 24} hrs : ${difference.inMinutes % 60} min : ${difference.inSeconds % 60} sec";
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'productId': productId,
+      'title': title,
+      'price': price,
+      'productListingPrice': productListingPrice,
+      'bids': bids,
+      'itemLocation': itemLocation,
+      'createdAt': createdAt.toIso8601String(),
+      'description': description,
+      'startBidAmount': startBidAmount,
+      'currentBid': currentBid,
+      'buyNowPrice': buyNowPrice,
+      'status': status,
+      'hasBuyNow': hasBuyNow,
+      'startDate': startDate.toIso8601String(),
+      'expiryDate': expiryDate.toIso8601String(),
+      'imageLinks': imageLinks,
+      'categoryId': categoryId,
+      'subCategoryId': subCategoryId,
+      'categoryName': categoryName,
+      'subCategoryName': subCategoryName,
+      'isAuctionProduct': isAuctionProduct,
+      'customFields': customFields?.fields,
+      'product': product,
+    };
   }
 }
