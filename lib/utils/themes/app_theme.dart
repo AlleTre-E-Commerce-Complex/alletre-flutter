@@ -4,6 +4,29 @@ import 'package:flutter/material.dart';
 final myRoute =
     MaterialPageRoute(builder: (context) => const HomeScreenContent());
 
+String getDisplayStatus(String status) {
+  switch (status.toUpperCase()) {
+    case 'ACTIVE':
+      return 'ACTIVE';
+    case 'IN_SCHEDULED':
+      return 'SCHEDULED';
+    case 'EXPIRED':
+      return 'EXPIRED';
+    case 'WAITING_FOR_PAYMENT':
+      return 'SOLD';
+    case 'SOLD':
+      return 'SOLD';
+    case 'CANCELLED_BEFORE_EXP_DATE':
+      return 'CANCELLED';
+    case 'USED':
+      return 'USED';
+    case 'NEW':
+      return 'NEW';
+    default:
+      return 'Unknown';
+  }
+}
+
 Color getStatusColor(String status) {
   switch (status) {
     case "WAITING_FOR_PAYMENT":

@@ -249,8 +249,8 @@ class AuctionCard extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 4),
                                     ),
-                                    onPressed: () =>
-                                        _navigateToDetails(context, auction, user),
+                                    onPressed: () => _navigateToDetails(
+                                        context, auction, user),
                                     child: const Text(
                                       'Bid Now',
                                       textAlign: TextAlign.center,
@@ -317,25 +317,26 @@ class AuctionCard extends StatelessWidget {
               ],
             ),
             Positioned(
-      top: 0,
-      left: 0,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        decoration: BoxDecoration(
-          color: getStatusColor(auction.usageStatus),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
-        ),
-        child: Text(
-          auction.usageStatus,
-          style: TextStyle(
-            fontSize: 7,
-            color: secondaryColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    ),
+              top: 0,
+              left: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: getStatusColor(auction.usageStatus),
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)),
+                ),
+                child: Text(
+                  auction.usageStatus,
+                  style: const TextStyle(
+                    fontSize: 7,
+                    color: secondaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
             if (title != 'Expired Auctions')
               // Bookmark and Share buttons
               Padding(
@@ -374,14 +375,8 @@ class AuctionCard extends StatelessWidget {
 
   Widget _buildStatusText(BuildContext context, String status) {
     final baseColor = getStatusColor(status);
-    String displayStatus = status;
-    if (status == "WAITING_FOR_PAYMENT") {
-      displayStatus = "SOLD";
-    } else if (status == "IN_SCHEDULED") {
-      displayStatus = "SCHEDULED";
-    } else if (status == "CANCELLED_BEFORE_EXP_DATE") {
-      displayStatus = "CANCELLED";
-    }
+    final displayStatus = getDisplayStatus(status);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(

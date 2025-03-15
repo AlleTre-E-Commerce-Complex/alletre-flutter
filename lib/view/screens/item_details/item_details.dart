@@ -120,14 +120,38 @@ class ItemDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge!
-                          .copyWith(fontWeight: FontWeight.w600, fontSize: 14),
+                    Wrap(
+                      // Replace Row with Wrap to allow content to flow to the next line if needed
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 10, // Horizontal spacing between items
+                      children: [
+                        Text(
+                          item.title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge!
+                              .copyWith(
+                                  fontWeight: FontWeight.w600, fontSize: 15),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: getStatusColor(item.usageStatus),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            getDisplayStatus(item.usageStatus),
+                            style: const TextStyle(
+                              fontSize: 6.7,
+                              color: secondaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 12),
                     if (title != 'Listed Products') ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -149,7 +173,8 @@ class ItemDetailsScreen extends StatelessWidget {
                     ],
                     IntrinsicWidth(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 7),
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
                           border: Border.all(color: Colors.grey[400]!),
@@ -158,7 +183,8 @@ class ItemDetailsScreen extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            const Icon(Icons.person, size: 14, color: onSecondaryColor),
+                            const Icon(Icons.person,
+                                size: 14, color: onSecondaryColor),
                             const SizedBox(width: 3),
                             Text(
                               'Posted by ',
@@ -166,14 +192,22 @@ class ItemDetailsScreen extends StatelessWidget {
                                   .textTheme
                                   .titleLarge!
                                   .copyWith(
-                                      fontSize: 11, fontWeight: FontWeight.w600, color: onSecondaryColor),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: onSecondaryColor),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Text(
-                              item.postedBy,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(fontSize: 11, color: primaryColor, fontWeight: FontWeight.w600),
+                            Expanded(
+                              child: Text(
+                                item.postedBy,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .copyWith(
+                                        fontSize: 11,
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.w600),
+                              ),
                             ),
                           ],
                         ),
@@ -657,36 +691,6 @@ class ItemDetailsScreen extends StatelessWidget {
           );
         },
       );
-    }
-  }
-
-  String getDisplayStatus(String status) {
-    switch (status.toUpperCase()) {
-      case 'ACTIVE':
-        return 'ACTIVE';
-      case 'IN_SCHEDULED':
-        return 'SCHEDULED';
-      case 'EXPIRED':
-        return 'EXPIRED';
-      case 'WAITING_FOR_PAYMENT':
-        return 'SOLD';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  Color getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'ACTIVE':
-        return activeColor;
-      case 'IN_SCHEDULED':
-        return scheduledColor;
-      case 'EXPIRED':
-        return expiredColor;
-      case 'WAITING_FOR_PAYMENT':
-        return errorColor;
-      default:
-        return avatarColor;
     }
   }
 }
