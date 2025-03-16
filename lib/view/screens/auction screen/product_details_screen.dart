@@ -113,11 +113,28 @@ class ProductDetailsScreen extends StatelessWidget {
       'Umm al Quwain'
     ];
 
+    final List<String> carType = [
+      'Micro Cars, Hatchback',
+      'Sedan',
+      'SUV',
+      'MPV',
+      'Coupe',
+      'Convertible',
+      'Wagon',
+      'Luxury'
+    ];
+
     // Define subcategory custom fields mapping
     Map<String, dynamic> getSubCategoryFields(String? subCategory) {
       if (subCategory == null) return {};
 
       switch (subCategory) {
+        case "Cars":
+          return {
+            "Color": {"type": "dropdown", "options": colorOptions},
+            "Brand": {"type": "text"},
+            "Model": {"type": "text"},
+          };
         case "Computers & tablets":
           return {
             "Color": {"type": "dropdown", "options": colorOptions},
@@ -187,7 +204,14 @@ class ProductDetailsScreen extends StatelessWidget {
         case "Villa":
           return {
             "Color": {"type": "dropdown", "options": colorOptions},
-            "Country": {"type": "dropdown", "options": countryOptions},
+            "Country": {
+              "type": "dropdown",
+              "options": countryOptions,
+              "textStyle": const TextStyle(
+                  fontSize: 10,
+                  color: onSecondaryColor,
+                  fontWeight: FontWeight.w500)
+            },
             "City": {"type": "dropdown", "options": cityOptions},
             "Age": {"type": "number"},
             "Number of Rooms": {"type": "number"},
@@ -219,6 +243,15 @@ class ProductDetailsScreen extends StatelessWidget {
             "Number of Rooms": {"type": "number"},
             "Total Area (Sq Ft)": {"type": "number"},
           };
+        case "Table and chairs":
+        case "Cupboards and Beds":
+        case "Paintings":
+        case "Currency":
+        case "Others":
+          return {
+            "Material": {"type": "text"},
+            "Brand": {"type": "text"},
+          };
         default:
           return {};
       }
@@ -235,8 +268,11 @@ class ProductDetailsScreen extends StatelessWidget {
       customFieldControllers.clear();
       customFieldDropdownValues.clear();
 
+      final fields = categoryController.value == "Cars" 
+      ? getSubCategoryFields("Cars")
+      : getSubCategoryFields(subCategory);
+
       // Create new controllers and dropdown values
-      final fields = getSubCategoryFields(subCategory);
       fields.forEach((key, value) {
         if (value["type"] == "text") {
           customFieldControllers[key] = TextEditingController();
@@ -350,49 +386,94 @@ class ProductDetailsScreen extends StatelessWidget {
                   if (selectedCategory == null) {
                     return const SizedBox(); // No subcategory dropdown if category not selected
                   }
-                  return ValueListenableBuilder<String?>(
-                    valueListenable: subCategoryController,
-                    builder: (context, selectedSubCategory, child) {
-                      return DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: "Sub Category",
-                          labelStyle: labelTextStyle,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: errorColor),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: errorColor),
-                          ),
-                        ),
-                        value: selectedSubCategory,
-                        items: (subCategories[selectedCategory] ?? [])
-                            .map((subcategory) {
-                          return DropdownMenuItem(
-                            value: subcategory,
-                            child: Text(
-                              subcategory,
-                              style: const TextStyle(
-                                color: onSecondaryColor,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15,
-                              ),
+
+                  if (selectedCategory == "Cars") {
+                    return ValueListenableBuilder<String?>(
+                      valueListenable: subCategoryController,
+                      builder: (context, selectedSubCategory, child) {
+                        return DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: "Car Type",
+                            labelStyle: labelTextStyle,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          subCategoryController.value = value;
-                          // Initialize controllers for this subcategory
-                          initializeCustomFieldControllers(value);
-                        },
-                        validator: CreateAuctionValidation.validateSubCategory,
-                      );
-                    },
-                  );
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: errorColor),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: errorColor),
+                            ),
+                          ),
+                          value: selectedSubCategory,
+                          items: carType.map((type) {
+                            return DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                type,
+                                style: const TextStyle(
+                                  color: onSecondaryColor,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            subCategoryController.value = value;
+                          },
+                          validator:
+                              CreateAuctionValidation.validateSubCategory,
+                        );
+                      },
+                    );
+                  }
+                  return ValueListenableBuilder<String?>(
+                      valueListenable: subCategoryController,
+                      builder: (context, selectedSubCategory, child) {
+                        return DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: "Sub Category",
+                            labelStyle: labelTextStyle,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: errorColor),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: errorColor),
+                            ),
+                          ),
+                          value: selectedSubCategory,
+                          items: (subCategories[selectedCategory] ?? [])
+                              .map((subcategory) {
+                            return DropdownMenuItem(
+                              value: subcategory,
+                              child: Text(
+                                subcategory,
+                                style: const TextStyle(
+                                  color: onSecondaryColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            subCategoryController.value = value;
+                            // Initialize controllers for this subcategory
+                            initializeCustomFieldControllers(value);
+                          },
+                          validator:
+                              CreateAuctionValidation.validateSubCategory,
+                        );
+                      },
+                    );
                 },
               ),
               const SizedBox(height: 16),
@@ -405,7 +486,10 @@ class ProductDetailsScreen extends StatelessWidget {
                     return const SizedBox();
                   }
 
-                  final fields = getSubCategoryFields(selectedSubCategory);
+                  final fields = categoryController.value == "Cars" 
+        ? getSubCategoryFields("Cars")
+        : getSubCategoryFields(selectedSubCategory);
+        
                   if (fields.isEmpty) {
                     return const SizedBox();
                   }
@@ -558,11 +642,13 @@ class ProductDetailsScreen extends StatelessWidget {
                                   value: option,
                                   child: Text(
                                     option,
-                                    style: const TextStyle(
-                                      color: onSecondaryColor,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: (fieldValue["textStyle"]
+                                            as TextStyle?) ??
+                                        const TextStyle(
+                                          color: onSecondaryColor,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                   ),
                                 );
                               }).toList(),
@@ -571,10 +657,6 @@ class ProductDetailsScreen extends StatelessWidget {
                                     value;
                               },
                               validator: (value) {
-                                // if (fieldName == 'Color') {
-                                //   return CreateAuctionValidation.validateColor(
-                                //       value);
-                                // }
                                 return CreateAuctionValidation
                                     .validateCustomField(
                                   fieldName,
@@ -843,68 +925,65 @@ class ProductDetailsScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "Item Condition",
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: onSecondaryColor,
-                ),
-              ),
               ValueListenableBuilder<String?>(
-                valueListenable: condition,
-                builder: (context, value, child) {
+                valueListenable: categoryController,
+                builder: (context, selectedCategory, child) {
+                  if (selectedCategory == "Properties") {
+                    return const SizedBox(); // Hide item condition for Properties category
+                  }
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Radio<String>(
-                            value: "new",
-                            groupValue: value,
-                            onChanged: (selected) =>
-                                condition.value = selected!,
-                          ),
-                          const Text("New", style: radioTextStyle),
-                        ],
+                      const SizedBox(height: 20),
+                      const Text(
+                        "Item Condition",
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: onSecondaryColor,
+                        ),
                       ),
-                      const SizedBox(width: 20),
-                      Row(
-                        children: [
-                          Radio<String>(
-                            value: "used",
-                            groupValue: value,
-                            onChanged: (selected) =>
-                                condition.value = selected!,
-                          ),
-                          const Text("Used", style: radioTextStyle),
-                        ],
-                      ),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: isSubmitted,
-                        builder: (context, submitted, child) {
-                          if (submitted && value == null) {
-                            return const Padding(
-                              padding: EdgeInsets.only(left: 12),
-                              child: Text(
-                                "Select item condition",
-                                style: TextStyle(
-                                    color: errorColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500),
+                      ValueListenableBuilder<String?>(
+                        valueListenable: condition,
+                        builder: (context, value, child) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Radio<String>(
+                                    value: "new",
+                                    groupValue: value,
+                                    onChanged: (selected) =>
+                                        condition.value = selected!,
+                                  ),
+                                  const Text("New", style: radioTextStyle),
+                                ],
                               ),
-                            );
-                          }
-                          return const SizedBox.shrink();
+                              const SizedBox(width: 20),
+                              Row(
+                                children: [
+                                  Radio<String>(
+                                    value: "used",
+                                    groupValue: value,
+                                    onChanged: (selected) =>
+                                        condition.value = selected!,
+                                  ),
+                                  const Text("Used", style: radioTextStyle),
+                                ],
+                              ),
+                            ],
+                          );
                         },
                       ),
                     ],
                   );
                 },
               ),
+
               Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 10),
+                padding: const EdgeInsets.only(top: 16, bottom: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -928,7 +1007,10 @@ class ProductDetailsScreen extends StatelessWidget {
                             CreateAuctionValidation.validateMediaSection(
                                     media.value) ==
                                 null &&
-                            condition.value != null &&
+                            CreateAuctionValidation.validateItemCondition(
+                                    categoryController.value,
+                                    condition.value!) ==
+                                null &&
                             isDropdownsValid;
 
                         if (isValid) {

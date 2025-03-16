@@ -17,8 +17,14 @@ class CreateAuctionValidation {
     return value!.isEmpty ? "Enter item description" : null;
   }
 
-  static String? validateItemCondition(String? value) {
-    return value == null ? "Select item condition" : null;
+  static String? validateItemCondition(String? condition, String category) {
+    if (category == "Properties") {
+      return null; // No validation needed for Properties category
+    }
+    if (condition == null || condition.isEmpty) {
+      return 'Please select an item condition';
+    }
+    return null;
   }
 
   static String? validateMediaSection(List<File> mediaList) {
