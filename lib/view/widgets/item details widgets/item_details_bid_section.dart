@@ -37,15 +37,24 @@ class ItemDetailsBidSection extends StatelessWidget {
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                final message = Uri.encodeComponent("Hello, I would like to inquire about your product listed on Alletre.");
-                                final whatsappUrl = "https://wa.me/${user.phoneNumber}?text=$message";
+                                final message = Uri.encodeComponent(
+                                    "Hello, I would like to inquire about your product listed on Alletre.");
+                                final whatsappUrl =
+                                    "https://wa.me/${item.phone}?text=$message";
                                 launchUrl(Uri.parse(whatsappUrl));
                               },
-                              icon: const Icon(FontAwesomeIcons.whatsapp, color: secondaryColor),
-                              label: Text('Chat', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: secondaryColor, fontSize: 16)),
+                              icon: const Icon(FontAwesomeIcons.whatsapp,
+                                  color: secondaryColor),
+                              label: Text('Chat',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                          color: secondaryColor, fontSize: 16)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primaryColor,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6),
                                 ),
@@ -70,56 +79,101 @@ class ItemDetailsBidSection extends StatelessWidget {
                                           children: [
                                             const Text(
                                               'Contact Number',
-                                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
                                             ),
                                             const SizedBox(height: 16),
                                             Text(
                                               'You can connect on',
-                                              style: TextStyle(color: Colors.grey[700]),
+                                              style: TextStyle(
+                                                  color: Colors.grey[700]),
                                             ),
                                             Text(
-                                              user.phoneNumber,
+                                              item.phone,
                                               style: TextStyle(
-                                                color: Theme.of(context).primaryColor,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 18,
+                                                fontSize: 15,
                                               ),
                                             ),
-                                            const SizedBox(height: 12),
-                                            Text(
-                                              "Don't forget to mention Alletre when you call",
-                                              style: TextStyle(color: Colors.grey[600], fontStyle: FontStyle.italic),
+                                            const SizedBox(height: 14),
+                                            RichText(
                                               textAlign: TextAlign.center,
+                                              text: TextSpan(
+                                                style: TextStyle(
+                                                    color: Colors.grey[600],
+                                                    fontWeight: FontWeight.bold,
+                                                    fontStyle:
+                                                        FontStyle.italic),
+                                                children: const [
+                                                  TextSpan(
+                                                      text:
+                                                          "Don't forget to mention "),
+                                                  TextSpan(
+                                                    text: "Alletre",
+                                                    style: TextStyle(
+                                                        color: primaryColor,
+                                                        fontStyle:
+                                                            FontStyle.italic),
+                                                  ),
+                                                  TextSpan(
+                                                      text: " when you call"),
+                                                ],
+                                              ),
                                             ),
                                             const SizedBox(height: 20),
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               children: [
                                                 TextButton(
-                                                  onPressed: () => Navigator.pop(context),
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: secondaryColor,
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(6),
-                                                      side: const BorderSide(color: primaryColor),
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        secondaryColor,
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 16),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      side: const BorderSide(
+                                                          color: primaryColor),
                                                     ),
                                                   ),
                                                   child: const Text('Close'),
                                                 ),
-                                                const SizedBox(width: 8),
+                                                const SizedBox(width: 10),
                                                 ElevatedButton(
                                                   onPressed: () {
-                                                    final url = 'tel:${user.phoneNumber}';
+                                                    final url =
+                                                        'tel:${item.phone}';
                                                     launchUrl(Uri.parse(url));
                                                   },
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: secondaryColor,
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(6),
-                                                      side: const BorderSide(color: primaryColor),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        primaryColor,
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 16),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
                                                     ),
                                                   ),
-                                                  child: const Text('Call Now'),
+                                                  child: const Text('Call Now',
+                                                      style: TextStyle(
+                                                          color:
+                                                              secondaryColor)),
                                                 ),
                                               ],
                                             ),
@@ -131,10 +185,16 @@ class ItemDetailsBidSection extends StatelessWidget {
                                 );
                               },
                               icon: const Icon(Icons.call, color: primaryColor),
-                              label: Text('Call', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 16)),
+                              label: Text('Call',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                          color: primaryColor, fontSize: 16)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: secondaryColor,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6),
                                   side: const BorderSide(color: primaryColor),
@@ -157,7 +217,10 @@ class ItemDetailsBidSection extends StatelessWidget {
                         ),
                         child: Text(
                           'View Contact Details',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: secondaryColor, fontSize: 16),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: secondaryColor, fontSize: 16),
                         ),
                       );
               },
@@ -171,7 +234,8 @@ class ItemDetailsBidSection extends StatelessWidget {
       item.currentBid.isEmpty ? item.startBidAmount : item.currentBid,
     );
 
-    final String minimumBid = item.currentBid.isEmpty ? item.startBidAmount : item.currentBid;
+    final String minimumBid =
+        item.currentBid.isEmpty ? item.startBidAmount : item.currentBid;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,16 +251,20 @@ class ItemDetailsBidSection extends StatelessWidget {
               ValueListenableBuilder<String>(
                 valueListenable: bidAmount,
                 builder: (context, value, child) {
-                  final bool canDecrease = double.parse(value) > double.parse(minimumBid);
+                  final bool canDecrease =
+                      double.parse(value) > double.parse(minimumBid);
                   return Container(
                     height: 30,
                     width: 30,
                     decoration: BoxDecoration(
-                      color: canDecrease ? primaryColor : primaryColor.withAlpha(128),
+                      color: canDecrease
+                          ? primaryColor
+                          : primaryColor.withAlpha(128),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.remove, color: secondaryColor, size: 15),
+                      icon: const Icon(Icons.remove,
+                          color: secondaryColor, size: 15),
                       onPressed: canDecrease
                           ? () {
                               final currentValue = double.parse(value);
@@ -213,7 +281,10 @@ class ItemDetailsBidSection extends StatelessWidget {
                   builder: (context, value, child) {
                     return Text(
                       'AED ${NumberFormat.decimalPattern().format(double.parse(value))}',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600, color: onSecondaryColor, fontSize: 15),
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: onSecondaryColor,
+                          fontSize: 15),
                       textAlign: TextAlign.center,
                     );
                   },
@@ -253,7 +324,10 @@ class ItemDetailsBidSection extends StatelessWidget {
             ),
             child: Text(
               'Submit Bid',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: secondaryColor, fontSize: 16),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: secondaryColor, fontSize: 16),
             ),
           ),
         ),

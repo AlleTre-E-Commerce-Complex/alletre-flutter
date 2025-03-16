@@ -121,9 +121,8 @@ class ItemDetailsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Wrap(
-                      // Replace Row with Wrap to allow content to flow to the next line if needed
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 10, // Horizontal spacing between items
+                      spacing: 10,
                       children: [
                         Text(
                           item.title,
