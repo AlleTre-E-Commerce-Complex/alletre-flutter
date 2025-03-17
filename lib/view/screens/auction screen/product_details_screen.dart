@@ -268,9 +268,9 @@ class ProductDetailsScreen extends StatelessWidget {
       customFieldControllers.clear();
       customFieldDropdownValues.clear();
 
-      final fields = categoryController.value == "Cars" 
-      ? getSubCategoryFields("Cars")
-      : getSubCategoryFields(subCategory);
+      final fields = categoryController.value == "Cars"
+          ? getSubCategoryFields("Cars")
+          : getSubCategoryFields(subCategory);
 
       // Create new controllers and dropdown values
       fields.forEach((key, value) {
@@ -431,49 +431,48 @@ class ProductDetailsScreen extends StatelessWidget {
                     );
                   }
                   return ValueListenableBuilder<String?>(
-                      valueListenable: subCategoryController,
-                      builder: (context, selectedSubCategory, child) {
-                        return DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
-                            labelText: "Sub Category",
-                            labelStyle: labelTextStyle,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: errorColor),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: errorColor),
-                            ),
+                    valueListenable: subCategoryController,
+                    builder: (context, selectedSubCategory, child) {
+                      return DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: "Sub Category",
+                          labelStyle: labelTextStyle,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          value: selectedSubCategory,
-                          items: (subCategories[selectedCategory] ?? [])
-                              .map((subcategory) {
-                            return DropdownMenuItem(
-                              value: subcategory,
-                              child: Text(
-                                subcategory,
-                                style: const TextStyle(
-                                  color: onSecondaryColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15,
-                                ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: errorColor),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: errorColor),
+                          ),
+                        ),
+                        value: selectedSubCategory,
+                        items: (subCategories[selectedCategory] ?? [])
+                            .map((subcategory) {
+                          return DropdownMenuItem(
+                            value: subcategory,
+                            child: Text(
+                              subcategory,
+                              style: const TextStyle(
+                                color: onSecondaryColor,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15,
                               ),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            subCategoryController.value = value;
-                            // Initialize controllers for this subcategory
-                            initializeCustomFieldControllers(value);
-                          },
-                          validator:
-                              CreateAuctionValidation.validateSubCategory,
-                        );
-                      },
-                    );
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          subCategoryController.value = value;
+                          // Initialize controllers for this subcategory
+                          initializeCustomFieldControllers(value);
+                        },
+                        validator: CreateAuctionValidation.validateSubCategory,
+                      );
+                    },
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -486,10 +485,10 @@ class ProductDetailsScreen extends StatelessWidget {
                     return const SizedBox();
                   }
 
-                  final fields = categoryController.value == "Cars" 
-        ? getSubCategoryFields("Cars")
-        : getSubCategoryFields(selectedSubCategory);
-        
+                  final fields = categoryController.value == "Cars"
+                      ? getSubCategoryFields("Cars")
+                      : getSubCategoryFields(selectedSubCategory);
+
                   if (fields.isEmpty) {
                     return const SizedBox();
                   }
@@ -1007,10 +1006,8 @@ class ProductDetailsScreen extends StatelessWidget {
                             CreateAuctionValidation.validateMediaSection(
                                     media.value) ==
                                 null &&
-                            CreateAuctionValidation.validateItemCondition(
-                                    categoryController.value,
-                                    condition.value!) ==
-                                null &&
+                            (categoryController.value == "Properties" ||
+                                condition.value != null) &&
                             isDropdownsValid;
 
                         if (isValid) {
@@ -1059,7 +1056,8 @@ class ProductDetailsScreen extends StatelessWidget {
                             CreateAuctionValidation.validateMediaSection(
                                     media.value) ==
                                 null &&
-                            condition.value != null &&
+                            (categoryController.value == "Properties" ||
+                                condition.value != null) &&
                             isDropdownsValid;
 
                         if (isValid) {

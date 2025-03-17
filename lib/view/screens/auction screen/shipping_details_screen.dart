@@ -12,8 +12,6 @@ class ShippingDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-    final isSubmitted = ValueNotifier<bool>(false);
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
@@ -153,10 +151,20 @@ class ShippingDetailsScreen extends StatelessWidget {
                   const SizedBox(width: 16),
                   ElevatedButton(
                     onPressed: () {
-                      isSubmitted.value = true;
-                      final isValid = formKey.currentState!.validate();
-                      if (isValid) {
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const PaymentDetailsScreen()));
+                      // Check if we have at least one address
+                      if (userProvider.addresses.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please add at least one address'),
+                          ),
+                        );
+                      } else {
+                        Navigator.pushReplacement(
+                          context, 
+                          MaterialPageRoute(
+                            builder: (context) => const PaymentDetailsScreen()
+                          )
+                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(

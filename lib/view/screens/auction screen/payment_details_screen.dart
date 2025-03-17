@@ -29,7 +29,12 @@ class PaymentDetailsScreen extends StatelessWidget {
               ),
             ),
             const Divider(thickness: 1, color: primaryColor),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            const Text(
+              'In order to complete publishing your auction successfully, please pay the auction fee and start receiving bids immediately.',
+              style: TextStyle(color: onSecondaryColor, fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 16),
 
             // Sample Debit Card UI
             _buildDebitCard(),
@@ -206,7 +211,8 @@ class PaymentDetailsScreen extends StatelessWidget {
                       isSubmitted.value = true;
                       final isValid = formKey.currentState!.validate();
                       if (isValid) {
-                        Navigator.popUntil(context, (route) => route == myRoute);
+                        Navigator.popUntil(
+                            context, (route) => route == myRoute);
                       }
                     },
                     style: ElevatedButton.styleFrom(
