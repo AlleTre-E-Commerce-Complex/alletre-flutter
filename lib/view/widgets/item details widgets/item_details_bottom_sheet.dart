@@ -79,72 +79,85 @@ class ItemDetailsBottomSheet extends StatelessWidget {
 
     // Get relevant fields based on subcategory
     final List<String> relevantFields;
-    switch (item.subCategoryId) {
-      // Laptops subcategory
-      case 2:
-        relevantFields = [
-          'screenSize',
-          'operatingSystem',
-          'releaseYear',
-          'ramSize',
-          'processor',
-          'brand',
-          'model',
-          'color',
-          'graphicCard'
-        ];
-        break;
-
-      // Cameras & photos
-      case 3:
-        relevantFields = [
-          'releaseYear',
-          'color',
-          'regionOfManufacture',
-          'cameraType',
-          'brand',
-          'model'
-        ];
-        break;
-
-      // Smart Phones
-      case 5:
-        relevantFields = [
-          'screenSize',
-          'operatingSystem',
-          'releaseYear',
-          'color',
-          'brand',
-          'model',
-          'memory',
-          'regionOfManufacture'
-        ];
-        break;
-
-      // Accessories
-      case 6:
-        relevantFields = ['color', 'type', 'material', 'brand', 'model'];
-        break;
-
-      // TVs & Audios
+    switch (item.categoryId) {
+      // Cars category
       case 4:
         relevantFields = [
-          'screenSize',
-          'releaseYear',
+          'carType',
           'color',
-          'regionOfManufacture',
           'brand',
-          'model'
+          'model',
         ];
-        break;
-
-      // Home Appliances
-      case 1:
-        relevantFields = ['age', 'model', 'brand', 'color'];
         break;
 
       default:
-        relevantFields = [];
+        switch (item.subCategoryId) {
+          // Laptops subcategory
+          case 2:
+            relevantFields = [
+              'screenSize',
+              'operatingSystem',
+              'releaseYear',
+              'ramSize',
+              'processor',
+              'brand',
+              'model',
+              'color',
+              'graphicCard'
+            ];
+            break;
+
+          // Cameras & photos
+          case 3:
+            relevantFields = [
+              'releaseYear',
+              'color',
+              'regionOfManufacture',
+              'cameraType',
+              'brand',
+              'model'
+            ];
+            break;
+
+          // Smart Phones
+          case 5:
+            relevantFields = [
+              'screenSize',
+              'operatingSystem',
+              'releaseYear',
+              'color',
+              'brand',
+              'model',
+              'memory',
+              'regionOfManufacture'
+            ];
+            break;
+
+          // Accessories
+          case 6:
+            relevantFields = ['color', 'type', 'material', 'brand', 'model'];
+            break;
+
+          // TVs & Audios
+          case 4:
+            relevantFields = [
+              'screenSize',
+              'releaseYear',
+              'color',
+              'regionOfManufacture',
+              'brand',
+              'model'
+            ];
+            break;
+
+          // Home Appliances
+          case 1:
+            relevantFields = ['age', 'model', 'brand', 'color'];
+            break;
+
+          default:
+            relevantFields = [];
+        }
     }
 
     // Define the fields to display
@@ -169,6 +182,7 @@ class ItemDetailsBottomSheet extends StatelessWidget {
         case 'brand':
           return value.toString();
         case 'releaseYear':
+        // case 'year':
           return value.toString();
         case 'age':
           return '$value years';
@@ -199,6 +213,45 @@ class ItemDetailsBottomSheet extends StatelessWidget {
             break;
           case 'graphicCard':
             label = 'Graphics Card';
+            break;
+          case 'carType':
+            label = 'Car Type';
+            break;
+          case 'brand':
+            label = 'Brand';
+            break;
+          case 'model':
+            label = 'Model';
+            break;
+          case 'year':
+            label = 'Year';
+            break;
+          case 'mileage':
+            label = 'Mileage';
+            break;
+          case 'color':
+            label = 'Color';
+            break;
+          case 'transmission':
+            label = 'Transmission';
+            break;
+          case 'fuelType':
+            label = 'Fuel Type';
+            break;
+          case 'bodyType':
+            label = 'Body Type';
+            break;
+          case 'cylinders':
+            label = 'Cylinders';
+            break;
+          case 'doors':
+            label = 'Doors';
+            break;
+          case 'regionalSpecs':
+            label = 'Regional Specs';
+            break;
+          case 'condition':
+            label = 'Condition';
             break;
           case 'cameraType':
             label = 'Camera Type';
