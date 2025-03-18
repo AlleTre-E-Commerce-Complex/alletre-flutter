@@ -270,7 +270,7 @@ class ItemDetailsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                     ],
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     IntrinsicHeight(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,

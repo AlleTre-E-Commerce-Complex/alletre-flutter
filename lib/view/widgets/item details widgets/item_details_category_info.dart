@@ -46,6 +46,7 @@ class ItemDetailsCategoryInfo extends StatelessWidget {
                 ],
               ),
             ),
+            if(categoryName != 'Cars')...[
             const SizedBox(height: 18),
             Container(
               width: double.infinity,
@@ -70,6 +71,7 @@ class ItemDetailsCategoryInfo extends StatelessWidget {
                 ],
               ),
             ),
+            ],
           ],
         );
       },
