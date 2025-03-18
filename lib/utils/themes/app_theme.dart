@@ -50,7 +50,11 @@ Color getStatusColor(String status) {
   }
 }
 
-double getCardHeight(String title) {
+double getCardHeight(String title, {bool isAuctionProduct = false}) {
+  if (title == "Similar Products") {
+    return isAuctionProduct ? 337 : 333; // Use appropriate height based on item type
+  }
+  
   switch (title) {
     case "Live Auctions" || "Upcoming Auctions":
       return 337; // Taller to accommodate the countdown and the buttons

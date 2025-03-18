@@ -83,7 +83,8 @@ class AuctionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Status (if not Listed Products)
-                        if (title != 'Listed Products') ...[
+                        if ((title != 'Listed Products' && title != 'Similar Products') || 
+                            (title == 'Similar Products' && auction.isAuctionProduct)) ...[
                           _buildStatusText(context, auction.status),
                           const SizedBox(height: 5),
                         ],
@@ -130,7 +131,7 @@ class AuctionCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'AED ${title == 'Listed Products' ? NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : NumberFormat.decimalPattern().format(double.tryParse(auction.currentBid))}',
+                            'AED ${(title == 'Listed Products' || (title == 'Similar Products' && !auction.isAuctionProduct)) ? NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : NumberFormat.decimalPattern().format(double.tryParse(auction.currentBid))}',
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall!
@@ -143,8 +144,8 @@ class AuctionCard extends StatelessWidget {
                         const SizedBox(height: 10),
                         // Location/Bids Section
                         SizedBox(
-                          height: title == "Listed Products" ? 42 : 12,
-                          child: title == "Listed Products"
+                          height: (!auction.isAuctionProduct || (title == "Similar Products" && !auction.isAuctionProduct)) ? 42 : 12,
+                          child: (!auction.isAuctionProduct || (title == "Similar Products" && !auction.isAuctionProduct))
                               ? Text.rich(
                                   TextSpan(
                                     children: [
@@ -159,12 +160,9 @@ class AuctionCard extends StatelessWidget {
                                             ),
                                       ),
                                       TextSpan(
-                                        text: title == 'Listed Products'
-                                            ? (auction.itemLocation != null
-                                                ? '${auction.itemLocation?.city},\n${auction.itemLocation?.country}'
-                                                : 'Location not available')
-                                            : (auction.itemLocation?.address ??
-                                                'Location not available'),
+                                        text: auction.itemLocation != null
+                                            ? '${auction.itemLocation?.city},\n${auction.itemLocation?.country}'
+                                            : 'Location not available',
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelLarge!
@@ -191,14 +189,13 @@ class AuctionCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 9),
                         // Countdown Section
-                        if (title != 'Expired Auctions' &&
-                            title != 'Listed Products' &&
-                            !auction.isAuctionProduct)
+                        if ((title != 'Expired Auctions' && title != 'Listed Products' && auction.isAuctionProduct) || 
+                            (title == 'Similar Products' && auction.isAuctionProduct)) 
                           AuctionCountdown(
                             startDate: auction.startDate,
                             endDate: auction.expiryDate,
                           ),
-                        if (title == "Listed Products") ...[
+                        if (!auction.isAuctionProduct || (title == "Similar Products" && !auction.isAuctionProduct)) ...[
                           Text(
                             "Listed: ${timeago.format(auction.createdAt, locale: 'en_custom')}",
                             style: Theme.of(context)
@@ -231,8 +228,8 @@ class AuctionCard extends StatelessWidget {
                           ),
                         ],
                         // Auction Card Action Buttons
-                        if (title != 'Listed Products' &&
-                            title != 'Expired Auctions') ...[
+                        if ((title != 'Listed Products' && title != 'Expired Auctions' && auction.isAuctionProduct) ||
+                            (title == 'Similar Products' && auction.isAuctionProduct)) ...[
                           const SizedBox(height: 10),
                           if (auction.hasBuyNow)
                             Row(
@@ -340,16 +337,15 @@ class AuctionCard extends StatelessWidget {
             if (title != 'Expired Auctions')
               // Bookmark and Share buttons
               Padding(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(4),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (title != 'Listed Products')
-                      _buildIconButton(
-                          context, FontAwesomeIcons.bookmark, auction),
-                    const SizedBox(width: 8),
-                    _buildIconButton(
-                        context, FontAwesomeIcons.shareFromSquare, auction),
+                    if ((title != 'Listed Products' && auction.isAuctionProduct) || 
+                            (title == 'Similar Products' && auction.isAuctionProduct)) 
+                    _buildIconButton(context, FontAwesomeIcons.bookmark, auction),
+                    const SizedBox(width: 4),
+                    _buildIconButton(context, FontAwesomeIcons.shareFromSquare, auction),
                   ],
                 ),
               ),
@@ -403,7 +399,7 @@ class AuctionCard extends StatelessWidget {
         color: buttonBgColor,
         shape: BoxShape.circle,
       ),
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(4),
       child: GestureDetector(
         onTap: () async {
           if (icon == FontAwesomeIcons.bookmark) {

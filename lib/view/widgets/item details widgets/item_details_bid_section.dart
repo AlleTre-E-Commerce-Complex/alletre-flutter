@@ -23,7 +23,7 @@ class ItemDetailsBidSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (title == 'Listed Products') {
+    if (!item.isAuctionProduct || (title == "Similar Products" && !item.isAuctionProduct)) {
       return Column(
         children: [
           const SizedBox(height: 10),

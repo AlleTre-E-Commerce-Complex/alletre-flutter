@@ -45,7 +45,9 @@ class AuctionListWidget extends StatelessWidget {
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 14),
+      padding: title == 'Similar Products'
+          ? EdgeInsets.zero
+          : const EdgeInsets.only(left: 16, right: 16, bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -61,6 +63,10 @@ class AuctionListWidget extends StatelessWidget {
                     .copyWith(fontSize: 15),
               ),
               TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                  ),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -193,7 +199,7 @@ class AuctionListWidget extends StatelessWidget {
                 itemCount: min(auctions.length, 6),
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.only(right: 7),
+                    padding: const EdgeInsets.only(right: 14),
                     child: AuctionCard(
                       user: user,
                       auction: auctions[index],

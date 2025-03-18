@@ -38,6 +38,25 @@ class AuctionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  List<AuctionItem> getSimilarProducts(AuctionItem currentItem) {
+    // Get all products from the same category
+    final sameCategory = _listedProducts.where((item) => 
+      item.id != currentItem.id && 
+      item.categoryId == currentItem.categoryId
+    ).toList();
+
+    // Separate listed products and auctions
+    final listedProducts = sameCategory.where((item) => !item.isAuctionProduct).toList();
+    final auctions = sameCategory.where((item) => item.isAuctionProduct).toList();
+
+    // Prioritize showing items of the same type (listed/auction) as the current item
+    if (currentItem.isAuctionProduct) {
+      return [...auctions, ...listedProducts].take(10).toList();
+    } else {
+      return [...listedProducts, ...auctions].take(10).toList();
+    }
+  }
+
   void initializeSocket() {
     _socketService.connect();
 

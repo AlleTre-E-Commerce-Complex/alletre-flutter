@@ -16,6 +16,7 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_countdown.dart';
 import 'package:alletre_app/view/screens/image_view/full_screen_image.dart';
+import '../../widgets/home widgets/auction_list_widget.dart';
 import '../../widgets/item details widgets/item_details_bid_section.dart';
 import '../../widgets/item details widgets/item_details_bottom_bar.dart';
 import '../../widgets/item details widgets/item_details_bottom_sheet.dart';
@@ -37,6 +38,8 @@ class ItemDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auctionProvider = context.watch<AuctionProvider>();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auctionProvider =
           Provider.of<AuctionProvider>(context, listen: false);
@@ -151,7 +154,10 @@ class ItemDetailsScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    if (title != 'Listed Products') ...[
+                    if ((title != 'Listed Products' &&
+                            title != 'Similar Products') ||
+                        (title == 'Similar Products' &&
+                            item.isAuctionProduct)) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 3),
@@ -249,8 +255,10 @@ class ItemDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     ItemDetailsCategoryInfo(item: item),
                     const SizedBox(height: 22),
-                    if (title != 'Listed Products' &&
-                        title != 'Expired Auctions') ...[
+                    if ((title != 'Listed Products' &&
+                            title != 'Similar Products') ||
+                        (title == 'Similar Products' &&
+                            item.isAuctionProduct)) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -306,7 +314,9 @@ class ItemDetailsScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          if (title == 'Listed Products')
+                          if (!item.isAuctionProduct ||
+                              (title == "Similar Products" &&
+                                  !item.isAuctionProduct))
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
@@ -403,7 +413,9 @@ class ItemDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (title == 'Listed Products') ...[
+                    if (!item.isAuctionProduct ||
+                        (title == "Similar Products" &&
+                            !item.isAuctionProduct)) ...[
                       const SizedBox(height: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -429,7 +441,7 @@ class ItemDetailsScreen extends StatelessWidget {
                                             .bodyLarge
                                             ?.copyWith(fontSize: 13),
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(),
                                       Text(
                                         '${item.itemLocation?.city ?? 'Unknown city'}, ${item.itemLocation?.country ?? 'Unknown country'}',
                                         style: Theme.of(context)
@@ -527,6 +539,17 @@ class ItemDetailsScreen extends StatelessWidget {
                     ],
                     const SizedBox(height: 12),
                     ItemDetailsBidSection(item: item, title: title, user: user),
+                    const SizedBox(height: 40),
+                    AuctionListWidget(
+                      user: UserModel.empty(),
+                      title: 'Similar Products',
+                      subtitle: 'Explore Related Items',
+                      auctions: auctionProvider.getSimilarProducts(item),
+                      isLoading: auctionProvider.isLoadingListedProducts,
+                      error: auctionProvider.errorListedProducts,
+                      placeholder:
+                          'No similar items found in ${item.categoryName}.',
+                    ),
                   ],
                 ),
               ),
