@@ -90,7 +90,6 @@ class UserProfileCard extends StatelessWidget {
                                 backgroundColor: buttonBgColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  side: BorderSide(color: dividerColor),
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 15, vertical: 6),
@@ -99,8 +98,8 @@ class UserProfileCard extends StatelessWidget {
                               ),
                               child: Text(
                                 buttonText,
-                                style: theme.textTheme.labelSmall!
-                                    .copyWith(color: onSecondaryColor),
+                                style: theme.textTheme.labelSmall!.copyWith(
+                                    color: onSecondaryColor),
                               ),
                             ),
                           ],

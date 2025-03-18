@@ -103,7 +103,7 @@ class ItemDetailsBidSection extends StatelessWidget {
                                               textAlign: TextAlign.center,
                                               text: TextSpan(
                                                 style: TextStyle(
-                                                    color: Colors.grey[600],
+                                                    color: textColor,
                                                     fontWeight: FontWeight.bold,
                                                     fontStyle:
                                                         FontStyle.italic),

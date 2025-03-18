@@ -22,7 +22,7 @@ class ItemDetailsBottomSheet extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.5,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -64,9 +64,9 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(8),
       children: [
-        _itemDetailsTitle(),
-        _itemDetailsAbout(item.description),
-        const SizedBox(height: 14),
+        // _itemDetailsTitle(),
+        // _itemDetailsAbout(item.description),
+        const SizedBox(height: 10),
         ..._buildCustomFieldsContent()
       ],
     );
@@ -327,28 +327,28 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _itemDetailsTitle() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Center(
-        child: Text(
-          'About The Brand',
-          style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: onSecondaryColor),
-        ),
-      ),
-    );
-  }
+  // Widget _itemDetailsTitle() {
+  //   return const Padding(
+  //     padding: EdgeInsets.symmetric(vertical: 8),
+  //     child: Center(
+  //       child: Text(
+  //         'About The Brand',
+  //         style: TextStyle(
+  //             fontSize: 12,
+  //             fontWeight: FontWeight.w600,
+  //             color: onSecondaryColor),
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _itemDetailsAbout(String value) {
-    return Center(
-      child: Text(
-        value,
-        style: const TextStyle(
-            color: onSecondaryColor, fontWeight: FontWeight.w500, fontSize: 11),
-      ),
-    );
-  }
+  // Widget _itemDetailsAbout(String value) {
+  //   return Center(
+  //     child: Text(
+  //       value,
+  //       style: const TextStyle(
+  //           color: onSecondaryColor, fontWeight: FontWeight.w500, fontSize: 11),
+  //     ),
+  //   );
+  // }
 }

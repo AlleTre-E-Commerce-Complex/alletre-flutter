@@ -74,7 +74,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             SettingsListTile(
               title: 'Country',
-              subtitle: 'India',
+              subtitle: 'United Arab Emirates',
               onTap: () {},
             ),
             SettingsListTile(

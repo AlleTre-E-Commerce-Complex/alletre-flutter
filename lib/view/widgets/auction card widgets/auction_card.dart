@@ -108,7 +108,7 @@ class AuctionCard extends StatelessWidget {
                                     .copyWith(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      backgroundColor: Colors.yellow,
+                                      backgroundColor: highlightColor,
                                     ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,

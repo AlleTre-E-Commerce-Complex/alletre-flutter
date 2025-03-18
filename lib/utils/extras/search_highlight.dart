@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class HighlightedText extends StatelessWidget {
@@ -52,8 +53,8 @@ class HighlightedText extends StatelessWidget {
       spans.add(TextSpan(
         text: fullText.substring(index, index + query.length),
         style: highlightStyle ??
-            normalStyle?.copyWith(backgroundColor: Colors.yellow) ??
-            const TextStyle(backgroundColor: Colors.yellow),
+            normalStyle?.copyWith(backgroundColor: highlightColor) ??
+            const TextStyle(backgroundColor: highlightColor),
       ));
       start = index + query.length;
     }
