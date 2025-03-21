@@ -22,7 +22,7 @@ class SubCategory {
   });
 
   factory SubCategory.fromJson(Map<String, dynamic> json) {
-    print('📦 Creating SubCategory from JSON: $json');
+    // print('📦 Creating SubCategory from JSON: $json');
     try {
       final id = json['id'];
       final categoryId = json['categoryId'] ?? json['category_id'];
@@ -52,7 +52,7 @@ class SubCategory {
         subCategory.customFields = CategoryFields(fields: fields);
       }
 
-      print('✅ Successfully created SubCategory: ${subCategory.nameEn} (ID: ${subCategory.id})');
+      // print('✅ Successfully created SubCategory: ${subCategory.nameEn} (ID: ${subCategory.id})');
       return subCategory;
     } catch (e, stackTrace) {
       print('❌ Error parsing SubCategory JSON: $e');

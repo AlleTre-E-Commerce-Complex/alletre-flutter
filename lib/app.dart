@@ -5,7 +5,6 @@ import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/category_state.dart';
 import 'package:alletre_app/controller/providers/focus_state_provider.dart';
-import 'package:alletre_app/controller/providers/language_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
@@ -80,7 +79,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) => AuctionProvider()..initializeSocket()),
           // ChangeNotifierProvider(create: (context) => AuctionDetailsProvider()),
-          ChangeNotifierProvider(create: (context) => LanguageProvider()),
+          // ChangeNotifierProvider(create: (context) => LanguageProvider()),
           ChangeNotifierProvider(create: (context) => CategoryState()),
           ChangeNotifierProvider(create: (_) => FocusStateNotifier()),
           // ChangeNotifierProvider(create: (context) => SearchProvider()),

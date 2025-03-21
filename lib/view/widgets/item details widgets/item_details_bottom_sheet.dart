@@ -226,29 +226,11 @@ class ItemDetailsBottomSheet extends StatelessWidget {
           case 'year':
             label = 'Year';
             break;
-          case 'mileage':
-            label = 'Mileage';
-            break;
           case 'color':
             label = 'Color';
             break;
-          case 'transmission':
-            label = 'Transmission';
-            break;
-          case 'fuelType':
-            label = 'Fuel Type';
-            break;
-          case 'bodyType':
-            label = 'Body Type';
-            break;
-          case 'cylinders':
-            label = 'Cylinders';
-            break;
           case 'doors':
             label = 'Doors';
-            break;
-          case 'regionalSpecs':
-            label = 'Regional Specs';
             break;
           case 'condition':
             label = 'Condition';

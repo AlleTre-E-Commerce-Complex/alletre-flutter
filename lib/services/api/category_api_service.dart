@@ -37,8 +37,8 @@ class CategoryApiService {
     try {
       final url =
           '${ApiEndpoints.baseUrl}${ApiEndpoints.getSubCategoriesUrl(categoryId)}';
-      print('Fetching subcategories from URL: $url');
-      print('Category ID: $categoryId');
+      // print('Fetching subcategories from URL: $url');
+      // print('Category ID: $categoryId');
 
       final response = await http.get(
         Uri.parse(url),
@@ -47,8 +47,8 @@ class CategoryApiService {
         },
       );
 
-      print('Subcategories Response Status: ${response.statusCode}');
-      print('Subcategories Response Body: ${response.body}');
+      // print('Subcategories Response Status: ${response.statusCode}');
+      // print('Subcategories Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         CategoryService.initializeSubCategories(response.body);

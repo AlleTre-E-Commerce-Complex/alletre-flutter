@@ -34,7 +34,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building HomeScreenContent');
+    // print('Building HomeScreenContent');
     // final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
 

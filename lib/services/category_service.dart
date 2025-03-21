@@ -42,9 +42,9 @@ class CategoryService {
   /// For Electronics category (ID: 1), ensures all required custom fields are present
   static void initializeSubCategories(String jsonResponse) {
     try {
-      print('Initializing subcategories with response: $jsonResponse');
+      // print('Initializing subcategories with response: $jsonResponse');
       final Map<String, dynamic> data = json.decode(jsonResponse);
-      print('Decoded JSON data: $data');
+      // print('Decoded JSON data: $data');
       
       if (data['success'] == true && data['data'] != null) {
         var subCategoriesData;
@@ -68,16 +68,16 @@ class CategoryService {
         }
         
         if (subCategoriesData != null) {
-          print('Processing subcategories data: $subCategoriesData');
+          // print('Processing subcategories data: $subCategoriesData');
           final List<dynamic> subCategories = subCategoriesData as List<dynamic>;
           print('Found ${subCategories.length} subcategories');
           
           for (var subCategoryData in subCategories) {
-            print('Processing subcategory: $subCategoryData');
+            // print('Processing subcategory: $subCategoryData');
             try {
               final subCategory = SubCategory.fromJson(subCategoryData as Map<String, dynamic>);
               _subCategories[subCategory.id] = subCategory;
-              print('🏆 Successfully added subcategory: ${subCategory.nameEn} (ID: ${subCategory.id})');
+              // print('🏆 Successfully added subcategory: ${subCategory.nameEn} (ID: ${subCategory.id})');
             } catch (e) {
               print('Error processing individual subcategory: $e');
               print('Problematic data: $subCategoryData');
@@ -100,7 +100,7 @@ class CategoryService {
   /// Returns empty string if category not found
   static String getCategoryName(int categoryId) {
     final category = _categories[categoryId];
-    print('Getting category name for ID $categoryId: ${category?.nameEn ?? 'not found'}');
+    // print('Getting category name for ID $categoryId: ${category?.nameEn ?? 'not found'}');
     return category?.nameEn ?? '';
   }
 
@@ -108,8 +108,8 @@ class CategoryService {
   /// Returns empty string if subcategory not found
   static String getSubCategoryName(int subCategoryId) {
     final subCategory = _subCategories[subCategoryId];
-    print('🎁 Getting subcategory name for ID $subCategoryId: ${subCategory?.nameEn ?? 'not found'}');
-    print('Current subcategories in memory: ${_subCategories.keys}');
+    // print('🎁 Getting subcategory name for ID $subCategoryId: ${subCategory?.nameEn ?? 'not found'}');
+    // print('Current subcategories in memory: ${_subCategories.keys}');
     return subCategory?.nameEn ?? '';
   }
 

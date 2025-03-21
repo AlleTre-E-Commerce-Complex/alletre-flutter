@@ -125,9 +125,9 @@ class AuctionListWidget extends StatelessWidget {
             )
           else if (auctions.isEmpty)
             (() {
-              print('AuctionListWidget: No auctions to display for "$title"');
-              print('isLoading: $isLoading, error: $error');
-              print('searchActive: ${_searchQueryIsActive(context)}');
+              // print('AuctionListWidget: No auctions to display for "$title"');
+              // print('isLoading: $isLoading, error: $error');
+              // print('searchActive: ${_searchQueryIsActive(context)}');
               return Column(
                 children: [
                   SizedBox(

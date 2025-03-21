@@ -17,8 +17,13 @@ class LoginButtons extends StatelessWidget {
   final GoogleAuthService _googleAuthService = GoogleAuthService();
   final AppleAuthService _appleAuthService = AppleAuthService();
   final GlobalKey<FormState> formKey;
+  final VoidCallback? onLoginSuccess;
 
-  LoginButtons({super.key, required this.formKey});
+  LoginButtons({
+    super.key, 
+    required this.formKey,
+    this.onLoginSuccess,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,39 +38,6 @@ class LoginButtons extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            // onPressed: userProvider.isLoading
-            //     ? null
-            //     : () async {
-            //         if (formKey.currentState!.validate()) {
-            //           if (!userProvider.validateLoginForm()) {
-            //           final result = await userProvider.login();
-
-            //           if (!context.mounted) return;
-
-            //           if (result['success']) {
-            //             Provider.of<LoggedInProvider>(context, listen: false).logIn();
-
-            //             if (!context.mounted) return;
-
-            //             // Show success dialog
-            //             showDialog(
-            //               context: context,
-            //               barrierDismissible: false,
-            //               builder: (context) => buildSuccessDialog(context),
-            //             );
-            //           } else {
-            //             ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            //             ScaffoldMessenger.of(context).showSnackBar(
-            //               SnackBar(
-            //                 content: Text(result['message']),
-            //                 backgroundColor: errorColor,
-            //               ),
-            //             );
-            //           }
-            //         }
-            //         }
-            //       },
-
             onPressed: userProvider.isLoading
                 ? null
                 : () async {
@@ -86,8 +58,8 @@ class LoginButtons extends StatelessWidget {
                       if (!context.mounted) return;
 
                       if (result['success']) {
-                        Provider.of<LoggedInProvider>(context, listen: false)
-                            .logIn();
+                        // Update login state
+                        Provider.of<LoggedInProvider>(context, listen: false).logIn();
 
                         // First update the tab index to home
                         Provider.of<TabIndexProvider>(context, listen: false)
@@ -96,11 +68,14 @@ class LoginButtons extends StatelessWidget {
                         if (!context.mounted) return;
 
                         // Show success dialog
-                        showDialog(
+                        await showDialog(
                           context: context,
                           barrierDismissible: false,
                           builder: (context) => buildSuccessDialog(context),
                         );
+
+                        // Call onLoginSuccess callback if provided
+                        onLoginSuccess?.call();
                       } else {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,7 +88,6 @@ class LoginButtons extends StatelessWidget {
                       }
                     }
                   },
-
             child: userProvider.isLoading
                 ? const SizedBox(
                     height: 20,
@@ -181,7 +155,7 @@ class LoginButtons extends StatelessWidget {
 
                 Provider.of<LoggedInProvider>(context, listen: false).logIn();
 
-                // // First update the tab index to home
+                // First update the tab index to home
                 // Provider.of<TabIndexProvider>(context, listen: false)
                 //     .updateIndex(0);
 

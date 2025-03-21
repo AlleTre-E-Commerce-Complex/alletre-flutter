@@ -1,68 +1,246 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
-import 'package:alletre_app/model/auction_item.dart';
-import 'package:alletre_app/utils/constants/api_endpoints.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
+import 'package:alletre_app/model/auction_item.dart';
+import 'user_services.dart';
 
 class AuctionService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<String?> _getAccessToken() async {
-    return await _storage.read(key: 'accessToken');
+    try {
+      // Get server-issued access token
+      final token = await _storage.read(key: 'access_token');
+      if (token == null) {
+        debugPrint('No access token found');
+        return null;
+      }
+
+      debugPrint('Using server access token');
+      return token;
+    } catch (e) {
+      debugPrint('Error getting access token: $e');
+      return null;
+    }
   }
 
-  // Future<Map<String, dynamic>> fetchAuctionDetails(int auctionId) async {
-  //   final accessToken = await _getAccessToken();
-  //   if (accessToken == null) throw Exception('Access token not found');
+  Future<Map<String, dynamic>> createAuction({
+    required Map<String, dynamic> auctionData,
+    required List<File> images,
+    required int locationId,
+  }) async {
+    try {
+      debugPrint('Starting auction creation...');
+      String? accessToken = await _getAccessToken();
 
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse('$baseUrl/auctions/user/$auctionId/details'),
-  //       headers: {'Authorization': 'Bearer $accessToken'},
-  //     );
+      if (accessToken == null) {
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+        } else {
+          throw Exception('Failed to get valid access token');
+        }
+      }
 
-  //     print('Auction Details Response Code: ${response.statusCode}');
+      debugPrint('Token acquired, preparing request...');
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions'),
+      );
+
+      // Set headers
+      request.headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'Accept': 'application/json',
+      });
+
+      debugPrint('Headers prepared:');
+      request.headers.forEach((key, value) {
+        if (key == 'Authorization') {
+          debugPrint('  $key: [REDACTED]');
+        } else {
+          debugPrint('  $key: $value');
+        }
+      });
+
+      // Process auction data
+      debugPrint('Processing auction data...');
+      debugPrint('Received end date: ${auctionData['endDate']}');
       
-  //     if (response.statusCode == 200) {
-  //       final jsonResponse = json.decode(response.body);
-  //       return jsonResponse['data'];
-  //     } else {
-  //       throw Exception('Failed to load auction details: ${response.statusCode}');
-  //     }
-  //   } catch (e, stackTrace) {
-  //     print('Error in fetchAuctionDetails: $e');
-  //     print(stackTrace);
-  //     throw Exception('Failed to fetch auction details: $e');
-  //   }
-  // }
+      // Debug product structure before processing
+      if (auctionData['product'] != null) {
+        debugPrint('Raw product data:');
+        debugPrint(json.encode(auctionData['product']));
+        debugPrint('Product data type: ${auctionData['product'].runtimeType}');
+      }
 
+      // Prepare the request body as a single JSON object
+      final Map<String, dynamic> requestBody = {
+        'type': auctionData['type'],
+        'durationUnit': auctionData['durationUnit'],
+        'duration': int.parse(auctionData['duration'].toString()),
+        'startBidAmount': double.parse(auctionData['startBidAmount'].toString()),
+        'startDate': auctionData['startDate'],
+        'endDate': auctionData['endDate'],  // Add end date to request
+        'scheduleBid': auctionData['scheduleBid'] ?? false,
+        'buyNowEnabled': auctionData['buyNowEnabled'] ?? false,
+        'buyNowPrice': double.parse(auctionData['buyNowPrice']?.toString() ?? '0'),
+        'locationId': locationId,
+      };
+
+      // Add shipping details if present
+      if (auctionData['shippingDetails'] != null) {
+        requestBody['shippingDetails'] = auctionData['shippingDetails'];
+      }
+
+      // Handle product data
+      if (auctionData['product'] != null) {
+        final productData = auctionData['product'];
+        if (productData is! Map<String, dynamic>) {
+          throw Exception('Product data must be an object');
+        }
+
+        // Create a clean copy of product data and convert numeric fields
+        final cleanProduct = Map<String, dynamic>.from(productData);
+        cleanProduct.removeWhere((key, value) => value == null || value == '');
+        
+        // Convert numeric fields
+        if (cleanProduct['categoryId'] != null) {
+          cleanProduct['categoryId'] = int.parse(cleanProduct['categoryId'].toString());
+        }
+        if (cleanProduct['subCategoryId'] != null) {
+          cleanProduct['subCategoryId'] = int.parse(cleanProduct['subCategoryId'].toString());
+        }
+        if (cleanProduct['quantity'] != null) {
+          cleanProduct['quantity'] = int.parse(cleanProduct['quantity'].toString());
+        }
+        if (cleanProduct['screenSize'] != null) {
+          cleanProduct['screenSize'] = double.parse(cleanProduct['screenSize'].toString());
+        }
+        if (cleanProduct['releaseYear'] != null) {
+          cleanProduct['releaseYear'] = int.parse(cleanProduct['releaseYear'].toString());
+        }
+        if (cleanProduct['ramSize'] != null) {
+          cleanProduct['ramSize'] = int.parse(cleanProduct['ramSize'].toString());
+        }
+
+        // Validate required fields
+        if (!cleanProduct.containsKey('title') || 
+            !cleanProduct.containsKey('description') ||
+            !cleanProduct.containsKey('categoryId') ||
+            !cleanProduct.containsKey('subCategoryId')) {
+          throw Exception('Product data missing required fields');
+        }
+
+        requestBody['product'] = cleanProduct;
+      } else {
+        throw Exception('Product data is required');
+      }
+
+      // Add all fields as form data
+      debugPrint('Adding form fields...');
+      
+      // Add basic auction fields
+      debugPrint('Adding end date to form fields: ${requestBody['endDate']}');
+      request.fields['type'] = requestBody['type'];
+      request.fields['durationUnit'] = requestBody['durationUnit'];
+      request.fields['duration'] = requestBody['duration'].toString();
+      request.fields['startBidAmount'] = requestBody['startBidAmount'].toString();
+      request.fields['endDate'] = requestBody['endDate'];
+      request.fields['startDate'] = requestBody['startDate'];
+      request.fields['scheduleBid'] = requestBody['scheduleBid'].toString();
+      request.fields['buyNowEnabled'] = requestBody['buyNowEnabled'].toString();
+      request.fields['buyNowPrice'] = requestBody['buyNowPrice'].toString();
+      request.fields['locationId'] = requestBody['locationId'].toString();
+
+      // Add product fields
+      final product = requestBody['product'] as Map<String, dynamic>;
+      product.forEach((key, value) {
+        request.fields['product[$key]'] = value.toString();
+      });
+
+      // Add shipping details
+      if (requestBody['shippingDetails'] != null) {
+        final shipping = requestBody['shippingDetails'] as Map<String, dynamic>;
+        shipping.forEach((key, value) {
+          request.fields['shippingDetails[$key]'] = value.toString();
+        });
+      }
+
+      // Add images
+      debugPrint('Adding ${images.length} images...');
+      for (var i = 0; i < images.length; i++) {
+        final file = images[i];
+        final stream = http.ByteStream(file.openRead());
+        final length = await file.length();
+        
+        final multipartFile = http.MultipartFile(
+          'images',
+          stream,
+          length,
+          filename: file.path.split('/').last,
+        );
+        request.files.add(multipartFile);
+      }
+
+      debugPrint('Sending request...');
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+      debugPrint('Response received');
+      debugPrint('Status: ${response.statusCode}');
+      debugPrint('Response body: $responseData');
+
+      // Log response
+      debugPrint('Response Details:');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Headers: ${response.headers}');
+      debugPrint('Body: $responseData');
+
+      final data = jsonDecode(responseData) as Map<String, dynamic>;
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return data;
+      } else {
+        debugPrint('Error Response Body: $data');
+        debugPrint('Error Message: ${data['message']}');
+        throw Exception('Failed to create auction: ${data['message']}');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error creating auction: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  // Implement other auction methods
   Future<List<AuctionItem>> fetchLiveAuctions() async {
     try {
       final accessToken = await _getAccessToken();
-      final headers = accessToken != null 
-          ? {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}
-          : {'Content-Type': 'application/json'};
+      if (accessToken == null) throw Exception('No valid access token');
 
       final response = await http.get(
         Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main'),
-        headers: headers,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        },
       );
 
-      print('Live Auctions Response Code: ${response.statusCode}');
-      print('Live Auctions Response Body: ${response.body}');
-
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        final List<dynamic> auctions = jsonResponse['data'];
-        return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-      } else {
-        print('Failed to load live auctions: ${response.statusCode}');
-        return [];
+        final data = jsonDecode(response.body);
+        return (data['data'] as List)
+            .map((item) => AuctionItem.fromJson(item))
+            .toList();
       }
+      return [];
     } catch (e) {
-      print('Error fetching live auctions: $e');
+      debugPrint('Error fetching live auctions: $e');
       return [];
     }
   }
@@ -104,32 +282,28 @@ class AuctionService {
     }
   }
 
-
   Future<List<AuctionItem>> fetchUpcomingAuctions() async {
     try {
       final accessToken = await _getAccessToken();
-      final headers = accessToken != null 
-          ? {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}
-          : {'Content-Type': 'application/json'};
+      if (accessToken == null) throw Exception('No valid access token');
 
       final response = await http.get(
         Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming'),
-        headers: headers,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        },
       );
 
-      print('Upcoming Auctions Response Code: ${response.statusCode}');
-      print('Upcoming Auctions Response Body: ${response.body}');
-
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        final List<dynamic> auctions = jsonResponse['data'];
-        return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-      } else {
-        print('Failed to load upcoming auctions: ${response.statusCode}');
-        return [];
+        final data = jsonDecode(response.body);
+        return (data['data'] as List)
+            .map((item) => AuctionItem.fromJson(item))
+            .toList();
       }
+      return [];
     } catch (e) {
-      print('Error fetching upcoming auctions: $e');
+      debugPrint('Error fetching upcoming auctions: $e');
       return [];
     }
   }
@@ -137,28 +311,25 @@ class AuctionService {
   Future<List<AuctionItem>> fetchExpiredAuctions() async {
     try {
       final accessToken = await _getAccessToken();
-      final headers = accessToken != null 
-          ? {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}
-          : {'Content-Type': 'application/json'};
+      if (accessToken == null) throw Exception('No valid access token');
 
       final response = await http.get(
         Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions'),
-        headers: headers,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        },
       );
 
-      print('Expired Auctions Response Code: ${response.statusCode}');
-      print('Expired Auctions Response Body: ${response.body}');
-
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        final List<dynamic> auctions = jsonResponse['data'];
-        return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-      } else {
-        print('Failed to load expired auctions: ${response.statusCode}');
-        return [];
+        final data = jsonDecode(response.body);
+        return (data['data'] as List)
+            .map((item) => AuctionItem.fromJson(item))
+            .toList();
       }
+      return [];
     } catch (e) {
-      print('Error fetching expired auctions: $e');
+      debugPrint('Error fetching expired auctions: $e');
       return [];
     }
   }

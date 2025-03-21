@@ -6,11 +6,19 @@ import '../../widgets/common widgets/footer_elements_appbar.dart';
 import 'shipping_details_screen.dart';
 
 class AuctionDetailsScreen extends StatelessWidget {
-  const AuctionDetailsScreen({super.key});
+  final Map<String, dynamic> productData;
+  final List<String> imagePaths;
+
+  const AuctionDetailsScreen({
+    super.key, 
+    required this.productData,
+    required this.imagePaths,
+  });
 
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
+    // Controllers for auction-specific fields
     final priceController = TextEditingController();
     final condition = ValueNotifier<String?>(null);
     final selectedDuration = ValueNotifier<String?>(null);
@@ -340,7 +348,45 @@ class AuctionDetailsScreen extends StatelessWidget {
                       final isValid = formKey.currentState!.validate();
 
                       if (isValid) {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const ShippingDetailsScreen()));
+                        // Collect form data
+                        final auctionData = {
+                          ...productData, // Keep the product data structure intact
+                          'startingPrice': double.tryParse(priceController.text)?.toString() ?? '0',
+                          'duration': selectedDuration.value?.split(' ')[0] ?? '1',
+                          'scheduleBid': scheduleBidSwitch.value,
+                          'startDate': startDateController.text,
+                          'startTime': startTimeController.text,
+                          'buyNowEnabled': buyNowSwitch.value,
+                          'buyNowPrice': double.tryParse(buyNowController.text)?.toString() ?? '0',
+                          'returnPolicy': returnPolicySwitch.value ? returnPolicyController.text.trim() : null,
+                          'warrantyPolicy': warrantyPolicySwitch.value ? warrantyPolicyController.text.trim() : null,
+                        };
+
+                        // Validate required fields
+                        final product = auctionData['product'] as Map<String, dynamic>;
+                        
+                        if (product['title']?.isEmpty ?? true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Title is required')),
+                          );
+                          return;
+                        }
+                        if (product['description']?.isEmpty ?? true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Description is required')),
+                          );
+                          return;
+                        }
+
+                        Navigator.push(
+                          context, 
+                          MaterialPageRoute(
+                            builder: (context) => ShippingDetailsScreen(
+                              auctionData: auctionData,
+                              imagePaths: imagePaths, 
+                            )
+                          )
+                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(

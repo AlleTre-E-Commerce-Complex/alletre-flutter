@@ -1,4 +1,4 @@
-import 'package:alletre_app/view/screens/auction%20screen/auction_details_screen.dart';
+import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/edit_profile_screen.dart';
@@ -41,8 +41,10 @@ class AppRoutes {
       signup: (context) => SignUpPage(),
       login: (context) => LoginPage(),
       home: (context) => const HomeScreenContent(),
-      productDetails: (context) => const AuctionDetailsScreen(),
-      auctionDetails: (context) => const AuctionDetailsScreen(),
+      // Note: These routes should not be used directly.
+      // Instead, use Navigator.push with the required product data
+      productDetails: (context) => const ProductDetailsScreen(),
+      auctionDetails: (context) => throw Exception('AuctionDetailsScreen requires product data. Use Navigator.push instead.'),
       // search: (context) => const SearchScreen(),
       purchases: (context) => const PurchaseScreen(),
       bids: (context) => const BidsScreen(),

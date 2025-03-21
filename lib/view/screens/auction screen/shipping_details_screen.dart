@@ -1,18 +1,36 @@
+// ignore_for_file: avoid_print
+
+import 'dart:convert';
 import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/location_provider.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
-import 'package:alletre_app/view/screens/edit%20profile%20screen/add_address_screen.dart';
+import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/common widgets/address_card.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
+import 'add_location_screen.dart';
 
 class ShippingDetailsScreen extends StatelessWidget {
-  const ShippingDetailsScreen({super.key});
+  final Map<String, dynamic> auctionData;
+  final List<String> imagePaths;
+
+  const ShippingDetailsScreen({
+    super.key,
+    required this.auctionData,
+    required this.imagePaths,
+  });
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final locationProvider = Provider.of<LocationProvider>(context);
+    final auctionProvider = Provider.of<AuctionProvider>(context);
+    final loginProvider = Provider.of<LoggedInProvider>(context);
+    final defaultAddress = userProvider.defaultAddress;
 
     return Scaffold(
       appBar: const NavbarElementsAppbar(
@@ -39,7 +57,6 @@ class ShippingDetailsScreen extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-
                   // Address Cards
                   Consumer<UserProvider>(
                     builder: (context, userProvider, child) {
@@ -57,23 +74,27 @@ class ShippingDetailsScreen extends StatelessWidget {
                         children: [
                           for (final address in sortedAddresses)
                             AddressCard(
-            address: address,
-            isDefault: address == defaultAddress,
-            onMakeDefault: () => userProvider.setDefaultAddress(address),
-            onEdit: () async {
-              final editedAddress = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const GoogleMapScreen(),
-                ),
-              );
+                              address: address,
+                              isDefault: address == defaultAddress,
+                              onMakeDefault: () =>
+                                  userProvider.setDefaultAddress(address),
+                              onEdit: () async {
+                                final editedAddress = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AddLocationScreen(),
+                                  ),
+                                );
 
-              if (editedAddress != null) {
-                userProvider.editAddress(address, editedAddress);
-              }
-            },
-            onDelete: () => userProvider.removeAddress(address),
-          ),
+                                if (editedAddress != null) {
+                                  userProvider.editAddress(
+                                      address, editedAddress);
+                                }
+                              },
+                              onDelete: () =>
+                                  userProvider.removeAddress(address),
+                            ),
                         ],
                       );
                     },
@@ -87,7 +108,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                         final selectedLocation = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const GoogleMapScreen(),
+                            builder: (context) => const AddLocationScreen(),
                           ),
                         );
 
@@ -150,7 +171,24 @@ class ShippingDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      // First check if user is logged in
+                      if (!loginProvider.isLoggedIn) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please log in to create an auction'),
+                          ),
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                LoginPage(fromAuctionCreation: true),
+                          ),
+                        );
+                        return;
+                      }
+
                       // Check if we have at least one address
                       if (userProvider.addresses.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -158,13 +196,183 @@ class ShippingDetailsScreen extends StatelessWidget {
                             content: Text('Please add at least one address'),
                           ),
                         );
-                      } else {
-                        Navigator.pushReplacement(
-                          context, 
-                          MaterialPageRoute(
-                            builder: (context) => const PaymentDetailsScreen()
-                          )
+                        return;
+                      }
+
+                      try {
+                        // Show loading indicator
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
                         );
+
+                        // Debug log auction data
+                        debugPrint('Incoming auction data:');
+                        debugPrint('Product data: ${auctionData['product']}');
+
+                        // Ensure product data is properly structured
+                        if (auctionData['product'] == null || 
+                            auctionData['product'] is! Map<String, dynamic>) {
+                          throw Exception('Product data is not properly structured');
+                        }
+
+                        // Parse duration and unit
+                        String durationStr = auctionData['duration'] ?? '1 DAYS';
+                        String durationUnit = durationStr.toUpperCase().contains('HRS') ? 'HOURS' : 'DAYS';
+                        int duration = int.parse(durationStr.split(' ')[0]);
+                        
+                        // Parse prices
+                        int startBidAmount = (double.parse(auctionData['startingPrice']?.toString() ?? '0')).toInt();
+                        double buyNowPrice = double.parse(auctionData['buyNowPrice']?.toString() ?? '0');
+                        
+                        // Calculate end time based on duration and start time
+                        DateTime startTime = auctionData['scheduleBid'] == true
+                            ? DateTime.parse('${auctionData['startDate']} ${auctionData['startTime']}:00')
+                            : DateTime.now();
+                        
+                        DateTime endTime;
+                        if (durationUnit == 'HOURS') {
+                          endTime = startTime.add(Duration(hours: duration));
+                        } else {
+                          endTime = startTime.add(Duration(days: duration));
+                        }
+
+                        // Debug end time calculation
+                        debugPrint('Start time: $startTime');
+                        debugPrint('Duration: $duration ${durationUnit.toLowerCase()}');
+                        debugPrint('Calculated end time: $endTime');
+
+                        // Create the full auction data structure
+                        final Map<String, dynamic> fullAuctionData = {
+                          'type': 'ON_TIME',
+                          'durationUnit': durationUnit,
+                          'duration': duration,
+                          'startBidAmount': startBidAmount,
+                          'startDate': startTime.toIso8601String(),
+                          'endDate': endTime.toIso8601String(), 
+                          'scheduleBid': auctionData['scheduleBid'] ?? false,
+                          'buyNowEnabled': auctionData['buyNowEnabled'] ?? false,
+                          'buyNowPrice': buyNowPrice,
+                          'product': Map<String, dynamic>.from(auctionData['product']), // Create clean copy a Map
+                          'locationId': 1,
+                          'shippingDetails': {
+                            'country': locationProvider.selectedCountry ?? 'UAE',
+                            'city': locationProvider.selectedCity ?? 'Dubai',
+                            'address': defaultAddress ?? '',
+                            'phone': userProvider.phoneNumber,
+                          },
+                        };
+
+                        // Clean and convert product data
+                        var productData = fullAuctionData['product'] as Map<String, dynamic>;
+                        
+                        // Remove null/empty values
+                        productData.removeWhere((key, value) => value == null || value == '');
+                        
+                        // Convert numeric fields
+                        if (productData['categoryId'] != null) {
+                          productData['categoryId'] = int.parse(productData['categoryId'].toString());
+                        }
+                        if (productData['subCategoryId'] != null) {
+                          productData['subCategoryId'] = int.parse(productData['subCategoryId'].toString());
+                        }
+                        if (productData['quantity'] != null) {
+                          productData['quantity'] = int.parse(productData['quantity'].toString());
+                        }
+                        fullAuctionData['product'] = productData;
+
+                        // Validate product data structure
+                        final product = fullAuctionData['product'] as Map<String, dynamic>;
+                        if (!product.containsKey('title') || !product.containsKey('description') ||
+                            !product.containsKey('categoryId') || !product.containsKey('subCategoryId')) {
+                          throw Exception('Product data missing required fields');
+                        }
+
+                        // Add optional policies if present
+                        if (auctionData['returnPolicy'] != null) {
+                          fullAuctionData['returnPolicy'] = auctionData['returnPolicy'];
+                        }
+                        if (auctionData['warrantyPolicy'] != null) {
+                          fullAuctionData['warrantyPolicy'] = auctionData['warrantyPolicy'];
+                        }
+
+                        // Debug log the final structure
+                        debugPrint('Final auction data structure:');
+                        debugPrint(fullAuctionData.toString());
+
+                        // Create auction with image paths
+                        debugPrint('Creating auction with data: $fullAuctionData');
+                        debugPrint('End time before API call: ${endTime.toIso8601String()}');
+                        
+                        // Debug the auction data before API call
+                        debugPrint('Full auction data before API call:');
+                        debugPrint(json.encode(fullAuctionData));
+                        
+                        final response = await auctionProvider.createAuction(
+                          auctionData: fullAuctionData,
+                          imagePaths: imagePaths,
+                        );
+                        
+                        debugPrint('API Response: $response');
+
+                        // Hide loading indicator
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+
+                        if (response['success'] == true) {
+                          // Show success message
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Auction created successfully!'),
+                              ),
+                            );
+                          }
+
+                          // Debug the data before navigation
+                          debugPrint('Shipping Screen - Full auction data: $fullAuctionData');
+                          debugPrint('Shipping Screen - API Response: $response');
+                          debugPrint('Shipping Screen - End time: ${endTime.toIso8601String()}');
+                          final navigationData = {
+                            'success': response['success'],
+                            'data': {
+                              ...response['data'],
+                              'endTime': endTime.toIso8601String(), // Explicitly set end time
+                              ...fullAuctionData,
+                            }
+                          };
+                          debugPrint('Shipping Screen - Navigation data: $navigationData');
+                          
+                          // Navigate to payment details
+                          if (context.mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PaymentDetailsScreen(
+                                  auctionData: navigationData,
+                                ),
+                              ),
+                            );
+                          }
+                        } else {
+                          throw Exception(response['message'] ?? 'Failed to create auction');
+                        }
+                      } catch (e) {
+                        // Hide loading indicator
+                        Navigator.pop(context);
+
+                        // Show error message
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to create auction: $e'),
+                            ),
+                          );
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(

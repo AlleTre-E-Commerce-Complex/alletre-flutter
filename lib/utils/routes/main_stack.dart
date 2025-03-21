@@ -66,13 +66,13 @@ class MainStack extends StatelessWidget {
       case 12:
         return ItemDetailsScreen(item: AuctionItem.empty(), title: '', user: UserModel.empty());
       case 13:
-        return const ShippingDetailsScreen();
+        return const ShippingDetailsScreen(auctionData: {}, imagePaths: []);
       case 14:
         return const AddLocationScreen();
       case 15:
         return const ListProductsScreen();
       case 16:
-        return const PaymentDetailsScreen();
+        return const PaymentDetailsScreen(auctionData: {'message': 'Please create an auction first'});
       // Auth screens
       case 17:
         return LoginPage();

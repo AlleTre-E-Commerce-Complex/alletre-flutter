@@ -71,7 +71,7 @@ class ListProductsScreen extends StatelessWidget {
                     borderSide: const BorderSide(color: errorColor),
                   ),
                 ),
-                validator: CreateAuctionValidation.validateItemName,
+                validator: CreateAuctionValidation.validateTitle,
               ),
               const SizedBox(height: 10),
               const SizedBox(height: 10),

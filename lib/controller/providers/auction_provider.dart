@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'dart:developer';
-
+import 'dart:io';
 import 'package:alletre_app/controller/helpers/auction_service.dart';
 import 'package:alletre_app/controller/helpers/socket_service.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:alletre_app/model/auction_item.dart';
 class AuctionProvider with ChangeNotifier {
   final SocketService _socketService = SocketService();
   final AuctionService _auctionService = AuctionService();
-  // Map<String, dynamic>? _auctionDetails;
   List<AuctionItem> _liveAuctions = [];
   List<AuctionItem> _listedProducts = [];
   List<AuctionItem> _upcomingAuctions = [];
@@ -18,11 +16,11 @@ class AuctionProvider with ChangeNotifier {
   final bool _isLoading = false;
   String? _error;
 
-  // Map<String, dynamic>? get auctionDetails => _auctionDetails;
   bool _isLoadingLive = false;
   bool _isLoadingListedProducts = false;
   bool _isLoadingUpcoming = false;
   bool _isLoadingExpired = false;
+  bool _isCreatingAuction = false;
 
   bool _isFirstLoad = true;
 
@@ -30,13 +28,16 @@ class AuctionProvider with ChangeNotifier {
   String? _errorListedProducts;
   String? _errorUpcoming;
   String? _errorExpired;
+  String? _createAuctionError;
 
   List<AuctionItem> get liveAuctions => _liveAuctions;
   List<AuctionItem> get listedProducts => _listedProducts;
   List<AuctionItem> get upcomingAuctions => _upcomingAuctions;
   List<AuctionItem> get expiredAuctions => _expiredAuctions;
   bool get isLoading => _isLoading;
+  bool get isCreatingAuction => _isCreatingAuction;
   String? get error => _error;
+  String? get createAuctionError => _createAuctionError;
 
   List<AuctionItem> getSimilarProducts(AuctionItem currentItem) {
     // Get all products from the same category
@@ -133,24 +134,6 @@ class AuctionProvider with ChangeNotifier {
     updateList(_listedProducts);
     notifyListeners();
   }
-
-  // void _updateAuctionBid(String auctionId, Map<String, dynamic> bidData) {
-  //   void updateList(List<AuctionItem> list) {
-  //     final index = list.indexWhere((item) => item.id.toString() == auctionId);
-  //     if (index != -1) {
-  //       final updatedItem = list[index].copyWith(
-  //         currentBid: bidData['currentBid'],
-  //         bids: bidData['bids'],
-  //       );
-  //       list[index] = updatedItem;
-  //     }
-  //   }
-
-  //   updateList(_liveAuctions);
-  //   updateList(_listedProducts);
-  //   updateList(_upcomingAuctions);
-  //   notifyListeners();
-  // }
 
   void _updateAuctionStatus(String auctionId, Map<String, dynamic> statusData) {
     // Remove from old status list and add to new status list
@@ -299,7 +282,7 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      log('Fetching listed products...');
+      // log('Fetching listed products...');
       if (_isFirstLoad) {
         _listedProducts.clear(); // Clear the list only during the first load
         _isFirstLoad = false;
@@ -312,7 +295,7 @@ class AuctionProvider with ChangeNotifier {
         } else {
           _listedProducts.addAll(auctions); // Append for subsequent pages
         }
-        log('Listed Products Fetched: ${_listedProducts.length}');
+        // log('Listed Products Fetched: ${_listedProducts.length}');
         
         // Increment page only if we got data
         _currentPage++;
@@ -323,7 +306,7 @@ class AuctionProvider with ChangeNotifier {
       }
     } catch (e) {
       _errorListedProducts = e.toString();
-      log('Error fetching listed products: $_errorListedProducts');
+      // log('Error fetching listed products: $_errorListedProducts');
     } finally {
       _isLoadingListedProducts = false;
       notifyListeners();
@@ -379,6 +362,46 @@ class AuctionProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<Map<String, dynamic>> createAuction({
+  required Map<String, dynamic> auctionData,
+  required List<String> imagePaths,
+}) async {
+  try {
+    _isCreatingAuction = true;
+    _createAuctionError = '';
+    notifyListeners();
+
+    // Convert image paths to File objects
+    final List<File> images = imagePaths.map((path) => File(path)).toList();
+
+    // Make sure the product field exists and is a proper object
+    if (!auctionData.containsKey('product') || auctionData['product'] is! Map<String, dynamic>) {
+      throw Exception('Product data must be a non-empty object');
+    }
+
+    // Create auction with the service
+    final response = await _auctionService.createAuction(
+      auctionData: auctionData,
+      images: images,
+      locationId: auctionData['locationId'] ?? 1,
+    );
+
+    if (response['success']) {
+      _createAuctionError = '';
+      return response;
+    } else {
+      _createAuctionError = response['message'] ?? 'Failed to create auction';
+      throw Exception(_createAuctionError);
+    }
+  } catch (e) {
+    _createAuctionError = e.toString();
+    throw Exception(_createAuctionError);
+  } finally {
+    _isCreatingAuction = false;
+    notifyListeners();
+  }
+}
 
   @override
   void dispose() {

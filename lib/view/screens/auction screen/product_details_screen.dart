@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -328,7 +329,7 @@ class ProductDetailsScreen extends StatelessWidget {
                     borderSide: const BorderSide(color: errorColor),
                   ),
                 ),
-                validator: CreateAuctionValidation.validateItemName,
+                validator: CreateAuctionValidation.validateTitle,
               ),
               const SizedBox(height: 14),
               ValueListenableBuilder<String?>(
@@ -1012,9 +1013,7 @@ class ProductDetailsScreen extends StatelessWidget {
 
                         if (isValid) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Center(child: Text('Saved in Drafts'))),
+                            const SnackBar(content: Text('Saved in Drafts')),
                           );
                           // Navigate to the home page after a short delay
                           Future.delayed(const Duration(seconds: 1), () {
@@ -1061,11 +1060,76 @@ class ProductDetailsScreen extends StatelessWidget {
                             isDropdownsValid;
 
                         if (isValid) {
+                          // Create base product data
+                          final Map<String, dynamic> productData = {
+                            'title': itemNameController.text.trim(),
+                            'description': descriptionController.text.trim(),
+                            'categoryId': CategoryData.categoryIds[categoryController.value] ?? 1,
+                            'subCategoryId': CategoryData.subCategoryIds[categoryController.value]?[subCategoryController.value] ?? 1,
+                            'usageStatus': condition.value?.toUpperCase() ?? 'NEW',
+                          };
+
+                          // Add Electronics category custom fields with exact field names
+                          final customFields = <String, dynamic>{
+                            'screenSize': customFieldControllers['Screen Size']?.text.trim(),
+                            'operatingSystem': customFieldControllers['Operating System']?.text.trim(),
+                            'releaseYear': customFieldControllers['Release Year']?.text.trim(),
+                            'regionOfManufacture': customFieldControllers['Region of Manufacture']?.text.trim(),
+                            'ramSize': customFieldControllers['RAM Size']?.text.trim(),
+                            'processor': customFieldControllers['Processor']?.text.trim(),
+                            'brand': customFieldControllers['Brand']?.text.trim(),
+                            'graphicCard': customFieldControllers['Graphic Card']?.text.trim(),
+                            'model': customFieldControllers['Model']?.text.trim(),
+                            'color': customFieldDropdownValues['Color']?.value,
+                          };
+
+                          // Add non-empty custom fields to product data
+                          customFields.forEach((key, value) {
+                            if (value != null && value.toString().isNotEmpty) {
+                              // Convert numeric fields to numbers
+                              if (['screenSize', 'releaseYear', 'ramSize'].contains(key)) {
+                                try {
+                                  productData[key] = num.tryParse(value.toString()) ?? value;
+                                } catch (_) {
+                                  productData[key] = value;
+                                }
+                              } else {
+                                productData[key] = value;
+                              }
+                            }
+                          });
+
+                          // Validate required fields for Electronics category
+                          if (productData['brand']?.toString().isEmpty ?? true) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Brand is required for Electronics category')),
+                            );
+                            return;
+                          }
+                          if (productData['model']?.toString().isEmpty ?? true) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Model is required for Electronics category')),
+                            );
+                            return;
+                          }
+
+                          // Debug log the product structure
+                          debugPrint('Final product data structure:');
+                          debugPrint(json.encode(productData));
+
+                          // Get image paths from media files
+                          final imagePaths = media.value.map((file) => file.path).toList();
+
+                          // Pass the product data and image paths to the next screen
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const AuctionDetailsScreen()));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AuctionDetailsScreen(
+                                productData: {'product': productData},
+                                imagePaths: imagePaths,
+                              ),
+                            ),
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -1075,7 +1139,8 @@ class ProductDetailsScreen extends StatelessWidget {
                         ),
                         backgroundColor: Theme.of(context).primaryColor,
                       ),
-                      child: const Text("Next",
+                      child: const Text(
+                          "Next",
                           style: TextStyle(color: secondaryColor)),
                     ),
                   ],

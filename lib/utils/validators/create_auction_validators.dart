@@ -1,7 +1,7 @@
 import 'dart:io';
 
 class CreateAuctionValidation {
-  static String? validateItemName(String? value) {
+  static String? validateTitle(String? value) {
     return value!.isEmpty ? "Enter item name" : null;
   }
 
@@ -62,6 +62,33 @@ class CreateAuctionValidation {
       }
     }
 
+    return null;
+  }
+
+  // static String? validateTitle(String? value) {
+  //   if (value == null || value.trim().isEmpty) {
+  //     return 'Title is required';
+  //   }
+  //   if (value.length < 3) {
+  //     return 'Title must be at least 3 characters';
+  //   }
+  //   return null;
+  // }
+
+  static String? validateAuctionDescription(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Description is required';
+    }
+    if (value.length < 10) {
+      return 'Description must be at least 10 characters';
+    }
+    return null;
+  }
+
+  static String? validateAuctionCategory(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Category is required';
+    }
     return null;
   }
 

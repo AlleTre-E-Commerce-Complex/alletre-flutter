@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../faqs screen/faqs_screen.dart';
+import '../../../services/category_service.dart';
 
 class PaymentDetailsScreen extends StatelessWidget {
-  const PaymentDetailsScreen({super.key});
+  final Map<String, dynamic> auctionData;
+
+  const PaymentDetailsScreen({
+    super.key,
+    required this.auctionData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -327,11 +333,10 @@ class PaymentDetailsScreen extends StatelessWidget {
                     child: Stack(
                       children: [
                         SvgPicture.asset(
-                          'assets/images/properties_category.svg',
+                          (auctionData['data']?['product']?['coverImage'] as String?) ?? 'assets/images/properties_category.svg',
                           width: 120,
                           height: 100,
-                          fit: BoxFit
-                              .cover, // Ensures image fills the container properly
+                          fit: BoxFit.cover,
                         ),
                         // Pending label positioned on top of the image
                         Positioned(
@@ -362,27 +367,27 @@ class PaymentDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 // Item details
-                const Expanded(
+                Expanded(
                   child: Padding(
                     padding:
-                        EdgeInsets.only(left: 12, right: 8, top: 4, bottom: 4),
+                        const EdgeInsets.only(left: 12, right: 8, top: 4, bottom: 4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 3),
+                        const SizedBox(height: 3),
                         Text(
-                          'iPhone 16 Pro Max Middle East Version',
-                          style: TextStyle(
+                          auctionData['data']?['product']?['title'] ?? 'No Title',
+                          style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: onSecondaryColor),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
-                          'ffdsfdsdsfdsfdsfdsfds\nfdfdfdsfdsfdsfdsfdsfdsfdsfdsfdsfdsfdsfdfdsfdsfdsf\ndfdsfdsfdsfdsfdsfdfdsfdsfdsfdsfds',
-                          style: TextStyle(
+                          auctionData['data']?['product']?['description'] ?? 'No Description',
+                          style: const TextStyle(
                             color: onSecondaryColor,
                             fontWeight: FontWeight.w500,
                             fontSize: 10,
@@ -390,17 +395,32 @@ class PaymentDetailsScreen extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Ending Time',
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Ending Time:',
                           style: TextStyle(
                             color: onSecondaryColor,
                             fontSize: 10,
                           ),
                         ),
                         Text(
-                          '10:00',
-                          style: TextStyle(
+                          () {
+                            debugPrint('Payment Screen - Full auction data: $auctionData');
+                            debugPrint('Payment Screen - End time from data: ${auctionData['data']?['endDate']}');
+                            final endTimeStr = auctionData['data']?['endDate'];
+                            
+                            if (endTimeStr != null) {
+                              try {
+                                final endTime = DateTime.parse(endTimeStr);
+                                debugPrint('Parsed DateTime: $endTime');
+                                return '${endTime.year}-${endTime.month.toString().padLeft(2, '0')}-${endTime.day.toString().padLeft(2, '0')} ${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}';
+                              } catch (e) {
+                                debugPrint('Error parsing end time: $e');
+                              }
+                            }
+                            return 'Not known';
+                          }(),
+                          style: const TextStyle(
                             color: primaryColor,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -437,10 +457,10 @@ class PaymentDetailsScreen extends StatelessWidget {
                   color: textColor, fontSize: 10, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           // Category row
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Category',
                 style: TextStyle(
                   color: onSecondaryColor,
@@ -448,8 +468,16 @@ class PaymentDetailsScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                'Cars',
-                style: TextStyle(
+                () {
+                  final categoryId = auctionData['data']?['product']?['categoryId'] ?? 
+                                   auctionData['product']?['categoryId'];
+                  if (categoryId != null) {
+                    final name = CategoryService.getCategoryName(int.parse(categoryId.toString()));
+                    return name.isNotEmpty ? name : 'Unknown';
+                  }
+                  return 'Unknown';
+                }(),
+                style: const TextStyle(
                   color: primaryColor,
                   fontSize: 12,
                 ),
@@ -458,10 +486,10 @@ class PaymentDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           // Auction starting price
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Auction Starting Price',
                 style: TextStyle(
                   color: onSecondaryColor,
@@ -469,8 +497,8 @@ class PaymentDetailsScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                'AED 342',
-                style: TextStyle(
+                'AED ${(auctionData['data']?['startBidAmount'] ?? auctionData['startBidAmount'] ?? 0).toInt()}',
+                style: const TextStyle(
                   color: primaryColor,
                   fontSize: 12,
                 ),
@@ -512,6 +540,42 @@ class PaymentDetailsScreen extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _calculateAuctionFee(dynamic startBidAmount) {
+    // Convert startBidAmount to integer
+    final int amount = (double.tryParse(startBidAmount.toString()) ?? 0).toInt();
+    
+    // Calculate fee as 2% of starting bid, minimum 10 AED
+    final fee = (amount * 0.02).toInt();
+    return fee < 10 ? 10 : fee;
+  }
+
+  Widget _buildDetailRow(String label, String value, {TextStyle? style}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: style ?? const TextStyle(
+              color: onSecondaryColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: style ?? const TextStyle(
+              color: onSecondaryColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

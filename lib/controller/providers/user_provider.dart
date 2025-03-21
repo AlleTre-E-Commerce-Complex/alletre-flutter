@@ -270,6 +270,14 @@ class UserProvider with ChangeNotifier {
           : firebaseUser.emailVerified;
       _photoUrl = firebaseUser.photoURL;
 
+      // Debug: Print tokens
+      final idToken = await firebaseUser.getIdToken();
+      debugPrint('Firebase ID Token: $idToken');
+      
+      // Get refresh token from secure storage
+      final refreshToken = await _storage.read(key: 'refresh_token');
+      debugPrint('Current refresh token: $refreshToken');
+
       // Save auth method
       final userAuthService = UserAuthService();
       await userAuthService.setAuthMethod(method);
