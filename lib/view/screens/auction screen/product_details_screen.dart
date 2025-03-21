@@ -1070,7 +1070,7 @@ class ProductDetailsScreen extends StatelessWidget {
                             'subCategoryId': CategoryData.getSubCategoryId(
                                 categoryController.value ?? '',
                                 subCategoryController.value ?? '') ?? 1,
-                            'usageStatus': condition.value?.toUpperCase() ?? 'NEW',
+                            'usageStatus': condition.value?.toUpperCase() ?? 'UNKNOWN',
                           };
 
                           // Add Electronics category custom fields with exact field names

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -60,6 +61,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                         fontSize: 14,
                         fontWeight: FontWeight.w600))),
             const SizedBox(height: 10),
+
             // Card Details Form
             Form(
               key: formKey,
@@ -236,51 +238,27 @@ class PaymentDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 22),
 
-            // Previous and Submit Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(50, 33),
-                    maximumSize: const Size(130, 33),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    backgroundColor: Colors.grey[300],
-                  ),
-                  child: const Text(
-                    "Previous",
-                    style: TextStyle(color: Colors.black),
-                  ),
+            // Submit Button
+            ElevatedButton(
+              onPressed: () {
+                isSubmitted.value = true;
+                final isValid = formKey.currentState!.validate();
+                if (isValid) {
+                  Navigator.popUntil(context, (route) => route == myRoute);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(50, 33),
+                maximumSize: const Size(130, 33),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    isSubmitted.value = true;
-                    final isValid = formKey.currentState!.validate();
-                    if (isValid) {
-                      Navigator.popUntil(
-                          context, (route) => route == myRoute);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(50, 33),
-                    maximumSize: const Size(130, 33),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    backgroundColor: Theme.of(context).primaryColor,
-                  ),
-                  child: const Text(
-                    "Pay & Submit",
-                    style: TextStyle(color: secondaryColor),
-                  ),
-                ),
-              ],
+                backgroundColor: Theme.of(context).primaryColor,
+              ),
+              child: const Text(
+                "Pay & Submit",
+                style: TextStyle(color: secondaryColor),
+              ),
             ),
           ],
         ),
@@ -323,7 +301,7 @@ class PaymentDetailsScreen extends StatelessWidget {
               children: [
                 // Image container with "Pending" label
                 Container(
-                  width: 120,
+                  width: 100,
                   height: 100,
                   decoration: BoxDecoration(
                     color: placeholderColor,
@@ -333,11 +311,34 @@ class PaymentDetailsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     child: Stack(
                       children: [
-                        SvgPicture.asset(
-                          (auctionData['data']?['product']?['coverImage'] as String?) ?? 'assets/images/properties_category.svg',
-                          width: 120,
-                          height: 100,
-                          fit: BoxFit.cover,
+                        Builder(
+                          builder: (context) {
+                            final imagePath = auctionData['data']?['product']
+                                ?['images']?[0] as String?;
+                            if (imagePath != null) {
+                              return Image.file(
+                                File(imagePath),
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return SvgPicture.asset(
+                                    'assets/images/properties_category.svg',
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  );
+                                },
+                              );
+                            } else {
+                              return SvgPicture.asset(
+                                'assets/images/properties_category.svg',
+                                width: 110,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              );
+                            }
+                          },
                         ),
                         // Pending label positioned on top of the image
                         Positioned(
@@ -370,14 +371,15 @@ class PaymentDetailsScreen extends StatelessWidget {
                 // Item details
                 Expanded(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.only(left: 12, right: 8, top: 4, bottom: 4),
+                    padding: const EdgeInsets.only(
+                        left: 12, right: 8, top: 4, bottom: 4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 3),
                         Text(
-                          auctionData['data']?['product']?['title'] ?? 'No Title',
+                          auctionData['data']?['product']?['title'] ??
+                              'No Title',
                           style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -387,7 +389,8 @@ class PaymentDetailsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          auctionData['data']?['product']?['description'] ?? 'No Description',
+                          auctionData['data']?['product']?['description'] ??
+                              'No Description',
                           style: const TextStyle(
                             color: onSecondaryColor,
                             fontWeight: FontWeight.w500,
@@ -407,12 +410,20 @@ class PaymentDetailsScreen extends StatelessWidget {
                         Text(
                           () {
                             final endTimeStr = auctionData['data']?['endDate'];
-                            
+
                             if (endTimeStr != null) {
                               try {
                                 final endTime = DateTime.parse(endTimeStr);
                                 debugPrint('Parsed DateTime: $endTime');
-                                return '${endTime.year}-${endTime.month.toString().padLeft(2, '0')}-${endTime.day.toString().padLeft(2, '0')} ${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}';
+
+                                // Format the date as YYYY-MM-DD
+                                final formattedDate =
+                                    DateFormat('yyyy-MM-dd').format(endTime);
+                                // Format the time as HH:MM AM/PM
+                                final formattedTime =
+                                    DateFormat('hh:mm a').format(endTime);
+
+                                return '$formattedDate  |  $formattedTime'; // Added separation after date
                               } catch (e) {
                                 debugPrint('Error parsing end time: $e');
                               }
@@ -468,10 +479,12 @@ class PaymentDetailsScreen extends StatelessWidget {
               ),
               Text(
                 () {
-                  final categoryId = auctionData['data']?['product']?['categoryId'] ?? 
-                                   auctionData['product']?['categoryId'];
+                  final categoryId = auctionData['data']?['product']
+                          ?['categoryId'] ??
+                      auctionData['product']?['categoryId'];
                   if (categoryId != null) {
-                    final name = CategoryService.getCategoryName(int.parse(categoryId.toString()));
+                    final name = CategoryService.getCategoryName(
+                        int.parse(categoryId.toString()));
                     return name.isNotEmpty ? name : 'Unknown';
                   }
                   return 'Unknown';
@@ -526,7 +539,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                       context,
-                    MaterialPageRoute(
+                      MaterialPageRoute(
                           builder: (context) => const FaqScreen()));
                 },
                 child: const Text(
@@ -547,8 +560,9 @@ class PaymentDetailsScreen extends StatelessWidget {
 
   int _calculateAuctionFee(dynamic startBidAmount) {
     // Convert startBidAmount to integer
-    final int amount = (double.tryParse(startBidAmount.toString()) ?? 0).toInt();
-    
+    final int amount =
+        (double.tryParse(startBidAmount.toString()) ?? 0).toInt();
+
     // Calculate fee as 2% of starting bid, minimum 10 AED
     final fee = (amount * 0.02).toInt();
     return fee < 10 ? 10 : fee;
@@ -562,19 +576,21 @@ class PaymentDetailsScreen extends StatelessWidget {
         children: [
           Text(
             label,
-            style: style ?? const TextStyle(
-              color: onSecondaryColor,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
+            style: style ??
+                const TextStyle(
+                  color: onSecondaryColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
           Text(
             value,
-            style: style ?? const TextStyle(
-              color: onSecondaryColor,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+            style: style ??
+                const TextStyle(
+                  color: onSecondaryColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),

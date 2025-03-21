@@ -343,6 +343,10 @@ class ShippingDetailsScreen extends StatelessWidget {
                               ...response['data'],
                               'endTime': endTime.toIso8601String(), // Explicitly set end time
                               ...fullAuctionData,
+                              'product': {
+                                ...fullAuctionData['product'],
+                                'images': imagePaths, // Include the image paths
+                              },
                             }
                           };
                           debugPrint('Shipping Screen - Navigation data: $navigationData');
