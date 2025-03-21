@@ -13,6 +13,18 @@ class CategoryService {
   /// In-memory cache of subcategories indexed by ID
   static final Map<int, SubCategory> _subCategories = {};
 
+  /// Get all categories
+  static List<Category> getAllCategories() {
+    return _categories.values.toList();
+  }
+
+  /// Get subcategories for a specific category
+  static List<SubCategory> getSubCategoriesForCategory(int categoryId) {
+    return _subCategories.values
+        .where((subcat) => subcat.categoryId == categoryId)
+        .toList();
+  }
+
   /// Initialize categories from API response
   /// Called by CategoryApiService after fetching data
   static void initializeCategories(String jsonResponse) {

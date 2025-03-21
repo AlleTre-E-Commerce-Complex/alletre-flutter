@@ -1,69 +1,45 @@
+import 'package:alletre_app/services/category_service.dart';
+
 class CategoryData {
-  // Category name to ID mapping
-  static const Map<String, int> categoryIds = {
-    "Electronic Devices": 1,
-    "Jewellers": 2,
-    "Properties": 3,
-    "Cars": 4,
-    "Furniture": 5,
-    "Antiques": 6,
-  };
+  // Get all category names
+  static List<String> get categories {
+    return CategoryService.getAllCategories()
+        .map((category) => category.nameEn)
+        .toList();
+  }
 
-  // Subcategory name to ID mapping for each category
-  static const Map<String, Map<String, int>> subCategoryIds = {
-    "Electronic Devices": {
-      "Home Appliances": 1,
-      "Computers & tablets": 2,
-      "Cameras & photos": 3,
-      "TVs & Audios": 4,
-      "Smart Phones": 5,
-      "Accessories": 6,
-    },
-    "Jewellers": {
-      "Gold": 1,
-      "Diamond": 2,
-      "Silver": 3,
-    },
-    "Properties": {
-      "House": 1,
-      "Townhouse": 2,
-      "Unit": 3,
-      "Villa": 4,
-      "Land": 5,
-      "Office": 6,
-    },
-    "Furniture": {
-      "Table and chairs": 1,
-      "Cupboards and Beds": 2,
-      "Others": 3,
-    },
-    "Antiques": {
-      "Paintings": 1,
-      "Currency": 2,
-    },
-  };
+  // Get subcategories for a given category
+  static List<String> getSubCategories(String categoryName) {
+    final categoryId = getCategoryId(categoryName);
+    if (categoryId == null) return [];
 
-  static const List<String> categories = [
-    "Jewellers",
-    "Properties",
-    "Cars",
-    "Electronic Devices",
-    "Furniture",
-    "Antiques"
-  ];
+    return CategoryService.getSubCategoriesForCategory(categoryId)
+        .map((subcategory) => subcategory.nameEn)
+        .toList();
+  }
 
-  static const Map<String, List<String>> subCategories = {
-    "Jewellers": ["Gold", "Diamond", "Silver"],
-    "Properties": ["House", "Townhouse", "Unit", "Villa", "Land", "Office"],
-    "Electronic Devices": [
-      "Computers & tablets",
-      "Cameras & photos",
-      "TVs & Audios",
-      "Smart Phones",
-      "Accessories",
-      "Home Appliances"
-    ],
-    "Furniture": ["Table and chairs", "Cupboards and Beds", "Others"],
-    "Antiques": ["Paintings", "Currency"]
-  };
+  // Get category ID from name
+  static int? getCategoryId(String categoryName) {
+    try {
+      return CategoryService.getAllCategories()
+          .firstWhere((cat) => cat.nameEn == categoryName)
+          .id;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Get subcategory ID from category and subcategory names
+  static int? getSubCategoryId(String categoryName, String subCategoryName) {
+    final categoryId = getCategoryId(categoryName);
+    if (categoryId == null) return null;
+
+    try {
+      return CategoryService.getSubCategoriesForCategory(categoryId)
+          .firstWhere((subcat) => subcat.nameEn == subCategoryName)
+          .id;
+    } catch (e) {
+      return null;
+    }
+  }
 }

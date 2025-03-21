@@ -21,11 +21,10 @@ class ListProductsScreen extends StatelessWidget {
     final descriptionController = TextEditingController();
     final condition = ValueNotifier<String?>(null);
     final media = ValueNotifier<List<File>>([]);
-    final coverPhotoIndex =
-        ValueNotifier<int?>(null); // Track selected cover photo
+    final coverPhotoIndex = ValueNotifier<int?>(null); // Track selected cover photo
 
-    const categories = CategoryData.categories;
-    const subCategories = CategoryData.subCategories;
+    // Get categories and subcategories dynamically
+    final categories = CategoryData.categories;
 
     return Scaffold(
       appBar: AppBar(
@@ -141,20 +140,22 @@ class ListProductsScreen extends StatelessWidget {
                           ),
                         ),
                         value: selectedSubCategory,
-                        items: (subCategories[selectedCategory] ?? [])
-                            .map((subcategory) {
-                          return DropdownMenuItem(
-                            value: subcategory,
-                            child: Text(
-                              subcategory,
-                              style: const TextStyle(
-                                color: onSecondaryColor,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                        // ignore: unnecessary_null_comparison
+                        items: selectedCategory != null
+                            ? CategoryData.getSubCategories(selectedCategory).map((subcategory) {
+                                return DropdownMenuItem(
+                                  value: subcategory,
+                                  child: Text(
+                                    subcategory,
+                                    style: const TextStyle(
+                                      color: onSecondaryColor,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                );
+                        }).toList()
+                            : [],
                         onChanged: (value) {
                           subCategoryController.value = value;
                         },

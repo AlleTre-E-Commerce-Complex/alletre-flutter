@@ -7,16 +7,15 @@ import 'package:alletre_app/model/custom_field_model.dart';
 class CustomFieldsService {
   static const String baseUrl = 'https://www.alletre.com/api';
 
-  // Get system fields
+  // Get all system fields
   static Future<CategoryFields> getSystemFields() async {
-    print('🔄 Fetching system fields');
+    print('🔄 Fetching all system fields');
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/categories/system-fields'),
       );
 
       print('📥 Response status code: ${response.statusCode}');
-      print('📦 Response data: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -35,16 +34,42 @@ class CustomFieldsService {
     }
   }
 
-  // Get custom fields by subcategory
-  static Future<CategoryFields> getCustomFieldsBySubcategory(String subcategoryId) async {
-    print('🔄 Fetching custom fields for subcategory: $subcategoryId');
+  // Get custom fields by category ID
+  static Future<CategoryFields> getCustomFieldsByCategory(String categoryId) async {
+    print('🔄 Fetching custom fields for category: $categoryId');
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/categories/custom-fields?subCategoryId=$subcategoryId'),
+        Uri.parse('$baseUrl/categories/custom-fields?categoryId=$categoryId'),
       );
 
       print('📥 Response status code: ${response.statusCode}');
-      print('📦 Response data: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          final fields = CategoryFields.fromJson(data);
+          print('✅ Successfully parsed category custom fields');
+          return fields;
+        }
+      }
+
+      print('❌ Failed to fetch category custom fields');
+      throw Exception('Failed to fetch category custom fields');
+    } catch (e) {
+      print('❌ Error fetching category custom fields: $e');
+      rethrow;
+    }
+  }
+
+  // Get custom fields by subcategory ID
+  static Future<CategoryFields> getCustomFieldsBySubcategory(String subCategoryId) async {
+    print('🔄 Fetching custom fields for subcategory: $subCategoryId');
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/categories/custom-fields?subCategoryId=$subCategoryId'),
+      );
+
+      print('📥 Response status code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -55,10 +80,8 @@ class CustomFieldsService {
           // Process array custom fields
           if (fieldsData['arrayCustomFields'] != null) {
             final arrayFields = fieldsData['arrayCustomFields'] as List<dynamic>;
-            print('DEBUG: Processing ${arrayFields.length} array fields');
             for (var field in arrayFields) {
               final fieldMap = field as Map<String, dynamic>;
-              print('DEBUG: Processing array field: ${fieldMap['key']} (${fieldMap['labelEn']})');
               fields.add({
                 ...fieldMap,
                 'type': 'array',
@@ -70,14 +93,10 @@ class CustomFieldsService {
           // Process regular custom fields
           if (fieldsData['regularCustomFields'] != null) {
             final regularFields = fieldsData['regularCustomFields'] as List<dynamic>;
-            print('DEBUG: Processing ${regularFields.length} regular fields');
             for (var field in regularFields) {
               final fieldMap = field as Map<String, dynamic>;
               String type = fieldMap['type'] ?? 'text';
               final key = fieldMap['key'] as String;
-              
-              print('DEBUG: Processing regular field: $key (${fieldMap['labelEn']})');
-              print('DEBUG: Original type: $type');
               
               // Determine correct type based on field key
               switch (key) {
@@ -85,14 +104,12 @@ class CustomFieldsService {
                 case 'memory':
                 case 'releaseYear':
                   type = 'number';
-                  print('DEBUG: Changed type to number for $key');
                   break;
                 case 'operatingSystem':
                 case 'regionOfManufacture':
                 case 'brandId':
                 case 'model':
                   type = 'text';
-                  print('DEBUG: Kept text type for $key');
                   break;
               }
 
@@ -101,14 +118,11 @@ class CustomFieldsService {
                 'type': type,
                 'isArray': false,
               });
-              print('DEBUG: Added field $key with type $type');
             }
           }
 
-          print('DEBUG: Total fields to process: ${fields.length}');
           final categoryFields = CategoryFields.fromJson({'data': fields});
           print('✅ Successfully created CategoryFields');
-          print('DEBUG: Final fields count: ${categoryFields.fields.length}');
           return categoryFields;
         }
       }
@@ -130,17 +144,16 @@ class CustomFieldsService {
       );
 
       print('📥 Response status code: ${response.statusCode}');
-      print('📦 Response data: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true && data['data'] != null) {
           print('✅ Successfully fetched auction details');
-          return data['data'];
+          return data['data'] as Map<String, dynamic>;
         }
       }
       
-      print('❌ API returned no data or success: false');
+      print('❌ Failed to fetch auction details');
       return null;
     } catch (e) {
       print('❌ Error fetching auction details: $e');
@@ -159,34 +172,20 @@ class CustomFieldsService {
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/listedProducts/$productId/details'),
+        Uri.parse('$baseUrl/products/$productId'),
       );
 
       print('📥 Response status code: ${response.statusCode}');
-      print('📦 Response data: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('DEBUG: Response data type: ${data.runtimeType}');
-        print('DEBUG: Success: ${data['success']}, Has data: ${data['data'] != null}');
-        
         if (data['success'] == true && data['data'] != null) {
-          final responseData = data['data'] as Map<String, dynamic>;
-          print('DEBUG: Response data fields: ${responseData.keys.toList()}');
-          
-          if (responseData['customFields'] != null) {
-            final customFields = responseData['customFields'] as Map<String, dynamic>;
-            print('DEBUG: Custom fields type: ${customFields.runtimeType}');
-            print('DEBUG: Custom fields keys: ${customFields.keys.toList()}');
-            print('DEBUG: Custom fields values: ${customFields.values.toList()}');
-          }
-          
           print('✅ Successfully fetched listed product details');
-          return responseData;
+          return data['data'] as Map<String, dynamic>;
         }
       }
       
-      print('❌ API returned no data or success: false');
+      print('❌ Failed to fetch listed product details');
       return null;
     } catch (e) {
       print('❌ Error fetching listed product details: $e');

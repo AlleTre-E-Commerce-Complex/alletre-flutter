@@ -64,8 +64,8 @@ class GoogleAuthService {
       // Sign in to Firebase with Google credential
 final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
-// Get Firebase ID token (this will have correct audience)
-final firebaseIdToken = await userCredential.user!.getIdToken();
+// // Get Firebase ID token (this will have correct audience)
+// final firebaseIdToken = await userCredential.user!.getIdToken();
 
 
       // Debug: Print Google auth tokens

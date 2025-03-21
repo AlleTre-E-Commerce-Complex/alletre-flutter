@@ -1,6 +1,7 @@
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../faqs screen/faqs_screen.dart';
 import '../../../services/category_service.dart';
@@ -405,8 +406,6 @@ class PaymentDetailsScreen extends StatelessWidget {
                         ),
                         Text(
                           () {
-                            debugPrint('Payment Screen - Full auction data: $auctionData');
-                            debugPrint('Payment Screen - End time from data: ${auctionData['data']?['endDate']}');
                             final endTimeStr = auctionData['data']?['endDate'];
                             
                             if (endTimeStr != null) {
@@ -497,7 +496,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                'AED ${(auctionData['data']?['startBidAmount'] ?? auctionData['startBidAmount'] ?? 0).toInt()}',
+                'AED ${NumberFormat("#,##0").format((auctionData['data']?['startBidAmount'] ?? auctionData['startBidAmount'] ?? 0).toInt())}',
                 style: const TextStyle(
                   color: primaryColor,
                   fontSize: 12,

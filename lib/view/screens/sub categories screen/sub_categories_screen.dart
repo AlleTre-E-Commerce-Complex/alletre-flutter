@@ -10,8 +10,7 @@ class SubCategoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const subCategories = CategoryData.subCategories;
-    final categorySubList = subCategories[categoryName] ?? [];
+    final categorySubList = CategoryData.getSubCategories(categoryName);
 
     return Scaffold(
       appBar: AppBar(

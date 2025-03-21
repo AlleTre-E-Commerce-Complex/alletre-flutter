@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:alletre_app/services/custom_fields_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,7 +10,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/custom_field_model.dart';
 import 'package:alletre_app/model/user_model.dart';
-import 'package:alletre_app/services/custom_fields_service.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -660,8 +660,7 @@ class ItemDetailsScreen extends StatelessWidget {
         if (item.isAuctionProduct) {
           itemDetails = await CustomFieldsService.getAuctionDetails(itemId);
         } else if (item.productId > 0) {
-          itemDetails =
-              await CustomFieldsService.getListedProductDetails(itemId);
+          itemDetails = await CustomFieldsService.getListedProductDetails(itemId);
         } else {
           print('WARNING: Invalid product ID ${item.productId}');
         }

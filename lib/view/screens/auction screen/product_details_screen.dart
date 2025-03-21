@@ -31,8 +31,8 @@ class ProductDetailsScreen extends StatelessWidget {
     final customFieldControllers = <String, TextEditingController>{};
     final customFieldDropdownValues = <String, ValueNotifier<String?>>{};
 
-    const categories = CategoryData.categories;
-    const subCategories = CategoryData.subCategories;
+    // Get categories list
+    final categories = CategoryData.categories;
 
     // Define consistent label text style
     const labelTextStyle = TextStyle(fontSize: 14);
@@ -451,20 +451,22 @@ class ProductDetailsScreen extends StatelessWidget {
                           ),
                         ),
                         value: selectedSubCategory,
-                        items: (subCategories[selectedCategory] ?? [])
-                            .map((subcategory) {
-                          return DropdownMenuItem(
-                            value: subcategory,
-                            child: Text(
-                              subcategory,
-                              style: const TextStyle(
-                                color: onSecondaryColor,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                        // ignore: unnecessary_null_comparison
+                        items: selectedCategory != null
+                            ? CategoryData.getSubCategories(selectedCategory).map((subcategory) {
+                                return DropdownMenuItem(
+                                  value: subcategory,
+                                  child: Text(
+                                    subcategory,
+                                    style: const TextStyle(
+                                      color: onSecondaryColor,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                );
+                              }).toList()
+                            : [],
                         onChanged: (value) {
                           subCategoryController.value = value;
                           // Initialize controllers for this subcategory
@@ -1064,8 +1066,10 @@ class ProductDetailsScreen extends StatelessWidget {
                           final Map<String, dynamic> productData = {
                             'title': itemNameController.text.trim(),
                             'description': descriptionController.text.trim(),
-                            'categoryId': CategoryData.categoryIds[categoryController.value] ?? 1,
-                            'subCategoryId': CategoryData.subCategoryIds[categoryController.value]?[subCategoryController.value] ?? 1,
+                            'categoryId': CategoryData.getCategoryId(categoryController.value ?? '') ?? 1,
+                            'subCategoryId': CategoryData.getSubCategoryId(
+                                categoryController.value ?? '',
+                                subCategoryController.value ?? '') ?? 1,
                             'usageStatus': condition.value?.toUpperCase() ?? 'NEW',
                           };
 
