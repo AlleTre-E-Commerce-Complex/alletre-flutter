@@ -6,6 +6,7 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/create_auction_validators.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/home widgets/categories widgets/categories_data.dart';
 import 'auction_details_screen.dart';
@@ -765,13 +766,13 @@ class ProductDetailsScreen extends StatelessWidget {
                                 GestureDetector(
                                   onTap: () async {
                                     // Open media gallery when image is tapped
-                                    final File? newImage =
-                                        await pickImageFromGallery();
-                                    if (newImage != null) {
+                                    final File? newMedia =
+                                        await pickMediaFromGallery();
+                                    if (newMedia != null) {
                                       final updatedMedia = List<File>.from(
                                           mediaList)
                                         ..[index] =
-                                            newImage; // Replace the tapped image
+                                            newMedia; // Replace the tapped image
                                       media.value = updatedMedia;
                                     }
                                   },
@@ -784,12 +785,7 @@ class ProductDetailsScreen extends StatelessWidget {
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(10),
-                                      child: Image.file(
-                                        reorderedMediaList[index],
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                      ),
+                                      child: _buildMediaWidget(reorderedMediaList[index]),
                                     ),
                                   ),
                                 ),
@@ -876,7 +872,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           } else {
                             // Add image button
                             return GestureDetector(
-                              onTap: () => pickMultipleImages(media),
+                              onTap: () => pickMultipleMedia(media),
                               child: Container(
                                 height: 120,
                                 width: 120,
@@ -1155,5 +1151,37 @@ class ProductDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildMediaWidget(File mediaFile) {
+    if (mediaFile.path.endsWith('.mp4') || mediaFile.path.endsWith('.mov')) {
+      return _buildVideoPlayer(mediaFile);
+    } else {
+      return Image.file(
+        mediaFile,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      );
+    }
+  }
+
+  Widget _buildVideoPlayer(File videoFile) {
+    return FutureBuilder(
+      future: _initializeVideoPlayer(videoFile),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return VideoPlayer(snapshot.data as VideoPlayerController);
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+
+  Future<VideoPlayerController> _initializeVideoPlayer(File videoFile) async {
+    final controller = VideoPlayerController.file(videoFile);
+    await controller.initialize();
+    return controller;
   }
 }

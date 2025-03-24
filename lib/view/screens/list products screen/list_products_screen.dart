@@ -5,6 +5,7 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/create_auction_validators.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import '../../widgets/home widgets/categories widgets/categories_data.dart';
 
 class ListProductsScreen extends StatelessWidget {
@@ -21,7 +22,8 @@ class ListProductsScreen extends StatelessWidget {
     final descriptionController = TextEditingController();
     final condition = ValueNotifier<String?>(null);
     final media = ValueNotifier<List<File>>([]);
-    final coverPhotoIndex = ValueNotifier<int?>(null); // Track selected cover photo
+    final coverPhotoIndex =
+        ValueNotifier<int?>(null); // Track selected cover photo
 
     // Get categories and subcategories dynamically
     final categories = CategoryData.categories;
@@ -142,7 +144,8 @@ class ListProductsScreen extends StatelessWidget {
                         value: selectedSubCategory,
                         // ignore: unnecessary_null_comparison
                         items: selectedCategory != null
-                            ? CategoryData.getSubCategories(selectedCategory).map((subcategory) {
+                            ? CategoryData.getSubCategories(selectedCategory)
+                                .map((subcategory) {
                                 return DropdownMenuItem(
                                   value: subcategory,
                                   child: Text(
@@ -154,7 +157,7 @@ class ListProductsScreen extends StatelessWidget {
                                     ),
                                   ),
                                 );
-                        }).toList()
+                              }).toList()
                             : [],
                         onChanged: (value) {
                           subCategoryController.value = value;
@@ -222,9 +225,9 @@ class ListProductsScreen extends StatelessWidget {
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
-                          crossAxisSpacing: 10, // Increased spacing
+                          crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: 1, // Square aspect ratio
+                          childAspectRatio: 1,
                         ),
                         itemCount: 5,
                         itemBuilder: (context, index) {
@@ -245,31 +248,26 @@ class ListProductsScreen extends StatelessWidget {
                                 GestureDetector(
                                   onTap: () async {
                                     // Open media gallery when image is tapped
-                                    final File? newImage =
-                                        await pickImageFromGallery();
-                                    if (newImage != null) {
+                                    final File? newMedia =
+                                        await pickMediaFromGallery();
+                                    if (newMedia != null) {
                                       final updatedMedia = List<File>.from(
                                           mediaList)
                                         ..[index] =
-                                            newImage; // Replace the tapped image
+                                            newMedia; // Replace the tapped image
                                       media.value = updatedMedia;
                                     }
                                   },
                                   child: Container(
-                                    height: 120, // Explicit height
-                                    width: 120, // Explicit width
+                                    height: 120,
+                                    width: 120,
                                     decoration: BoxDecoration(
                                       border: Border.all(color: greyColor),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(10),
-                                      child: Image.file(
-                                        reorderedMediaList[index],
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                      ),
+                                      child: _buildMediaWidget(reorderedMediaList[index]),
                                     ),
                                   ),
                                 ),
@@ -356,10 +354,10 @@ class ListProductsScreen extends StatelessWidget {
                           } else {
                             // Add image button
                             return GestureDetector(
-                              onTap: () => pickMultipleImages(media),
+                              onTap: () => pickMultipleMedia(media),
                               child: Container(
-                                height: 120, // Match image container height
-                                width: 120, // Match image container width
+                                height: 120,
+                                width: 120,
                                 decoration: BoxDecoration(
                                   border: Border.all(color: greyColor),
                                   borderRadius: BorderRadius.circular(10),
@@ -504,5 +502,37 @@ class ListProductsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildMediaWidget(File mediaFile) {
+    if (mediaFile.path.endsWith('.mp4') || mediaFile.path.endsWith('.mov')) {
+      return _buildVideoPlayer(mediaFile);
+    } else {
+      return Image.file(
+        mediaFile,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      );
+    }
+  }
+
+  Widget _buildVideoPlayer(File videoFile) {
+    return FutureBuilder(
+      future: _initializeVideoPlayer(videoFile),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return VideoPlayer(snapshot.data as VideoPlayerController);
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+
+  Future<VideoPlayerController> _initializeVideoPlayer(File videoFile) async {
+    final controller = VideoPlayerController.file(videoFile);
+    await controller.initialize();
+    return controller;
   }
 }

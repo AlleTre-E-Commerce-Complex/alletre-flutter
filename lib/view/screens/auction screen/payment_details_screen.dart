@@ -239,25 +239,26 @@ class PaymentDetailsScreen extends StatelessWidget {
             const SizedBox(height: 22),
 
             // Submit Button
-            ElevatedButton(
-              onPressed: () {
-                isSubmitted.value = true;
-                final isValid = formKey.currentState!.validate();
-                if (isValid) {
-                  Navigator.popUntil(context, (route) => route == myRoute);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(50, 33),
-                maximumSize: const Size(130, 33),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  isSubmitted.value = true;
+                  final isValid = formKey.currentState!.validate();
+                  if (isValid) {
+                    Navigator.popUntil(context, (route) => route == myRoute);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  backgroundColor: Theme.of(context).primaryColor,
                 ),
-                backgroundColor: Theme.of(context).primaryColor,
-              ),
-              child: const Text(
-                "Pay & Submit",
-                style: TextStyle(color: secondaryColor),
+                child: const Text(
+                  "Pay & Submit",
+                  style: TextStyle(color: secondaryColor, fontSize: 14),
+                ),
               ),
             ),
           ],
@@ -284,13 +285,13 @@ class PaymentDetailsScreen extends StatelessWidget {
                 'Ad Preview',
                 style: TextStyle(
                   color: onSecondaryColor,
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
               color: placeholderColor,
@@ -301,8 +302,8 @@ class PaymentDetailsScreen extends StatelessWidget {
               children: [
                 // Image container with "Pending" label
                 Container(
-                  width: 100,
-                  height: 100,
+                  width: 112,
+                  height: 106,
                   decoration: BoxDecoration(
                     color: placeholderColor,
                     borderRadius: BorderRadius.circular(8),
@@ -318,24 +319,24 @@ class PaymentDetailsScreen extends StatelessWidget {
                             if (imagePath != null) {
                               return Image.file(
                                 File(imagePath),
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
+                                width: 112,
+                                height: 106,
+                                fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) {
                                   return SvgPicture.asset(
                                     'assets/images/properties_category.svg',
-                                    width: 100,
-                                    height: 100,
-                                    fit: BoxFit.cover,
+                                    width: 112,
+                                    height: 106,
+                                    fit: BoxFit.contain,
                                   );
                                 },
                               );
                             } else {
                               return SvgPicture.asset(
                                 'assets/images/properties_category.svg',
-                                width: 110,
-                                height: 100,
-                                fit: BoxFit.cover,
+                                width: 112,
+                                height: 106,
+                                fit: BoxFit.contain,
                               );
                             }
                           },
@@ -354,9 +355,10 @@ class PaymentDetailsScreen extends StatelessWidget {
                                 bottomRight: Radius.circular(6),
                               ),
                             ),
-                            child: const Text(
-                              'Pending',
-                              style: TextStyle(
+                            child: Text(
+                              getDisplayStatus(
+                                  auctionData['data']?['status'] ?? 'Unknown'),
+                              style: const TextStyle(
                                 fontSize: 6.4,
                                 color: secondaryColor,
                                 fontWeight: FontWeight.bold,
@@ -372,7 +374,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(
-                        left: 12, right: 8, top: 4, bottom: 4),
+                        left: 8, right: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -387,7 +389,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 7),
                         Text(
                           auctionData['data']?['product']?['description'] ??
                               'No Description',
@@ -399,12 +401,12 @@ class PaymentDetailsScreen extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 7),
                         const Text(
                           'Ending Time:',
                           style: TextStyle(
                             color: onSecondaryColor,
-                            fontSize: 10,
+                            fontSize: 9,
                           ),
                         ),
                         Text(
@@ -416,9 +418,9 @@ class PaymentDetailsScreen extends StatelessWidget {
                                 final endTime = DateTime.parse(endTimeStr);
                                 debugPrint('Parsed DateTime: $endTime');
 
-                                // Format the date as YYYY-MM-DD
+                                // Format the date as DD-MM-YYYY
                                 final formattedDate =
-                                    DateFormat('yyyy-MM-dd').format(endTime);
+                                    DateFormat('dd-MM-yyyy').format(endTime);
                                 // Format the time as HH:MM AM/PM
                                 final formattedTime =
                                     DateFormat('hh:mm a').format(endTime);
@@ -432,10 +434,28 @@ class PaymentDetailsScreen extends StatelessWidget {
                           }(),
                           style: const TextStyle(
                             color: primaryColor,
-                            fontSize: 10,
+                            fontSize: 8,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        auctionData['data']?['status'] == 'PENDING_OWNER_DEPOIST'
+                          ? Container(
+                            margin: const EdgeInsets.only(top: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: avatarColor,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: const Text(
+                              'PENDING DEPOSIT',
+                              style: TextStyle(
+                                color: secondaryColor,
+                                fontSize: 6.4,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          )
+                          : const Text('UNKNOWN')
                       ],
                     ),
                   ),
@@ -443,29 +463,58 @@ class PaymentDetailsScreen extends StatelessWidget {
               ],
             ),
           ),
+          
           const SizedBox(height: 20),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Security Deposit',
+              const Text('Security Deposit',
                   style: TextStyle(
                       color: onSecondaryColor,
                       fontSize: 12,
                       fontWeight: FontWeight.bold)),
-              Text(
-                'AED 500',
-                style: TextStyle(
-                  color: primaryColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Builder(builder: (context) {
+                final categoryId =
+                    auctionData['data']?['product']?['categoryId'];
+                final depositAmount = categoryId != null
+                    ? CategoryService.getSellerDepositAmount(
+                        int.parse(categoryId.toString()))
+                    : null;
+                return Text(
+                  'AED ${depositAmount ?? 'Unknown'}',
+                  style: const TextStyle(
+                    color: primaryColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              }),
             ],
           ),
           Text('(refunded after auction completion)',
               style: TextStyle(
                   color: textColor, fontSize: 10, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     Text('Auction Fee',
+          //         style: TextStyle(
+          //             color: onSecondaryColor,
+          //             fontSize: 12,
+          //             fontWeight: FontWeight.bold)),
+          //     Text(
+          //       'AED ${_calculateAuctionFee(auctionData['data']?['startBidAmount'] ?? auctionData['startBidAmount'])}',
+          //       style: TextStyle(
+          //         color: primaryColor,
+          //         fontSize: 12,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // const SizedBox(height: 16),
+
           // Category row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -491,12 +540,12 @@ class PaymentDetailsScreen extends StatelessWidget {
                 }(),
                 style: const TextStyle(
                   color: primaryColor,
-                  fontSize: 12,
+                  fontSize: 11,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 24),
           // Auction starting price
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -512,7 +561,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                 'AED ${NumberFormat("#,##0").format((auctionData['data']?['startBidAmount'] ?? auctionData['startBidAmount'] ?? 0).toInt())}',
                 style: const TextStyle(
                   color: primaryColor,
-                  fontSize: 12,
+                  fontSize: 11,
                 ),
               ),
             ],

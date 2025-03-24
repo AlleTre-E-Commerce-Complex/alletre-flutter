@@ -52,7 +52,7 @@ class EditProfileScreen extends StatelessWidget {
                   user: user,
                   buttonText: "Upload Photo",
                   onButtonPressed: () async {
-                    final File? newImage = await pickImageFromGallery();
+                    final File? newImage = await pickMediaFromGallery();
                     if (newImage != null) {
                       await userProvider.updateProfilePhoto(newImage);
                     }
