@@ -22,6 +22,8 @@ String getDisplayStatus(String status) {
       return 'USED';
     case 'NEW':
       return 'NEW';
+    case 'PENDING_OWNER_DEPOIST':
+      return 'PENDING';
     default:
       return 'Unknown';
   }

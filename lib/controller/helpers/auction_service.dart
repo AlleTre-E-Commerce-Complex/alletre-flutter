@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'user_services.dart';
@@ -72,7 +73,7 @@ class AuctionService {
       // Process auction data
       debugPrint('Processing auction data...');
       debugPrint('Received end date: ${auctionData['endDate']}');
-      
+
       // Debug product structure before processing
       if (auctionData['product'] != null) {
         debugPrint('Raw product data:');
@@ -85,12 +86,14 @@ class AuctionService {
         'type': auctionData['type'],
         'durationUnit': auctionData['durationUnit'],
         'duration': int.parse(auctionData['duration'].toString()),
-        'startBidAmount': double.parse(auctionData['startBidAmount'].toString()),
+        'startBidAmount':
+            double.parse(auctionData['startBidAmount'].toString()),
         'startDate': auctionData['startDate'],
-        'endDate': auctionData['endDate'],  // Add end date to request
+        'endDate': auctionData['endDate'], // Add end date to request
         'scheduleBid': auctionData['scheduleBid'] ?? false,
         'buyNowEnabled': auctionData['buyNowEnabled'] ?? false,
-        'buyNowPrice': double.parse(auctionData['buyNowPrice']?.toString() ?? '0'),
+        'buyNowPrice':
+            double.parse(auctionData['buyNowPrice']?.toString() ?? '0'),
         'locationId': locationId,
       };
 
@@ -109,29 +112,35 @@ class AuctionService {
         // Create a clean copy of product data and convert numeric fields
         final cleanProduct = Map<String, dynamic>.from(productData);
         cleanProduct.removeWhere((key, value) => value == null || value == '');
-        
+
         // Convert numeric fields
         if (cleanProduct['categoryId'] != null) {
-          cleanProduct['categoryId'] = int.parse(cleanProduct['categoryId'].toString());
+          cleanProduct['categoryId'] =
+              int.parse(cleanProduct['categoryId'].toString());
         }
         if (cleanProduct['subCategoryId'] != null) {
-          cleanProduct['subCategoryId'] = int.parse(cleanProduct['subCategoryId'].toString());
+          cleanProduct['subCategoryId'] =
+              int.parse(cleanProduct['subCategoryId'].toString());
         }
         if (cleanProduct['quantity'] != null) {
-          cleanProduct['quantity'] = int.parse(cleanProduct['quantity'].toString());
+          cleanProduct['quantity'] =
+              int.parse(cleanProduct['quantity'].toString());
         }
         if (cleanProduct['screenSize'] != null) {
-          cleanProduct['screenSize'] = double.parse(cleanProduct['screenSize'].toString());
+          cleanProduct['screenSize'] =
+              double.parse(cleanProduct['screenSize'].toString());
         }
         if (cleanProduct['releaseYear'] != null) {
-          cleanProduct['releaseYear'] = int.parse(cleanProduct['releaseYear'].toString());
+          cleanProduct['releaseYear'] =
+              int.parse(cleanProduct['releaseYear'].toString());
         }
         if (cleanProduct['ramSize'] != null) {
-          cleanProduct['ramSize'] = int.parse(cleanProduct['ramSize'].toString());
+          cleanProduct['ramSize'] =
+              int.parse(cleanProduct['ramSize'].toString());
         }
 
         // Validate required fields
-        if (!cleanProduct.containsKey('title') || 
+        if (!cleanProduct.containsKey('title') ||
             !cleanProduct.containsKey('description') ||
             !cleanProduct.containsKey('categoryId') ||
             !cleanProduct.containsKey('subCategoryId')) {
@@ -145,13 +154,14 @@ class AuctionService {
 
       // Add all fields as form data
       debugPrint('Adding form fields...');
-      
+
       // Add basic auction fields
       debugPrint('Adding end date to form fields: ${requestBody['endDate']}');
       request.fields['type'] = requestBody['type'];
       request.fields['durationUnit'] = requestBody['durationUnit'];
       request.fields['duration'] = requestBody['duration'].toString();
-      request.fields['startBidAmount'] = requestBody['startBidAmount'].toString();
+      request.fields['startBidAmount'] =
+          requestBody['startBidAmount'].toString();
       request.fields['endDate'] = requestBody['endDate'];
       request.fields['startDate'] = requestBody['startDate'];
       request.fields['scheduleBid'] = requestBody['scheduleBid'].toString();
@@ -173,18 +183,71 @@ class AuctionService {
         });
       }
 
-      // Add images
-      debugPrint('Adding ${images.length} images...');
-      for (var i = 0; i < images.length; i++) {
-        final file = images[i];
+      // Add media files (images and videos)
+      debugPrint('Adding ${images.length} media files...');
+
+      // Separate images and videos
+      final imageFiles = images
+          .where((file) =>
+              file.path.toLowerCase().endsWith('.jpg') ||
+              file.path.toLowerCase().endsWith('.jpeg') ||
+              file.path.toLowerCase().endsWith('.png'))
+          .toList();
+
+      final videoFiles = images
+          .where((file) =>
+              file.path.toLowerCase().endsWith('.mp4') ||
+              file.path.toLowerCase().endsWith('.mov') ||
+              file.path.toLowerCase().endsWith('.avi'))
+          .toList();
+
+      // Validate image count
+      if (imageFiles.length < 3 || imageFiles.length > 5) {
+        throw Exception('Please upload 3 to 5 photos');
+      }
+
+      // Add images first
+      for (var file in imageFiles) {
         final stream = http.ByteStream(file.openRead());
         final length = await file.length();
-        
+        final filename = file.path.split('/').last;
+
+        // Determine MIME type based on file extension
+        final mimeType = filename.toLowerCase().endsWith('.png') 
+            ? 'image/png'
+            : filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg')
+                ? 'image/jpeg'
+                : 'image/jpeg'; // default to jpeg
+
         final multipartFile = http.MultipartFile(
           'images',
           stream,
           length,
-          filename: file.path.split('/').last,
+          filename: filename,
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
+      }
+
+      // Add videos if any
+      for (var file in videoFiles) {
+        final stream = http.ByteStream(file.openRead());
+        final length = await file.length();
+        final filename = file.path.split('/').last;
+
+        // Set video MIME type
+        final mimeType = filename.toLowerCase().endsWith('.mp4')
+            ? 'video/mp4'
+            : filename.toLowerCase().endsWith('.mov')
+                ? 'video/quicktime'
+                : 'video/mp4'; // default to mp4
+
+        final multipartFile = http.MultipartFile(
+          'videos',
+          stream,
+          length,
+          filename: filename,
+          contentType: MediaType.parse(mimeType),
         );
         request.files.add(multipartFile);
       }
@@ -203,7 +266,7 @@ class AuctionService {
       debugPrint('Body: $responseData');
 
       final data = jsonDecode(responseData) as Map<String, dynamic>;
-      
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return data;
       } else {
@@ -248,12 +311,16 @@ class AuctionService {
   Future<List<AuctionItem>> fetchListedProducts(int page) async {
     try {
       final accessToken = await _getAccessToken();
-      final headers = accessToken != null 
-          ? {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'}
+      final headers = accessToken != null
+          ? {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json'
+            }
           : {'Content-Type': 'application/json'};
 
       final response = await http.get(
-        Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?perPage=20&page=$page'),
+        Uri.parse(
+            '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?perPage=20&page=$page'),
         headers: headers,
       );
 
@@ -269,7 +336,8 @@ class AuctionService {
         final totalPages = pagination['totalPages'];
         final totalItems = pagination['totalItems'];
 
-        print('Fetched page: $page, Total pages: $totalPages, Total items: $totalItems');
+        print(
+            'Fetched page: $page, Total pages: $totalPages, Total items: $totalItems');
 
         return auctions.map((json) => AuctionItem.fromJson(json)).toList();
       } else {

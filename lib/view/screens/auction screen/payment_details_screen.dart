@@ -321,13 +321,13 @@ class PaymentDetailsScreen extends StatelessWidget {
                                 File(imagePath),
                                 width: 112,
                                 height: 106,
-                                fit: BoxFit.contain,
+                                fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return SvgPicture.asset(
                                     'assets/images/properties_category.svg',
                                     width: 112,
                                     height: 106,
-                                    fit: BoxFit.contain,
+                                    fit: BoxFit.cover,
                                   );
                                 },
                               );
@@ -336,7 +336,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                                 'assets/images/properties_category.svg',
                                 width: 112,
                                 height: 106,
-                                fit: BoxFit.contain,
+                                fit: BoxFit.cover,
                               );
                             }
                           },
@@ -374,7 +374,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(
-                        left: 8, right: 8),
+                        left: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

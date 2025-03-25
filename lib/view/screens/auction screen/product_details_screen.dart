@@ -1117,6 +1117,17 @@ class ProductDetailsScreen extends StatelessWidget {
                           debugPrint('Final product data structure:');
                           debugPrint(json.encode(productData));
 
+                          // Debug log media files
+                          debugPrint('ProductDetailsScreen - Media files before navigation:');
+                          debugPrint('Total files: ${media.value.length}');
+                          for (var i = 0; i < media.value.length; i++) {
+                            final file = media.value[i];
+                            final isVideo = file.path.toLowerCase().endsWith('.mp4') || file.path.toLowerCase().endsWith('.mov');
+                            debugPrint('  File $i: ${file.path}');
+                            debugPrint('    Type: ${isVideo ? 'Video' : 'Image'}');
+                            debugPrint('    Size: ${(file.lengthSync() / 1024).toStringAsFixed(2)} KB');
+                          }
+
                           // Get image paths from media files
                           final imagePaths = media.value.map((file) => file.path).toList();
 

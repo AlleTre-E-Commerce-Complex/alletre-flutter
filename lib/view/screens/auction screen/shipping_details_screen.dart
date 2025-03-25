@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
@@ -266,6 +267,9 @@ class ShippingDetailsScreen extends StatelessWidget {
                           },
                         };
 
+                        // Debug auction data
+                        debugPrint('Creating auction with data: ${json.encode(fullAuctionData)}');
+
                         // Clean and convert product data
                         var productData = fullAuctionData['product'] as Map<String, dynamic>;
                         
@@ -302,6 +306,23 @@ class ShippingDetailsScreen extends StatelessWidget {
                         // Debug log the final structure
                         debugPrint('Final auction data structure:');
                         debugPrint(fullAuctionData.toString());
+
+                        // Debug log media files
+                        debugPrint('ShippingDetailsScreen - Media files before API call:');
+                        debugPrint('Total files: ${imagePaths.length}');
+                        for (var i = 0; i < imagePaths.length; i++) {
+                          final path = imagePaths[i];
+                          final isVideo = path.toLowerCase().endsWith('.mp4') || path.toLowerCase().endsWith('.mov');
+                          debugPrint('  File $i: $path');
+                          debugPrint('    Type: ${isVideo ? 'Video' : 'Image'}');
+                          final file = File(path);
+                          if (await file.exists()) {
+                            debugPrint('    Size: ${(await file.length() / 1024).toStringAsFixed(2)} KB');
+                            debugPrint('    Exists: Yes');
+                          } else {
+                            debugPrint('    Exists: No');
+                          }
+                        }
 
                         // Create auction with image paths
                         debugPrint('Creating auction with data: $fullAuctionData');

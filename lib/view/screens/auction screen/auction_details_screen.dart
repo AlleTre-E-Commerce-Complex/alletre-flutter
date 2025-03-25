@@ -378,6 +378,16 @@ class AuctionDetailsScreen extends StatelessWidget {
                           return;
                         }
 
+                        // Debug log media files
+                        debugPrint('AuctionDetailsScreen - Media files before navigation:');
+                        debugPrint('Total files: ${imagePaths.length}');
+                        for (var i = 0; i < imagePaths.length; i++) {
+                          final path = imagePaths[i];
+                          final isVideo = path.toLowerCase().endsWith('.mp4') || path.toLowerCase().endsWith('.mov');
+                          debugPrint('  File $i: $path');
+                          debugPrint('    Type: ${isVideo ? 'Video' : 'Image'}');
+                        }
+
                         Navigator.push(
                           context, 
                           MaterialPageRoute(
