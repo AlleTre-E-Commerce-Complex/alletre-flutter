@@ -352,7 +352,7 @@ class AuctionDetailsScreen extends StatelessWidget {
                         final auctionData = {
                           ...productData, // Keep the product data structure intact
                           'startingPrice': double.tryParse(priceController.text)?.toString() ?? '0',
-                          'duration': selectedDuration.value?.split(' ')[0] ?? '1',
+                          'duration': selectedDuration.value ?? '1 DAYS', // Pass full duration string including unit
                           'scheduleBid': scheduleBidSwitch.value,
                           'startDate': startDateController.text,
                           'startTime': startTimeController.text,

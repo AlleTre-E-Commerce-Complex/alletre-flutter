@@ -222,8 +222,9 @@ class ShippingDetailsScreen extends StatelessWidget {
 
                         // Parse duration and unit
                         String durationStr = auctionData['duration'] ?? '1 DAYS';
-                        String durationUnit = durationStr.toUpperCase().contains('HRS') ? 'HOURS' : 'DAYS';
-                        int duration = int.parse(durationStr.split(' ')[0]);
+                        List<String> durationParts = durationStr.split(' ');
+                        int duration = int.parse(durationParts[0]);
+                        String durationUnit = durationParts[1].toUpperCase().contains('HR') ? 'HOURS' : 'DAYS';
                         
                         // Parse prices
                         int startBidAmount = (double.parse(auctionData['startingPrice']?.toString() ?? '0')).toInt();
