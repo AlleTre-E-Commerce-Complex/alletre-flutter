@@ -3,11 +3,71 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../faqs screen/faqs_screen.dart';
 import '../../../services/category_service.dart';
+import '../../../services/payment_service.dart';
+import '../../../controller/providers/user_provider.dart';
+import '../../../controller/helpers/user_services.dart';
 
-class PaymentDetailsScreen extends StatelessWidget {
+// Payment method enum
+enum PaymentMethod { card, wallet }
+
+// Card form widget
+class CardFormWidget extends StatefulWidget {
+  final CardFormEditController controller;
+  final GlobalKey<FormState> formKey;
+
+  const CardFormWidget({
+    super.key,
+    required this.controller,
+    required this.formKey,
+  });
+
+  @override
+  State<CardFormWidget> createState() => _CardFormWidgetState();
+}
+
+class _CardFormWidgetState extends State<CardFormWidget> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void dispose() {
+    widget.controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Form(
+      key: widget.formKey,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: CardFormField(
+              controller: widget.controller,
+              style: CardFormStyle(
+                borderColor: Colors.grey.shade400,
+                textColor: onSecondaryColor,
+                fontSize: 13,
+                placeholderColor: Colors.grey.shade600,
+                borderWidth: 1,
+                borderRadius: 8,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class PaymentDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> auctionData;
 
   const PaymentDetailsScreen({
@@ -16,10 +76,28 @@ class PaymentDetailsScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-    final isSubmitted = ValueNotifier<bool>(false);
+  State<PaymentDetailsScreen> createState() => _PaymentDetailsScreenState();
+}
 
+class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
+  final formKey = GlobalKey<FormState>();
+  final selectedPaymentMethod = ValueNotifier<PaymentMethod>(PaymentMethod.card);
+  late final CardFormEditController cardController;
+
+  @override
+  void initState() {
+    super.initState();
+    cardController = CardFormEditController();
+  }
+
+  @override
+  void dispose() {
+    selectedPaymentMethod.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: const NavbarElementsAppbar(
           appBarTitle: 'Publish Auction', showBackButton: true),
@@ -62,204 +140,192 @@ class PaymentDetailsScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600))),
             const SizedBox(height: 10),
 
-            // Card Details Form
-            Form(
-              key: formKey,
-              child: Column(
-                children: [
-                  Theme(
-                    data: Theme.of(context).copyWith(
-                      inputDecorationTheme: const InputDecorationTheme(
-                        errorStyle: TextStyle(
-                            fontSize: 10, fontWeight: FontWeight.w500),
-                      ),
+            // Payment Method Selection
+            ValueListenableBuilder<PaymentMethod>(
+              valueListenable: selectedPaymentMethod,
+              builder: (context, method, child) {
+                return Column(
+                  children: [
+                    RadioListTile<PaymentMethod>(
+                      title: const Text('Credit/Debit Card'),
+                      value: PaymentMethod.card,
+                      groupValue: method,
+                      onChanged: (value) => selectedPaymentMethod.value = value!,
                     ),
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Card Number',
-                        labelStyle: const TextStyle(
-                            color: onSecondaryColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 13),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade600),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
-                        ),
-                        prefixIcon: const Icon(Icons.credit_card, size: 18),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your card number';
-                        }
-                        return null;
-                      },
+                    RadioListTile<PaymentMethod>(
+                      title: const Text('Wallet'),
+                      value: PaymentMethod.wallet,
+                      groupValue: method,
+                      onChanged: (value) => selectedPaymentMethod.value = value!,
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Theme(
-                          data: Theme.of(context).copyWith(
-                            inputDecorationTheme: const InputDecorationTheme(
-                              errorStyle: TextStyle(
-                                  fontSize: 10, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              labelText: 'Expiry Date',
-                              labelStyle: const TextStyle(
-                                  color: onSecondaryColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 13),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade400),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade600),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade400),
-                              ),
-                              prefixIcon:
-                                  const Icon(Icons.calendar_today, size: 18),
-                            ),
-                            keyboardType: TextInputType.datetime,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter expiry date';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Theme(
-                          data: Theme.of(context).copyWith(
-                            inputDecorationTheme: const InputDecorationTheme(
-                              errorStyle: TextStyle(
-                                  fontSize: 10, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              labelText: 'CVV',
-                              labelStyle: const TextStyle(
-                                  color: onSecondaryColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 13),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade400),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade600),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade400),
-                              ),
-                              prefixIcon: const Icon(Icons.lock, size: 18),
-                            ),
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter CVV';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Theme(
-                    data: Theme.of(context).copyWith(
-                      inputDecorationTheme: const InputDecorationTheme(
-                        errorStyle: TextStyle(
-                            fontSize: 10, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Country',
-                        labelStyle: const TextStyle(
-                          color: onSecondaryColor,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade600),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
-                        ),
-                        prefixIcon: const Icon(Icons.flag, size: 18),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please choose country';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              },
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 10),
+
+            // Card Details Form
+            ValueListenableBuilder<PaymentMethod>(
+              valueListenable: selectedPaymentMethod,
+              builder: (context, method, child) {
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: method == PaymentMethod.card
+                      ? KeyedSubtree(
+                          key: const ValueKey('card_form'),
+                          child: CardFormWidget(
+                            key: const ValueKey('card_form_widget'),
+                            controller: cardController,
+                            formKey: formKey,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
 
             // Submit Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  isSubmitted.value = true;
-                  final isValid = formKey.currentState!.validate();
-                  if (isValid) {
-                    Navigator.popUntil(context, (route) => route == myRoute);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+            ValueListenableBuilder<bool>(
+              valueListenable: PaymentService.isLoadingPayment,
+              builder: (context, isLoading, child) {
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            try {
+                              // Check if user is logged in
+                              final userProvider = Provider.of<UserProvider>(context, listen: false);
+                              if (!userProvider.isLoggedIn) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Please login to continue with the payment'),
+                                    backgroundColor: errorColor,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Get token and validate
+                              final String token;
+                              final userService = UserService();
+                              
+                              // First try to validate tokens
+                              final isValid = await userService.validateTokens();
+                              if (!isValid) {
+                                // Try refreshing tokens
+                                final refreshResult = await userService.refreshTokens();
+                                if (!refreshResult['success']) {
+                                  // ignore: use_build_context_synchronously
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(refreshResult['message'] ?? 'Session expired. Please login again.'),
+                                      backgroundColor: errorColor,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                token = refreshResult['data']['accessToken'];
+                              } else {
+                                final tokenValue = await userService.getAccessToken();
+                                if (tokenValue == null) {
+                                  // ignore: use_build_context_synchronously
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Unable to get access token. Please try logging in again.'),
+                                      backgroundColor: errorColor,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                token = tokenValue;
+                              }
+
+                              final categoryId = widget.auctionData['data']?['product']?['categoryId'];
+                              if (categoryId == null) {
+                                throw Exception('Invalid category ID');
+                              }
+
+                              final depositAmount = CategoryService.getSellerDepositAmount(
+                                int.parse(categoryId.toString())
+                              );
+
+                              final auctionId = widget.auctionData['data']?['id'];
+                              if (auctionId == null) {
+                                throw Exception('Invalid auction ID');
+                              }
+
+                              final amount = double.parse(depositAmount);
+                              
+                              if (selectedPaymentMethod.value == PaymentMethod.wallet) {
+                                await PaymentService.walletPayForAuction(
+                                  auctionId: auctionId,
+                                  amount: amount,
+                                  token: token,
+                                );
+                              } else {
+                                // Get card details
+                                final cardDetails = cardController.details;
+                                
+                                await PaymentService.payForAuction(
+                                  auctionId: auctionId,
+                                  amount: amount,
+                                  paymentType: 'card',
+                                  currency: 'AED',
+                                  token: token,
+                                  cardDetails: cardDetails,
+                                );
+                              }
+
+                              if (!context.mounted) return;
+                              
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Payment successful'),
+                                  backgroundColor: activeColor,
+                                ),
+                              );
+
+                              Navigator.popUntil(context, (route) => route == ModalRoute.of(context));
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString()),
+                                  backgroundColor: errorColor,
+                                ),
+                              );
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      backgroundColor: Theme.of(context).primaryColor,
+                    ),
+                    child: Text(
+                      isLoading ? "Processing..." : "Pay & Submit",
+                      style: const TextStyle(color: secondaryColor, fontSize: 14),
+                    ),
                   ),
-                  backgroundColor: Theme.of(context).primaryColor,
-                ),
-                child: const Text(
-                  "Pay & Submit",
-                  style: TextStyle(color: secondaryColor, fontSize: 14),
-                ),
-              ),
+                );
+              },
+            ),
+
+            // Error display
+            ValueListenableBuilder<String?>(
+              valueListenable: PaymentService.paymentError,
+              builder: (context, error, child) {
+                if (error == null) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    error,
+                    style: const TextStyle(color: errorColor, fontSize: 12),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -314,7 +380,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                       children: [
                         Builder(
                           builder: (context) {
-                            final imagePath = auctionData['data']?['product']
+                            final imagePath = widget.auctionData['data']?['product']
                                 ?['images']?[0] as String?;
                             if (imagePath != null) {
                               return Image.file(
@@ -357,7 +423,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                             ),
                             child: Text(
                               getDisplayStatus(
-                                  auctionData['data']?['status'] ?? 'Unknown'),
+                                  widget.auctionData['data']?['status'] ?? 'Unknown'),
                               style: const TextStyle(
                                 fontSize: 6.4,
                                 color: secondaryColor,
@@ -380,7 +446,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                       children: [
                         const SizedBox(height: 3),
                         Text(
-                          auctionData['data']?['product']?['title'] ??
+                          widget.auctionData['data']?['product']?['title'] ??
                               'No Title',
                           style: const TextStyle(
                               fontSize: 10,
@@ -391,7 +457,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 7),
                         Text(
-                          auctionData['data']?['product']?['description'] ??
+                          widget.auctionData['data']?['product']?['description'] ??
                               'No Description',
                           style: const TextStyle(
                             color: onSecondaryColor,
@@ -411,7 +477,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                         ),
                         Text(
                           () {
-                            final endTimeStr = auctionData['data']?['endDate'];
+                            final endTimeStr = widget.auctionData['data']?['endDate'];
 
                             if (endTimeStr != null) {
                               try {
@@ -438,7 +504,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        auctionData['data']?['status'] == 'PENDING_OWNER_DEPOIST'
+                        widget.auctionData['data']?['status'] == 'PENDING_OWNER_DEPOIST'
                           ? Container(
                             margin: const EdgeInsets.only(top: 6),
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
@@ -475,7 +541,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold)),
               Builder(builder: (context) {
                 final categoryId =
-                    auctionData['data']?['product']?['categoryId'];
+                    widget.auctionData['data']?['product']?['categoryId'];
                 final depositAmount = categoryId != null
                     ? CategoryService.getSellerDepositAmount(
                         int.parse(categoryId.toString()))
@@ -528,9 +594,9 @@ class PaymentDetailsScreen extends StatelessWidget {
               ),
               Text(
                 () {
-                  final categoryId = auctionData['data']?['product']
+                  final categoryId = widget.auctionData['data']?['product']
                           ?['categoryId'] ??
-                      auctionData['product']?['categoryId'];
+                      widget.auctionData['product']?['categoryId'];
                   if (categoryId != null) {
                     final name = CategoryService.getCategoryName(
                         int.parse(categoryId.toString()));
@@ -558,7 +624,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                'AED ${NumberFormat("#,##0").format((auctionData['data']?['startBidAmount'] ?? auctionData['startBidAmount'] ?? 0).toInt())}',
+                'AED ${NumberFormat("#,##0").format((widget.auctionData['data']?['startBidAmount'] ?? widget.auctionData['startBidAmount'] ?? 0).toInt())}',
                 style: const TextStyle(
                   color: primaryColor,
                   fontSize: 11,

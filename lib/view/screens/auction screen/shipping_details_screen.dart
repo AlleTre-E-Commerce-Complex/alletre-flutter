@@ -350,7 +350,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Auction created successfully!'),
+                                content: Center(child: Text('Auction created successfully')),
                               ),
                             );
                           }

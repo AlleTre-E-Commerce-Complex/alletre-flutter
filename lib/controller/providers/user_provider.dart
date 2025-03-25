@@ -64,6 +64,13 @@ class UserProvider with ChangeNotifier {
 
   String? get photoUrl => _photoUrl;
   bool? get emailVerified => _emailVerified;
+  bool get isLoggedIn => FirebaseAuth.instance.currentUser != null;
+
+  // Get the current access token
+  Future<String?> get token async {
+    final tokens = await getTokens();
+    return tokens['access_token'];
+  }
 
   // Update profile photo
   Future<void> updateProfilePhoto(File photo) async {

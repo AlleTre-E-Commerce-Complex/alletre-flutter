@@ -139,8 +139,8 @@ class CategoryService {
 
   /// Get seller deposit amount for a category
   /// Returns null if category not found
-  static String? getSellerDepositAmount(int categoryId) {
+  static String getSellerDepositAmount(int categoryId) {
     final category = _categories[categoryId];
-    return category?.sellerDepositFixedAmount;
+    return category!.sellerDepositFixedAmount;
   }
 }
