@@ -73,7 +73,6 @@ class AddLocationScreen extends StatelessWidget {
                         CSCPickerPlus(
                       layout: Layout.vertical,
                       flagState: CountryFlag.ENABLE,
-                      cityLanguage: CityLanguage.native,
                       onCountryChanged: (country) {
                         locationProvider.updateCountry(country);
                       },

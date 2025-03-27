@@ -8,7 +8,7 @@ class PaymentService {
   static final ValueNotifier<String?> paymentError = ValueNotifier<String?>(null);
 
   // Base URL for API endpoints
-  static const String baseUrl = 'https://www.alletre.com/api';
+  static const String baseUrl = 'http://192.168.0.139:3001/api';
 
   // Seller deposit payment methods
   static Future<Map<String, dynamic>> payForAuction({
@@ -24,8 +24,15 @@ class PaymentService {
 
     try {
       // Step 1: Create payment intent on server
+      debugPrint('⭐️⭐️Creating payment intent with data: ${jsonEncode({
+        'auctionId': auctionId,
+        'amount': amount,
+        'paymentType': paymentType,
+        'currency': currency,
+      })}');
+
       final response = await http.post(
-        Uri.parse('$baseUrl/user/pay'),
+        Uri.parse('$baseUrl/auctions/user/pay'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -38,17 +45,31 @@ class PaymentService {
         }),
       );
 
-      if (response.statusCode != 200) {
+      debugPrint('⭐️⭐️Server response status: ${response.statusCode}');
+      debugPrint('⭐️⭐️Server response body: ${response.body}');
+
+      // Accept both 200 and 201 as success codes
+      if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body);
-        throw Exception(error['message'] ?? 'Payment failed');
+        final errorMessage = error['message'];
+        if (errorMessage is Map) {
+          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? '⭐️⭐️Payment failed');
+        }
+        throw Exception(errorMessage ?? '⭐️⭐️Payment failed');
       }
 
       final data = jsonDecode(response.body);
+      if (!data['success']) {
+        throw Exception(data['message'] ?? '⭐️⭐️Payment failed');
+      }
+
       final clientSecret = data['data']['clientSecret'];
+      debugPrint('⭐️⭐️Got client secret from server: $clientSecret');
 
       // Step 2: If using card payment, confirm with Stripe
       if (paymentType == 'card' && cardDetails != null && cardDetails.complete) {
         try {
+          debugPrint('🌏🌏Confirming payment with Stripe...');
           // Confirm the payment with the card
           await Stripe.instance.confirmPayment(
             paymentIntentClientSecret: clientSecret,
@@ -60,13 +81,16 @@ class PaymentService {
               ),
             ),
           );
+          debugPrint('🌈🌈Stripe payment confirmed successfully');
         } on StripeException catch (e) {
+          debugPrint('💥💥Stripe error: ${e.error.message}');
           throw Exception(e.error.message);
         }
       }
 
       return data['data'];
     } catch (e) {
+      debugPrint('✨Payment error: $e');
       paymentError.value = e.toString();
       rethrow;
     } finally {
@@ -124,6 +148,13 @@ class PaymentService {
 
     try {
       // Step 1: Create payment intent on server
+      debugPrint('Creating payment intent with data: ${jsonEncode({
+        'auctionId': auctionId,
+        'amount': amount,
+        'bidAmount': bidAmount,
+        'currency': currency,
+      })}');
+
       final response = await http.post(
         Uri.parse('$baseUrl/user/bidder/deposit'),
         headers: {
@@ -138,17 +169,31 @@ class PaymentService {
         }),
       );
 
-      if (response.statusCode != 200) {
+      debugPrint('Server response status: ${response.statusCode}');
+      debugPrint('Server response body: ${response.body}');
+
+      // Accept both 200 and 201 as success codes
+      if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body);
-        throw Exception(error['message'] ?? 'Bidder deposit payment failed');
+        final errorMessage = error['message'];
+        if (errorMessage is Map) {
+          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? 'Bidder deposit payment failed');
+        }
+        throw Exception(errorMessage ?? 'Bidder deposit payment failed');
       }
 
       final data = jsonDecode(response.body);
+      if (!data['success']) {
+        throw Exception(data['message'] ?? 'Bidder deposit payment failed');
+      }
+
       final clientSecret = data['data']['clientSecret'];
+      debugPrint('Got client secret from server: $clientSecret');
 
       // Step 2: If using card payment, confirm with Stripe
       if (cardDetails != null && cardDetails.complete) {
         try {
+          debugPrint('Confirming payment with Stripe...');
           // Confirm the payment with the card
           await Stripe.instance.confirmPayment(
             paymentIntentClientSecret: clientSecret,
@@ -160,13 +205,16 @@ class PaymentService {
               ),
             ),
           );
+          debugPrint('Stripe payment confirmed successfully');
         } on StripeException catch (e) {
+          debugPrint('Stripe error: ${e.error.message}');
           throw Exception(e.error.message);
         }
       }
 
       return data['data'];
     } catch (e) {
+      debugPrint('Payment error: $e');
       paymentError.value = e.toString();
       rethrow;
     } finally {
@@ -225,6 +273,12 @@ class PaymentService {
 
     try {
       // Step 1: Create payment intent on server
+      debugPrint('Creating payment intent with data: ${jsonEncode({
+        'auctionId': auctionId,
+        'amount': amount,
+        'currency': currency,
+      })}');
+
       final response = await http.post(
         Uri.parse('$baseUrl/user/auction/purchase'),
         headers: {
@@ -238,17 +292,31 @@ class PaymentService {
         }),
       );
 
-      if (response.statusCode != 200) {
+      debugPrint('Server response status: ${response.statusCode}');
+      debugPrint('Server response body: ${response.body}');
+
+      // Accept both 200 and 201 as success codes
+      if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body);
-        throw Exception(error['message'] ?? 'Auction purchase payment failed');
+        final errorMessage = error['message'];
+        if (errorMessage is Map) {
+          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? 'Auction purchase payment failed');
+        }
+        throw Exception(errorMessage ?? 'Auction purchase payment failed');
       }
 
       final data = jsonDecode(response.body);
+      if (!data['success']) {
+        throw Exception(data['message'] ?? 'Auction purchase payment failed');
+      }
+
       final clientSecret = data['data']['clientSecret'];
+      debugPrint('Got client secret from server: $clientSecret');
 
       // Step 2: If using card payment, confirm with Stripe
       if (cardDetails != null && cardDetails.complete) {
         try {
+          debugPrint('Confirming payment with Stripe...');
           // Confirm the payment with the card
           await Stripe.instance.confirmPayment(
             paymentIntentClientSecret: clientSecret,
@@ -260,13 +328,16 @@ class PaymentService {
               ),
             ),
           );
+          debugPrint('Stripe payment confirmed successfully');
         } on StripeException catch (e) {
+          debugPrint('Stripe error: ${e.error.message}');
           throw Exception(e.error.message);
         }
       }
 
       return data['data'];
     } catch (e) {
+      debugPrint('Payment error: $e');
       paymentError.value = e.toString();
       rethrow;
     } finally {

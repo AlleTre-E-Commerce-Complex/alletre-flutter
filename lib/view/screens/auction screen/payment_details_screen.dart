@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../faqs screen/faqs_screen.dart';
 import '../../../services/category_service.dart';
@@ -83,6 +84,26 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   final formKey = GlobalKey<FormState>();
   final selectedPaymentMethod = ValueNotifier<PaymentMethod>(PaymentMethod.card);
   late final CardFormEditController cardController;
+  final UserService _userService = UserService();
+
+  Future<String?> _getValidToken() async {
+    try {
+      // Get the current access token
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
+      if (token == null) {
+        debugPrint('No access token found, attempting refresh');
+        final refreshResult = await _userService.refreshTokens();
+        if (refreshResult['success']) {
+          return refreshResult['data']['accessToken'];
+        }
+        return null;
+      }
+      return token;
+    } catch (e) {
+      debugPrint('Error getting/refreshing token: $e');
+      return null;
+    }
+  }
 
   @override
   void initState() {
@@ -209,48 +230,32 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                               }
 
                               // Get token and validate
-                              final String token;
-                              final userService = UserService();
-                              
-                              // First try to validate tokens
-                              final isValid = await userService.validateTokens();
-                              if (!isValid) {
-                                // Try refreshing tokens
-                                final refreshResult = await userService.refreshTokens();
-                                if (!refreshResult['success']) {
-                                  // ignore: use_build_context_synchronously
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(refreshResult['message'] ?? 'Session expired. Please login again.'),
-                                      backgroundColor: errorColor,
-                                    ),
-                                  );
-                                  return;
-                                }
-                                token = refreshResult['data']['accessToken'];
-                              } else {
-                                final tokenValue = await userService.getAccessToken();
-                                if (tokenValue == null) {
-                                  // ignore: use_build_context_synchronously
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Unable to get access token. Please try logging in again.'),
-                                      backgroundColor: errorColor,
-                                    ),
-                                  );
-                                  return;
-                                }
-                                token = tokenValue;
+                              final token = await _getValidToken();
+                              if (token == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Unable to get a valid token'),
+                                    backgroundColor: errorColor,
+                                  ),
+                                );
+                                return;
                               }
 
                               final categoryId = widget.auctionData['data']?['product']?['categoryId'];
+                              print('Category ID from auction data: $categoryId (${categoryId.runtimeType})');
                               if (categoryId == null) {
                                 throw Exception('Invalid category ID');
                               }
 
-                              final depositAmount = CategoryService.getSellerDepositAmount(
-                                int.parse(categoryId.toString())
-                              );
+                              final parsedCategoryId = int.parse(categoryId.toString());
+                              print('Parsed category ID: $parsedCategoryId');
+                              
+                              final depositAmount = CategoryService.getSellerDepositAmount(parsedCategoryId);
+                              print('Deposit amount from service: $depositAmount (${depositAmount.runtimeType})');
+                              
+                              if (depositAmount.isEmpty) {
+                                throw Exception('Invalid deposit amount for category');
+                              }
 
                               final auctionId = widget.auctionData['data']?['id'];
                               if (auctionId == null) {
@@ -268,27 +273,113 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                               } else {
                                 // Get card details
                                 final cardDetails = cardController.details;
+                                if (!cardDetails.complete) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Please fill in all card details correctly'),
+                                      backgroundColor: errorColor,
+                                    ),
+                                  );
+                                  return;
+                                }
                                 
-                                await PaymentService.payForAuction(
-                                  auctionId: auctionId,
-                                  amount: amount,
-                                  paymentType: 'card',
-                                  currency: 'AED',
-                                  token: token,
-                                  cardDetails: cardDetails,
-                                );
+                                try {
+                                  await PaymentService.payForAuction(
+                                    auctionId: auctionId,
+                                    amount: amount,
+                                    paymentType: 'card',
+                                    currency: 'AED',
+                                    token: token,
+                                    cardDetails: cardDetails,
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Payment failed: ${e.toString()}'),
+                                      backgroundColor: errorColor,
+                                    ),
+                                  );
+                                  return;
+                                }
                               }
 
                               if (!context.mounted) return;
                               
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Payment successful'),
-                                  backgroundColor: activeColor,
-                                ),
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.credit_card,
+                                            color: Colors.green,
+                                            size: 64,
+                                          ),
+                                          const SizedBox(height: 16),
+                                          const Text(
+                                            'Payment success',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          const Text(
+                                            'Your deposit has been successfully transferred and your\nauction is active now',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(color: Colors.grey),
+                                          ),
+                                          const SizedBox(height: 24),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.pushNamedAndRemoveUntil(
+                                                    context,
+                                                    '/auctions',
+                                                    (route) => false,
+                                                  );
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.white,
+                                                  side: const BorderSide(color: Colors.grey),
+                                                ),
+                                                child: const Text(
+                                                  'View Auctions',
+                                                  style: TextStyle(color: Colors.black),
+                                                ),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.pushNamedAndRemoveUntil(
+                                                    context,
+                                                    '/',
+                                                    (route) => false,
+                                                  );
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: activeColor,
+                                                ),
+                                                child: const Text('Back to home'),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
-
-                              Navigator.popUntil(context, (route) => route == ModalRoute.of(context));
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(

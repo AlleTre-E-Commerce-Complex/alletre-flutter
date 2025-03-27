@@ -12,8 +12,8 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp();
 
-  // Initialize Stripe
-  Stripe.publishableKey = 'pk_live_51PjvreLb7rADQxlhUzKvia1z6Jzy4OOy042AJf91mADZhgMhnV5JWyfymS1AgXfu6fpmld3oOzFz0syvIAPKYor5002jc0jAVB';
+  // Initialize Stripe with test key
+  Stripe.publishableKey = 'pk_test_51PjvreLb7rADQxlhNguFowjeUKGOe8vrgmoKbPboIuSfDF2KiqdevkpElFb6QIO7RVeBST80waLymed3v62w91Eh00YXNr6FRC';
   await Stripe.instance.applySettings();
 
   // Initialize categories and subcategories

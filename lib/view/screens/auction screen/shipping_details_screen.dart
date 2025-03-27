@@ -389,6 +389,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                         }
                       } catch (e) {
                         // Hide loading indicator
+                        // ignore: use_build_context_synchronously
                         Navigator.pop(context);
 
                         // Show error message

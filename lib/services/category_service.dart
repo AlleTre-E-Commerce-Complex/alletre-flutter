@@ -59,7 +59,7 @@ class CategoryService {
       // print('Decoded JSON data: $data');
       
       if (data['success'] == true && data['data'] != null) {
-        var subCategoriesData;
+        dynamic subCategoriesData;
         
         // Handle different API response structures
         if (data['data'] is List) {
