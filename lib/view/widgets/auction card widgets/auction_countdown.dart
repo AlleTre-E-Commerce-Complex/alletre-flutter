@@ -52,14 +52,14 @@ class AuctionCountdown extends StatelessWidget {
 
     String timeValue;
     if (days > 0) {
-      timeValue = '$days days: $hours hrs: $minutes min';
+      timeValue = '$days days: $hours hrs: $minutes mins';
     } else if (hours > 0) {
-      timeValue = '$hours hrs: $minutes min: $seconds sec';
+      timeValue = '$hours hrs: $minutes mins: $seconds sec';
     } else if (minutes > 0) {
-    timeValue = '$minutes min: $seconds sec';
-  } else {
-    timeValue = '$seconds sec';
-  }
+      timeValue = '$minutes mins: $seconds sec';
+    } else {
+      timeValue = '$seconds sec';
+    }
 
     return {'prefix': prefix, 'time': timeValue};
   }
@@ -91,19 +91,22 @@ class AuctionCountdown extends StatelessWidget {
             children: [
               TextSpan(
                 text: '$prefix\n',
-                style: prefixStyle ?? textStyle ?? Theme.of(context).textTheme.labelSmall!.copyWith(
-                      color: primaryVariantColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: prefixStyle ??
+                    textStyle ??
+                    Theme.of(context).textTheme.labelSmall!.copyWith(
+                          color: primaryVariantColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
               ),
               TextSpan(
                 text: timeValue,
-                style: textStyle ?? Theme.of(context).textTheme.labelSmall!.copyWith(
-                      color: primaryVariantColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: textStyle ??
+                    Theme.of(context).textTheme.labelSmall!.copyWith(
+                          color: primaryVariantColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
               ),
             ],
           ),

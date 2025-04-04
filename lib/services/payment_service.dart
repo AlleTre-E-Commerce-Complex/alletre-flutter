@@ -8,7 +8,7 @@ class PaymentService {
   static final ValueNotifier<String?> paymentError = ValueNotifier<String?>(null);
 
   // Base URL for API endpoints
-  static const String baseUrl = 'http://192.168.0.139:3001/api';
+  static const String baseUrl = 'http://192.168.0.158:3001/api';
 
   // Seller deposit payment methods
   static Future<Map<String, dynamic>> payForAuction({

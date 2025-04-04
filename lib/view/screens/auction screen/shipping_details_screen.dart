@@ -373,6 +373,12 @@ class ShippingDetailsScreen extends StatelessWidget {
                           };
                           debugPrint('Shipping Screen - Navigation data: $navigationData');
                           
+                          // Print auction details
+                          print('🔦🔦New Auction Created:');
+                          print('🔦🔦Item Name: ${navigationData['title']}');
+                          print('🔦🔦Status: ${navigationData['status']}');
+                          print('🔦🔦Amount: ${navigationData['startingPrice']}');
+
                           // Navigate to payment details
                           if (context.mounted) {
                             Navigator.push(

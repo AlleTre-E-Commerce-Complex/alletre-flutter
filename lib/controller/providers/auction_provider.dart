@@ -22,8 +22,6 @@ class AuctionProvider with ChangeNotifier {
   bool _isLoadingExpired = false;
   bool _isCreatingAuction = false;
 
-  bool _isFirstLoad = true;
-
   String? _errorLive;
   String? _errorListedProducts;
   String? _errorUpcoming;
@@ -143,6 +141,12 @@ class AuctionProvider with ChangeNotifier {
           orElse: () => AuctionItem.fromJson(statusData), // Create a new item if not found
         );
 
+    // // Parse dates in UTC
+    // DateTime? expiryDate;
+    // if (statusData['expiryDate'] != null) {
+    //   expiryDate = DateTime.parse(statusData['expiryDate']).toUtc();
+    // }
+
     final updatedAuction = auction.copyWith(
       status: statusData['status'],
       expiryDate: statusData['expiryDate'] != null ? DateTime.parse(statusData['expiryDate']) : null,
@@ -153,22 +157,21 @@ class AuctionProvider with ChangeNotifier {
     _listedProducts.removeWhere((item) => item.id.toString() == auctionId);
     _upcomingAuctions.removeWhere((item) => item.id.toString() == auctionId);
     _expiredAuctions.removeWhere((item) => item.id.toString() == auctionId);
-
-    // Add to appropriate list
-    switch (statusData['status']) {
-      case 'live':
-        _liveAuctions.add(updatedAuction);
-        break;
-      case 'listed':
-        _listedProducts.add(updatedAuction);
-        break;
-      case 'upcoming':
-        _upcomingAuctions.add(updatedAuction);
-        break;
-      case 'expired':
-        _expiredAuctions.add(updatedAuction);
-        break;
-    }
+    
+      switch (statusData['status']) {
+        case 'live':
+          _liveAuctions.add(updatedAuction);
+          break;
+        case 'listed':
+          _listedProducts.add(updatedAuction);
+          break;
+        case 'upcoming':
+          _upcomingAuctions.add(updatedAuction);
+          break;
+        case 'expired':
+          _expiredAuctions.add(updatedAuction);
+          break;
+      }
 
     notifyListeners();
   }
@@ -176,17 +179,17 @@ class AuctionProvider with ChangeNotifier {
   void _addNewAuction(Map<String, dynamic> auctionData) {
     final newAuction = AuctionItem.fromJson(auctionData);
     
-    switch (newAuction.status) {
-      case 'live':
-        _liveAuctions.add(newAuction);
-        break;
-      case 'listed':
-        _listedProducts.add(newAuction);
-        break;
-      case 'upcoming':
-        _upcomingAuctions.add(newAuction);
-        break;
-    }
+      switch (newAuction.status) {
+        case 'live':
+          _liveAuctions.add(newAuction);
+          break;
+        case 'listed':
+          _listedProducts.add(newAuction);
+          break;
+        case 'upcoming':
+          _upcomingAuctions.add(newAuction);
+          break;
+      }
     
     notifyListeners();
   }
@@ -210,8 +213,6 @@ class AuctionProvider with ChangeNotifier {
   String? get errorListedProducts => _errorListedProducts;
   String? get errorUpcoming => _errorUpcoming;
   String? get errorExpired => _errorExpired;
-
-  int _currentPage = 1;
 
   String _searchQuery = "";
   String get searchQuery => _searchQuery;
@@ -282,31 +283,20 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // log('Fetching listed products...');
-      if (_isFirstLoad) {
-        _listedProducts.clear(); // Clear the list only during the first load
-        _isFirstLoad = false;
-      }
-      
-      final auctions = await _auctionService.fetchListedProducts(_currentPage);
+      final auctions = await _auctionService.fetchListedProducts();
       if (auctions.isNotEmpty) {
-        if (_currentPage == 1) {
-          _listedProducts = auctions; // Replace list only on first page
-        } else {
-          _listedProducts.addAll(auctions); // Append for subsequent pages
-        }
-        // log('Listed Products Fetched: ${_listedProducts.length}');
-        
-        // Increment page only if we got data
-        _currentPage++;
-      } else {
-        // No more data, reset pagination
-        _currentPage = 1;
-        _isFirstLoad = true;
+        _listedProducts = auctions;
       }
+      _errorListedProducts = null;
     } catch (e) {
-      _errorListedProducts = e.toString();
-      // log('Error fetching listed products: $_errorListedProducts');
+      debugPrint('Error fetching listed products: $e');
+      if (e.toString().contains('Authentication failed')) {
+        // Token refresh failed, user needs to re-login
+        _errorListedProducts = 'Session expired. Please login again.';
+      } else {
+        _errorListedProducts = 'Failed to load products. Please try again.';
+      }
+      // Keep existing data
     } finally {
       _isLoadingListedProducts = false;
       notifyListeners();

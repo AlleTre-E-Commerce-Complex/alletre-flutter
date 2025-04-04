@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -31,7 +32,8 @@ class CardFormWidget extends StatefulWidget {
   State<CardFormWidget> createState() => _CardFormWidgetState();
 }
 
-class _CardFormWidgetState extends State<CardFormWidget> with AutomaticKeepAliveClientMixin {
+class _CardFormWidgetState extends State<CardFormWidget>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -82,14 +84,16 @@ class PaymentDetailsScreen extends StatefulWidget {
 
 class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   final formKey = GlobalKey<FormState>();
-  final selectedPaymentMethod = ValueNotifier<PaymentMethod>(PaymentMethod.card);
+  final selectedPaymentMethod =
+      ValueNotifier<PaymentMethod>(PaymentMethod.card);
   late final CardFormEditController cardController;
   final UserService _userService = UserService();
 
   Future<String?> _getValidToken() async {
     try {
       // Get the current access token
-      final token = await const FlutterSecureStorage().read(key: 'access_token');
+      final token =
+          await const FlutterSecureStorage().read(key: 'access_token');
       if (token == null) {
         debugPrint('No access token found, attempting refresh');
         final refreshResult = await _userService.refreshTokens();
@@ -171,13 +175,15 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                       title: const Text('Credit/Debit Card'),
                       value: PaymentMethod.card,
                       groupValue: method,
-                      onChanged: (value) => selectedPaymentMethod.value = value!,
+                      onChanged: (value) =>
+                          selectedPaymentMethod.value = value!,
                     ),
                     RadioListTile<PaymentMethod>(
                       title: const Text('Wallet'),
                       value: PaymentMethod.wallet,
                       groupValue: method,
-                      onChanged: (value) => selectedPaymentMethod.value = value!,
+                      onChanged: (value) =>
+                          selectedPaymentMethod.value = value!,
                     ),
                   ],
                 );
@@ -218,11 +224,14 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                         : () async {
                             try {
                               // Check if user is logged in
-                              final userProvider = Provider.of<UserProvider>(context, listen: false);
+                              final userProvider = Provider.of<UserProvider>(
+                                  context,
+                                  listen: false);
                               if (!userProvider.isLoggedIn) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Please login to continue with the payment'),
+                                    content: Text(
+                                        'Please login to continue with the payment'),
                                     backgroundColor: errorColor,
                                   ),
                                 );
@@ -234,37 +243,47 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                               if (token == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Unable to get a valid token'),
+                                    content:
+                                        Text('Unable to get a valid token'),
                                     backgroundColor: errorColor,
                                   ),
                                 );
                                 return;
                               }
 
-                              final categoryId = widget.auctionData['data']?['product']?['categoryId'];
-                              print('Category ID from auction data: $categoryId (${categoryId.runtimeType})');
+                              final categoryId = widget.auctionData['data']
+                                  ?['product']?['categoryId'];
+                              print(
+                                  'Category ID from auction data: $categoryId (${categoryId.runtimeType})');
                               if (categoryId == null) {
                                 throw Exception('Invalid category ID');
                               }
 
-                              final parsedCategoryId = int.parse(categoryId.toString());
+                              final parsedCategoryId =
+                                  int.parse(categoryId.toString());
                               print('Parsed category ID: $parsedCategoryId');
-                              
-                              final depositAmount = CategoryService.getSellerDepositAmount(parsedCategoryId);
-                              print('Deposit amount from service: $depositAmount (${depositAmount.runtimeType})');
-                              
+
+                              final depositAmount =
+                                  CategoryService.getSellerDepositAmount(
+                                      parsedCategoryId);
+                              print(
+                                  'Deposit amount from service: $depositAmount (${depositAmount.runtimeType})');
+
                               if (depositAmount.isEmpty) {
-                                throw Exception('Invalid deposit amount for category');
+                                throw Exception(
+                                    'Invalid deposit amount for category');
                               }
 
-                              final auctionId = widget.auctionData['data']?['id'];
+                              final auctionId =
+                                  widget.auctionData['data']?['id'];
                               if (auctionId == null) {
                                 throw Exception('Invalid auction ID');
                               }
 
                               final amount = double.parse(depositAmount);
-                              
-                              if (selectedPaymentMethod.value == PaymentMethod.wallet) {
+
+                              if (selectedPaymentMethod.value ==
+                                  PaymentMethod.wallet) {
                                 await PaymentService.walletPayForAuction(
                                   auctionId: auctionId,
                                   amount: amount,
@@ -276,13 +295,14 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                 if (!cardDetails.complete) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Please fill in all card details correctly'),
+                                      content: Text(
+                                          'Please fill in all card details correctly'),
                                       backgroundColor: errorColor,
                                     ),
                                   );
                                   return;
                                 }
-                                
+
                                 try {
                                   await PaymentService.payForAuction(
                                     auctionId: auctionId,
@@ -296,7 +316,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Payment failed: ${e.toString()}'),
+                                      content: Text(
+                                          'Payment failed: ${e.toString()}'),
                                       backgroundColor: errorColor,
                                     ),
                                   );
@@ -305,7 +326,13 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                               }
 
                               if (!context.mounted) return;
-                              
+
+                              // Log successful payment details
+                              print('🎉🎉 Payment Successful!');
+                              print('🎉🎉 Item Name: ${widget.auctionData['data']?['product']?['title'] ?? 'No Title'}');
+                              print('🎉🎉 Status: ${widget.auctionData['data']?['status'] ?? 'Unknown'}');
+                              print('🎉🎉 Amount Paid: AED ${NumberFormat("#,##0").format(amount)}');
+
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
@@ -321,7 +348,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                         children: [
                                           const Icon(
                                             Icons.credit_card,
-                                            color: Colors.green,
+                                            color: primaryColor,
                                             size: 64,
                                           ),
                                           const SizedBox(height: 16),
@@ -330,47 +357,65 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                             style: TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
+                                              color: onSecondaryColor,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           const Text(
-                                            'Your deposit has been successfully transferred and your\nauction is active now',
+                                            'Your deposit has been successfully transferred and your auction is active now',
                                             textAlign: TextAlign.center,
-                                            style: TextStyle(color: Colors.grey),
+                                            style: TextStyle(color: greyColor),
                                           ),
                                           const SizedBox(height: 24),
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
                                             children: [
                                               ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.pushNamedAndRemoveUntil(
-                                                    context,
-                                                    '/auctions',
-                                                    (route) => false,
-                                                  );
-                                                },
+                                                onPressed: () {},
                                                 style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.white,
-                                                  side: const BorderSide(color: Colors.grey),
+                                                  backgroundColor: primaryColor,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 16),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            6),
+                                                  ),
                                                 ),
                                                 child: const Text(
-                                                  'View Auctions',
-                                                  style: TextStyle(color: Colors.black),
-                                                ),
+                                                    'View Auctions',
+                                                    style: TextStyle(
+                                                        color: secondaryColor)),
                                               ),
                                               ElevatedButton(
                                                 onPressed: () {
-                                                  Navigator.pushNamedAndRemoveUntil(
+                                                  Navigator.pushAndRemoveUntil(
                                                     context,
-                                                    '/',
-                                                    (route) => false,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const MainStack(),
+                                                    ),
+                                                    (Route<dynamic> route) =>
+                                                        false,
                                                   );
                                                 },
                                                 style: ElevatedButton.styleFrom(
-                                                  backgroundColor: activeColor,
+                                                  backgroundColor: primaryColor,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 16),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            6),
+                                                  ),
                                                 ),
-                                                child: const Text('Back to home'),
+                                                child: const Text(
+                                                    'Back to Home',
+                                                    style: TextStyle(
+                                                        color: secondaryColor)),
                                               ),
                                             ],
                                           ),
@@ -397,7 +442,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                     ),
                     child: Text(
                       isLoading ? "Processing..." : "Pay & Submit",
-                      style: const TextStyle(color: secondaryColor, fontSize: 14),
+                      style:
+                          const TextStyle(color: secondaryColor, fontSize: 14),
                     ),
                   ),
                 );
@@ -471,8 +517,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                       children: [
                         Builder(
                           builder: (context) {
-                            final imagePath = widget.auctionData['data']?['product']
-                                ?['images']?[0] as String?;
+                            final imagePath = widget.auctionData['data']
+                                ?['product']?['images']?[0] as String?;
                             if (imagePath != null) {
                               return Image.file(
                                 File(imagePath),
@@ -513,8 +559,9 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                               ),
                             ),
                             child: Text(
-                              getDisplayStatus(
-                                  widget.auctionData['data']?['status'] ?? 'Unknown'),
+                              getDisplayStatus(widget.auctionData['data']
+                                      ?['status'] ??
+                                  'Unknown'),
                               style: const TextStyle(
                                 fontSize: 6.4,
                                 color: secondaryColor,
@@ -530,8 +577,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                 // Item details
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(
-                        left: 10),
+                    padding: const EdgeInsets.only(left: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -548,7 +594,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                         ),
                         const SizedBox(height: 7),
                         Text(
-                          widget.auctionData['data']?['product']?['description'] ??
+                          widget.auctionData['data']?['product']
+                                  ?['description'] ??
                               'No Description',
                           style: const TextStyle(
                             color: onSecondaryColor,
@@ -568,7 +615,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                         ),
                         Text(
                           () {
-                            final endTimeStr = widget.auctionData['data']?['endDate'];
+                            final endTimeStr =
+                                widget.auctionData['data']?['endDate'];
 
                             if (endTimeStr != null) {
                               try {
@@ -595,24 +643,26 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        widget.auctionData['data']?['status'] == 'PENDING_OWNER_DEPOIST'
-                          ? Container(
-                            margin: const EdgeInsets.only(top: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: avatarColor,
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                            child: const Text(
-                              'PENDING DEPOSIT',
-                              style: TextStyle(
-                                color: secondaryColor,
-                                fontSize: 6.4,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          )
-                          : const Text('UNKNOWN')
+                        widget.auctionData['data']?['status'] ==
+                                'PENDING_OWNER_DEPOIST'
+                            ? Container(
+                                margin: const EdgeInsets.only(top: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: avatarColor,
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                                child: const Text(
+                                  'PENDING DEPOSIT',
+                                  style: TextStyle(
+                                    color: secondaryColor,
+                                    fontSize: 6.4,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              )
+                            : const Text('UNKNOWN')
                       ],
                     ),
                   ),
@@ -620,7 +670,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

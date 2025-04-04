@@ -188,7 +188,7 @@ class AuctionDetailsScreen extends StatelessWidget {
                                                           (index) =>
                                                               "${index + 1} hrs")
                                                       : List.generate(
-                                                          7,
+                                                          3,
                                                           (index) =>
                                                               "${index + 1} days"))
                                                   .map((duration) =>

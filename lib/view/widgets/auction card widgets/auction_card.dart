@@ -193,7 +193,8 @@ class AuctionCard extends StatelessWidget {
                             (title == 'Similar Products' && auction.isAuctionProduct)) 
                           AuctionCountdown(
                             startDate: auction.startDate,
-                            endDate: auction.expiryDate,
+                            endDate: auction.endDate ?? auction.expiryDate,
+                            customPrefix: auction.status == 'ACTIVE' ? 'Ending in:' : 'Starting in:',
                           ),
                         if (!auction.isAuctionProduct || (title == "Similar Products" && !auction.isAuctionProduct)) ...[
                           Text(

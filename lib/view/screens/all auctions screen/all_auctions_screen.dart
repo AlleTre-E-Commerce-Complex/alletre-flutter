@@ -1,9 +1,9 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_card.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';

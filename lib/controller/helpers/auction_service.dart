@@ -84,12 +84,18 @@ class AuctionService {
       // Prepare the request body as a single JSON object
       final Map<String, dynamic> requestBody = {
         'type': auctionData['type'],
-        'durationUnit': auctionData['durationUnit'],
-        'duration': int.parse(auctionData['duration'].toString()),
+        'durationUnit': auctionData['durationUnit'].toString().toUpperCase(),
+        // Set duration field based on durationUnit
+        'durationInDays': auctionData['durationUnit'].toString().toUpperCase() == 'DAYS' 
+            ? int.parse(auctionData['duration'].toString())
+            : null,
+        'durationInHours': auctionData['durationUnit'].toString().toUpperCase() == 'HOURS' 
+            ? int.parse(auctionData['duration'].toString())
+            : null,
         'startBidAmount':
             double.parse(auctionData['startBidAmount'].toString()),
         'startDate': auctionData['startDate'],
-        'endDate': auctionData['endDate'], // Add end date to request
+        'endDate': auctionData['endDate'],
         'scheduleBid': auctionData['scheduleBid'] ?? false,
         'buyNowEnabled': auctionData['buyNowEnabled'] ?? false,
         'buyNowPrice':
@@ -159,11 +165,29 @@ class AuctionService {
       debugPrint('Adding end date to form fields: ${requestBody['endDate']}');
       request.fields['type'] = requestBody['type'];
       request.fields['durationUnit'] = requestBody['durationUnit'];
-      request.fields['duration'] = requestBody['duration'].toString();
-      request.fields['startBidAmount'] =
-          requestBody['startBidAmount'].toString();
-      request.fields['endDate'] = requestBody['endDate'];
-      request.fields['startDate'] = requestBody['startDate'];
+      
+      // Add appropriate duration field based on duration unit
+      if (requestBody['durationInDays'] != null) {
+        request.fields['durationInDays'] = requestBody['durationInDays'].toString();
+      }
+      if (requestBody['durationInHours'] != null) {
+        request.fields['durationInHours'] = requestBody['durationInHours'].toString();
+      }
+      request.fields['startBidAmount'] = requestBody['startBidAmount'].toString();
+      
+      // Calculate and set end date based on duration
+      final startDate = DateTime.now();
+      final durationUnit = requestBody['durationUnit'] as String;
+      final duration = requestBody['durationInDays'] != null
+          ? int.parse(requestBody['durationInDays'].toString())
+          : int.parse(requestBody['durationInHours'].toString());
+      
+      final endDate = durationUnit == 'HOURS'
+          ? startDate.add(Duration(hours: duration))
+          : startDate.add(Duration(days: duration));
+          
+      request.fields['startDate'] = startDate.toIso8601String();
+      request.fields['endDate'] = endDate.toIso8601String();
       request.fields['scheduleBid'] = requestBody['scheduleBid'].toString();
       request.fields['buyNowEnabled'] = requestBody['buyNowEnabled'].toString();
       request.fields['buyNowPrice'] = requestBody['buyNowPrice'].toString();
@@ -284,23 +308,61 @@ class AuctionService {
   // Implement other auction methods
   Future<List<AuctionItem>> fetchLiveAuctions() async {
     try {
-      final accessToken = await _getAccessToken();
-      if (accessToken == null) throw Exception('No valid access token');
+      // First try to get the token
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      // Add authorization header if we have a token
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
 
       final response = await http.get(
         Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Accept': 'application/json',
-        },
+        headers: headers,
       );
+
+      debugPrint('Live Auctions Response Code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return (data['data'] as List)
-            .map((item) => AuctionItem.fromJson(item))
-            .toList();
+        if (data['success'] == true && data['data'] is List) {
+          final items = (data['data'] as List)
+              .map((item) => AuctionItem.fromJson(item))
+              .toList();
+          debugPrint('Successfully parsed ${items.length} live auctions');
+          return items;
+        }
+      } else if (response.statusCode == 401 && accessToken != null) {
+        // Only try token refresh if we had a token and got 401
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          final retryResponse = await http.get(
+            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main'),
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+          );
+          
+          if (retryResponse.statusCode == 200) {
+            final data = jsonDecode(retryResponse.body);
+            if (data['success'] == true && data['data'] is List) {
+              return (data['data'] as List)
+                  .map((item) => AuctionItem.fromJson(item))
+                  .toList();
+            }
+          }
+        }
       }
+      
+      debugPrint('Live auctions returned non-200 status: ${response.statusCode}');
       return [];
     } catch (e) {
       debugPrint('Error fetching live auctions: $e');
@@ -308,67 +370,133 @@ class AuctionService {
     }
   }
 
-  Future<List<AuctionItem>> fetchListedProducts(int page) async {
+  Future<List<AuctionItem>> fetchListedProducts() async {
     try {
-      final accessToken = await _getAccessToken();
-      final headers = accessToken != null
-          ? {
-              'Authorization': 'Bearer $accessToken',
-              'Content-Type': 'application/json'
-            }
-          : {'Content-Type': 'application/json'};
+      // First try to get the token
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
 
+      // Add authorization header if we have a token
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
+
+      // Make the API call
       final response = await http.get(
-        Uri.parse(
-            '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?perPage=20&page=$page'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products'),
         headers: headers,
       );
 
-      print('Listed Products Response Code: ${response.statusCode}');
-      print('Listed Products Response Body: ${response.body}');
+      debugPrint('Listed Products Response Code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        final List<dynamic> auctions = jsonResponse['data'];
-        final pagination = jsonResponse['pagination'];
-
-        // Check pagination details
-        final totalPages = pagination['totalPages'];
-        final totalItems = pagination['totalItems'];
-
-        print(
-            'Fetched page: $page, Total pages: $totalPages, Total items: $totalItems');
-
-        return auctions.map((json) => AuctionItem.fromJson(json)).toList();
-      } else {
-        print('Failed to load listed products: ${response.statusCode}');
-        return [];
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] is List) {
+          final items = (data['data'] as List)
+              .map((item) => AuctionItem.fromJson(item))
+              .toList();
+          debugPrint('Successfully parsed ${items.length} listed products');
+          return items;
+        } else {
+          debugPrint('Invalid response format: ${response.body}');
+          return [];
+        }
+      } else if (response.statusCode == 401 && accessToken != null) {
+        // Only try token refresh if we had a token and got 401
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          final retryResponse = await http.get(
+            Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products'),
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+          );
+          
+          if (retryResponse.statusCode == 200) {
+            final data = jsonDecode(retryResponse.body);
+            if (data['success'] == true && data['data'] is List) {
+              return (data['data'] as List)
+                  .map((item) => AuctionItem.fromJson(item))
+                  .toList();
+            }
+          }
+          throw Exception('Authentication failed after token refresh');
+        }
       }
+      
+      debugPrint('Listed products returned non-200 status: ${response.statusCode}');
+      return [];
     } catch (e) {
-      print('Error fetching listed products: $e');
+      debugPrint('Error fetching listed products: $e');
+      // Return empty list instead of rethrowing to maintain consistency with other sections
       return [];
     }
   }
 
   Future<List<AuctionItem>> fetchUpcomingAuctions() async {
     try {
-      final accessToken = await _getAccessToken();
-      if (accessToken == null) throw Exception('No valid access token');
+      // First try to get the token
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      // Add authorization header if we have a token
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
 
       final response = await http.get(
         Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Accept': 'application/json',
-        },
+        headers: headers,
       );
+
+      debugPrint('Upcoming Auctions Response Code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return (data['data'] as List)
-            .map((item) => AuctionItem.fromJson(item))
-            .toList();
+        if (data['success'] == true && data['data'] is List) {
+          final items = (data['data'] as List)
+              .map((item) => AuctionItem.fromJson(item))
+              .toList();
+          debugPrint('Successfully parsed ${items.length} upcoming auctions');
+          return items;
+        }
+      } else if (response.statusCode == 401 && accessToken != null) {
+        // Only try token refresh if we had a token and got 401
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          final retryResponse = await http.get(
+            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming'),
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+          );
+          
+          if (retryResponse.statusCode == 200) {
+            final data = jsonDecode(retryResponse.body);
+            if (data['success'] == true && data['data'] is List) {
+              return (data['data'] as List)
+                  .map((item) => AuctionItem.fromJson(item))
+                  .toList();
+            }
+          }
+        }
       }
+      
+      debugPrint('Upcoming auctions returned non-200 status: ${response.statusCode}');
       return [];
     } catch (e) {
       debugPrint('Error fetching upcoming auctions: $e');
@@ -378,23 +506,61 @@ class AuctionService {
 
   Future<List<AuctionItem>> fetchExpiredAuctions() async {
     try {
-      final accessToken = await _getAccessToken();
-      if (accessToken == null) throw Exception('No valid access token');
+      // First try to get the token
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      // Add authorization header if we have a token
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
 
       final response = await http.get(
         Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Accept': 'application/json',
-        },
+        headers: headers,
       );
+
+      debugPrint('Expired Auctions Response Code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return (data['data'] as List)
-            .map((item) => AuctionItem.fromJson(item))
-            .toList();
+        if (data['success'] == true && data['data'] is List) {
+          final items = (data['data'] as List)
+              .map((item) => AuctionItem.fromJson(item))
+              .toList();
+          debugPrint('Successfully parsed ${items.length} expired auctions');
+          return items;
+        }
+      } else if (response.statusCode == 401 && accessToken != null) {
+        // Only try token refresh if we had a token and got 401
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          final retryResponse = await http.get(
+            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions'),
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+          );
+          
+          if (retryResponse.statusCode == 200) {
+            final data = jsonDecode(retryResponse.body);
+            if (data['success'] == true && data['data'] is List) {
+              return (data['data'] as List)
+                  .map((item) => AuctionItem.fromJson(item))
+                  .toList();
+            }
+          }
+        }
       }
+      
+      debugPrint('Expired auctions returned non-200 status: ${response.statusCode}');
       return [];
     } catch (e) {
       debugPrint('Error fetching expired auctions: $e');

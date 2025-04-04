@@ -33,7 +33,7 @@ Future<void> pickMultipleMedia(ValueNotifier<List<File>> media) async {
             ),
             ListTile(
               leading: const Icon(Icons.video_library),
-              title: const Text('Video'),
+              title: const Text('Videos'),
               onTap: () => Navigator.pop(context, 'video'),
             ),
           ],

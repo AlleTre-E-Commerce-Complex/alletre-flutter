@@ -7,7 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class UserService {
-  final String baseUrl = 'http://192.168.0.139:3001/api/auth';
+  final String baseUrl = 'http://192.168.0.158:3001/api/auth';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
