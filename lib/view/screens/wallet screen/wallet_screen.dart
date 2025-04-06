@@ -1,3 +1,4 @@
+import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/services/api_service.dart';
 import 'package:intl/intl.dart';
@@ -61,7 +62,7 @@ class WalletScreen extends StatelessWidget {
   void _handleSessionExpired(BuildContext context) {
     // Clear stored tokens
     const FlutterSecureStorage().delete(key: 'access_token');
-    
+
     // Show error message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -69,19 +70,17 @@ class WalletScreen extends StatelessWidget {
         backgroundColor: errorColor,
       ),
     );
-    
+
     // Navigate to login screen using TabIndexProvider
-    context.read<TabIndexProvider>().updateIndex(18); // 18 is login page index
+    context.read<TabIndexProvider>().updateIndex(18); // login page index
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Wallet'),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+      appBar: const NavbarElementsAppbar(
+        appBarTitle: 'My Wallet',
+        showBackButton: true,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchWalletData(),
@@ -111,7 +110,9 @@ class WalletScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => context.read<TabIndexProvider>().updateIndex(0), // 0 is wallet page index
+                    onPressed: () => context
+                        .read<TabIndexProvider>()
+                        .updateIndex(0), // 0 is wallet page index
                     child: const Text('Retry'),
                   ),
                 ],
@@ -126,7 +127,9 @@ class WalletScreen extends StatelessWidget {
           return RefreshIndicator(
             onRefresh: () async {
               // Force a rebuild with new data
-              context.read<TabIndexProvider>().updateIndex(0); // 0 is wallet page index
+              context
+                  .read<TabIndexProvider>()
+                  .updateIndex(0); // 0 is wallet page index
             },
             child: CustomScrollView(
               slivers: [
@@ -147,7 +150,8 @@ class WalletScreen extends StatelessWidget {
                 ),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildTransactionItem(context, transactions[index]),
+                    (context, index) =>
+                        _buildTransactionItem(context, transactions[index]),
                     childCount: transactions.length,
                   ),
                 ),
@@ -161,7 +165,7 @@ class WalletScreen extends StatelessWidget {
 
   Widget _buildWalletCard(BuildContext context, double balance) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -172,7 +176,7 @@ class WalletScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).primaryColor.withOpacity(0.3),
@@ -220,7 +224,8 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionItem(BuildContext context, WalletTransaction transaction) {
+  Widget _buildTransactionItem(
+      BuildContext context, WalletTransaction transaction) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -312,7 +317,9 @@ class WalletTransaction {
       description: json['description'],
       amount: double.parse(json['amount'].toString()),
       date: DateTime.parse(json['date']),
-      type: json['type'] == 'deposit' ? TransactionType.deposit : TransactionType.withdrawal,
+      type: json['type'] == 'deposit'
+          ? TransactionType.deposit
+          : TransactionType.withdrawal,
     );
   }
 }
