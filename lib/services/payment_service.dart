@@ -108,7 +108,7 @@ class PaymentService {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/user/walletPay'),
+        Uri.parse('$baseUrl/auctions/user/walletPay'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

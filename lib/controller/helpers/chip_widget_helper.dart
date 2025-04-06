@@ -11,14 +11,13 @@ Widget buildCustomChip({
 }) {
   return InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(16), // Optional: Add ripple effect
+    borderRadius: BorderRadius.circular(16),
     child: SizedBox(
       child: Chip(
         avatar: Icon(icon, color: labelStyle.color, size: iconSize),
         label: Text(label),
         backgroundColor: backgroundColor,
         labelStyle: labelStyle,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
     ),
   );

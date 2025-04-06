@@ -7,13 +7,13 @@ import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/common widgets/address_card.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import 'add_location_screen.dart';
+import 'payment_details_screen.dart';
 
 class ShippingDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> auctionData;

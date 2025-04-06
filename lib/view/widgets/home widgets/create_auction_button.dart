@@ -7,6 +7,10 @@ import '../../screens/auction screen/product_details_screen.dart';
 class CreateAuctionButton extends StatelessWidget {
   const CreateAuctionButton({super.key});
 
+  // Generate a unique hero tag for each instance
+  static int _tagCounter = 0;
+  static String _getUniqueHeroTag() => 'create_auction_fab_${_tagCounter++}';
+
   void _handleOptionSelected(BuildContext context, String option) {
     if (option == 'Create Auction') {
       Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())); // Navigate to Add Location Screen
@@ -50,6 +54,7 @@ class CreateAuctionButton extends StatelessWidget {
             },
             offset: const Offset(0, 40), // Position dropdown below the button
             child: FloatingActionButton.extended(
+              heroTag: _getUniqueHeroTag(), // Use unique hero tag
               onPressed: isLoggedIn
                   ? null
                   : () {

@@ -31,6 +31,19 @@ import '../../view/widgets/home widgets/bottom_navbar.dart';
 class MainStack extends StatelessWidget {
   const MainStack({super.key});
 
+  static const String splash = '/splash';
+  static const String onboarding = '/onboarding';
+  static const String login = '/login';
+  static const String signup = '/signup';
+  static const String home = '/home';
+  static const String profile = '/profile';
+  static const String settings = '/settings';
+  static const String notifications = '/notifications';
+  static const String createAuction = '/create-auction';
+  static const String auctionDetails = '/auction-details';
+  static const String paymentDetails = '/payment-details';
+  static const String faqs = '/faqs';
+
   Widget _buildScreen(int index, bool isLoggedIn) {
     // // If not logged in, show splash screen first
     // if (!isLoggedIn && index == 0) {
@@ -74,13 +87,13 @@ class MainStack extends StatelessWidget {
       case 16:
         return const PaymentDetailsScreen(auctionData: {'message': 'Please create an auction first'});
       // Auth screens
-      case 17:
-        return LoginPage();
       case 18:
-        return SignUpPage();
+        return LoginPage();
       case 19:
-        return const OnboardingPages();
+        return SignUpPage();
       case 20:
+        return const OnboardingPages();
+      case 21:
         return OnboardingPage3(pageController: PageController());
       default:
         return const HomeScreenContent();
@@ -98,7 +111,7 @@ class MainStack extends StatelessWidget {
         if (!isLoggedIn && currentIndex > 0 && currentIndex < 4) {
           // Delay to avoid build phase issues
           Future.microtask(() {
-            tabIndexProvider.updateIndex(17); // Login page index
+            tabIndexProvider.updateIndex(18); // Login page index
           });
         }
 
@@ -106,7 +119,7 @@ class MainStack extends StatelessWidget {
           body: IndexedStack(
             index: currentIndex,
             children: List.generate(
-              21, // Total number of screens
+              22, // Total number of screens
               (index) => KeyedSubtree(
                 key: ValueKey(index),
                 child: _buildScreen(index, isLoggedIn),
