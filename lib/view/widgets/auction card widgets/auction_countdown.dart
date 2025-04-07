@@ -31,7 +31,7 @@ class AuctionCountdown extends StatelessWidget {
     // If auction hasn't started yet, show time until start
     if (now.isBefore(startDate)) {
       final Duration difference = startDate.difference(now);
-      return formatDuration(difference, customPrefix ?? 'Starting in:');
+      return formatDuration(difference, 'Starting in:');
     }
 
     // If auction has ended, show expired

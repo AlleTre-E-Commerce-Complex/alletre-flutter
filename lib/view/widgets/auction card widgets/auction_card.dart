@@ -130,15 +130,34 @@ class AuctionCard extends StatelessWidget {
                                 Border.all(color: onSecondaryColor, width: 1.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Text(
-                            'AED ${(title == 'Listed Products' || (title == 'Similar Products' && !auction.isAuctionProduct)) ? NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : NumberFormat.decimalPattern().format(double.tryParse(auction.currentBid))}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall!
-                                .copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 10,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'AED ${(title == 'Listed Products' || (title == 'Similar Products' && !auction.isAuctionProduct)) ? NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : NumberFormat.decimalPattern().format(double.tryParse(auction.currentBid))}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall!
+                                    .copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 10,
+                                    ),
+                              ),
+                              if (auction.hasBuyNow && double.tryParse(auction.buyNowPrice) != null && double.tryParse(auction.buyNowPrice)! > 0) ...[  
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Buy Now: AED ${NumberFormat.decimalPattern().format(double.tryParse(auction.buyNowPrice))}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall!
+                                      .copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 10,
+                                        color: primaryVariantColor,
+                                      ),
                                 ),
+                              ],
+                            ],
                           ),
                         ),
                         const SizedBox(height: 10),

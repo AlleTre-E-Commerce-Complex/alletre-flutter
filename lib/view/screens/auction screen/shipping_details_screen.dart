@@ -231,9 +231,13 @@ class ShippingDetailsScreen extends StatelessWidget {
                         double buyNowPrice = double.parse(auctionData['buyNowPrice']?.toString() ?? '0');
                         
                         // Calculate end time based on duration and start time
-                        DateTime startTime = auctionData['scheduleBid'] == true
-                            ? DateTime.parse(auctionData['startDate'])
-                            : DateTime.now();
+                        DateTime startTime;
+                        if (auctionData['scheduleBid'] == true) {
+                            // Parse the ISO string and convert to local time
+                            startTime = DateTime.parse(auctionData['startTime'] ?? auctionData['startDate']).toLocal();
+                        } else {
+                            startTime = DateTime.now();
+                        }
                         
                         DateTime endTime;
                         if (durationUnit == 'HOURS') {

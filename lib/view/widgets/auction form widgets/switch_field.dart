@@ -3,6 +3,7 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction%20form%20widgets/custom_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:intl/intl.dart';
 
 class SwitchWithField extends StatelessWidget {
   final String label;
@@ -13,6 +14,7 @@ class SwitchWithField extends StatelessWidget {
   final String? hintText;
   final bool isSchedulingEnabled; // Determines if scheduling fields are needed
   final TextEditingController? startDateController;
+  final TextEditingController? startTimeController;
   final TextInputType? keyboardType;
 
   const SwitchWithField({
@@ -25,6 +27,7 @@ class SwitchWithField extends StatelessWidget {
     this.hintText,
     this.isSchedulingEnabled = false,
     this.startDateController,
+    this.startTimeController,
     this.keyboardType,
   });
 
@@ -64,6 +67,7 @@ class SwitchWithField extends StatelessWidget {
                     if (!newValue) {
                       textController?.clear();
                       startDateController?.clear();
+                      startTimeController?.clear();
                     }
                   },
                   activeColor: primaryColor,
@@ -166,8 +170,8 @@ class SwitchWithField extends StatelessWidget {
                               await CustomTimePicker.showTimePickerDialog(
                                   context);
                           if (selectedTime != null) {
-                            // Create UTC DateTime
-                            final localDateTime = DateTime(
+                            // Combine Date and Time
+                            DateTime combinedDateTime = DateTime(
                               selectedDate!.year,
                               selectedDate.month,
                               selectedDate.day,
@@ -175,18 +179,16 @@ class SwitchWithField extends StatelessWidget {
                               selectedTime.minute,
                             );
 
-                            // Convert to UTC
-                            final utcDateTime = localDateTime.toUtc();
+                            // Convert to UTC for backend
+                            final utcDateTime = combinedDateTime.toUtc();
+                            
+                            // Store the ISO format for backend
+                            final isoString = utcDateTime.toIso8601String();
+                            startTimeController?.text = isoString;
 
-                            // Format date manually in ISO format
-                            final year = utcDateTime.year.toString().padLeft(4, '0');
-                            final month = utcDateTime.month.toString().padLeft(2, '0');
-                            final day = utcDateTime.day.toString().padLeft(2, '0');
-                            final hour = utcDateTime.hour.toString().padLeft(2, '0');
-                            final minute = utcDateTime.minute.toString().padLeft(2, '0');
-
-                            // Format as YYYY-MM-DDTHH:mm:00Z
-                            startDateController?.text = '$year-$month-${day}T$hour:$minute:00Z';
+                            // Show user-friendly format in the field (dd-MM-yyyy)
+                            final displayFormat = DateFormat('dd-MM-yyyy, hh:mm a');
+                            startDateController?.text = displayFormat.format(combinedDateTime);
                           }
                         },
                       ),
