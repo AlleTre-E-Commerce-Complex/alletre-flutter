@@ -232,7 +232,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                         
                         // Calculate end time based on duration and start time
                         DateTime startTime = auctionData['scheduleBid'] == true
-                            ? DateTime.parse('${auctionData['startDate']} ${auctionData['startTime']}:00')
+                            ? DateTime.parse(auctionData['startDate'])
                             : DateTime.now();
                         
                         DateTime endTime;

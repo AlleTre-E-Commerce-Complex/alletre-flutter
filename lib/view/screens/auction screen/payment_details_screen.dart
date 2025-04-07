@@ -176,8 +176,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       }
     } catch (e) {
       debugPrint('Error fetching wallet balance: $e');
-      // Show error message to user
-      if (mounted) {
+      // Only show error message if user is actively trying to make a payment
+      if (mounted && selectedPaymentMethod.value == PaymentMethod.wallet) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Unable to fetch wallet balance: ${e.toString()}'),

@@ -24,7 +24,6 @@ class AuctionDetailsScreen extends StatelessWidget {
     final selectedDuration = ValueNotifier<String?>(null);
     final scheduleBidSwitch = ValueNotifier<bool>(false);
     final startDateController = TextEditingController();
-    final startTimeController = TextEditingController();
     final buyNowSwitch = ValueNotifier<bool>(false);
     final buyNowController = TextEditingController();
     final returnPolicySwitch = ValueNotifier<bool>(false);
@@ -230,7 +229,7 @@ class AuctionDetailsScreen extends StatelessWidget {
                                       switchNotifier: scheduleBidSwitch,
                                       isSchedulingEnabled: true,
                                       startDateController: startDateController,
-                                      startTimeController: startTimeController),
+                                  ),
                                   const SizedBox(height: 8),
                                   const Align(
                                     alignment: Alignment.topLeft,
@@ -355,7 +354,6 @@ class AuctionDetailsScreen extends StatelessWidget {
                           'duration': selectedDuration.value ?? '1 DAYS', // Pass full duration string including unit
                           'scheduleBid': scheduleBidSwitch.value,
                           'startDate': startDateController.text,
-                          'startTime': startTimeController.text,
                           'buyNowEnabled': buyNowSwitch.value,
                           'buyNowPrice': double.tryParse(buyNowController.text)?.toString() ?? '0',
                           'returnPolicy': returnPolicySwitch.value ? returnPolicyController.text.trim() : null,

@@ -175,18 +175,26 @@ class AuctionService {
       }
       request.fields['startBidAmount'] = requestBody['startBidAmount'].toString();
       
-      // Calculate and set end date based on duration
-      final startDate = DateTime.now();
-      final durationUnit = requestBody['durationUnit'] as String;
-      final duration = requestBody['durationInDays'] != null
-          ? int.parse(requestBody['durationInDays'].toString())
-          : int.parse(requestBody['durationInHours'].toString());
+      // Handle start date
+      String startDateStr;
+      if (requestBody['scheduleBid'] == true && auctionData['startDate'] != null) {
+        // Use the provided start date as is (it's already in UTC)
+        startDateStr = auctionData['startDate'];
+      } else {
+        // If not scheduled, use current time in UTC
+        startDateStr = DateTime.now().toUtc().toIso8601String();
+      }
       
-      final endDate = durationUnit == 'HOURS'
+      // Parse the start date for duration calculation
+      final startDate = DateTime.parse(startDateStr);
+
+      // Calculate end date based on duration
+      final duration = requestBody['durationInHours'] ?? requestBody['durationInDays'];
+      final endDate = requestBody['durationUnit'].toString().toUpperCase() == 'HOURS'
           ? startDate.add(Duration(hours: duration))
           : startDate.add(Duration(days: duration));
-          
-      request.fields['startDate'] = startDate.toIso8601String();
+
+      request.fields['startDate'] = startDateStr;
       request.fields['endDate'] = endDate.toIso8601String();
       request.fields['scheduleBid'] = requestBody['scheduleBid'].toString();
       request.fields['buyNowEnabled'] = requestBody['buyNowEnabled'].toString();

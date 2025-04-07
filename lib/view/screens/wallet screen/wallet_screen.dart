@@ -71,7 +71,11 @@ class WalletScreen extends StatelessWidget {
       if (e.toString().contains('403') || e.toString().contains('token')) {
         throw Exception('Session expired. Please login again.');
       }
-      throw Exception('Failed to load wallet data');
+      // Return empty data instead of throwing an error
+      return {
+        'balance': 0.0,
+        'transactions': [],
+      };
     }
   }
 
@@ -113,23 +117,32 @@ class WalletScreen extends StatelessWidget {
               });
               return const Center(child: CircularProgressIndicator());
             }
-
+            
+            // Show a more user-friendly error state
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: errorColor),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error: ${snapshot.error}',
-                    style: const TextStyle(color: errorColor),
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 48,
+                    color: Theme.of(context).disabledColor,
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context
-                        .read<TabIndexProvider>()
-                        .updateIndex(0), // 0 is wallet page index
-                    child: const Text('Retry'),
+                  Text(
+                    'Unable to load wallet data',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).disabledColor,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () {
+                      // Force a rebuild to retry loading the data
+                      (context as Element).markNeedsBuild();
+                    },
+                    child: const Text('Tap to retry'),
                   ),
                 ],
               ),

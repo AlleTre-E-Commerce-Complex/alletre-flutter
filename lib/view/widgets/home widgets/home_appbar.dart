@@ -22,7 +22,7 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
             AppImages.header,
             fit: BoxFit.contain,
           ),
-          const SizedBox(width: 90),
+          const SizedBox(width: 105),
           // Language Text
           // GestureDetector(
           //   onTap: () {
@@ -37,9 +37,10 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
           //     ),
           //   ),
           // ),
+
           // Notification Icon
           IconButton(
-            icon: const Icon(Icons.notifications, color: secondaryColor, size: 19),
+            icon: const Icon(Icons.notifications, color: secondaryColor, size: 22),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Notifications Clicked!')),
