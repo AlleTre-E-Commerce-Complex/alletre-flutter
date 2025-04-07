@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/services/api_service.dart';
@@ -7,14 +8,12 @@ import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:provider/provider.dart';
 
-const errorColor = Colors.red;
-
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
 
   Future<String?> _getValidToken() async {
     try {
-      final storage = const FlutterSecureStorage();
+      const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'access_token');
       if (token == null) {
         debugPrint('No access token found, attempting refresh');
@@ -38,12 +37,29 @@ class WalletScreen extends StatelessWidget {
         throw Exception('Session expired. Please login again.');
       }
 
-      final response = await ApiService.get('/wallet/get_balance');
+      // Fetch balance
+      final balanceResponse = await ApiService.get('/wallet/get_balance');
       double balance = 0.0;
-      List<WalletTransaction> transactions = [];
+      if (balanceResponse.statusCode == 200) {
+        final dynamic balanceData = balanceResponse.data;
+        if (balanceData is int) {
+          balance = balanceData.toDouble();
+        } else if (balanceData is double) {
+          balance = balanceData;
+        } else {
+          balance = double.tryParse(balanceData.toString()) ?? 0.0;
+        }
+      }
 
-      if (response.statusCode == 200) {
-        balance = double.tryParse(response.data.toString()) ?? 0.0;
+      // Fetch transactions
+      final transactionsResponse =
+          await ApiService.get('/wallet/get_from_wallet');
+      List<WalletTransaction> transactions = [];
+      if (transactionsResponse.statusCode == 200 &&
+          transactionsResponse.data is List) {
+        transactions = (transactionsResponse.data as List)
+            .map((json) => WalletTransaction.fromJson(json))
+            .toList();
       }
 
       return {
@@ -97,7 +113,7 @@ class WalletScreen extends StatelessWidget {
               });
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -137,23 +153,108 @@ class WalletScreen extends StatelessWidget {
                   child: _buildWalletCard(context, walletBalance),
                 ),
                 const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Transaction History',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  child: SizedBox(height: 20),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) =>
-                        _buildTransactionItem(context, transactions[index]),
-                    childCount: transactions.length,
-                  ),
+
+                // const SliverToBoxAdapter(
+                //   child: Padding(
+                //     padding: EdgeInsets.all(16.0),
+                //     child: Text(
+                //       'Transaction History',
+                //       style: TextStyle(
+                //         color: onSecondaryColor,
+                //         fontSize: 18,
+                //         fontWeight: FontWeight.bold,
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                SliverToBoxAdapter(
+                  child: transactions.isEmpty
+                      ? Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 36),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 48,
+                                  color: Theme.of(context).disabledColor,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No transactions yet',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(context).disabledColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Table Header
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.3),
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withOpacity(0.4),
+                                      width: 1,
+                                    ),
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      topRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      _buildHeaderCell('Date', 120),
+                                      _buildHeaderCell('Description', 200),
+                                      _buildHeaderCell('Withdrawals', 120),
+                                      _buildHeaderCell('Deposits', 120),
+                                      _buildHeaderCell('Balance', 120),
+                                    ],
+                                  ),
+                                ),
+                                // Table Rows
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withOpacity(0.6),
+                                      width: 1,
+                                    ),
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(12),
+                                      bottomRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: transactions
+                                        .map((transaction) =>
+                                            _buildTransactionRow(
+                                                context, transaction))
+                                        .toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -177,13 +278,6 @@ class WalletScreen extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,102 +285,110 @@ class WalletScreen extends StatelessWidget {
           const Text(
             'Wallet Balance',
             style: TextStyle(
-              color: Colors.white,
+              color: secondaryColor,
               fontSize: 16,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'AED ${NumberFormat('#,##0.00').format(balance)}',
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+              color: secondaryColor,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
               // TODO: Implement withdraw functionality
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: secondaryColor,
               foregroundColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Withdraw'),
+            child: const Text('Withdraw', style: TextStyle(fontSize: 11)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTransactionItem(
-      BuildContext context, WalletTransaction transaction) {
+  Widget _buildHeaderCell(String text, double width) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: onSecondaryColor,
+          fontSize: 12,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildDataCell(String text, double width,
+      {Color? textColor, bool alignCenter = false}) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor ?? onSecondaryColor,
+          fontSize: 11,
+        ),
+        textAlign: alignCenter ? TextAlign.center : TextAlign.left,
+      ),
+    );
+  }
+
+  Widget _buildTransactionRow(
+      BuildContext context, WalletTransaction transaction) {
+    final dateStr = DateFormat('MMM d, yyyy').format(transaction.date);
+    final amountStr = NumberFormat('#,##0.00').format(transaction.amount);
+
+    return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).dividerColor,
-          width: 1,
+        border: Border(
+          bottom: BorderSide(color: Theme.of(context).dividerColor),
         ),
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: transaction.type == TransactionType.deposit
-                  ? Colors.green.withOpacity(0.1)
-                  : Colors.red.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              transaction.type == TransactionType.deposit
-                  ? Icons.arrow_downward
-                  : Icons.arrow_upward,
-              color: transaction.type == TransactionType.deposit
-                  ? Colors.green
-                  : Colors.red,
-            ),
+          _buildDataCell(dateStr, 120, alignCenter: true),
+          _buildDataCell(transaction.description, 200, alignCenter: true),
+          _buildDataCell(
+            transaction.type == TransactionType.withdrawal
+                ? 'AED $amountStr'
+                : '-',
+            120,
+            textColor: transaction.type == TransactionType.withdrawal
+                ? errorColor
+                : null,
+            alignCenter: true,
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.description,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  DateFormat('MMM d, yyyy').format(transaction.date),
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+          _buildDataCell(
+            transaction.type == TransactionType.deposit
+                ? 'AED $amountStr'
+                : '-',
+            120,
+            textColor: transaction.type == TransactionType.deposit
+                ? activeColor
+                : null,
+            alignCenter: true,
           ),
-          Text(
-            '${transaction.type == TransactionType.deposit ? '+' : '-'} AED ${NumberFormat('#,##0.00').format(transaction.amount)}',
-            style: TextStyle(
-              color: transaction.type == TransactionType.deposit
-                  ? Colors.green
-                  : Colors.red,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+          _buildDataCell(
+            'AED ${NumberFormat('#,##0.00').format(transaction.balance)}',
+            120,
+            alignCenter: true,
           ),
         ],
       ),
@@ -302,6 +404,8 @@ class WalletTransaction {
   final double amount;
   final DateTime date;
   final TransactionType type;
+  final String transactionType;
+  final double balance;
 
   WalletTransaction({
     required this.id,
@@ -309,17 +413,27 @@ class WalletTransaction {
     required this.amount,
     required this.date,
     required this.type,
+    required this.transactionType,
+    required this.balance,
   });
 
   factory WalletTransaction.fromJson(Map<String, dynamic> json) {
+    double parseAmount(dynamic value) {
+      if (value is int) return value.toDouble();
+      if (value is double) return value;
+      return double.parse(value.toString());
+    }
+
     return WalletTransaction(
-      id: json['id'],
+      id: json['id'].toString(),
       description: json['description'],
-      amount: double.parse(json['amount'].toString()),
+      amount: parseAmount(json['amount']),
       date: DateTime.parse(json['date']),
-      type: json['type'] == 'deposit'
+      type: json['status'] == 'DEPOSIT'
           ? TransactionType.deposit
           : TransactionType.withdrawal,
+      transactionType: json['transactionType'] ?? '',
+      balance: parseAmount(json['balance']),
     );
   }
 }
