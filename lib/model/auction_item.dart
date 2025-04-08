@@ -19,6 +19,7 @@ class AuctionItem {
   final String currentBid;
   final String buyNowPrice;
   String status;
+  String type;
   String usageStatus;
   bool buyNowEnabled;
   final DateTime startDate;
@@ -51,6 +52,7 @@ class AuctionItem {
     required this.currentBid,
     required this.buyNowPrice,
     required this.status,
+    required this.type,
     required this.usageStatus,
     required this.buyNowEnabled,
     required this.startDate,
@@ -85,6 +87,7 @@ class AuctionItem {
     String? currentBid,
     String? buyNowPrice,
     String? status,
+    String? type,
     String? usageStatus,
     bool? buyNowEnabled,
     DateTime? startDate,
@@ -116,6 +119,7 @@ class AuctionItem {
       currentBid: currentBid ?? this.currentBid,
       buyNowPrice: buyNowPrice ?? this.buyNowPrice,
       status: status ?? this.status,
+      type: type ?? this.type,
       usageStatus: usageStatus ?? this.usageStatus,
       buyNowEnabled: buyNowEnabled ?? this.buyNowEnabled,
       startDate: startDate ?? this.startDate,
@@ -297,6 +301,7 @@ class AuctionItem {
         currentBid: currentBid,
         buyNowPrice: json['acceptedAmount'] as String? ?? '0',
         status: json['status'] as String? ?? '',
+        type: json['type'] as String? ?? 'ON_TIME',
         usageStatus: product['usageStatus'] as String? ?? '',
         buyNowEnabled: json['isBuyNowAllowed'] as bool? ?? false,
         startDate: startDate,
@@ -338,6 +343,7 @@ class AuctionItem {
       endDate: null,
       createdAt: DateTime.now(),
       status: '',
+      type: 'ON_TIME',
       usageStatus: '',
       itemLocation: null,
       bids: 0,
@@ -387,6 +393,7 @@ class AuctionItem {
       'currentBid': currentBid,
       'buyNowPrice': buyNowPrice,
       'status': status,
+      'type': type,
       'buyNowEnabled': buyNowEnabled,
       'startDate': startDate.toIso8601String(),
       'expiryDate': expiryDate.toIso8601String(),

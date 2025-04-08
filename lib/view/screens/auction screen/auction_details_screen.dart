@@ -379,6 +379,14 @@ class AuctionDetailsScreen extends StatelessWidget {
                           return;
                         }
 
+                        // Validate start date and time for scheduled auctions
+                        if (scheduleBidSwitch.value && (startTimeController.text.isEmpty || startDateController.text.isEmpty)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Start date and time are required for scheduled auctions')),
+                          );
+                          return;
+                        }
+
                         // Debug log media files
                         debugPrint('AuctionDetailsScreen - Media files before navigation:');
                         debugPrint('Total files: ${imagePaths.length}');
