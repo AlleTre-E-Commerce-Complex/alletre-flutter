@@ -253,7 +253,7 @@ class ShippingDetailsScreen extends StatelessWidget {
 
                         // Create the full auction data structure
                         final Map<String, dynamic> fullAuctionData = {
-                          'type': 'ON_TIME',
+                          'type': auctionData['scheduleBid'] == true ? 'SCHEDULED' : 'ON_TIME',
                           'durationUnit': durationUnit,
                           'duration': duration,
                           'startBidAmount': startBidAmount,

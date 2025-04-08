@@ -212,6 +212,7 @@ class WalletScreen extends StatelessWidget {
                           scrollDirection: Axis.horizontal,
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.only(bottom: 26),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -279,13 +280,13 @@ class WalletScreen extends StatelessWidget {
 
   Widget _buildWalletCard(BuildContext context, double balance) {
     return Container(
-      margin: const EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 16),
+      margin: const EdgeInsets.only(left: 16, right: 16, top: 26, bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withOpacity(0.9),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

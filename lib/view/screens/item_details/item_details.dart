@@ -75,8 +75,8 @@ class ItemDetailsScreen extends StatelessWidget {
               final String itemUrl = 'https://alletre.com/items/${item.id}';
               Share.share(
                 'Check out this ${title.toLowerCase()}: ${item.title}\n'
-                '${title == "Listed Products" ? "Price" : "Starting bid"}: AED ${item.startBidAmount}\n'
-                '${title != "Listed Products" ? "Current bid: AED ${item.currentBid}\n" : ""}'
+                '${title == "Listed Products" ? "Price" : "Starting bid"}: AED ${NumberFormat.decimalPattern().format(double.tryParse(item.startBidAmount) ?? 0.0)}\n'
+                '${title != "Listed Products" ? "Current Bid: AED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}\n" : ""}'
                 '$itemUrl',
                 subject: title == "Listed Products"
                     ? 'Interesting Product on Alletre'
@@ -351,7 +351,7 @@ class ItemDetailsScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                          if (item.hasBuyNow) ...[
+                          if (item.buyNowEnabled) ...[
                             const SizedBox(width: 15),
                             Expanded(
                               child: ValueListenableBuilder<bool>(
@@ -390,7 +390,7 @@ class ItemDetailsScreen extends StatelessWidget {
                                           const SizedBox(height: 5),
                                           Center(
                                             child: Text(
-                                              'AED ${item.buyNowPrice}',
+                                              'AED ${NumberFormat('#,##,###.##').format(double.tryParse(item.buyNowPrice) ?? 0)}',
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .titleLarge

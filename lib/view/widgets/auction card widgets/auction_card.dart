@@ -143,20 +143,20 @@ class AuctionCard extends StatelessWidget {
                                       fontSize: 10,
                                     ),
                               ),
-                              if (auction.hasBuyNow && double.tryParse(auction.buyNowPrice) != null && double.tryParse(auction.buyNowPrice)! > 0) ...[  
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Buy Now: AED ${NumberFormat.decimalPattern().format(double.tryParse(auction.buyNowPrice))}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall!
-                                      .copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 10,
-                                        color: primaryVariantColor,
-                                      ),
-                                ),
-                              ],
+                              // if (auction.buyNowEnabled && double.tryParse(auction.buyNowPrice) != null && double.tryParse(auction.buyNowPrice)! > 0) ...[  
+                              //   const SizedBox(height: 4),
+                              //   Text(
+                              //     'Buy Now: AED ${NumberFormat.decimalPattern().format(double.tryParse(auction.buyNowPrice))}',
+                              //     style: Theme.of(context)
+                              //         .textTheme
+                              //         .labelSmall!
+                              //         .copyWith(
+                              //           fontWeight: FontWeight.w600,
+                              //           fontSize: 10,
+                              //           color: primaryVariantColor,
+                              //         ),
+                              //   ),
+                              // ],
                             ],
                           ),
                         ),
@@ -251,7 +251,7 @@ class AuctionCard extends StatelessWidget {
                         if ((title != 'Listed Products' && title != 'Expired Auctions' && auction.isAuctionProduct) ||
                             (title == 'Similar Products' && auction.isAuctionProduct)) ...[
                           const SizedBox(height: 10),
-                          if (auction.hasBuyNow)
+                          if (auction.buyNowEnabled)...[
                             Row(
                               children: [
                                 SizedBox(
@@ -305,8 +305,10 @@ class AuctionCard extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                
                               ],
                             )
+                          ]
                           else
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(

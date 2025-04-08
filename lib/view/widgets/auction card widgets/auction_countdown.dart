@@ -28,8 +28,8 @@ class AuctionCountdown extends StatelessWidget {
   Map<String, String> getFormattedTime() {
     final DateTime now = DateTime.now();
 
-    // If auction hasn't started yet, show time until start
-    if (now.isBefore(startDate)) {
+    // If auction hasn't started yet and it's not LIVE, show time until start
+    if (now.isBefore(startDate) && customPrefix != 'Ending in:') {
       final Duration difference = startDate.difference(now);
       return formatDuration(difference, 'Starting in:');
     }

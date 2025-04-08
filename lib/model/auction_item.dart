@@ -20,7 +20,7 @@ class AuctionItem {
   final String buyNowPrice;
   String status;
   String usageStatus;
-  bool hasBuyNow;
+  bool buyNowEnabled;
   final DateTime startDate;
   final DateTime expiryDate;
   final DateTime? endDate;
@@ -52,7 +52,7 @@ class AuctionItem {
     required this.buyNowPrice,
     required this.status,
     required this.usageStatus,
-    required this.hasBuyNow,
+    required this.buyNowEnabled,
     required this.startDate,
     required this.expiryDate,
     this.endDate,
@@ -86,7 +86,7 @@ class AuctionItem {
     String? buyNowPrice,
     String? status,
     String? usageStatus,
-    bool? hasBuyNow,
+    bool? buyNowEnabled,
     DateTime? startDate,
     DateTime? expiryDate,
     DateTime? endDate,
@@ -117,7 +117,7 @@ class AuctionItem {
       buyNowPrice: buyNowPrice ?? this.buyNowPrice,
       status: status ?? this.status,
       usageStatus: usageStatus ?? this.usageStatus,
-      hasBuyNow: hasBuyNow ?? this.hasBuyNow,
+      buyNowEnabled: buyNowEnabled ?? this.buyNowEnabled,
       startDate: startDate ?? this.startDate,
       expiryDate: expiryDate ?? this.expiryDate,
       endDate: endDate ?? this.endDate,
@@ -295,10 +295,10 @@ class AuctionItem {
         description: product['description'] as String? ?? '',
         startBidAmount: json['startBidAmount'] as String? ?? '0',
         currentBid: currentBid,
-        buyNowPrice: json['buyNowPrice'] as String? ?? '0',
+        buyNowPrice: json['acceptedAmount'] as String? ?? '0',
         status: json['status'] as String? ?? '',
         usageStatus: product['usageStatus'] as String? ?? '',
-        hasBuyNow: json['isBuyNowAllowed'] as bool? ?? false,
+        buyNowEnabled: json['isBuyNowAllowed'] as bool? ?? false,
         startDate: startDate,
         expiryDate: expiryDate,
         endDate: endDate,
@@ -341,7 +341,7 @@ class AuctionItem {
       usageStatus: '',
       itemLocation: null,
       bids: 0,
-      hasBuyNow: false,
+      buyNowEnabled: false,
       categoryId: 0,
       subCategoryId: 0,
       categoryName: '',
@@ -387,7 +387,7 @@ class AuctionItem {
       'currentBid': currentBid,
       'buyNowPrice': buyNowPrice,
       'status': status,
-      'hasBuyNow': hasBuyNow,
+      'buyNowEnabled': buyNowEnabled,
       'startDate': startDate.toIso8601String(),
       'expiryDate': expiryDate.toIso8601String(),
       'endDate': endDate?.toIso8601String(),

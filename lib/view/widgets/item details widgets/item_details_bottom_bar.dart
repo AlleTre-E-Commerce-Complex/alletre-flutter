@@ -36,7 +36,7 @@ class ItemDetailsBottomBars extends StatelessWidget {
                 child: const Text('Bid Now'),
               ),
             ),
-            if (item.hasBuyNow) ...[
+            if (item.buyNowEnabled) ...[
               const SizedBox(width: 16),
               Expanded(
                 child: OutlinedButton(

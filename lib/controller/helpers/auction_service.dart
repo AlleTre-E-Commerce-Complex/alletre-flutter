@@ -83,15 +83,17 @@ class AuctionService {
 
       // Prepare the request body as a single JSON object
       final Map<String, dynamic> requestBody = {
-        'type': auctionData['type'],
+        'type': auctionData['scheduleBid'] == true ? 'SCHEDULED' : 'ON_TIME',
         'durationUnit': auctionData['durationUnit'].toString().toUpperCase(),
         // Set duration field based on durationUnit
-        'durationInDays': auctionData['durationUnit'].toString().toUpperCase() == 'DAYS' 
-            ? int.parse(auctionData['duration'].toString())
-            : null,
-        'durationInHours': auctionData['durationUnit'].toString().toUpperCase() == 'HOURS' 
-            ? int.parse(auctionData['duration'].toString())
-            : null,
+        'durationInDays':
+            auctionData['durationUnit'].toString().toUpperCase() == 'DAYS'
+                ? int.parse(auctionData['duration'].toString())
+                : null,
+        'durationInHours':
+            auctionData['durationUnit'].toString().toUpperCase() == 'HOURS'
+                ? int.parse(auctionData['duration'].toString())
+                : null,
         'startBidAmount':
             double.parse(auctionData['startBidAmount'].toString()),
         'startDate': auctionData['startDate'],
@@ -103,9 +105,15 @@ class AuctionService {
         'locationId': locationId,
       };
 
-      // Add shipping details if present
+      // Handle shipping details
       if (auctionData['shippingDetails'] != null) {
-        requestBody['shippingDetails'] = auctionData['shippingDetails'];
+        final shippingDetails = auctionData['shippingDetails'];
+        requestBody['shippingDetails'] = {
+          'country': shippingDetails['country'],
+          'city': shippingDetails['city'],
+          'address': shippingDetails['address'],
+          'phone': shippingDetails['phone']
+        };
       }
 
       // Handle product data
@@ -165,34 +173,45 @@ class AuctionService {
       debugPrint('Adding end date to form fields: ${requestBody['endDate']}');
       request.fields['type'] = requestBody['type'];
       request.fields['durationUnit'] = requestBody['durationUnit'];
-      
+
       // Add appropriate duration field based on duration unit
       if (requestBody['durationInDays'] != null) {
-        request.fields['durationInDays'] = requestBody['durationInDays'].toString();
+        request.fields['durationInDays'] =
+            requestBody['durationInDays'].toString();
       }
       if (requestBody['durationInHours'] != null) {
-        request.fields['durationInHours'] = requestBody['durationInHours'].toString();
+        request.fields['durationInHours'] =
+            requestBody['durationInHours'].toString();
       }
-      request.fields['startBidAmount'] = requestBody['startBidAmount'].toString();
-      
+      request.fields['startBidAmount'] =
+          requestBody['startBidAmount'].toString();
+      request.fields['locationId'] = locationId.toString();
+      request.fields['isBuyNowAllowed'] = requestBody['buyNowEnabled'] == true ? 'YES' : 'NO';
+      if (requestBody['buyNowEnabled'] == true) {
+        request.fields['acceptedAmount'] = requestBody['buyNowPrice'].toString();
+      }
+
       // Handle start date
       String startDateStr;
-      if (requestBody['scheduleBid'] == true && auctionData['startDate'] != null) {
+      if (requestBody['scheduleBid'] == true &&
+          auctionData['startDate'] != null) {
         // Use the provided start date as is (it's already in UTC)
         startDateStr = auctionData['startDate'];
       } else {
         // If not scheduled, use current time in UTC
         startDateStr = DateTime.now().toUtc().toIso8601String();
       }
-      
+
       // Parse the start date for duration calculation
       final startDate = DateTime.parse(startDateStr);
 
       // Calculate end date based on duration
-      final duration = requestBody['durationInHours'] ?? requestBody['durationInDays'];
-      final endDate = requestBody['durationUnit'].toString().toUpperCase() == 'HOURS'
-          ? startDate.add(Duration(hours: duration))
-          : startDate.add(Duration(days: duration));
+      final duration =
+          requestBody['durationInHours'] ?? requestBody['durationInDays'];
+      final endDate =
+          requestBody['durationUnit'].toString().toUpperCase() == 'HOURS'
+              ? startDate.add(Duration(hours: duration))
+              : startDate.add(Duration(days: duration));
 
       request.fields['startDate'] = startDateStr;
       request.fields['endDate'] = endDate.toIso8601String();
@@ -245,9 +264,10 @@ class AuctionService {
         final filename = file.path.split('/').last;
 
         // Determine MIME type based on file extension
-        final mimeType = filename.toLowerCase().endsWith('.png') 
+        final mimeType = filename.toLowerCase().endsWith('.png')
             ? 'image/png'
-            : filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg')
+            : filename.toLowerCase().endsWith('.jpg') ||
+                    filename.toLowerCase().endsWith('.jpeg')
                 ? 'image/jpeg'
                 : 'image/jpeg'; // default to jpeg
 
@@ -358,7 +378,7 @@ class AuctionService {
               'Content-Type': 'application/json'
             },
           );
-          
+
           if (retryResponse.statusCode == 200) {
             final data = jsonDecode(retryResponse.body);
             if (data['success'] == true && data['data'] is List) {
@@ -369,8 +389,9 @@ class AuctionService {
           }
         }
       }
-      
-      debugPrint('Live auctions returned non-200 status: ${response.statusCode}');
+
+      debugPrint(
+          'Live auctions returned non-200 status: ${response.statusCode}');
       return [];
     } catch (e) {
       debugPrint('Error fetching live auctions: $e');
@@ -394,7 +415,8 @@ class AuctionService {
 
       // Make the API call
       final response = await http.get(
-        Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products'),
+        Uri.parse(
+            '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products'),
         headers: headers,
       );
 
@@ -419,14 +441,15 @@ class AuctionService {
         if (refreshResult['success']) {
           accessToken = refreshResult['data']['accessToken'];
           final retryResponse = await http.get(
-            Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products'),
+            Uri.parse(
+                '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products'),
             headers: {
               'Authorization': 'Bearer $accessToken',
               'Accept': 'application/json',
               'Content-Type': 'application/json'
             },
           );
-          
+
           if (retryResponse.statusCode == 200) {
             final data = jsonDecode(retryResponse.body);
             if (data['success'] == true && data['data'] is List) {
@@ -438,8 +461,9 @@ class AuctionService {
           throw Exception('Authentication failed after token refresh');
         }
       }
-      
-      debugPrint('Listed products returned non-200 status: ${response.statusCode}');
+
+      debugPrint(
+          'Listed products returned non-200 status: ${response.statusCode}');
       return [];
     } catch (e) {
       debugPrint('Error fetching listed products: $e');
@@ -462,29 +486,59 @@ class AuctionService {
         headers['Authorization'] = 'Bearer $accessToken';
       }
 
-      final response = await http.get(
+      // Fetch both upcoming and scheduled auctions
+      final upcomingResponse = await http.get(
         Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming'),
         headers: headers,
       );
 
-      debugPrint('Upcoming Auctions Response Code: ${response.statusCode}');
+      final scheduledResponse = await http.get(
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/scheduled'),
+        headers: headers,
+      );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+      debugPrint(
+          'Upcoming Auctions Response Code: ${upcomingResponse.statusCode}');
+      debugPrint(
+          'Scheduled Auctions Response Code: ${scheduledResponse.statusCode}');
+
+      List<AuctionItem> allAuctions = [];
+
+      // Process upcoming auctions
+      if (upcomingResponse.statusCode == 200) {
+        final data = jsonDecode(upcomingResponse.body);
         if (data['success'] == true && data['data'] is List) {
           final items = (data['data'] as List)
               .map((item) => AuctionItem.fromJson(item))
               .toList();
+          allAuctions.addAll(items);
           debugPrint('Successfully parsed ${items.length} upcoming auctions');
-          return items;
         }
-      } else if (response.statusCode == 401 && accessToken != null) {
-        // Only try token refresh if we had a token and got 401
+      }
+
+      // Process scheduled auctions
+      if (scheduledResponse.statusCode == 200) {
+        final data = jsonDecode(scheduledResponse.body);
+        if (data['success'] == true && data['data'] is List) {
+          final items = (data['data'] as List)
+              .map((item) => AuctionItem.fromJson(item))
+              .toList();
+          allAuctions.addAll(items);
+          debugPrint('Successfully parsed ${items.length} scheduled auctions');
+        }
+      }
+
+      // Handle token refresh if needed
+      if ((upcomingResponse.statusCode == 401 ||
+              scheduledResponse.statusCode == 401) &&
+          accessToken != null) {
         final userService = UserService();
         final refreshResult = await userService.refreshTokens();
         if (refreshResult['success']) {
           accessToken = refreshResult['data']['accessToken'];
-          final retryResponse = await http.get(
+
+          // Retry upcoming auctions
+          final retryUpcoming = await http.get(
             Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming'),
             headers: {
               'Authorization': 'Bearer $accessToken',
@@ -492,20 +546,42 @@ class AuctionService {
               'Content-Type': 'application/json'
             },
           );
-          
-          if (retryResponse.statusCode == 200) {
-            final data = jsonDecode(retryResponse.body);
+
+          // Retry scheduled auctions
+          final retryScheduled = await http.get(
+            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/scheduled'),
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+          );
+
+          // Process retried upcoming auctions
+          if (retryUpcoming.statusCode == 200) {
+            final data = jsonDecode(retryUpcoming.body);
             if (data['success'] == true && data['data'] is List) {
-              return (data['data'] as List)
+              final items = (data['data'] as List)
                   .map((item) => AuctionItem.fromJson(item))
                   .toList();
+              allAuctions.addAll(items);
+            }
+          }
+
+          // Process retried scheduled auctions
+          if (retryScheduled.statusCode == 200) {
+            final data = jsonDecode(retryScheduled.body);
+            if (data['success'] == true && data['data'] is List) {
+              final items = (data['data'] as List)
+                  .map((item) => AuctionItem.fromJson(item))
+                  .toList();
+              allAuctions.addAll(items);
             }
           }
         }
       }
-      
-      debugPrint('Upcoming auctions returned non-200 status: ${response.statusCode}');
-      return [];
+
+      return allAuctions;
     } catch (e) {
       debugPrint('Error fetching upcoming auctions: $e');
       return [];
@@ -556,7 +632,7 @@ class AuctionService {
               'Content-Type': 'application/json'
             },
           );
-          
+
           if (retryResponse.statusCode == 200) {
             final data = jsonDecode(retryResponse.body);
             if (data['success'] == true && data['data'] is List) {
@@ -567,8 +643,9 @@ class AuctionService {
           }
         }
       }
-      
-      debugPrint('Expired auctions returned non-200 status: ${response.statusCode}');
+
+      debugPrint(
+          'Expired auctions returned non-200 status: ${response.statusCode}');
       return [];
     } catch (e) {
       debugPrint('Error fetching expired auctions: $e');
