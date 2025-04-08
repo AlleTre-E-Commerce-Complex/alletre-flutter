@@ -186,8 +186,8 @@ class AuctionService {
       request.fields['startBidAmount'] =
           requestBody['startBidAmount'].toString();
       request.fields['locationId'] = locationId.toString();
-      request.fields['isBuyNowAllowed'] = requestBody['buyNowEnabled'] == true ? 'YES' : 'NO';
       if (requestBody['buyNowEnabled'] == true) {
+        request.fields['isBuyNowAllowed'] = 'YES';
         request.fields['acceptedAmount'] = requestBody['buyNowPrice'].toString();
       }
 

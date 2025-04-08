@@ -44,7 +44,6 @@ class _CardFormWidgetState extends State<CardFormWidget>
 
   @override
   void dispose() {
-    widget.controller.dispose();
     super.dispose();
   }
 
@@ -383,6 +382,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   @override
   void dispose() {
     selectedPaymentMethod.dispose();
+    cardController.dispose();
     super.dispose();
   }
 
@@ -546,18 +546,22 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                       );
               },
             ),
-            const SizedBox(height: 15),
 
-            // Submit Button
-            ValueListenableBuilder<bool>(
-              valueListenable: PaymentService.isLoadingPayment,
-              builder: (context, isLoading, child) {
-                return SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () async {
+            // Pay & Submit Button (only for card payment)
+            ValueListenableBuilder<PaymentMethod>(
+              valueListenable: selectedPaymentMethod,
+              builder: (context, paymentMethod, child) {
+                if (paymentMethod == PaymentMethod.wallet) {
+                  return const SizedBox.shrink();
+                }
+                
+                return ValueListenableBuilder<bool>(
+                  valueListenable: PaymentService.isLoadingPayment,
+                  builder: (context, isLoading, child) {
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : () async {
                             try {
                               // Check if user is logged in
                               final userProvider = Provider.of<UserProvider>(
@@ -782,10 +786,11 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                     ),
                     child: Text(
                       isLoading ? "Processing..." : "Pay & Submit",
-                      style:
-                          const TextStyle(color: secondaryColor, fontSize: 14),
-                    ),
-                  ),
+                      style: const TextStyle(color: secondaryColor, fontSize: 14),
+                          ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
