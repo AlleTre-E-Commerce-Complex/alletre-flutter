@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../services/api_service.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
+import '../../widgets/payment widgets/payment_success_dialog.dart';
 import '../faqs screen/faqs_screen.dart';
 import '../../../services/category_service.dart';
 import '../../../services/payment_service.dart';
@@ -300,17 +300,10 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     debugPrint('🔍 API Response data: ${response.data}');
 
     if (response.data['success']) {
-      _showSuccessToast('Payment successful');
 
       // Navigate to success screen or refresh current screen
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const MainStack(),
-          ),
-          (Route<dynamic> route) => false,
-        );
+        PaymentSuccessDialog.show(context);
       }
     } else {
       throw Exception(response.data['message'] ?? 'Payment failed');
@@ -325,19 +318,6 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
           content: Text(message),
           backgroundColor: errorColor,
           duration: const Duration(seconds: 5),
-        ),
-      );
-    }
-  }
-
-// Helper method to show success toast
-  void _showSuccessToast(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: activeColor,
-          duration: const Duration(seconds: 3),
         ),
       );
     }
@@ -554,240 +534,157 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                 if (paymentMethod == PaymentMethod.wallet) {
                   return const SizedBox.shrink();
                 }
-                
+
                 return ValueListenableBuilder<bool>(
                   valueListenable: PaymentService.isLoadingPayment,
                   builder: (context, isLoading, child) {
                     return SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: isLoading ? null : () async {
-                            try {
-                              // Check if user is logged in
-                              final userProvider = Provider.of<UserProvider>(
-                                  context,
-                                  listen: false);
-                              if (!userProvider.isLoggedIn) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Please login to continue with the payment'),
-                                    backgroundColor: errorColor,
-                                  ),
-                                );
-                                return;
-                              }
-
-                              // Get token and validate
-                              final token = await _getValidToken();
-                              if (token == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text('Unable to get a valid token'),
-                                    backgroundColor: errorColor,
-                                  ),
-                                );
-                                return;
-                              }
-
-                              final categoryId = widget.auctionData['data']
-                                  ?['product']?['categoryId'];
-                              print(
-                                  'Category ID from auction data: $categoryId (${categoryId.runtimeType})');
-                              if (categoryId == null) {
-                                throw Exception('Invalid category ID');
-                              }
-
-                              final parsedCategoryId =
-                                  int.parse(categoryId.toString());
-                              print('Parsed category ID: $parsedCategoryId');
-
-                              final depositAmount =
-                                  CategoryService.getSellerDepositAmount(
-                                      parsedCategoryId);
-                              print(
-                                  'Deposit amount from service: $depositAmount (${depositAmount.runtimeType})');
-
-                              if (depositAmount.isEmpty) {
-                                throw Exception(
-                                    'Invalid deposit amount for category');
-                              }
-
-                              final auctionId =
-                                  widget.auctionData['data']?['id'];
-                              if (auctionId == null) {
-                                throw Exception('Invalid auction ID');
-                              }
-
-                              final amount = double.parse(depositAmount);
-
-                              if (selectedPaymentMethod.value ==
-                                  PaymentMethod.wallet) {
-                                await PaymentService.walletPayForAuction(
-                                  auctionId: auctionId,
-                                  amount: amount,
-                                  token: token,
-                                );
-                              } else {
-                                // Get card details
-                                final cardDetails = cardController.details;
-                                if (!cardDetails.complete) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Please fill in all card details correctly'),
-                                      backgroundColor: errorColor,
-                                    ),
-                                  );
-                                  return;
-                                }
-
+                        onPressed: isLoading
+                            ? null
+                            : () async {
                                 try {
-                                  await PaymentService.payForAuction(
-                                    auctionId: auctionId,
-                                    amount: amount,
-                                    paymentType: 'card',
-                                    currency: 'AED',
-                                    token: token,
-                                    cardDetails: cardDetails,
-                                  );
-                                } catch (e) {
+                                  // Check if user is logged in
+                                  final userProvider =
+                                      Provider.of<UserProvider>(context,
+                                          listen: false);
+                                  if (!userProvider.isLoggedIn) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Please login to continue with the payment'),
+                                        backgroundColor: errorColor,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  // Get token and validate
+                                  final token = await _getValidToken();
+                                  if (token == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content:
+                                            Text('Unable to get a valid token'),
+                                        backgroundColor: errorColor,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  final categoryId = widget.auctionData['data']
+                                      ?['product']?['categoryId'];
+                                  print(
+                                      'Category ID from auction data: $categoryId (${categoryId.runtimeType})');
+                                  if (categoryId == null) {
+                                    throw Exception('Invalid category ID');
+                                  }
+
+                                  final parsedCategoryId =
+                                      int.parse(categoryId.toString());
+                                  print(
+                                      'Parsed category ID: $parsedCategoryId');
+
+                                  final depositAmount =
+                                      CategoryService.getSellerDepositAmount(
+                                          parsedCategoryId);
+                                  print(
+                                      'Deposit amount from service: $depositAmount (${depositAmount.runtimeType})');
+
+                                  if (depositAmount.isEmpty) {
+                                    throw Exception(
+                                        'Invalid deposit amount for category');
+                                  }
+
+                                  final auctionId =
+                                      widget.auctionData['data']?['id'];
+                                  if (auctionId == null) {
+                                    throw Exception('Invalid auction ID');
+                                  }
+
+                                  final amount = double.parse(depositAmount);
+
+                                  if (selectedPaymentMethod.value ==
+                                      PaymentMethod.wallet) {
+                                    await PaymentService.walletPayForAuction(
+                                      auctionId: auctionId,
+                                      amount: amount,
+                                      token: token,
+                                    );
+
+                                    if (!context.mounted) return;
+                                    PaymentSuccessDialog.show(context);
+                                    return;
+                                  } else {
+                                    // Get card details
+                                    final cardDetails = cardController.details;
+                                    if (!cardDetails.complete) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Please fill in all card details correctly'),
+                                          backgroundColor: errorColor,
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    try {
+                                      await PaymentService.payForAuction(
+                                        auctionId: auctionId,
+                                        amount: amount,
+                                        paymentType: 'card',
+                                        currency: 'AED',
+                                        token: token,
+                                        cardDetails: cardDetails,
+                                      );
+                                    } catch (e) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              'Payment failed: ${e.toString()}'),
+                                          backgroundColor: errorColor,
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                  }
+
+                                  // Log successful payment details
+                                  print('🎉🎉 Payment Successful!');
+                                  print(
+                                      '🎉🎉 Item Name: ${widget.auctionData['data']?['product']?['title'] ?? 'No Title'}');
+                                  print(
+                                      '🎉🎉 Status: ${widget.auctionData['data']?['status'] ?? 'Unknown'}');
+                                  print(
+                                      '🎉🎉 Amount Paid: AED ${NumberFormat("#,##0").format(amount)}');
+
                                   if (!context.mounted) return;
+                                  PaymentSuccessDialog.show(context);
+                                } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(
-                                          'Payment failed: ${e.toString()}'),
+                                      content: Text(e.toString()),
                                       backgroundColor: errorColor,
                                     ),
                                   );
-                                  return;
                                 }
-                              }
-
-                              if (!context.mounted) return;
-
-                              // Log successful payment details
-                              print('🎉🎉 Payment Successful!');
-                              print(
-                                  '🎉🎉 Item Name: ${widget.auctionData['data']?['product']?['title'] ?? 'No Title'}');
-                              print(
-                                  '🎉🎉 Status: ${widget.auctionData['data']?['status'] ?? 'Unknown'}');
-                              print(
-                                  '🎉🎉 Amount Paid: AED ${NumberFormat("#,##0").format(amount)}');
-
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (BuildContext context) {
-                                  return Dialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(24.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.credit_card,
-                                            color: primaryColor,
-                                            size: 64,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          const Text(
-                                            'Payment success',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: onSecondaryColor,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          const Text(
-                                            'Your deposit has been successfully transferred and your auction is active now',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(color: greyColor),
-                                          ),
-                                          const SizedBox(height: 24),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              ElevatedButton(
-                                                onPressed: () {},
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: primaryColor,
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 16),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            6),
-                                                  ),
-                                                ),
-                                                child: const Text(
-                                                    'View Auctions',
-                                                    style: TextStyle(
-                                                        color: secondaryColor)),
-                                              ),
-                                              const SizedBox(width: 5),
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.pushAndRemoveUntil(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const MainStack(),
-                                                    ),
-                                                    (Route<dynamic> route) =>
-                                                        false,
-                                                  );
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: primaryColor,
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 16),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            6),
-                                                  ),
-                                                ),
-                                                child: const Text(
-                                                    'Back to Home',
-                                                    style: TextStyle(
-                                                        color: secondaryColor)),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(e.toString()),
-                                  backgroundColor: errorColor,
-                                ),
-                              );
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      backgroundColor: Theme.of(context).primaryColor,
-                    ),
-                    child: Text(
-                      isLoading ? "Processing..." : "Pay & Submit",
-                      style: const TextStyle(color: secondaryColor, fontSize: 14),
+                              },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
                           ),
+                          backgroundColor: Theme.of(context).primaryColor,
+                        ),
+                        child: Text(
+                          isLoading ? "Processing..." : "Pay & Submit",
+                          style: const TextStyle(
+                              color: secondaryColor, fontSize: 14),
+                        ),
                       ),
                     );
                   },
