@@ -64,201 +64,83 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(8),
       children: [
-        // _itemDetailsTitle(),
-        // _itemDetailsAbout(item.description),
         const SizedBox(height: 10),
         ..._buildCustomFieldsContent()
       ],
     );
   }
 
+  // Helper function to format field value
+  String formatFieldValue(String field, dynamic value, {String? type}) {
+    if (value == null) return '';
+
+    // Handle array type fields
+    if (type == 'array' && value is! List) {
+      value = [value];
+    }
+
+    // Format based on field key
+    switch (field.toLowerCase()) {
+      case 'screensize':
+        return '$value inches';
+      case 'ramsize':
+        return '$value GB';
+      case 'totalarea':
+        return '$value sqm';
+      case 'age':
+        return '$value years';
+      case 'usagestatus':
+        return value.toString().split('_').map((word) => 
+          word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase()
+        ).join(' ');
+      default:
+        if (value is List) {
+          return value.join(', ');
+        }
+        return value.toString();
+    }
+  }
+
   List<Widget> _buildCustomFieldsContent() {
     // Get product data from the item
-    final product = item.product;
+    final Map<String, dynamic>? product = item.product;
     if (product == null) return [];
 
-    // Get relevant fields based on subcategory
-    final List<String> relevantFields;
-    switch (item.categoryId) {
-      // Cars category
-      case 4:
-        relevantFields = [
-          'carType',
-          'color',
-          'brand',
-          'model',
-        ];
-        break;
+    // Create a list to store field widgets
+    final List<Widget> fieldWidgets = [];
 
-      default:
-        switch (item.subCategoryId) {
-          // Laptops subcategory
-          case 2:
-            relevantFields = [
-              'screenSize',
-              'operatingSystem',
-              'releaseYear',
-              'ramSize',
-              'processor',
-              'brand',
-              'model',
-              'color',
-              'graphicCard'
-            ];
-            break;
+    // Get system fields from customFields
+    final systemFields = customFields;
+    if (systemFields != null) {
+      print('Building fields from: ${systemFields.fields}');
+      
+      // Process each field from system fields
+      for (final field in systemFields.fields) {
+        // Skip if the field has no value
+        if (field.value == null) continue;
+        
+        print('Processing field: ${field.key} with value: ${field.value}');
 
-          // Cameras & photos
-          case 3:
-            relevantFields = [
-              'releaseYear',
-              'color',
-              'regionOfManufacture',
-              'cameraType',
-              'brand',
-              'model'
-            ];
-            break;
+        // Format the field value based on type and key
+        final formattedValue = formatFieldValue(
+          field.key,
+          field.value,
+          type: field.type,
+        );
 
-          // Smart Phones
-          case 5:
-            relevantFields = [
-              'screenSize',
-              'operatingSystem',
-              'releaseYear',
-              'color',
-              'brand',
-              'model',
-              'memory',
-              'regionOfManufacture'
-            ];
-            break;
-
-          // Accessories
-          case 6:
-            relevantFields = ['color', 'type', 'material', 'brand', 'model'];
-            break;
-
-          // TVs & Audios
-          case 4:
-            relevantFields = [
-              'screenSize',
-              'releaseYear',
-              'color',
-              'regionOfManufacture',
-              'brand',
-              'model'
-            ];
-            break;
-
-          // Home Appliances
-          case 1:
-            relevantFields = ['age', 'model', 'brand', 'color'];
-            break;
-
-          default:
-            relevantFields = [];
-        }
-    }
-
-    // Define the fields to display
-    Map<String, dynamic> fields = {};
-
-    // Helper function to format field value
-    String formatFieldValue(String key, dynamic value) {
-      if (value == null) return 'Not specified';
-
-      switch (key) {
-        case 'screenSize':
-          return '$value inches';
-        case 'ramSize':
-          return '$value GB';
-        case 'memory':
-          return value.toString(); // May already include GB
-        case 'color':
-          if (value is List) {
-            return value.join(', ');
-          }
-          return value.toString();
-        case 'brand':
-          return value.toString();
-        case 'releaseYear':
-        // case 'year':
-          return value.toString();
-        case 'age':
-          return '$value years';
-        default:
-          return value.toString();
+        // Add field card widget
+        fieldWidgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: _buildFieldCard(
+              label: field.labelEn,
+              value: formattedValue,
+            ),
+          ),
+        );
       }
     }
-
-    // Add fields that are relevant for this subcategory
-    for (var field in relevantFields) {
-      if (product[field] != null) {
-        String label;
-        switch (field) {
-          case 'screenSize':
-            label = 'Screen Size';
-            break;
-          case 'operatingSystem':
-            label = 'Operating System';
-            break;
-          case 'releaseYear':
-            label = 'Release Year';
-            break;
-          case 'ramSize':
-            label = 'RAM';
-            break;
-          case 'regionOfManufacture':
-            label = 'Region of Manufacture';
-            break;
-          case 'graphicCard':
-            label = 'Graphics Card';
-            break;
-          case 'carType':
-            label = 'Car Type';
-            break;
-          case 'brand':
-            label = 'Brand';
-            break;
-          case 'model':
-            label = 'Model';
-            break;
-          case 'year':
-            label = 'Year';
-            break;
-          case 'color':
-            label = 'Color';
-            break;
-          case 'doors':
-            label = 'Doors';
-            break;
-          case 'condition':
-            label = 'Condition';
-            break;
-          case 'cameraType':
-            label = 'Camera Type';
-            break;
-          default:
-            // Capitalize first letter of each word
-            label = field
-                .split(RegExp(r'(?=[A-Z])'))
-                .map((e) => e.substring(0, 1).toUpperCase() + e.substring(1))
-                .join(' ');
-        }
-        fields[label] = formatFieldValue(field, product[field]);
-      }
-    }
-
-    // If no fields to display, return empty list
-    if (fields.isEmpty) return [];
-
-    // Convert fields into pairs for grid layout
-    return fields.entries.map((entry) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6), // Consistent spacing
-        child: _buildFieldCard(label: entry.key, value: entry.value.toString()),
-      );
-    }).toList();
+    return fieldWidgets;
   }
 
   Widget _buildFieldCard({required String label, required String value}) {

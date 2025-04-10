@@ -631,14 +631,12 @@ class ItemDetailsScreen extends StatelessWidget {
 
     CategoryFields? mergedFields;
     try {
-      // Fetch custom fields for the specific subcategory
-      final customFields =
-          await CustomFieldsService.getCustomFieldsBySubcategory(
-              item.subCategoryId.toString());
-      print('DEBUG: Custom fields fetched: $customFields');
+      // Fetch system fields
+      final systemFields = await CustomFieldsService.getSystemFields();
+      print('DEBUG: System fields fetched: $systemFields');
 
-      // Create a copy of custom fields to avoid modifying the original
-      mergedFields = CategoryFields(fields: List.from(customFields.fields));
+      // Create a copy of system fields to avoid modifying the original
+      mergedFields = CategoryFields(fields: List.from(systemFields.fields));
 
       // If item has custom fields, merge them
       if (item.customFields != null) {
@@ -670,18 +668,22 @@ class ItemDetailsScreen extends StatelessWidget {
 
         // Update field values from item details if available
         if (itemDetails != null) {
-          final customFieldsMap = itemDetails['customFields'];
-          print('  - Custom fields present: ${customFieldsMap != null}');
-          print('  - Custom fields type: ${customFieldsMap?.runtimeType}');
-
-          if (customFieldsMap is Map<String, dynamic>) {
-            print('\nDEBUG: Updating field values');
-            print('  - Fields to update: ${customFieldsMap.keys.toList()}');
-            mergedFields.updateFieldValues(customFieldsMap);
+          final product = itemDetails['product'] as Map<String, dynamic>?;
+          print('  - Product data present: ${product != null}');
+          
+          if (product != null) {
+            print('\nDEBUG: Updating field values from product');
+            print('  - Available product fields: ${product.keys.toList()}');
+            
+            // Update system field values from product data
+            for (var field in mergedFields.fields) {
+              final value = product[field.resKey];
+              if (value != null) {
+                field.value = value;
+                print('  - Updated ${field.key} with value: $value');
+              }
+            }
             print('  - Update complete');
-          } else if (customFieldsMap != null) {
-            print(
-                'WARNING: Unexpected custom fields type: ${customFieldsMap.runtimeType}');
           }
         }
       } catch (e) {

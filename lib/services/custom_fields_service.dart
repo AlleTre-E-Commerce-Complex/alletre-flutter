@@ -19,10 +19,26 @@ class CustomFieldsService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print('Creating CategoryFields from JSON: $data');
         if (data['success'] == true && data['data'] != null) {
-          final fields = CategoryFields.fromJson(data);
-          print('✅ Successfully parsed system fields');
-          return fields;
+          final List<Map<String, dynamic>> fields = [];
+          if (data['data'] is List) {
+            print('DEBUG: Processing direct list of ${data['data'].length} fields');
+            fields.addAll(List<Map<String, dynamic>>.from(data['data']));
+          } else if (data['data'] is Map) {
+            print('DEBUG: Processing map of fields');
+            final Map<String, dynamic> fieldsMap = data['data'];
+            fields.addAll(fieldsMap.entries.map((entry) => {
+                  'name': entry.key,
+                  'type': entry.value['type'] ?? 'text',
+                  'options': entry.value['options'],
+                  'isArray': entry.value['isArray'] ?? false,
+                }));
+          }
+          print('DEBUG: Total fields processed: ${fields.length}');
+          final categoryFields = CategoryFields.fromJson({'data': fields});
+          print('✅ Successfully created CategoryFields');
+          return categoryFields;
         }
       }
       
