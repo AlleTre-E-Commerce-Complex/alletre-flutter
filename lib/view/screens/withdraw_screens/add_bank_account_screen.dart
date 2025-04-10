@@ -6,9 +6,12 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
 import 'success_dialog.dart';
+import 'withdraw_screen.dart'; // Import WithdrawScreen
 
 class AddBankAccountScreen extends StatelessWidget {
-  const AddBankAccountScreen({super.key});
+  final double balance;
+  
+  const AddBankAccountScreen({super.key, required this.balance});
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +135,12 @@ class AddBankAccountScreen extends StatelessWidget {
                           barrierDismissible: false,
                           builder: (context) => const SuccessDialog(),
                         ).then((_) {
-                          Navigator.pop(context); // Close add account screen
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WithdrawScreen(balance: balance),
+                            ),
+                          );
                         });
                       }
                     } catch (e) {
