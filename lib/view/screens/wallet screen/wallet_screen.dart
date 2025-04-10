@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:provider/provider.dart';
+import '../withdraw_screens/withdraw_screen.dart';
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
@@ -316,7 +317,12 @@ class WalletScreen extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              // TODO: Implement withdraw functionality
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WithdrawScreen(balance: balance),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: secondaryColor,

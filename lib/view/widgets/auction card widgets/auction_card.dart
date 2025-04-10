@@ -428,7 +428,7 @@ class AuctionCard extends StatelessWidget {
             wishlistProvider.toggleWishlist(auction);
           } else if (icon == FontAwesomeIcons.shareFromSquare) {
             final String itemUrl =
-                'https://alletre.com/items/${auction.id}'; // Replace with your actual domain
+                'https://alletre.com/items/${auction.id}';
             await Share.share(
               'Check out this ${title.toLowerCase()}: ${auction.title}\n'
               '${title == "Listed Products" ? "Price" : "Starting bid"}: AED ${title == "Listed Products" ? auction.productListingPrice : auction.startBidAmount}\n'
