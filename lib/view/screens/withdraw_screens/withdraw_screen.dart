@@ -1,5 +1,6 @@
 import 'package:alletre_app/model/bank_account.dart';
 import 'package:alletre_app/services/bank_account_service.dart';
+import 'package:alletre_app/services/withdrawal_service.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
@@ -120,7 +121,7 @@ class WithdrawScreen extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           color: selectedIndex == index ? primaryColor : dividerColor,
-                                          width: selectedIndex == index ? 1.3 : 1,
+                                          width: selectedIndex == index ? 1.5 : 1,
                                         ),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
@@ -256,7 +257,7 @@ class WithdrawScreen extends StatelessWidget {
             
                   Center(
                     child: ElevatedButton(
-                      onPressed: !hasAccounts ? null : () {
+                      onPressed: !hasAccounts ? null : () async {
                         final amount = amountController.text;
                         if (selectedAccountIndex.value == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -297,6 +298,74 @@ class WithdrawScreen extends StatelessWidget {
                             ),
                           );
                           return;
+                        }
+
+                        // Submit withdrawal request
+                        try {
+                          final selectedAccount = bankAccounts[selectedAccountIndex.value!];
+                          await WithdrawalService.submitWithdrawalRequest(
+                            accountId: selectedAccount.id.toString(),
+                            amount: amountValue,
+                          );
+
+                          if (context.mounted) {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle_outline,
+                                        color: activeColor,
+                                        size: 64,
+                                      ),
+                                      const SizedBox(height: 24),
+                                      const Text(
+                                        'Success! Your withdrawal request has been processed successfully. Your funds are on their way, and you\'ll receive them shortly. Thank you for using our service!',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: onSecondaryColor,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 24),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: primaryColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'OK',
+                                          style: TextStyle(color: secondaryColor),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Center(child: Text(e.toString())),
+                                backgroundColor: errorColor,
+                              ),
+                            );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(       

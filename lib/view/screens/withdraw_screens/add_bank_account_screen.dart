@@ -121,6 +121,7 @@ class AddBankAccountScreen extends StatelessWidget {
                   if (formKey.currentState!.validate()) {
                     try {
                       final bankAccount = BankAccount(
+                        id: 0, // Server will assign the actual ID
                         accountHolderName: accountHolderController.text,
                         bankName: bankNameController.text,
                         accountNumber: accountNumberController.text,
