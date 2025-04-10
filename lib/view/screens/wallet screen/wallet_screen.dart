@@ -60,7 +60,8 @@ class WalletScreen extends StatelessWidget {
           transactionsResponse.data is List) {
         transactions = (transactionsResponse.data as List)
             .map((json) => WalletTransaction.fromJson(json))
-            .toList();
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
       }
 
       return {
