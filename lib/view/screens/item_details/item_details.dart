@@ -1,6 +1,4 @@
 // ignore_for_file: avoid_print
-
-import 'package:alletre_app/services/custom_fields_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,6 +10,8 @@ import 'package:alletre_app/model/custom_field_model.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
+import 'package:alletre_app/controller/providers/auction_details_provider.dart';
+import 'package:alletre_app/services/custom_fields_service.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_countdown.dart';
@@ -34,8 +34,6 @@ class ItemDetailsScreen extends StatelessWidget {
     required this.title,
   });
 
-  final ValueNotifier<bool> _isBuyNowTapped = ValueNotifier(false);
-
   @override
   Widget build(BuildContext context) {
     final auctionProvider = context.watch<AuctionProvider>();
@@ -44,6 +42,12 @@ class ItemDetailsScreen extends StatelessWidget {
       final auctionProvider =
           Provider.of<AuctionProvider>(context, listen: false);
       auctionProvider.joinAuctionRoom(item.id.toString());
+
+      // Fetch auction details to get username
+      if (item.isAuctionProduct) {
+        final detailsProvider = Provider.of<AuctionDetailsProvider>(context, listen: false);
+        detailsProvider.fetchUserName(item.id.toString());
+      }
     });
 
     return Scaffold(
@@ -203,16 +207,34 @@ class ItemDetailsScreen extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Expanded(
-                              child: Text(
-                                item.postedBy,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(
-                                        fontSize: 11,
-                                        color: primaryColor,
-                                        fontWeight: FontWeight.w600),
-                              ),
+                              child: item.isAuctionProduct
+                                  ? Consumer<AuctionDetailsProvider>(
+                                      builder: (context, detailsProvider, _) {
+                                        final userName = detailsProvider.getUserName(item.id.toString());
+                                        return Text(
+                                          userName ?? item.postedBy,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(
+                                                fontSize: 11,
+                                                color: primaryColor,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        );
+                                      },
+                                    )
+                                  : Text(
+                                      item.product?['user']?['userName'] as String? ?? item.postedBy,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .copyWith(
+                                            fontSize: 11,
+                                            color: primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
                             ),
                           ],
                         ),
@@ -354,58 +376,41 @@ class ItemDetailsScreen extends StatelessWidget {
                           if (item.buyNowEnabled) ...[
                             const SizedBox(width: 15),
                             Expanded(
-                              child: ValueListenableBuilder<bool>(
-                                valueListenable: _isBuyNowTapped,
-                                builder: (context, isTapped, child) {
-                                  return InkWell(
-                                    onTap: () {
-                                      _isBuyNowTapped.value = true;
-                                      Future.delayed(
-                                          const Duration(milliseconds: 100),
-                                          () {
-                                        _isBuyNowTapped.value = false;
-                                      });
-                                    },
-                                    borderRadius: BorderRadius.circular(6),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 6, horizontal: 8),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: primaryColor, width: 1.5),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            'Buy Now',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge
-                                                ?.copyWith(
-                                                    color: onSecondaryColor,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 13),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Center(
-                                            child: Text(
-                                              'AED ${NumberFormat('#,##,###.##').format(double.tryParse(item.buyNowPrice) ?? 0)}',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleLarge
-                                                  ?.copyWith(
-                                                      color: primaryColor,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize: 12),
-                                            ),
-                                          ),
-                                        ],
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: primaryColor, width: 1.5),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Buy Now',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                              color: onSecondaryColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Center(
+                                      child: Text(
+                                        'AED ${NumberFormat('#,##,###.##').format(double.tryParse(item.buyNowPrice) ?? 0)}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                                color: primaryColor,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12),
                                       ),
                                     ),
-                                  );
-                                },
+                                  ],
+                                ),
                               ),
                             ),
                           ],

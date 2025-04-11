@@ -7,6 +7,7 @@ class AuctionItem {
   final int id;
   final int productId;
   final String postedBy;
+  final String? userName;
   final String phone;
   final String title;
   final String price;
@@ -40,6 +41,7 @@ class AuctionItem {
     required this.id,
     required this.productId,
     required this.postedBy,
+    this.userName,
     required this.phone,
     required this.title,
     required this.price,
@@ -75,6 +77,7 @@ class AuctionItem {
     int? id,
     int? productId,
     String? postedBy,
+    String? userName,
     String? phone,
     String? title,
     String? price,
@@ -107,6 +110,7 @@ class AuctionItem {
       id: id ?? this.id,
       productId: productId ?? this.productId,
       postedBy: postedBy ?? this.postedBy,
+      userName: userName ?? this.userName,
       phone: phone ?? this.phone,
       title: title ?? this.title,
       price: price ?? this.price,
@@ -288,7 +292,8 @@ class AuctionItem {
       return AuctionItem(
         id: json['id'] as int? ?? 0,
         productId: product['id'] as int? ?? 0,
-        postedBy: product['user']?['userName'] as String? ?? '',
+        postedBy: json['user']?['userName'] as String? ?? '',
+        userName: json['user']?['userName'] as String?,
         phone: product['user']?['phone'] as String? ?? '',
         title: product['title'] as String? ?? '',
         price: json['price'] as String? ?? '0',
@@ -329,6 +334,7 @@ class AuctionItem {
       id: 0,
       productId: 0,
       postedBy: '',
+      userName: null,
       phone: '',
       title: '',
       description: '',
@@ -382,6 +388,7 @@ class AuctionItem {
       'productId': productId,
       'title': title,
       'postedBy': postedBy,
+      'userName': userName,
       'phone': phone,
       'price': price,
       'productListingPrice': productListingPrice,
