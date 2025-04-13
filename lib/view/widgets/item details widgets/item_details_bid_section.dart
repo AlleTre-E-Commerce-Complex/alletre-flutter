@@ -1,3 +1,5 @@
+import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -23,6 +25,7 @@ class ItemDetailsBidSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     if (!item.isAuctionProduct || (title == "Similar Products" && !item.isAuctionProduct)) {
       return Column(
         children: [
@@ -206,7 +209,11 @@ class ItemDetailsBidSection extends StatelessWidget {
                       )
                     : ElevatedButton(
                         onPressed: () {
-                          contactProvider.toggleContactButtons(item.id);
+                          if (!isLoggedIn) {
+                            AuthHelper.showAuthenticationRequiredMessage(context);
+                          } else {
+                            contactProvider.toggleContactButtons(item.id);
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
@@ -313,7 +320,9 @@ class ItemDetailsBidSection extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              // Handle bid submission
+              if (!isLoggedIn) {
+                  AuthHelper.showAuthenticationRequiredMessage(context);
+                }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,

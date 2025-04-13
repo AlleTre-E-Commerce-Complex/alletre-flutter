@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -27,7 +29,7 @@ class ItemDetailsScreen extends StatelessWidget {
   final UserModel user;
   final String title;
 
-  ItemDetailsScreen({
+  const ItemDetailsScreen({
     super.key,
     required this.item,
     required this.user,
@@ -36,6 +38,7 @@ class ItemDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -45,7 +48,8 @@ class ItemDetailsScreen extends StatelessWidget {
 
       // Fetch auction details to get username
       if (item.isAuctionProduct) {
-        final detailsProvider = Provider.of<AuctionDetailsProvider>(context, listen: false);
+        final detailsProvider =
+            Provider.of<AuctionDetailsProvider>(context, listen: false);
         detailsProvider.fetchUserName(item.id.toString());
       }
     });
@@ -67,7 +71,13 @@ class ItemDetailsScreen extends StatelessWidget {
                       isInWishlist ? Icons.bookmark : FontAwesomeIcons.bookmark,
                       color: isInWishlist ? primaryColor : null,
                       size: 18),
-                  onPressed: () => wishlistProvider.toggleWishlist(item),
+                  onPressed: () {
+                    if (!isLoggedIn) {
+                      AuthHelper.showAuthenticationRequiredMessage(context);
+                    } else {
+                      wishlistProvider.toggleWishlist(item);
+                    }
+                  },
                   padding: const EdgeInsets.only(right: 2),
                   constraints: const BoxConstraints(),
                 );
@@ -210,7 +220,8 @@ class ItemDetailsScreen extends StatelessWidget {
                               child: item.isAuctionProduct
                                   ? Consumer<AuctionDetailsProvider>(
                                       builder: (context, detailsProvider, _) {
-                                        final userName = detailsProvider.getUserName(item.id.toString());
+                                        final userName = detailsProvider
+                                            .getUserName(item.id.toString());
                                         return Text(
                                           userName ?? item.postedBy,
                                           style: Theme.of(context)
@@ -225,7 +236,9 @@ class ItemDetailsScreen extends StatelessWidget {
                                       },
                                     )
                                   : Text(
-                                      item.product?['user']?['userName'] as String? ?? item.postedBy,
+                                      item.product?['user']?['userName']
+                                              as String? ??
+                                          item.postedBy,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyLarge!
@@ -376,14 +389,25 @@ class ItemDetailsScreen extends StatelessWidget {
                           if (item.buyNowEnabled) ...[
                             const SizedBox(width: 15),
                             Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 6, horizontal: 8),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: primaryColor, width: 1.5),
-                                  borderRadius: BorderRadius.circular(6),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryColor.withOpacity(0.1),
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    side: const BorderSide(
+                                        color: primaryColor, width: 1.2),
+                                  ),
                                 ),
+                                onPressed: () {
+                                  if (!isLoggedIn) {
+                                    AuthHelper
+                                        .showAuthenticationRequiredMessage(
+                                            context);
+                                  }
+                                },
                                 child: Column(
                                   children: [
                                     Text(
@@ -392,22 +416,22 @@ class ItemDetailsScreen extends StatelessWidget {
                                           .textTheme
                                           .titleLarge
                                           ?.copyWith(
-                                              color: onSecondaryColor,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 13),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: onSecondaryColor,
+                                          ),
                                     ),
                                     const SizedBox(height: 5),
-                                    Center(
-                                      child: Text(
-                                        'AED ${NumberFormat('#,##,###.##').format(double.tryParse(item.buyNowPrice) ?? 0)}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge
-                                            ?.copyWith(
-                                                color: primaryColor,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12),
-                                      ),
+                                    Text(
+                                      'AED ${NumberFormat('#,##,###.##').format(double.tryParse(item.buyNowPrice) ?? 0)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: primaryColor,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -663,7 +687,8 @@ class ItemDetailsScreen extends StatelessWidget {
         if (item.isAuctionProduct) {
           itemDetails = await CustomFieldsService.getAuctionDetails(itemId);
         } else if (item.productId > 0) {
-          itemDetails = await CustomFieldsService.getListedProductDetails(itemId);
+          itemDetails =
+              await CustomFieldsService.getListedProductDetails(itemId);
         } else {
           print('WARNING: Invalid product ID ${item.productId}');
         }
@@ -675,11 +700,11 @@ class ItemDetailsScreen extends StatelessWidget {
         if (itemDetails != null) {
           final product = itemDetails['product'] as Map<String, dynamic>?;
           print('  - Product data present: ${product != null}');
-          
+
           if (product != null) {
             print('\nDEBUG: Updating field values from product');
             print('  - Available product fields: ${product.keys.toList()}');
-            
+
             // Update system field values from product data
             for (var field in mergedFields.fields) {
               final value = product[field.resKey];

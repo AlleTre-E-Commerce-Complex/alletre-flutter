@@ -1,7 +1,7 @@
-import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:provider/provider.dart';
+import '../../../utils/auth_helper.dart';
 import '../../screens/auction screen/product_details_screen.dart';
 
 class CreateAuctionButton extends StatelessWidget {
@@ -55,16 +55,11 @@ class CreateAuctionButton extends StatelessWidget {
             offset: const Offset(0, 40), // Position dropdown below the button
             child: FloatingActionButton.extended(
               heroTag: _getUniqueHeroTag(), // Use unique hero tag
-              onPressed: isLoggedIn
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LoginPage(),
-                        ),
-                      );
-                    },
+              onPressed: () {
+                if (!isLoggedIn) {
+                  AuthHelper.showAuthenticationRequiredMessage(context);
+                }
+              },
               label: Text(
                 'Sell Now',
                 style: TextStyle(

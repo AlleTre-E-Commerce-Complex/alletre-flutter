@@ -1,7 +1,10 @@
+import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:alletre_app/utils/images/images.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppbar({super.key});
@@ -42,9 +45,14 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
           IconButton(
             icon: const Icon(Icons.notifications, color: secondaryColor, size: 22),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Notifications Clicked!')),
-              );
+              final isLoggedIn = Provider.of<LoggedInProvider>(context, listen: false).isLoggedIn;
+              if (!isLoggedIn) {
+                AuthHelper.showAuthenticationRequiredMessage(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Notifications Clicked!')),
+                );
+              }
             },
           ),
         ],

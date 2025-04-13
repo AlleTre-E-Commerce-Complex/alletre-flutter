@@ -1,15 +1,15 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:flutter/material.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_card.dart';
-import 'package:provider/provider.dart';
-import '../../widgets/common widgets/footer_elements_appbar.dart';
-import '../../widgets/home widgets/search_field_widget.dart';
+import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/search_field_widget.dart';
 import '../auction screen/product_details_screen.dart';
-import '../login screen/login_page.dart';
+import '../../../utils/auth_helper.dart';
 
 class AllAuctionsScreen extends StatelessWidget {
   final String title;
@@ -89,11 +89,16 @@ class AllAuctionsScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () {
-                            if (title == "Live Auctions") {
-                              isLoggedIn ? Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())) : Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
-                            } else if (title == "Listed Products") {
-                              isLoggedIn ? Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())) : Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                          onPressed: () async {
+                            if (isLoggedIn) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ProductDetailsScreen(),
+                                ),
+                              );
+                            } else {
+                              AuthHelper.showAuthenticationRequiredMessage(context);
                             }
                           },
                           child: Text(

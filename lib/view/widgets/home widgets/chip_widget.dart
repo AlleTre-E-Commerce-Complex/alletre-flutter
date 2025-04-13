@@ -1,43 +1,28 @@
-import 'package:alletre_app/model/user_model.dart';
-import 'package:alletre_app/view/screens/wallet%20screen/wallet_screen.dart';
-import 'package:alletre_app/view/screens/wishlist%20screen/wishlist_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/controller/helpers/chip_widget_helper.dart';
-import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// ignore_for_file: use_build_context_synchronously
 
-import '../../screens/login screen/login_page.dart';
+import 'package:flutter/material.dart';
+import '../../../utils/auth_helper.dart';
+import '../../../utils/themes/app_theme.dart';
+import '../../screens/wallet screen/wallet_screen.dart';
+import '../../screens/wishlist screen/wishlist_screen.dart';
+import 'package:alletre_app/model/user_model.dart';
+import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
+import 'package:alletre_app/controller/helpers/chip_widget_helper.dart';
 
 class ChipWidget extends StatelessWidget {
   final String? title;
   const ChipWidget({super.key, this.title});
 
-  Future<bool> _isAuthenticated() async {
-    const storage = FlutterSecureStorage();
-    final token = await storage.read(key: 'access_token');
-    return token != null;
-  }
-
   void _handleAuthenticatedNavigation(BuildContext context, Widget page) async {
-    if (await _isAuthenticated()) {
+    if (await AuthHelper.isAuthenticated()) {
       // User is authenticated, navigate to the requested page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => page),
       );
     } else {
-      // User is not authenticated, show message and navigate to login
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please login to access this feature'),
-          backgroundColor: errorColor,
-        ),
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
+      // User is not authenticated, only show message
+      AuthHelper.showAuthenticationRequiredMessage(context);
     }
   }
 

@@ -1,6 +1,8 @@
 import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
+import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:alletre_app/utils/extras/search_highlight.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -414,6 +416,7 @@ class AuctionCard extends StatelessWidget {
 
   Widget _buildIconButton(
       BuildContext context, IconData icon, AuctionItem auction) {
+    final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     final wishlistProvider = Provider.of<WishlistProvider>(context);
     final isWishlisted = wishlistProvider.isWishlisted(auction.id);
     return Container(
@@ -425,7 +428,11 @@ class AuctionCard extends StatelessWidget {
       child: GestureDetector(
         onTap: () async {
           if (icon == FontAwesomeIcons.bookmark) {
-            wishlistProvider.toggleWishlist(auction);
+            if (!isLoggedIn) {
+                      AuthHelper.showAuthenticationRequiredMessage(context);
+                    } else {
+                      wishlistProvider.toggleWishlist(auction);
+                    }
           } else if (icon == FontAwesomeIcons.shareFromSquare) {
             final String itemUrl =
                 'https://alletre.com/items/${auction.id}';

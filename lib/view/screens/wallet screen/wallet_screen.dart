@@ -50,6 +50,8 @@ class WalletScreen extends StatelessWidget {
         } else {
           balance = double.tryParse(balanceData.toString()) ?? 0.0;
         }
+      } else if (balanceResponse.statusCode == 403) {
+        throw Exception('Session expired. Please login again.');
       }
 
       // Fetch transactions
@@ -62,11 +64,14 @@ class WalletScreen extends StatelessWidget {
             .map((json) => WalletTransaction.fromJson(json))
             .toList()
           ..sort((a, b) => b.date.compareTo(a.date));
+      } else if (transactionsResponse.statusCode == 403) {
+        throw Exception('Session expired. Please login again.');
       }
 
       return {
         'balance': balance,
         'transactions': transactions,
+        'needsAuth': false,
       };
     } catch (e) {
       debugPrint('Error fetching wallet data: $e');
@@ -77,6 +82,7 @@ class WalletScreen extends StatelessWidget {
       return {
         'balance': 0.0,
         'transactions': [],
+        'needsAuth': false,
       };
     }
   }
@@ -154,6 +160,38 @@ class WalletScreen extends StatelessWidget {
           final data = snapshot.data!;
           final walletBalance = data['balance'] as double;
           final transactions = data['transactions'] as List<WalletTransaction>;
+          final needsAuth = data['needsAuth'] as bool;
+
+          if (needsAuth) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 48,
+                    color: Theme.of(context).disabledColor,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Please login to view wallet data',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).disabledColor,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to login screen using TabIndexProvider
+                      context.read<TabIndexProvider>().updateIndex(18); // login page index
+                    },
+                    child: const Text('Login'),
+                  ),
+                ],
+              ),
+            );
+          }
 
           return RefreshIndicator(
             onRefresh: () async {

@@ -15,6 +15,10 @@ class ApiService {
     final token = await _getToken();
     debugPrint('🔍 API Request: GET $baseUrl$endpoint');
 
+    if (token == null) {
+      throw Exception('No access token found');
+    }
+
     try {
       final response = await _dio.get(
         baseUrl + endpoint,
@@ -47,6 +51,10 @@ class ApiService {
     debugPrint('🔍 API Request: POST $baseUrl$endpoint');
     debugPrint('🔍 Request data: $data');
 
+    if (token == null) {
+      throw Exception('No access token found');
+    }
+
     try {
       final response = await _dio.post(
         baseUrl + endpoint,
@@ -65,14 +73,12 @@ class ApiService {
 
       return response;
     } on DioException catch (e) {
-    debugPrint('🔍 API Error status: ${e.response?.statusCode}');
-    debugPrint('🔍 API Error data: ${e.response?.data}');
-    debugPrint('🔍 API Error message: ${e.message}');
-    debugPrint('🔍 API Error URI: ${e.requestOptions.uri}');
-    
-    rethrow;
-  }
-    catch (e) {
+      debugPrint('🔍 API Error status: ${e.response?.statusCode}');
+      debugPrint('🔍 API Error data: ${e.response?.data}');
+      debugPrint('🔍 API Error message: ${e.message}');
+      debugPrint('🔍 API Error URI: ${e.requestOptions.uri}');
+      rethrow;
+    } catch (e) {
       debugPrint('🔍 Unexpected API error: $e');
       rethrow;
     }
