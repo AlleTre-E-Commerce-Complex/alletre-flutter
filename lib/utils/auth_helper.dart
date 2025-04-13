@@ -14,10 +14,10 @@ class AuthHelper {
   /// Show a snackbar message for unauthenticated users
   static void showAuthenticationRequiredMessage(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Center(child: Text('Please login')),
-        backgroundColor: errorColor,
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: const Center(child: Text('This action requires user login')),
+        backgroundColor: avatarColor,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
