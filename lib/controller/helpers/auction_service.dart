@@ -351,11 +351,10 @@ class AuctionService {
       List<AuctionItem> allItems = [];
       int page = 1;
       bool hasMore = true;
-      const int limit = 50; // Fetch more items per request
 
       while (hasMore) {
         final response = await http.get(
-          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main?page=$page&limit=$limit'),
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main?page=$page'),
           headers: headers,
         );
 
@@ -368,17 +367,18 @@ class AuctionService {
                 .map((item) => AuctionItem.fromJson(item))
                 .toList();
             
-            if (items.isEmpty) {
-              hasMore = false;
-            } else {
-              allItems.addAll(items);
-              if (items.length < limit) {
-                hasMore = false;
-              } else {
-                page++;
-              }
-            }
+            final pagination = data['pagination'] as Map<String, dynamic>;
+            final totalPages = pagination['totalPages'] as int;
+            
+            allItems.addAll(items);
             debugPrint('Successfully parsed ${items.length} live auctions for page $page');
+            
+            if (page >= totalPages) {
+              hasMore = false;
+              debugPrint('Reached last page of live auctions');
+            } else {
+              page++;
+            }
           } else {
             hasMore = false;
           }
@@ -424,12 +424,10 @@ class AuctionService {
       List<AuctionItem> allItems = [];
       int page = 1;
       bool hasMore = true;
-      const int limit = 50; // Fetch more items per request
 
       while (hasMore) {
         final response = await http.get(
-          Uri.parse(
-              '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?page=$page&limit=$limit'),
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?page=$page'),
           headers: headers,
         );
 
@@ -442,19 +440,19 @@ class AuctionService {
                 .map((item) => AuctionItem.fromJson(item))
                 .toList();
             
-            if (items.isEmpty) {
-              hasMore = false;
-            } else {
-              allItems.addAll(items);
-              if (items.length < limit) {
-                hasMore = false;
-              } else {
-                page++;
-              }
-            }
+            final pagination = data['pagination'] as Map<String, dynamic>;
+            final totalPages = pagination['totalPages'] as int;
+            
+            allItems.addAll(items);
             debugPrint('Successfully parsed ${items.length} listed products for page $page');
+            
+            if (page >= totalPages) {
+              hasMore = false;
+              debugPrint('Reached last page of listed products');
+            } else {
+              page++;
+            }
           } else {
-            debugPrint('Invalid response format: ${response.body}');
             hasMore = false;
           }
         } else if (response.statusCode == 401 && accessToken != null) {
@@ -497,42 +495,42 @@ class AuctionService {
       }
 
       List<AuctionItem> allAuctions = [];
-      const int limit = 50; // Fetch more items per request
 
       // Fetch upcoming auctions with pagination
-      int upcomingPage = 1;
-      bool hasMoreUpcoming = true;
+      int page = 1;
+      bool hasMore = true;
 
-      while (hasMoreUpcoming) {
-        final upcomingResponse = await http.get(
-          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming?page=$upcomingPage&limit=$limit'),
+      while (hasMore) {
+        final response = await http.get(
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming?page=$page'),
           headers: headers,
         );
 
-        debugPrint('Upcoming Auctions Response Code: ${upcomingResponse.statusCode} for page $upcomingPage');
+        debugPrint('Upcoming Auctions Response Code: ${response.statusCode} for page $page');
 
-        if (upcomingResponse.statusCode == 200) {
-          final data = jsonDecode(upcomingResponse.body);
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
             final items = (data['data'] as List)
                 .map((item) => AuctionItem.fromJson(item))
                 .toList();
             
-            if (items.isEmpty) {
-              hasMoreUpcoming = false;
+            final pagination = data['pagination'] as Map<String, dynamic>;
+            final totalPages = pagination['totalPages'] as int;
+            
+            allAuctions.addAll(items);
+            debugPrint('Successfully parsed ${items.length} upcoming auctions for page $page');
+            
+            if (page >= totalPages) {
+              hasMore = false;
+              debugPrint('Reached last page of upcoming auctions');
             } else {
-              allAuctions.addAll(items);
-              if (items.length < limit) {
-                hasMoreUpcoming = false;
-              } else {
-                upcomingPage++;
-              }
+              page++;
             }
-            debugPrint('Successfully parsed ${items.length} upcoming auctions for page $upcomingPage');
           } else {
-            hasMoreUpcoming = false;
+            hasMore = false;
           }
-        } else if (upcomingResponse.statusCode == 401 && accessToken != null) {
+        } else if (response.statusCode == 401 && accessToken != null) {
           final userService = UserService();
           final refreshResult = await userService.refreshTokens();
           if (refreshResult['success']) {
@@ -540,10 +538,10 @@ class AuctionService {
             headers['Authorization'] = 'Bearer $accessToken';
             continue;
           } else {
-            hasMoreUpcoming = false;
+            hasMore = false;
           }
         } else {
-          hasMoreUpcoming = false;
+          hasMore = false;
         }
       }
 
@@ -553,7 +551,7 @@ class AuctionService {
 
       while (hasMoreScheduled) {
         final scheduledResponse = await http.get(
-          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/scheduled?page=$scheduledPage&limit=$limit'),
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/scheduled?page=$scheduledPage'),
           headers: headers,
         );
 
@@ -566,17 +564,18 @@ class AuctionService {
                 .map((item) => AuctionItem.fromJson(item))
                 .toList();
             
-            if (items.isEmpty) {
-              hasMoreScheduled = false;
-            } else {
-              allAuctions.addAll(items);
-              if (items.length < limit) {
-                hasMoreScheduled = false;
-              } else {
-                scheduledPage++;
-              }
-            }
+            final pagination = data['pagination'] as Map<String, dynamic>;
+            final totalPages = pagination['totalPages'] as int;
+            
+            allAuctions.addAll(items);
             debugPrint('Successfully parsed ${items.length} scheduled auctions for page $scheduledPage');
+            
+            if (scheduledPage >= totalPages) {
+              hasMoreScheduled = false;
+              debugPrint('Reached last page of scheduled auctions');
+            } else {
+              scheduledPage++;
+            }
           } else {
             hasMoreScheduled = false;
           }
@@ -617,64 +616,62 @@ class AuctionService {
         headers['Authorization'] = 'Bearer $accessToken';
       }
 
-      List<AuctionItem> allItems = [];
-      int page = 1;
-      bool hasMore = true;
-      const int limit = 50; // Fetch more items per request
+      // Only fetch first page with 10 items
+      final response = await http.get(
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions?page=1&limit=10'),
+        headers: headers,
+      );
 
-      while (hasMore) {
-        final response = await http.get(
-          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions?page=$page&limit=$limit'),
-          headers: headers,
-        );
+      debugPrint('Expired Auctions Response Code: ${response.statusCode}');
 
-        debugPrint('Expired Auctions Response Code: ${response.statusCode} for page $page');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] is List) {
+          final items = (data['data'] as List)
+              .map((item) => AuctionItem.fromJson(item))
+              .toList();
+          
+          // Filter out cancelled auctions
+          final validItems = items.where((auction) =>
+            auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE'
+          ).toList();
+          
+          debugPrint('Successfully parsed ${validItems.length} expired auctions');
+          return validItems;
+        }
+      } else if (response.statusCode == 401 && accessToken != null) {
+        // Only try token refresh if we had a token and got 401
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          final retryResponse = await http.get(
+            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions?page=1&limit=10'),
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+          );
 
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List)
-                .map((item) => AuctionItem.fromJson(item))
-                .toList();
-            
-            if (items.isEmpty) {
-              hasMore = false;
-            } else {
-              // Filter out cancelled auctions
+          if (retryResponse.statusCode == 200) {
+            final data = jsonDecode(retryResponse.body);
+            if (data['success'] == true && data['data'] is List) {
+              final items = (data['data'] as List)
+                  .map((item) => AuctionItem.fromJson(item))
+                  .toList();
+              
               final validItems = items.where((auction) =>
                 auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE'
               ).toList();
               
-              allItems.addAll(validItems);
-              if (items.length < limit) {
-                hasMore = false;
-              } else {
-                page++;
-              }
+              return validItems;
             }
-            debugPrint('Successfully parsed ${items.length} expired auctions for page $page');
-          } else {
-            hasMore = false;
           }
-        } else if (response.statusCode == 401 && accessToken != null) {
-          // Only try token refresh if we had a token and got 401
-          final userService = UserService();
-          final refreshResult = await userService.refreshTokens();
-          if (refreshResult['success']) {
-            accessToken = refreshResult['data']['accessToken'];
-            headers['Authorization'] = 'Bearer $accessToken';
-            // Continue with the same page
-            continue;
-          } else {
-            hasMore = false;
-          }
-        } else {
-          hasMore = false;
         }
       }
 
-      debugPrint('Total expired auctions fetched: ${allItems.length}');
-      return allItems;
+      return [];
     } catch (e) {
       debugPrint('Error fetching expired auctions: $e');
       return [];

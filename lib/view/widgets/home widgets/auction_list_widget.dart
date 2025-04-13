@@ -69,33 +69,8 @@ class AuctionListWidget extends StatelessWidget {
                   ),
                   onPressed: () async {
                     debugPrint('See all clicked for: $title');
-                    final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
-                    List<AuctionItem> fullList = [];
-
-                    // Fetch the full list based on the section
-                    if (title == "Live Auctions") {
-                      debugPrint('Fetching live auctions...');
-                      await auctionProvider.getLiveAuctions();
-                      fullList = auctionProvider.liveAuctions;
-                      debugPrint('Fetched ${fullList.length} live auctions');
-                    } else if (title == "Listed Products") {
-                      debugPrint('Fetching listed products...');
-                      await auctionProvider.getListedProducts();
-                      fullList = auctionProvider.listedProducts;
-                      debugPrint('Fetched ${fullList.length} listed products');
-                    } else if (title == "Upcoming Auctions") {
-                      debugPrint('Fetching upcoming auctions...');
-                      await auctionProvider.getUpcomingAuctions();
-                      fullList = auctionProvider.upcomingAuctions;
-                      debugPrint('Fetched ${fullList.length} upcoming auctions');
-                    } else if (title == "Expired Auctions") {
-                      debugPrint('Fetching expired auctions...');
-                      await auctionProvider.getExpiredAuctions();
-                      fullList = auctionProvider.expiredAuctions;
-                      debugPrint('Fetched ${fullList.length} expired auctions');
-                    }
-
-                    if (!context.mounted) return;
+                    // Use the existing auctions list instead of fetching again
+                    final fullList = auctions;
                     debugPrint('Navigating to AllAuctionsScreen with ${fullList.length} items');
                     
                     Navigator.push(
