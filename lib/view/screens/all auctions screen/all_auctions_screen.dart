@@ -27,6 +27,7 @@ class AllAuctionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('AllAuctionsScreen build called with ${auctions.length} items');
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     
     final screenWidth = MediaQuery.of(context).size.width;
@@ -43,6 +44,8 @@ class AllAuctionsScreen extends StatelessWidget {
                     .toLowerCase()
                     .contains(auctionProvider.searchQuery.toLowerCase()))
             .toList();
+    
+    debugPrint('Filtered auctions count: ${filteredAuctions.length}');
 
     return Scaffold(
       appBar: NavbarElementsAppbar(

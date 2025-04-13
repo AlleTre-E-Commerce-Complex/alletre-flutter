@@ -38,7 +38,37 @@ class CreateAuctionValidation {
   }
 
   static String? validatePrice(String? value) {
-    return value!.isEmpty ? "Enter start price" : null;
+    if (value == null || value.isEmpty) {
+      return "Enter start price";
+    }
+    final price = double.tryParse(value);
+    if (price == null || price <= 0) {
+      return "Enter a valid price";
+    }
+    return null;
+  }
+
+  static String? validatePurchasePrice(String? value, String startPrice) {
+    if (value == null || value.isEmpty) {
+      return "Enter purchase price";
+    }
+
+    final purchasePrice = double.tryParse(value);
+    final startingPrice = double.tryParse(startPrice);
+
+    if (purchasePrice == null || purchasePrice <= 0) {
+      return "Enter a valid price";
+    }
+
+    if (startingPrice == null || startingPrice <= 0) {
+      return "Invalid start price";
+    }
+
+    if (purchasePrice < startingPrice * 1.3) {
+      return "Purchase price must be at least 30% more than\nstart price";
+    }
+
+    return null;
   }
 
   // Custom field validation methods

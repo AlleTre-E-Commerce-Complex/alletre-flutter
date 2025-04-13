@@ -348,51 +348,59 @@ class AuctionService {
         headers['Authorization'] = 'Bearer $accessToken';
       }
 
-      final response = await http.get(
-        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main'),
-        headers: headers,
-      );
+      List<AuctionItem> allItems = [];
+      int page = 1;
+      bool hasMore = true;
+      const int limit = 50; // Fetch more items per request
 
-      debugPrint('Live Auctions Response Code: ${response.statusCode}');
+      while (hasMore) {
+        final response = await http.get(
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main?page=$page&limit=$limit'),
+          headers: headers,
+        );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['success'] == true && data['data'] is List) {
-          final items = (data['data'] as List)
-              .map((item) => AuctionItem.fromJson(item))
-              .toList();
-          debugPrint('Successfully parsed ${items.length} live auctions');
-          return items;
-        }
-      } else if (response.statusCode == 401 && accessToken != null) {
-        // Only try token refresh if we had a token and got 401
-        final userService = UserService();
-        final refreshResult = await userService.refreshTokens();
-        if (refreshResult['success']) {
-          accessToken = refreshResult['data']['accessToken'];
-          final retryResponse = await http.get(
-            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/main'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-          );
+        debugPrint('Live Auctions Response Code: ${response.statusCode} for page $page');
 
-          if (retryResponse.statusCode == 200) {
-            final data = jsonDecode(retryResponse.body);
-            if (data['success'] == true && data['data'] is List) {
-              return (data['data'] as List)
-                  .map((item) => AuctionItem.fromJson(item))
-                  .toList();
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List)
+                .map((item) => AuctionItem.fromJson(item))
+                .toList();
+            
+            if (items.isEmpty) {
+              hasMore = false;
+            } else {
+              allItems.addAll(items);
+              if (items.length < limit) {
+                hasMore = false;
+              } else {
+                page++;
+              }
             }
+            debugPrint('Successfully parsed ${items.length} live auctions for page $page');
+          } else {
+            hasMore = false;
           }
+        } else if (response.statusCode == 401 && accessToken != null) {
+          // Only try token refresh if we had a token and got 401
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            // Continue with the same page
+            continue;
+          } else {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
         }
       }
 
-      debugPrint(
-          'Live auctions returned non-200 status: ${response.statusCode}');
-      return [];
+      debugPrint('Total live auctions fetched: ${allItems.length}');
+      return allItems;
     } catch (e) {
       debugPrint('Error fetching live auctions: $e');
       return [];
@@ -413,61 +421,63 @@ class AuctionService {
         headers['Authorization'] = 'Bearer $accessToken';
       }
 
-      // Make the API call
-      final response = await http.get(
-        Uri.parse(
-            '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products'),
-        headers: headers,
-      );
+      List<AuctionItem> allItems = [];
+      int page = 1;
+      bool hasMore = true;
+      const int limit = 50; // Fetch more items per request
 
-      debugPrint('Listed Products Response Code: ${response.statusCode}');
+      while (hasMore) {
+        final response = await http.get(
+          Uri.parse(
+              '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?page=$page&limit=$limit'),
+          headers: headers,
+        );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['success'] == true && data['data'] is List) {
-          final items = (data['data'] as List)
-              .map((item) => AuctionItem.fromJson(item))
-              .toList();
-          debugPrint('Successfully parsed ${items.length} listed products');
-          return items;
-        } else {
-          debugPrint('Invalid response format: ${response.body}');
-          return [];
-        }
-      } else if (response.statusCode == 401 && accessToken != null) {
-        // Only try token refresh if we had a token and got 401
-        final userService = UserService();
-        final refreshResult = await userService.refreshTokens();
-        if (refreshResult['success']) {
-          accessToken = refreshResult['data']['accessToken'];
-          final retryResponse = await http.get(
-            Uri.parse(
-                '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-          );
+        debugPrint('Listed Products Response Code: ${response.statusCode} for page $page');
 
-          if (retryResponse.statusCode == 200) {
-            final data = jsonDecode(retryResponse.body);
-            if (data['success'] == true && data['data'] is List) {
-              return (data['data'] as List)
-                  .map((item) => AuctionItem.fromJson(item))
-                  .toList();
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List)
+                .map((item) => AuctionItem.fromJson(item))
+                .toList();
+            
+            if (items.isEmpty) {
+              hasMore = false;
+            } else {
+              allItems.addAll(items);
+              if (items.length < limit) {
+                hasMore = false;
+              } else {
+                page++;
+              }
             }
+            debugPrint('Successfully parsed ${items.length} listed products for page $page');
+          } else {
+            debugPrint('Invalid response format: ${response.body}');
+            hasMore = false;
           }
-          throw Exception('Authentication failed after token refresh');
+        } else if (response.statusCode == 401 && accessToken != null) {
+          // Only try token refresh if we had a token and got 401
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            // Continue with the same page
+            continue;
+          } else {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
         }
       }
 
-      debugPrint(
-          'Listed products returned non-200 status: ${response.statusCode}');
-      return [];
+      debugPrint('Total listed products fetched: ${allItems.length}');
+      return allItems;
     } catch (e) {
       debugPrint('Error fetching listed products: $e');
-      // Return empty list instead of rethrowing to maintain consistency with other sections
       return [];
     }
   }
@@ -486,101 +496,106 @@ class AuctionService {
         headers['Authorization'] = 'Bearer $accessToken';
       }
 
-      // Fetch both upcoming and scheduled auctions
-      final upcomingResponse = await http.get(
-        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming'),
-        headers: headers,
-      );
-
-      final scheduledResponse = await http.get(
-        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/scheduled'),
-        headers: headers,
-      );
-
-      debugPrint(
-          'Upcoming Auctions Response Code: ${upcomingResponse.statusCode}');
-      debugPrint(
-          'Scheduled Auctions Response Code: ${scheduledResponse.statusCode}');
-
       List<AuctionItem> allAuctions = [];
+      const int limit = 50; // Fetch more items per request
 
-      // Process upcoming auctions
-      if (upcomingResponse.statusCode == 200) {
-        final data = jsonDecode(upcomingResponse.body);
-        if (data['success'] == true && data['data'] is List) {
-          final items = (data['data'] as List)
-              .map((item) => AuctionItem.fromJson(item))
-              .toList();
-          allAuctions.addAll(items);
-          debugPrint('Successfully parsed ${items.length} upcoming auctions');
-        }
-      }
+      // Fetch upcoming auctions with pagination
+      int upcomingPage = 1;
+      bool hasMoreUpcoming = true;
 
-      // Process scheduled auctions
-      if (scheduledResponse.statusCode == 200) {
-        final data = jsonDecode(scheduledResponse.body);
-        if (data['success'] == true && data['data'] is List) {
-          final items = (data['data'] as List)
-              .map((item) => AuctionItem.fromJson(item))
-              .toList();
-          allAuctions.addAll(items);
-          debugPrint('Successfully parsed ${items.length} scheduled auctions');
-        }
-      }
+      while (hasMoreUpcoming) {
+        final upcomingResponse = await http.get(
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming?page=$upcomingPage&limit=$limit'),
+          headers: headers,
+        );
 
-      // Handle token refresh if needed
-      if ((upcomingResponse.statusCode == 401 ||
-              scheduledResponse.statusCode == 401) &&
-          accessToken != null) {
-        final userService = UserService();
-        final refreshResult = await userService.refreshTokens();
-        if (refreshResult['success']) {
-          accessToken = refreshResult['data']['accessToken'];
+        debugPrint('Upcoming Auctions Response Code: ${upcomingResponse.statusCode} for page $upcomingPage');
 
-          // Retry upcoming auctions
-          final retryUpcoming = await http.get(
-            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-          );
-
-          // Retry scheduled auctions
-          final retryScheduled = await http.get(
-            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/scheduled'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-          );
-
-          // Process retried upcoming auctions
-          if (retryUpcoming.statusCode == 200) {
-            final data = jsonDecode(retryUpcoming.body);
-            if (data['success'] == true && data['data'] is List) {
-              final items = (data['data'] as List)
-                  .map((item) => AuctionItem.fromJson(item))
-                  .toList();
+        if (upcomingResponse.statusCode == 200) {
+          final data = jsonDecode(upcomingResponse.body);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List)
+                .map((item) => AuctionItem.fromJson(item))
+                .toList();
+            
+            if (items.isEmpty) {
+              hasMoreUpcoming = false;
+            } else {
               allAuctions.addAll(items);
+              if (items.length < limit) {
+                hasMoreUpcoming = false;
+              } else {
+                upcomingPage++;
+              }
             }
+            debugPrint('Successfully parsed ${items.length} upcoming auctions for page $upcomingPage');
+          } else {
+            hasMoreUpcoming = false;
           }
-
-          // Process retried scheduled auctions
-          if (retryScheduled.statusCode == 200) {
-            final data = jsonDecode(retryScheduled.body);
-            if (data['success'] == true && data['data'] is List) {
-              final items = (data['data'] as List)
-                  .map((item) => AuctionItem.fromJson(item))
-                  .toList();
-              allAuctions.addAll(items);
-            }
+        } else if (upcomingResponse.statusCode == 401 && accessToken != null) {
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            continue;
+          } else {
+            hasMoreUpcoming = false;
           }
+        } else {
+          hasMoreUpcoming = false;
         }
       }
 
+      // Fetch scheduled auctions with pagination
+      int scheduledPage = 1;
+      bool hasMoreScheduled = true;
+
+      while (hasMoreScheduled) {
+        final scheduledResponse = await http.get(
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/scheduled?page=$scheduledPage&limit=$limit'),
+          headers: headers,
+        );
+
+        debugPrint('Scheduled Auctions Response Code: ${scheduledResponse.statusCode} for page $scheduledPage');
+
+        if (scheduledResponse.statusCode == 200) {
+          final data = jsonDecode(scheduledResponse.body);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List)
+                .map((item) => AuctionItem.fromJson(item))
+                .toList();
+            
+            if (items.isEmpty) {
+              hasMoreScheduled = false;
+            } else {
+              allAuctions.addAll(items);
+              if (items.length < limit) {
+                hasMoreScheduled = false;
+              } else {
+                scheduledPage++;
+              }
+            }
+            debugPrint('Successfully parsed ${items.length} scheduled auctions for page $scheduledPage');
+          } else {
+            hasMoreScheduled = false;
+          }
+        } else if (scheduledResponse.statusCode == 401 && accessToken != null) {
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            continue;
+          } else {
+            hasMoreScheduled = false;
+          }
+        } else {
+          hasMoreScheduled = false;
+        }
+      }
+
+      debugPrint('Total upcoming and scheduled auctions fetched: ${allAuctions.length}');
       return allAuctions;
     } catch (e) {
       debugPrint('Error fetching upcoming auctions: $e');
@@ -602,51 +617,64 @@ class AuctionService {
         headers['Authorization'] = 'Bearer $accessToken';
       }
 
-      final response = await http.get(
-        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions'),
-        headers: headers,
-      );
+      List<AuctionItem> allItems = [];
+      int page = 1;
+      bool hasMore = true;
+      const int limit = 50; // Fetch more items per request
 
-      debugPrint('Expired Auctions Response Code: ${response.statusCode}');
+      while (hasMore) {
+        final response = await http.get(
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions?page=$page&limit=$limit'),
+          headers: headers,
+        );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['success'] == true && data['data'] is List) {
-          final items = (data['data'] as List)
-              .map((item) => AuctionItem.fromJson(item))
-              .toList();
-          debugPrint('Successfully parsed ${items.length} expired auctions');
-          return items;
-        }
-      } else if (response.statusCode == 401 && accessToken != null) {
-        // Only try token refresh if we had a token and got 401
-        final userService = UserService();
-        final refreshResult = await userService.refreshTokens();
-        if (refreshResult['success']) {
-          accessToken = refreshResult['data']['accessToken'];
-          final retryResponse = await http.get(
-            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-          );
+        debugPrint('Expired Auctions Response Code: ${response.statusCode} for page $page');
 
-          if (retryResponse.statusCode == 200) {
-            final data = jsonDecode(retryResponse.body);
-            if (data['success'] == true && data['data'] is List) {
-              return (data['data'] as List)
-                  .map((item) => AuctionItem.fromJson(item))
-                  .toList();
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List)
+                .map((item) => AuctionItem.fromJson(item))
+                .toList();
+            
+            if (items.isEmpty) {
+              hasMore = false;
+            } else {
+              // Filter out cancelled auctions
+              final validItems = items.where((auction) =>
+                auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE'
+              ).toList();
+              
+              allItems.addAll(validItems);
+              if (items.length < limit) {
+                hasMore = false;
+              } else {
+                page++;
+              }
             }
+            debugPrint('Successfully parsed ${items.length} expired auctions for page $page');
+          } else {
+            hasMore = false;
           }
+        } else if (response.statusCode == 401 && accessToken != null) {
+          // Only try token refresh if we had a token and got 401
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            // Continue with the same page
+            continue;
+          } else {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
         }
       }
 
-      debugPrint(
-          'Expired auctions returned non-200 status: ${response.statusCode}');
-      return [];
+      debugPrint('Total expired auctions fetched: ${allItems.length}');
+      return allItems;
     } catch (e) {
       debugPrint('Error fetching expired auctions: $e');
       return [];

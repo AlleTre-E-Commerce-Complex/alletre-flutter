@@ -16,6 +16,7 @@ class SwitchWithField extends StatelessWidget {
   final TextEditingController? startDateController;
   final TextEditingController? startTimeController;
   final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
 
   const SwitchWithField({
     super.key,
@@ -29,6 +30,7 @@ class SwitchWithField extends StatelessWidget {
     this.startDateController,
     this.startTimeController,
     this.keyboardType,
+    this.validator,
   });
 
   @override
@@ -105,13 +107,27 @@ class SwitchWithField extends StatelessWidget {
                       labelStyle: const TextStyle(fontSize: 14),
                       hintText: hintText,
                       hintStyle: const TextStyle(fontSize: 12),
+                      errorStyle: const TextStyle(color: errorColor, fontSize: 11, fontWeight: FontWeight.w500),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: errorColor),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: errorColor),
+                      ),
                     ),
                     validator: (value) {
-                      if (isActive && (value == null || value.isEmpty)) {
-                        return "This field is required.";
+                      if (isActive) {
+                        if (value == null || value.isEmpty) {
+                          return "This field is required.";
+                        }
+                        if (validator != null) {
+                          return validator!(value);
+                        }
                       }
                       return null;
                     },

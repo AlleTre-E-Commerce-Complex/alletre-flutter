@@ -273,16 +273,25 @@ class AuctionDetailsScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 22),
                                   // Buy Now Logic
-                                  SwitchWithField(
-                                    label: 'Buy Now',
-                                    leadingText:
-                                        'Amount the user should pay\nto buy the item directly without auction',
-                                    switchNotifier: buyNowSwitch,
-                                    textController: buyNowController,
-                                    labelText: 'Purchase Price',
-                                    hintText: 'AED XXX',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(),
+                                  ValueListenableBuilder<bool>(
+                                    valueListenable: buyNowSwitch,
+                                    builder: (context, isBuyNowEnabled, child) {
+                                      return SwitchWithField(
+                                        label: 'Buy Now',
+                                        leadingText:
+                                            'Amount the user should pay\nto buy the item directly without auction\n(must be at least 30% more than start price)',
+                                        switchNotifier: buyNowSwitch,
+                                        textController: buyNowController,
+                                        labelText: 'Purchase Price',
+                                        hintText: 'AED XXX',
+                                        keyboardType:
+                                            const TextInputType.numberWithOptions(),
+                                        validator: isBuyNowEnabled
+                                            ? (value) => CreateAuctionValidation.validatePurchasePrice(
+                                                value, priceController.text)
+                                            : null,
+                                      );
+                                    },
                                   ),
                                   const SizedBox(height: 12),
                                   // Return Policy Logic
@@ -347,6 +356,11 @@ class AuctionDetailsScreen extends StatelessWidget {
                       // Set submitted to true to show validation errors
                       isSubmitted.value = true;
                       final isValid = formKey.currentState!.validate();
+
+                      // Check if auction type is selected
+                      if (condition.value == null) {
+                        return;
+                      }
 
                       if (isValid) {
                         // Collect form data
