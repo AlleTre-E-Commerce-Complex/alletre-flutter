@@ -107,7 +107,7 @@ class AuctionListWidget extends StatelessWidget {
           /// **Shimmer Loading Effect**
           if (isLoading)
             SizedBox(
-              height: getCardHeight(title), // Set consistent height
+              height: getCardHeight(title, isAuctionProduct: auctions.firstOrNull?.isAuctionProduct ?? false), // Set consistent height
               child: ListView.builder(
                 key: const PageStorageKey('shimmerList'),
                 scrollDirection: Axis.horizontal,
@@ -121,7 +121,7 @@ class AuctionListWidget extends StatelessWidget {
                       child: ShimmerLoading(
                           width:
                               (MediaQuery.of(context).size.width - 32 - 10) / 2,
-                          height: getCardHeight(title),
+                          height: getCardHeight(title, isAuctionProduct: auctions.firstOrNull?.isAuctionProduct ?? false),
                           title: title),
                     ),
                   );
@@ -194,7 +194,7 @@ class AuctionListWidget extends StatelessWidget {
             })()
           else
             SizedBox(
-              height: getCardHeight(title), // Fixed height for each section
+              height: getCardHeight(title, isAuctionProduct: auctions.firstOrNull?.isAuctionProduct ?? false), // Fixed height for each section
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: min(auctions.length, 6),

@@ -14,6 +14,7 @@ import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/controller/providers/auction_details_provider.dart';
 import 'package:alletre_app/services/custom_fields_service.dart';
+import 'package:alletre_app/services/category_service.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/image_carousel.dart';
 import 'package:alletre_app/view/widgets/auction%20card%20widgets/auction_countdown.dart';
@@ -577,7 +578,7 @@ class ItemDetailsScreen extends StatelessWidget {
                       isLoading: auctionProvider.isLoadingListedProducts,
                       error: auctionProvider.errorListedProducts,
                       placeholder:
-                          'No similar items found in ${item.categoryName}.',
+                          'No similar items found in ${CategoryService.getCategoryName(item.categoryId)}.',
                     ),
                   ],
                 ),
@@ -635,11 +636,8 @@ class ItemDetailsScreen extends StatelessWidget {
           AuctionCountdown(
             startDate: item.startDate,
             endDate: item.expiryDate,
+            auctionId: item.id.toString(),
             customPrefix: 'Time Left',
-            prefixStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: onSecondaryColor,
-                fontSize: 13,
-                fontWeight: FontWeight.w600),
             textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600, color: primaryColor, fontSize: 12),
           ),

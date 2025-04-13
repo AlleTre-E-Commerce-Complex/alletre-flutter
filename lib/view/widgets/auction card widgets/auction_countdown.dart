@@ -1,20 +1,22 @@
 import 'dart:async';
-import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:provider/provider.dart';
 
 class AuctionCountdown extends StatelessWidget {
   final DateTime startDate;
   final DateTime endDate;
   final TextStyle? textStyle;
-  final TextStyle? prefixStyle;
   final String? customPrefix;
+  final String auctionId;
 
   const AuctionCountdown({
     super.key,
     required this.startDate,
     required this.endDate,
+    required this.auctionId,
     this.textStyle,
-    this.prefixStyle,
     this.customPrefix,
   });
 
@@ -34,9 +36,9 @@ class AuctionCountdown extends StatelessWidget {
       return formatDuration(difference, 'Starting in:');
     }
 
-    // If auction has ended, show expired
+    // // If auction has ended, return empty to let provider handle removal
     if (now.isAfter(endDate)) {
-      return {'prefix': '', 'time': 'Auction Ended'};
+      return {'prefix': '', 'time': ''};
     }
 
     // If auction is live, show time until end
@@ -70,30 +72,27 @@ class AuctionCountdown extends StatelessWidget {
       stream: getTimeStream(),
       initialData: getFormattedTime(),
       builder: (context, snapshot) {
+        // Handle auction ended
+        if (snapshot.hasData && snapshot.data!['time']!.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<AuctionProvider>().handleAuctionEnded(auctionId);
+          });
+          return const SizedBox();
+        }
         if (!snapshot.hasData) return const SizedBox();
         final data = snapshot.data!;
         final prefix = data['prefix']!;
         final timeValue = data['time']!;
-        // If Auction Ended, we display the full text in one go with smaller font size.
-        if (timeValue == 'Auction Ended') {
-          return Text(
-            timeValue,
-            style: textStyle ??
-                Theme.of(context).textTheme.labelSmall!.copyWith(
-                      color: primaryVariantColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-          );
+        // If auction has ended, show nothing
+        if (timeValue.isEmpty) {
+          return const SizedBox();
         }
         return RichText(
           text: TextSpan(
             children: [
               TextSpan(
                 text: '$prefix\n',
-                style: prefixStyle ??
-                    textStyle ??
-                    Theme.of(context).textTheme.labelSmall!.copyWith(
+                style: textStyle ?? Theme.of(context).textTheme.labelSmall!.copyWith(
                           color: primaryVariantColor,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,

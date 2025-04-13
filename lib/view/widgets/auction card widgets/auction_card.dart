@@ -215,6 +215,7 @@ class AuctionCard extends StatelessWidget {
                           AuctionCountdown(
                             startDate: auction.startDate,
                             endDate: auction.endDate ?? auction.expiryDate,
+                            auctionId: auction.id.toString(),
                             customPrefix: auction.status == 'ACTIVE' ? 'Ending in:' : 'Starting in:',
                           ),
                         if (!auction.isAuctionProduct || (title == "Similar Products" && !auction.isAuctionProduct)) ...[
