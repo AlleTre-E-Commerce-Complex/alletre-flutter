@@ -6,6 +6,7 @@ import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +19,13 @@ import 'payment_details_screen.dart';
 class ShippingDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> auctionData;
   final List<String> imagePaths;
+  final String title;
 
   const ShippingDetailsScreen({
     super.key,
     required this.auctionData,
     required this.imagePaths,
+    this.title = 'Create Auction',
   });
 
   @override
@@ -34,8 +37,8 @@ class ShippingDetailsScreen extends StatelessWidget {
     final defaultAddress = userProvider.defaultAddress;
 
     return Scaffold(
-      appBar: const NavbarElementsAppbar(
-          appBarTitle: 'Create Auction', showBackButton: true),
+      appBar: NavbarElementsAppbar(
+          appBarTitle: title, showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.only(left: 14, right: 14, top: 8, bottom: 8),
         child: Column(
@@ -354,7 +357,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Center(child: Text('Auction created successfully')),
+                                content: Center(child: Text('Item created successfully')),
                               ),
                             );
                           }
@@ -367,32 +370,83 @@ class ShippingDetailsScreen extends StatelessWidget {
                             'success': response['success'],
                             'data': {
                               ...response['data'],
-                              'endTime': endTime.toIso8601String(), // Explicitly set end time
+                              'endTime': endTime.toIso8601String(),
                               ...fullAuctionData,
                               'product': {
                                 ...fullAuctionData['product'],
-                                'images': imagePaths, // Include the image paths
+                                'images': imagePaths,
                               },
                             }
                           };
                           debugPrint('Shipping Screen - Navigation data: $navigationData');
                           
-                          // Print auction details
-                          print('🔦🔦New Auction Created:');
-                          print('🔦🔦Item Name: ${navigationData['title']}');
-                          print('🔦🔦Status: ${navigationData['status']}');
-                          print('🔦🔦Amount: ${navigationData['startingPrice']}');
+                          // Print item details
+                          print('🔦🔦New Item Created:');
+                          print('🔦🔦Item Name: ${auctionData['product']['title']}');
+                          print('🔦🔦Status: ${response['status']}');
+                          print('🔦🔦Amount: ${auctionData['product']['price']}');
 
-                          // Navigate to payment details
                           if (context.mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PaymentDetailsScreen(
-                                  auctionData: navigationData,
+                            if (title == 'Create Auction') {
+                              // Navigate to payment details for auctions
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PaymentDetailsScreen(
+                                    auctionData: navigationData,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            } else {
+                              // Show success dialog for listed products
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle_outline,
+                                        color: activeColor,
+                                        size: 60,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      const Text(
+                                        'Success!',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Your item ${auctionData['product']['title']} has been listed successfully.',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context); // Close dialog
+                                        // Navigate to home and update tab index
+                                        context.read<TabIndexProvider>().updateIndex(1);
+                                        // Pop until home
+                                        Navigator.popUntil(
+                                          context,
+                                          (route) => route.isFirst,
+                                        );
+                                      },
+                                      child: const Text('View My Products'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
                           }
                         } else {
                           throw Exception(response['message'] ?? 'Failed to create auction');
@@ -420,9 +474,9 @@ class ShippingDetailsScreen extends StatelessWidget {
                       ),
                       backgroundColor: Theme.of(context).primaryColor,
                     ),
-                    child: const Text(
-                      "Create Auction",
-                      style: TextStyle(color: secondaryColor),
+                    child: Text(
+                      title,
+                      style: const TextStyle(color: secondaryColor),
                     ),
                   ),
                 ],

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'dart:convert';
 import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
@@ -10,6 +12,7 @@ import 'package:video_player/video_player.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/home widgets/categories widgets/categories_data.dart';
 import 'auction_details_screen.dart';
+import 'shipping_details_screen.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final String title;
@@ -21,6 +24,7 @@ class ProductDetailsScreen extends StatelessWidget {
     final isSubmitted = ValueNotifier<bool>(false);
     final formKey = GlobalKey<FormState>();
     final itemNameController = TextEditingController();
+    final priceController = TextEditingController();
     final categoryController = ValueNotifier<String?>(null);
     final subCategoryController = ValueNotifier<String?>(null);
     final descriptionController = TextEditingController();
@@ -376,7 +380,7 @@ class ProductDetailsScreen extends StatelessWidget {
               const SizedBox(height: 15),
               if(title == "List Product")
               TextFormField(
-                controller: itemNameController,
+                controller: priceController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: "Price",
@@ -780,7 +784,7 @@ class ProductDetailsScreen extends StatelessWidget {
                       color: onSecondaryColor),
                   children: [
                     TextSpan(
-                      text: '(You can upload upto 50 images & 1 video (max 50MB))',
+                      text: '(You can upload upto 50 images & 1 video [max 50MB])',
                       style: TextStyle(
                           color: greyColor, fontWeight: FontWeight.w500),
                     ),
@@ -966,23 +970,25 @@ class ProductDetailsScreen extends StatelessWidget {
                         valueListenable: isSubmitted,
                         builder: (context, submitted, child) {
                           if (submitted) {
-                            final mediaError =
-                                CreateAuctionValidation.validateMediaSection(
-                                    mediaList);
-                            // ignore: unnecessary_null_comparison
-                            return mediaError != null
-                                ? Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 10, left: 12),
+                            return FutureBuilder<String?>(
+                              future: CreateAuctionValidation.validateMediaSection(mediaList),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData && snapshot.data != null) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 10, left: 12),
                                     child: Text(
-                                      mediaError as String,
+                                      snapshot.data!,
                                       style: const TextStyle(
-                                          color: errorColor,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500),
+                                        color: errorColor,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  )
-                                : const SizedBox.shrink();
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            );
                           }
                           return const SizedBox.shrink();
                         },
@@ -1067,7 +1073,6 @@ class ProductDetailsScreen extends StatelessWidget {
                           );
                           // Navigate to the home page after a short delay
                           Future.delayed(const Duration(seconds: 1), () {
-                            // ignore: use_build_context_synchronously
                             context.read<TabIndexProvider>().updateIndex(1);
                           });
                         }
@@ -1167,16 +1172,37 @@ class ProductDetailsScreen extends StatelessWidget {
                           // Get image paths from media files
                           final imagePaths = media.value.map((file) => file.path).toList();
 
-                          // Pass the product data and image paths to the next screen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AuctionDetailsScreen(
-                                productData: {'product': productData},
-                                imagePaths: imagePaths,
+                          if (title == 'Create Auction') {
+                            // Navigate to auction details for auction creation
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AuctionDetailsScreen(
+                                  productData: {'product': productData},
+                                  imagePaths: imagePaths,
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          } else {
+                            // Navigate to shipping details for listing product
+                            final listProductData = {
+                              'product': {
+                                ...productData,
+                                'price': priceController.text.trim(),
+                              },
+                            };
+                            
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ShippingDetailsScreen(
+                                  auctionData: listProductData,
+                                  imagePaths: imagePaths,
+                                  title: title,
+                                ),
+                              ),
+                            );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(

@@ -409,17 +409,10 @@ class AuctionService {
 
   Future<List<AuctionItem>> fetchListedProducts() async {
     try {
-      // First try to get the token
-      String? accessToken = await _getAccessToken();
       Map<String, String> headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       };
-
-      // Add authorization header if we have a token
-      if (accessToken != null) {
-        headers['Authorization'] = 'Bearer $accessToken';
-      }
 
       List<AuctionItem> allItems = [];
       int page = 1;
@@ -452,18 +445,6 @@ class AuctionService {
             } else {
               page++;
             }
-          } else {
-            hasMore = false;
-          }
-        } else if (response.statusCode == 401 && accessToken != null) {
-          // Only try token refresh if we had a token and got 401
-          final userService = UserService();
-          final refreshResult = await userService.refreshTokens();
-          if (refreshResult['success']) {
-            accessToken = refreshResult['data']['accessToken'];
-            headers['Authorization'] = 'Bearer $accessToken';
-            // Continue with the same page
-            continue;
           } else {
             hasMore = false;
           }

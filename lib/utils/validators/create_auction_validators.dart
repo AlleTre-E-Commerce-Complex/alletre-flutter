@@ -32,7 +32,7 @@ class CreateAuctionValidation {
       return "Please upload at least 3 images or videos";
     }
     if (mediaList.length > 50) {
-      return "You can upload upto 50 images & 1 video (max 50MB)";
+      return "You can upload upto 50 images & 1 video [max 50MB]";
     }
     
     // Count videos in the media list
