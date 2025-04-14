@@ -7,11 +7,11 @@ class CustomTimeagoMessages implements timeago.LookupMessages {
   @override
   String prefixFromNow() => '';
   @override
-  String suffixAgo() => lessThanOneMinute(0) == 'just now' ? '' : 'ago';
+  String suffixAgo() => 'ago';
   @override
   String suffixFromNow() => 'from now';
   @override
-  String lessThanOneMinute(int seconds) => 'just now';
+  String lessThanOneMinute(int seconds) => seconds < 10 ? 'just now' : '$seconds secs';
   @override
   String aboutAMinute(int minutes) => '1 min';
   @override
