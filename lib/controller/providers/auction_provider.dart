@@ -38,11 +38,6 @@ class AuctionProvider with ChangeNotifier {
   String? get createAuctionError => _createAuctionError;
 
   List<AuctionItem> getSimilarProducts(AuctionItem currentItem) {
-    print('\nDEBUG: Getting similar products');
-    print('Current item: ${currentItem.id}');
-    print('Category ID: ${currentItem.categoryId}');
-    print('Is auction: ${currentItem.isAuctionProduct}');
-
     // Combine all available products
     final allProducts = [
       ..._listedProducts,
@@ -50,22 +45,11 @@ class AuctionProvider with ChangeNotifier {
       ..._upcomingAuctions
     ];
 
-    print('Total products available: ${allProducts.length}');
-    print('- Listed: ${_listedProducts.length}');
-    print('- Live auctions: ${_liveAuctions.length}');
-    print('- Upcoming: ${_upcomingAuctions.length}');
-
     // Get all products from the same category
     final sameCategory = allProducts.where((item) => 
       item.id != currentItem.id && 
       item.categoryId == currentItem.categoryId
     ).toList();
-
-    print('\nProducts in same category: ${sameCategory.length}');
-    print('Category products breakdown:');
-    for (var item in sameCategory) {
-      print(' - ID: ${item.id}, Category: ${item.categoryId}, IsAuction: ${item.isAuctionProduct}');
-    }
 
     // If current item is an auction, only show similar auctions
     if (currentItem.isAuctionProduct) {
@@ -74,11 +58,6 @@ class AuctionProvider with ChangeNotifier {
           .take(10)
           .toList();
       
-      print('\nFiltered auction results: ${similarAuctions.length}');
-      print('Auction results breakdown:');
-      for (var item in similarAuctions) {
-        print(' - ID: ${item.id}, Category: ${item.categoryId}');
-      }
       return similarAuctions;
     }
     
@@ -88,11 +67,6 @@ class AuctionProvider with ChangeNotifier {
         .take(10)
         .toList();
 
-    print('\nFiltered product results: ${similarProducts.length}');
-    print('Product results breakdown:');
-    for (var item in similarProducts) {
-      print(' - ID: ${item.id}, Category: ${item.categoryId}');
-    }
     return similarProducts;
   }
 

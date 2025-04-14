@@ -7,17 +7,17 @@ class AuctionDetailsService {
 
   static Future<Map<String, dynamic>> getAuctionDetails(String auctionId) async {
     try {
-      debugPrint('🎯 Fetching details for auction: $auctionId');
+      // debugPrint('🎯 Fetching details for auction: $auctionId');
       final response = await http.get(
         Uri.parse('$baseUrl/auctions/user/$auctionId/details'),
       );
 
-      debugPrint('📥 Response status code: ${response.statusCode}');
+      // debugPrint('📥 Response status code: ${response.statusCode}');
       final data = jsonDecode(response.body);
-      debugPrint('📦 Response data: $data');
+      // debugPrint('📦 Response data: $data');
 
       if (response.statusCode == 200) {
-        debugPrint('✅ Successfully fetched auction details');
+        // debugPrint('✅ Successfully fetched auction details');
         return data;
       } else {
         final error = '❌ Failed to fetch auction details: ${response.statusCode}';

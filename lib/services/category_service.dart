@@ -34,7 +34,7 @@ class CategoryService {
       
       if (data['success'] == true && data['data'] != null) {
         final List<dynamic> categoriesData = data['data'] as List<dynamic>;
-        print('Found ${categoriesData.length} categories');
+        // print('Found ${categoriesData.length} categories');
         
         for (var categoryData in categoriesData) {
           final category = Category.fromJson(categoryData as Map<String, dynamic>);
@@ -64,10 +64,10 @@ class CategoryService {
         // Handle different API response structures
         if (data['data'] is List) {
           subCategoriesData = data['data'];
-          print('Found direct list of subcategories');
+          // print('Found direct list of subcategories');
         } else if (data['data'] is Map) {
           final categoryData = data['data'] as Map<String, dynamic>;
-          print('Category data structure: ${categoryData.keys}');
+          // print('Category data structure: ${categoryData.keys}');
           
           // Try different possible keys based on API response
           if (categoryData['subCategories'] != null) {
@@ -82,7 +82,7 @@ class CategoryService {
         if (subCategoriesData != null) {
           // print('Processing subcategories data: $subCategoriesData');
           final List<dynamic> subCategories = subCategoriesData as List<dynamic>;
-          print('Found ${subCategories.length} subcategories');
+          // print('Found ${subCategories.length} subcategories');
           
           for (var subCategoryData in subCategories) {
             // print('Processing subcategory: $subCategoryData');

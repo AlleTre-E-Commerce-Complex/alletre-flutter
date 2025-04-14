@@ -12,7 +12,8 @@ import '../../widgets/home widgets/categories widgets/categories_data.dart';
 import 'auction_details_screen.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
-  const ProductDetailsScreen({super.key});
+  final String title;
+  const ProductDetailsScreen({super.key, this.title = 'Create Auction'});
 
   @override
   Widget build(BuildContext context) {
@@ -284,9 +285,49 @@ class ProductDetailsScreen extends StatelessWidget {
       });
     }
 
+    Future<bool> validateForm() async {
+      if (!formKey.currentState!.validate()) {
+        return false;
+      }
+
+      // Validate media section separately since it's async
+      final mediaError = await CreateAuctionValidation.validateMediaSection(media.value);
+      if (mediaError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(mediaError)),
+        );
+        return false;
+      }
+
+      // Validate form including dropdown fields
+      bool isDropdownsValid = true;
+      customFieldDropdownValues.forEach((key, notifier) {
+        if (notifier.value == null) {
+          isDropdownsValid = false;
+        }
+      });
+
+      if (!isDropdownsValid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill in all dropdown fields')),
+        );
+        return false;
+      }
+
+      // Validate condition for non-property items
+      if (categoryController.value != "Properties" && condition.value == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select item condition')),
+        );
+        return false;
+      }
+
+      return true;
+    }
+
     return Scaffold(
-      appBar: const NavbarElementsAppbar(
-          appBarTitle: 'Create Auction', showBackButton: true),
+      appBar: NavbarElementsAppbar(
+          appBarTitle: title, showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
         child: Form(
@@ -332,7 +373,29 @@ class ProductDetailsScreen extends StatelessWidget {
                 ),
                 validator: CreateAuctionValidation.validateTitle,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 15),
+              if(title == "List Product")
+              TextFormField(
+                controller: itemNameController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: "Price",
+                  labelStyle: labelTextStyle,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: errorColor),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: errorColor),
+                  ),
+                ),
+                validator: CreateAuctionValidation.validateTitle,
+              ),
+              const SizedBox(height: 15),
               ValueListenableBuilder<String?>(
                 valueListenable: categoryController,
                 builder: (context, selectedCategory, child) {
@@ -710,14 +773,14 @@ class ProductDetailsScreen extends StatelessWidget {
               const SizedBox(height: 20),
               RichText(
                 text: const TextSpan(
-                  text: 'Add Media ',
+                  text: 'Add Media\n',
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: onSecondaryColor),
                   children: [
                     TextSpan(
-                      text: '(3-5 images)',
+                      text: '(You can upload upto 50 images & 1 video (max 50MB))',
                       style: TextStyle(
                           color: greyColor, fontWeight: FontWeight.w500),
                     ),
@@ -747,11 +810,14 @@ class ProductDetailsScreen extends StatelessWidget {
                           mainAxisSpacing: 10,
                           childAspectRatio: 1,
                         ),
-                        itemCount: 5,
+                        itemCount: mediaList.length < 5 
+                            ? 5 // Initial count
+                            : mediaList.length >= 50 
+                                ? 50 // Max limit
+                                : mediaList.length + 1, // Current count + 1 empty slot
                         itemBuilder: (context, index) {
                           // Generate a reordered media list with the cover photo (if set) first
-                          final reorderedMediaList = coverPhotoIndex.value !=
-                                      null &&
+                          final reorderedMediaList = coverPhotoIndex.value != null &&
                                   coverPhotoIndex.value! < mediaList.length
                               ? [
                                   mediaList[coverPhotoIndex.value!],
@@ -760,6 +826,7 @@ class ProductDetailsScreen extends StatelessWidget {
                                 ]
                               : mediaList;
 
+                          // Check if this is an existing media item
                           if (index < reorderedMediaList.length) {
                             return Stack(
                               children: [
@@ -769,10 +836,10 @@ class ProductDetailsScreen extends StatelessWidget {
                                     final File? newMedia =
                                         await pickMediaFromGallery();
                                     if (newMedia != null) {
-                                      final updatedMedia = List<File>.from(
-                                          mediaList)
-                                        ..[index] =
-                                            newMedia; // Replace the tapped image
+                                      final updatedMedia = List<File>.from(mediaList);
+                                      // Replace the correct item in the original list
+                                      final originalIndex = mediaList.indexOf(reorderedMediaList[index]);
+                                      updatedMedia[originalIndex] = newMedia;
                                       media.value = updatedMedia;
                                     }
                                   },
@@ -799,13 +866,13 @@ class ProductDetailsScreen extends StatelessWidget {
                                       size: 16,
                                     ),
                                     onPressed: () {
-                                      final updatedMedia =
-                                          List<File>.from(mediaList)
-                                            ..removeAt(index);
+                                      final updatedMedia = List<File>.from(mediaList);
+                                      // Remove the correct item from the original list
+                                      final originalIndex = mediaList.indexOf(reorderedMediaList[index]);
+                                      updatedMedia.removeAt(originalIndex);
                                       media.value = updatedMedia;
-                                      if (coverPhotoIndex.value == index) {
-                                        coverPhotoIndex.value =
-                                            null; // Reset cover photo
+                                      if (coverPhotoIndex.value == originalIndex) {
+                                        coverPhotoIndex.value = null; // Reset cover photo
                                       }
                                     },
                                   ),
@@ -902,12 +969,13 @@ class ProductDetailsScreen extends StatelessWidget {
                             final mediaError =
                                 CreateAuctionValidation.validateMediaSection(
                                     mediaList);
+                            // ignore: unnecessary_null_comparison
                             return mediaError != null
                                 ? Padding(
                                     padding: const EdgeInsets.only(
                                         top: 10, left: 12),
                                     child: Text(
-                                      mediaError,
+                                      mediaError as String,
                                       style: const TextStyle(
                                           color: errorColor,
                                           fontSize: 12,
@@ -986,30 +1054,14 @@ class ProductDetailsScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         // Save as draft logic
                         isSubmitted.value = true;
 
                         // This will trigger the validators and show error messages
-                        final formValid = formKey.currentState!.validate();
+                        final formValid = await validateForm();
 
-                        // Validate form including dropdown fields
-                        bool isDropdownsValid = true;
-                        customFieldDropdownValues.forEach((key, notifier) {
-                          if (notifier.value == null) {
-                            isDropdownsValid = false;
-                          }
-                        });
-
-                        final isValid = formValid &&
-                            CreateAuctionValidation.validateMediaSection(
-                                    media.value) ==
-                                null &&
-                            (categoryController.value == "Properties" ||
-                                condition.value != null) &&
-                            isDropdownsValid;
-
-                        if (isValid) {
+                        if (formValid) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Saved in Drafts')),
                           );
@@ -1035,29 +1087,13 @@ class ProductDetailsScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         // Set submitted to true to show validation errors
                         isSubmitted.value = true;
 
-                        final formValid = formKey.currentState!.validate();
+                        final formValid = await validateForm();
 
-                        // Validate form including dropdown fields
-                        bool isDropdownsValid = true;
-                        customFieldDropdownValues.forEach((key, notifier) {
-                          if (notifier.value == null) {
-                            isDropdownsValid = false;
-                          }
-                        });
-
-                        final isValid = formValid &&
-                            CreateAuctionValidation.validateMediaSection(
-                                    media.value) ==
-                                null &&
-                            (categoryController.value == "Properties" ||
-                                condition.value != null) &&
-                            isDropdownsValid;
-
-                        if (isValid) {
+                        if (formValid) {
                           // Create base product data
                           final Map<String, dynamic> productData = {
                             'title': itemNameController.text.trim(),

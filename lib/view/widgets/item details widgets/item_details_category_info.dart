@@ -14,9 +14,9 @@ class ItemDetailsCategoryInfo extends StatelessWidget {
     return FutureBuilder<void>(
       future: CategoryApiService.initSubCategories(item.categoryId),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: primaryColor));
-        }
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //   return const Center(child: CircularProgressIndicator(color: primaryColor));
+        // }
 
         final categoryName = CategoryService.getCategoryName(item.categoryId);
         final subCategoryName = CategoryService.getSubCategoryName(item.subCategoryId);

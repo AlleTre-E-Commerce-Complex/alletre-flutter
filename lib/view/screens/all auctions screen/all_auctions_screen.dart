@@ -27,12 +27,13 @@ class AllAuctionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('AllAuctionsScreen build called with ${auctions.length} items');
+    // debugPrint('AllAuctionsScreen build called with ${auctions.length} items');
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - 32 - 10) / 2;
-    final cardHeight = getCardHeight(title);
+    // Get card height based on whether we're showing auctions or listed products
+    final cardHeight = getCardHeight(title, isAuctionProduct: title == 'Similar Products' ? auctions.firstOrNull?.isAuctionProduct ?? false : title.contains('Auction'));
 
     // Create a filtered list based on the search query from AuctionProvider
     final auctionProvider = context.watch<AuctionProvider>();
@@ -45,7 +46,7 @@ class AllAuctionsScreen extends StatelessWidget {
                     .contains(auctionProvider.searchQuery.toLowerCase()))
             .toList();
     
-    debugPrint('Filtered auctions count: ${filteredAuctions.length}');
+    // debugPrint('Filtered auctions count: ${filteredAuctions.length}');
 
     return Scaffold(
       appBar: NavbarElementsAppbar(

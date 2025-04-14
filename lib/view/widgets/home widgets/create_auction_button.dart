@@ -13,9 +13,9 @@ class CreateAuctionButton extends StatelessWidget {
 
   void _handleOptionSelected(BuildContext context, String option) {
     if (option == 'Create Auction') {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())); // Navigate to Add Location Screen
-    } else if (option == 'List Products') {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen())); // Navigate to List Products
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen(title: 'Create Auction'))); 
+    } else if (option == 'List Product') {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen(title: 'List Product'))); 
     }
   }
 
@@ -29,50 +29,50 @@ class CreateAuctionButton extends StatelessWidget {
         height: 29,
         width: 86,
         child: Center(
-          child: PopupMenuButton<String>(
-            enabled: isLoggedIn,
-            onSelected: (value) => _handleOptionSelected(context, value),
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem<String>(
-                  value: 'Create Auction',
-                  child: Center(
-                    child: Text(
-                      'Create Auction',
-                    ),
-                  ),
+          child: FloatingActionButton.extended(
+            heroTag: _getUniqueHeroTag(), // Use unique hero tag
+            onPressed: () {
+              if (!isLoggedIn) {
+                AuthHelper.showAuthenticationRequiredMessage(context);
+                return;
+              }
+              // Show popup menu manually
+              final RenderBox button = context.findRenderObject() as RenderBox;
+              final Offset offset = button.localToGlobal(Offset.zero);
+              showMenu(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  offset.dx,
+                  offset.dy + 40, // 40 is the offset we defined
+                  offset.dx + button.size.width,
+                  offset.dy + button.size.height + 40,
                 ),
-                const PopupMenuItem<String>(
-                  value: 'List Products',
-                  child: Center(
-                    child: Text(
-                      'List Products',
-                    ),
+                items: [
+                  PopupMenuItem<String>(
+                    value: 'Create Auction',
+                    child: const Center(child: Text('Create Auction')),
+                    onTap: () => _handleOptionSelected(context, 'Create Auction'),
                   ),
-                ),
-              ];
+                  PopupMenuItem<String>(
+                    value: 'List Product',
+                    child: const Center(child: Text('List Product')),
+                    onTap: () => _handleOptionSelected(context, 'List Product'),
+                  ),
+                ],
+              );
             },
-            offset: const Offset(0, 40), // Position dropdown below the button
-            child: FloatingActionButton.extended(
-              heroTag: _getUniqueHeroTag(), // Use unique hero tag
-              onPressed: () {
-                if (!isLoggedIn) {
-                  AuthHelper.showAuthenticationRequiredMessage(context);
-                }
-              },
-              label: Text(
-                'Sell Now',
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor
-                ),
+            label: Text(
+              'Sell Now',
+              style: TextStyle(
+                color: Theme.of(context).primaryColor
               ),
-              backgroundColor: Theme.of(context).splashColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-              elevation: 0, // Remove elevation
-              disabledElevation: 0, // Remove disabled elevation
             ),
+            backgroundColor: Theme.of(context).splashColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+            elevation: 0, // Remove elevation
+            disabledElevation: 0, // Remove disabled elevation
           ),
         ),
       ),

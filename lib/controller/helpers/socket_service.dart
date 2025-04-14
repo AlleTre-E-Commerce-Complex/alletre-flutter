@@ -118,7 +118,7 @@ class SocketService {
 
   // Join auction room to receive specific auction updates
   void joinAuctionRoom(String auctionId) {
-    print('Joining auction room: $auctionId');
+    // print('Joining auction room: $auctionId');
     _socket?.emit('joinAuction', {'auctionId': auctionId});
   }
 

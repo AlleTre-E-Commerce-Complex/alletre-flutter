@@ -153,18 +153,18 @@ class CustomFieldsService {
 
   // Get auction details
   static Future<Map<String, dynamic>?> getAuctionDetails(String auctionId) async {
-    print('🔄 Fetching auction details: $auctionId');
+    // print('🔄 Fetching auction details: $auctionId');
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/auctions/user/$auctionId/details'),
       );
 
-      print('📥 Response status code: ${response.statusCode}');
+      // print('📥 Response status code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true && data['data'] != null) {
-          print('✅ Successfully fetched auction details');
+          // print('✅ Successfully fetched auction details');
           return data['data'] as Map<String, dynamic>;
         }
       }
@@ -179,7 +179,7 @@ class CustomFieldsService {
 
   // Get listed product details
   static Future<Map<String, dynamic>?> getListedProductDetails(String productId) async {
-    print('🔄 Fetching listed product details: $productId');
+    // print('🔄 Fetching listed product details: $productId');
     try {
       // Don't try to fetch details if productId is 0 or null
       if (productId == '0' || productId.isEmpty) {
@@ -191,12 +191,12 @@ class CustomFieldsService {
         Uri.parse('$baseUrl/products/$productId'),
       );
 
-      print('📥 Response status code: ${response.statusCode}');
+      // print('📥 Response status code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true && data['data'] != null) {
-          print('✅ Successfully fetched listed product details');
+          // print('✅ Successfully fetched listed product details');
           return data['data'] as Map<String, dynamic>;
         }
       }

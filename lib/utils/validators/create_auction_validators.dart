@@ -27,13 +27,33 @@ class CreateAuctionValidation {
     return null;
   }
 
-  static String? validateMediaSection(List<File> mediaList) {
+  static Future<String?> validateMediaSection(List<File> mediaList) async {
     if (mediaList.isEmpty || mediaList.length < 3) {
-      return "Please upload atleast 3 images or videos";
+      return "Please upload at least 3 images or videos";
     }
-    if (mediaList.length > 5) {
-      return "You can upload maximum 5 images or videos";
+    if (mediaList.length > 50) {
+      return "You can upload upto 50 images & 1 video (max 50MB)";
     }
+    
+    // Count videos in the media list
+    int videoCount = mediaList.where((file) => 
+      file.path.toLowerCase().endsWith('.mp4') || 
+      file.path.toLowerCase().endsWith('.mov')
+    ).length;
+    
+    if (videoCount > 1) {
+      return "You can only upload 1 video";
+    }
+    
+    // Check file sizes
+    for (var file in mediaList) {
+      final fileSizeInMB = await file.length() / (1024 * 1024); // Convert to MB
+      if (fileSizeInMB > 50) {
+        final fileName = file.path.split('/').last;
+        return "$fileName exceeds 50MB limit";
+      }
+    }
+    
     return null;
   }
 

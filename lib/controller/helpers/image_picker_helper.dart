@@ -45,19 +45,91 @@ Future<void> pickMultipleMedia(ValueNotifier<List<File>> media) async {
 
     if (mediaType == 'image') {
       final List<XFile> pickedFiles = await picker.pickMultiImage(imageQuality: 80);
-      final List<File> newFiles = pickedFiles
-          .map((pickedFile) => File(pickedFile.path))
-          .toList()
-          .take(5 - media.value.length)
-          .toList();
-      media.value = [...media.value, ...newFiles];
+      if (pickedFiles.isNotEmpty) {
+        final List<File> newFiles = [];
+        
+        // Check file sizes and add valid files
+        for (var pickedFile in pickedFiles) {
+          final file = File(pickedFile.path);
+          final fileSizeInMB = await file.length() / (1024 * 1024); // Convert to MB
+          
+          if (fileSizeInMB <= 50) {
+            newFiles.add(file);
+          } else {
+            await showDialog(
+              context: MyApp.navigatorKey.currentContext!,
+              builder: (context) => AlertDialog(
+                title: const Text('File Too Large'),
+                content: Text('${pickedFile.name} exceeds 50MB limit'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          }
+        }
+        
+        // Calculate how many more files we can add
+        final remainingSlots = 50 - media.value.length;
+        if (remainingSlots > 0) {
+          // Add only up to the remaining slots
+          final filesToAdd = newFiles.take(remainingSlots).toList();
+          media.value = [...media.value, ...filesToAdd];
+        }
+      }
     } else {
-      final XFile? videoFile = await picker.pickVideo(
-        source: ImageSource.gallery,
-        maxDuration: const Duration(minutes: 5), // Limit video duration to 5 minutes
+      // Check if we already have a video
+      final hasVideo = media.value.any((file) => 
+        file.path.toLowerCase().endsWith('.mp4') || 
+        file.path.toLowerCase().endsWith('.mov')
       );
-      if (videoFile != null && media.value.length < 5) {
-        media.value = [...media.value, File(videoFile.path)];
+      
+      if (hasVideo) {
+        await showDialog(
+          context: MyApp.navigatorKey.currentContext!,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: const Text('You can only upload 1 video'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      final XFile? pickedFile = await picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 5),
+      );
+      
+      if (pickedFile != null && media.value.length < 50) {
+        final file = File(pickedFile.path);
+        final fileSizeInMB = await file.length() / (1024 * 1024); // Convert to MB
+        
+        if (fileSizeInMB <= 50) {
+          media.value = [...media.value, file];
+        } else {
+          await showDialog(
+            context: MyApp.navigatorKey.currentContext!,
+            builder: (context) => AlertDialog(
+              title: const Text('File Too Large'),
+              content: const Text('Video exceeds 50MB limit'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
       }
     }
   } catch (e) {

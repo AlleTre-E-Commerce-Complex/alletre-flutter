@@ -10,7 +10,6 @@ import 'package:alletre_app/view/screens/categories%20screen/categories_page.dar
 import 'package:alletre_app/view/screens/contact%20screen/contact_screen.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/edit_profile_screen.dart';
 import 'package:alletre_app/view/screens/faqs%20screen/faqs_screen.dart';
-import 'package:alletre_app/view/screens/list%20products%20screen/list_products_screen.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
@@ -83,7 +82,7 @@ class MainStack extends StatelessWidget {
       case 14:
         return const AddLocationScreen();
       case 15:
-        return const ListProductsScreen();
+        // return const ListProductsScreen();
       case 16:
         return const PaymentDetailsScreen(auctionData: {'message': 'Please create an auction first'});
       // Auth screens
