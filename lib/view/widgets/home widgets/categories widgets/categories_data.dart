@@ -1,4 +1,5 @@
 import 'package:alletre_app/services/category_service.dart';
+import 'package:alletre_app/services/api/category_api_service.dart';
 
 class CategoryData {
   // Get all category names
@@ -12,6 +13,9 @@ class CategoryData {
   static List<String> getSubCategories(String categoryName) {
     final categoryId = getCategoryId(categoryName);
     if (categoryId == null) return [];
+
+    // Trigger debounced loading of subcategories if needed
+    CategoryApiService.debouncedInitSubCategories(categoryId);
 
     return CategoryService.getSubCategoriesForCategory(categoryId)
         .map((subcategory) => subcategory.nameEn)

@@ -16,10 +16,8 @@ void main() async {
   Stripe.publishableKey = 'pk_test_51PjvreLb7rADQxlhNguFowjeUKGOe8vrgmoKbPboIuSfDF2KiqdevkpElFb6QIO7RVeBST80waLymed3v62w91Eh00YXNr6FRC';
   await Stripe.instance.applySettings();
 
-  // Initialize categories and subcategories
+  // Initialize categories
   await CategoryApiService.initCategories();
-  // Initialize subcategories for Electronics (ID: 1)
-  await CategoryApiService.initSubCategories(1);
 
   timeago.setLocaleMessages('en_custom', CustomTimeagoMessages());
   runApp(const MyApp());

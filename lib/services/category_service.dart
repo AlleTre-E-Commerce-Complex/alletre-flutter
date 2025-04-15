@@ -18,6 +18,11 @@ class CategoryService {
     return _categories.values.toList();
   }
 
+  /// Check if subcategories are already loaded for a category
+  static bool hasSubCategories(int categoryId) {
+    return _subCategories.values.any((subcat) => subcat.categoryId == categoryId);
+  }
+
   /// Get subcategories for a specific category
   static List<SubCategory> getSubCategoriesForCategory(int categoryId) {
     return _subCategories.values

@@ -21,12 +21,14 @@ class AuctionProvider with ChangeNotifier {
   bool _isLoadingUpcoming = false;
   bool _isLoadingExpired = false;
   bool _isCreatingAuction = false;
+  bool _isListingProduct = false;
 
   String? _errorLive;
   String? _errorListedProducts;
   String? _errorUpcoming;
   String? _errorExpired;
   String? _createAuctionError;
+  String? _listProductError;
 
   List<AuctionItem> get liveAuctions => _liveAuctions;
   List<AuctionItem> get listedProducts => _listedProducts;
@@ -34,8 +36,10 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> get expiredAuctions => _expiredAuctions;
   bool get isLoading => _isLoading;
   bool get isCreatingAuction => _isCreatingAuction;
+  bool get isListingProduct => _isListingProduct;
   String? get error => _error;
   String? get createAuctionError => _createAuctionError;
+  String? get listProductError => _listProductError;
 
   List<AuctionItem> getSimilarProducts(AuctionItem currentItem) {
     // Combine all available products
@@ -401,6 +405,46 @@ class AuctionProvider with ChangeNotifier {
   } catch (e) {
     _createAuctionError = e.toString();
     throw Exception(_createAuctionError);
+  } finally {
+    _isCreatingAuction = false;
+    notifyListeners();
+  }
+}
+
+Future<Map<String, dynamic>> listProduct({
+  required Map<String, dynamic> auctionData,
+  required List<String> imagePaths,
+}) async {
+  try {
+    _isListingProduct = true;
+    _listProductError = '';
+    notifyListeners();
+
+    // Convert image paths to File objects
+    final List<File> images = imagePaths.map((path) => File(path)).toList();
+
+    // Make sure the product field exists and is a proper object
+    if (!auctionData.containsKey('product') || auctionData['product'] is! Map<String, dynamic>) {
+      throw Exception('Product data must be a non-empty object');
+    }
+
+    // Create auction with the service
+    final response = await _auctionService.listProduct(
+      auctionData: auctionData,
+      images: images,
+      locationId: auctionData['locationId'] ?? 1,
+    );
+
+    if (response['success']) {
+      _listProductError = '';
+      return response;
+    } else {
+      _listProductError = response['message'] ?? 'Failed to list product';
+      throw Exception(_listProductError);
+    }
+  } catch (e) {
+    _listProductError = e.toString();
+    throw Exception(_listProductError);
   } finally {
     _isCreatingAuction = false;
     notifyListeners();

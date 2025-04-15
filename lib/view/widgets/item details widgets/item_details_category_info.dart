@@ -11,9 +11,11 @@ class ItemDetailsCategoryInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: CategoryApiService.initSubCategories(item.categoryId),
-      builder: (context, snapshot) {
+    // Trigger debounced loading of subcategories
+    CategoryApiService.debouncedInitSubCategories(item.categoryId);
+
+    return Builder(
+      builder: (context) {
         // if (snapshot.connectionState == ConnectionState.waiting) {
         //   return const Center(child: CircularProgressIndicator(color: primaryColor));
         // }
