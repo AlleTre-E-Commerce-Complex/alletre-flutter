@@ -1,16 +1,15 @@
 // ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../listed product widgets/listed_success_dialog.dart';
 import '../../widgets/common widgets/address_card.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import 'add_location_screen.dart';
@@ -180,7 +179,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                       if (!loginProvider.isLoggedIn) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Please log in to create an auction'),
+                            content: Text('Please login to continue...'),
                           ),
                         );
                         Navigator.pushReplacement(
@@ -426,63 +425,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                                 ),
                               );
                             } else {
-                              // Show success dialog for listed products
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.check_circle_outline,
-                                        color: activeColor,
-                                        size: 60,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      const Text(
-                                        'Success!',
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            color: onSecondaryColor),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Your item ${auctionData['product']['title']} has been listed successfully.',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            color: onSecondaryColor),
-                                      ),
-                                      Text(
-                                        'Listing Price: $listingPrice AED',
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: onSecondaryColor),
-                                      ),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context); // Close dialog
-                                        // Navigate to home and update tab index
-                                        context.read<TabIndexProvider>().updateIndex(1);
-                                        // Pop until home
-                                        Navigator.popUntil(
-                                          context,
-                                          (route) => route.isFirst,
-                                        );
-                                      },
-                                      child: const Text('View My Products'),
-                                    ),
-                                  ],
-                                ),
-                              );
+                              ListedSuccessDialog.show(context);
                             }
                           }
                         } else {
