@@ -366,7 +366,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                                 auctionData: fullAuctionData,
                                 imagePaths: imagePaths,
                               );
-                        
+
                         debugPrint('API Response: $response');
 
                         // Hide loading indicator
@@ -445,10 +445,9 @@ class ShippingDetailsScreen extends StatelessWidget {
                                       const Text(
                                         'Success!',
                                         style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          color: onSecondaryColor
-                                        ),
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                            color: onSecondaryColor),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
