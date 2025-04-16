@@ -1,6 +1,7 @@
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/utils/location_maps.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/add_address_screen.dart';
@@ -74,13 +75,33 @@ class AddLocationScreen extends StatelessWidget {
                       layout: Layout.vertical,
                       flagState: CountryFlag.ENABLE,
                       onCountryChanged: (country) {
-                        locationProvider.updateCountry(country);
+                        // UAE is always countryId 1
+                        locationProvider.updateCountry(country, id: 1);
                       },
                       onStateChanged: (state) {
-                        locationProvider.updateState(state);
+                        // Map state name to ID based on position in UAE cities
+                        int? stateId;
+                        // Find city ID by matching name in our map
+                        cityIdToName.forEach((id, name) {
+                          if (name.toLowerCase() == state?.toLowerCase() || 
+                              name.contains(state ?? '')) {
+                            stateId = id;
+                          }
+                        });
+                        locationProvider.updateState(state, id: stateId);
+                        print('🌍 Selected state: $state (ID: $stateId)');
                       },
                       onCityChanged: (city) {
-                        locationProvider.updateCity(city);
+                        // Find the correct city ID from our map
+                        int? cityId;
+                        cityIdToName.forEach((id, name) {
+                          if (name.toLowerCase() == city?.toLowerCase() || 
+                              (city != null && name.toLowerCase().contains(city.toLowerCase()))) {
+                            cityId = id;
+                          }
+                        });
+                        locationProvider.updateCity(city, id: cityId);
+                        print('🌍 Selected city: $city (ID: $cityId)');
                       },
                       countryFilter: const [CscCountry.United_Arab_Emirates],
                       countryDropdownLabel: "Select Country",

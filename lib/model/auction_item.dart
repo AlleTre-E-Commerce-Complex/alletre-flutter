@@ -285,8 +285,62 @@ class AuctionItem {
       }
 
       Location? itemLocation;
-      if (json['location'] != null) {
+      // Prefer shippingDetails for city/country if available
+      if (json['shippingDetails'] != null) {
+        final shipping = json['shippingDetails'] as Map<String, dynamic>;
+        print('💸🔦[AuctionItem.fromJson] Using shippingDetails: $shipping');
+        // Always use English state for city, and clean up country string
+        final rawCountry = (shipping['country'] ?? '') as String;
+        final cleanedCountry = rawCountry.replaceAll(RegExp(r'[^A-Za-z ]'), '').trim();
+        itemLocation = Location(
+          id: 0,
+          address: shipping['address'] ?? '',
+          lat: 0.0,
+          lng: 0.0,
+          phone: shipping['phone'] ?? '',
+          addressLabel: '',
+          city: shipping['state'] ?? '', // Use English state as city
+          country: cleanedCountry,
+        );
+        print('[AuctionItem.fromJson] Created itemLocation from shippingDetails: city=${itemLocation.city}, country=${itemLocation.country}');
+      } else if (json['location'] != null) {
+        print('[AuctionItem.fromJson] Using location object: ${json['location']}');
         itemLocation = Location.fromJson(json['location']);
+         print('[AuctionItem.fromJson] Created itemLocation from location object: city=${itemLocation.city}, country=${itemLocation.country}');
+      } else if (product['cityId'] != null || product['countryId'] != null) {
+        print('[AuctionItem.fromJson] Using cityId/countryId from product: cityId=${product['cityId']}, countryId=${product['countryId']}');
+        print('[AuctionItem.fromJson] Product map: $product');
+        // Fallback: if product['address'] is empty, use user's first location address if available
+        String address = product['address'] ?? '';
+        String addressLabel = product['addressLabel'] ?? '';
+        if ((address.isEmpty || address == '') && product['user'] != null && product['user']['locations'] != null) {
+          final locations = product['user']['locations'];
+          if (locations is List && locations.isNotEmpty) {
+            address = locations[0]['address'] ?? '';
+            addressLabel = locations[0]['addressLabel'] ?? '';
+          }
+        }
+        itemLocation = Location.fromIds(
+          id: json['locationId'] ?? 0,
+          cityId: product['cityId'],
+          countryId: product['countryId'],
+          address: address,
+          addressLabel: addressLabel,
+        );
+        print('[💡💡💡AuctionItem.fromJson] Created itemLocation from product IDs: city=${itemLocation.city}, country=${itemLocation.country}, address=${itemLocation.address}');
+      } else if (json['cityId'] != null || json['countryId'] != null) {
+        print('[AuctionItem.fromJson] Using cityId/countryId: cityId=${json['cityId']}, countryId=${json['countryId']}, locationId=${json['locationId']}');
+        print('[AuctionItem.fromJson] Product map: $product');
+        itemLocation = Location.fromIds(
+          id: json['locationId'] ?? 0,
+          cityId: json['cityId'],
+          countryId: json['countryId'],
+          address: json['address'] ?? '',
+          addressLabel: json['addressLabel'] ?? '',
+        );
+        print('[AuctionItem.fromJson] Created itemLocation from IDs: city=${itemLocation.city}, country=${itemLocation.country}, address=${itemLocation.address}');
+      } else {
+        print('[AuctionItem.fromJson] No location data found in JSON!');
       }
 
       return AuctionItem(
@@ -327,6 +381,20 @@ class AuctionItem {
       log('Error creating AuctionItem: $e');
       rethrow;
     }
+  }
+
+   /// Helper to create AuctionItem after local listing (use state as city)
+  static Location createLocationFromApp(Map<String, dynamic> shipping) {
+    return Location(
+      id: 0,
+      address: shipping['address'] ?? '',
+      lat: 0.0,
+      lng: 0.0,
+      phone: shipping['phone'] ?? '',
+      addressLabel: '',
+      city: shipping['state'] ?? '', // Use state as city when listing from app
+      country: shipping['country'] ?? '',
+    );
   }
 
   factory AuctionItem.empty() {

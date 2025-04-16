@@ -1,3 +1,5 @@
+import 'package:alletre_app/utils/location_maps.dart';
+
 class Location {
   final int id;
   final String address;
@@ -29,6 +31,24 @@ class Location {
       addressLabel: json['addressLabel'] as String,
       city: json['city']['nameEn'] as String,
       country: json['country']['nameEn'] as String,
+    );
+  }
+  factory Location.fromIds({
+    required int id,
+    required int? cityId,
+    required int? countryId,
+    String address = '',
+    String addressLabel = '',
+  }) {
+    return Location(
+      id: id,
+      address: address,
+      lat: 0.0,
+      lng: 0.0,
+      phone: '',
+      addressLabel: addressLabel,
+      city: cityIdToName[cityId] ?? '',
+      country: countryIdToName[countryId] ?? '',
     );
   }
 }

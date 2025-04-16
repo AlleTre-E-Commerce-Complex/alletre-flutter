@@ -52,7 +52,7 @@ class AuctionService {
       debugPrint('Token acquired, preparing request...');
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('${ApiEndpoints.baseUrl}/auctions'),
+        Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.auctions}'),
       );
 
       // Set headers
@@ -356,7 +356,7 @@ class AuctionService {
       debugPrint('Token acquired, preparing request...');
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('${ApiEndpoints.baseUrl}auctions/product-listing'),
+        Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.productListing}'),
       );
 
       // Set headers

@@ -170,7 +170,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                     ),
                     child: const Text(
                       "Previous",
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(color: onSecondaryColor),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -265,11 +265,28 @@ class ShippingDetailsScreen extends StatelessWidget {
                           'scheduleBid': auctionData['scheduleBid'] ?? false,
                           'buyNowEnabled': auctionData['buyNowEnabled'] ?? false,
                           'buyNowPrice': buyNowPrice,
-                          'product': Map<String, dynamic>.from(auctionData['product']), // Create clean copy a Map
-                          'locationId': 1,
+                                                   'product': {
+                            ...Map<String, dynamic>.from(
+                                auctionData['product']),
+                            // Always set ProductListingPrice for backend compatibility
+                            'ProductListingPrice': auctionData['product']
+                                ['price'],
+                            // Add location IDs to product data for backend
+                            // Ensure countryId is always 1 for UAE
+                            'countryId': 1,
+                            // Use cityId from locationProvider, defaulting to 1 (Dubai) if not set
+                            'cityId': locationProvider.cityId ?? 1,
+                            // Add address and addressLabel for backend DTO
+                            'address': defaultAddress ?? '',
+                            'addressLabel': 'Main Address',
+                          },
+                          // 'locationId': locationProvider.selectedLocationId ?? 0,
                           'shippingDetails': {
-                            'country': locationProvider.selectedCountry ?? 'UAE',
-                            'city': locationProvider.selectedCity ?? 'Dubai',
+                            'country':
+                                locationProvider.selectedCountry ?? 'UAE',
+                            'state': locationProvider.selectedState ??
+                                'Ras Al Khaima',
+                            'city': locationProvider.selectedCity ?? 'Nakheel',
                             'address': defaultAddress ?? '',
                             'phone': userProvider.phoneNumber,
                           },
@@ -339,11 +356,16 @@ class ShippingDetailsScreen extends StatelessWidget {
                         // Debug the auction data before API call
                         debugPrint('Full auction data before API call:');
                         debugPrint(json.encode(fullAuctionData));
-                        
-                        final response = await auctionProvider.createAuction(
-                          auctionData: fullAuctionData,
-                          imagePaths: imagePaths,
-                        );
+
+                        final response = title == 'Create Auction'
+                            ? await auctionProvider.createAuction(
+                                auctionData: fullAuctionData,
+                                imagePaths: imagePaths,
+                              )
+                            : await auctionProvider.listProduct(
+                                auctionData: fullAuctionData,
+                                imagePaths: imagePaths,
+                              );
                         
                         debugPrint('API Response: $response');
 
@@ -372,6 +394,8 @@ class ShippingDetailsScreen extends StatelessWidget {
                               ...response['data'],
                               'endTime': endTime.toIso8601String(),
                               ...fullAuctionData,
+                              'ProductListingPrice': fullAuctionData['product']
+                                  ['price'],
                               'product': {
                                 ...fullAuctionData['product'],
                                 'images': imagePaths,
@@ -384,7 +408,11 @@ class ShippingDetailsScreen extends StatelessWidget {
                           print('🔦🔦New Item Created:');
                           print('🔦🔦Item Name: ${auctionData['product']['title']}');
                           print('🔦🔦Status: ${response['status']}');
-                          print('🔦🔦Amount: ${auctionData['product']['price']}');
+                          // Use ProductListingPrice for listed products, fallback to product price
+                          final listingPrice = navigationData['data']
+                                  ['ProductListingPrice'] ??
+                              navigationData['data']['product']['price'];
+                          print('🔦🔦Listing Price: $listingPrice');
 
                           if (context.mounted) {
                             if (title == 'Create Auction') {
@@ -419,13 +447,23 @@ class ShippingDetailsScreen extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
+                                          color: onSecondaryColor
                                         ),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
                                         'Your item ${auctionData['product']['title']} has been listed successfully.',
                                         textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            color: onSecondaryColor),
+                                      ),
+                                      Text(
+                                        'Listing Price: $listingPrice AED',
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: onSecondaryColor),
                                       ),
                                     ],
                                   ),

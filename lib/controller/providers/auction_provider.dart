@@ -1,5 +1,4 @@
 // ignore_for_file: avoid_print
-
 import 'dart:io';
 import 'package:alletre_app/controller/helpers/auction_service.dart';
 import 'package:alletre_app/controller/helpers/socket_service.dart';
@@ -428,26 +427,46 @@ Future<Map<String, dynamic>> listProduct({
       throw Exception('Product data must be a non-empty object');
     }
 
-    // Create auction with the service
-    final response = await _auctionService.listProduct(
-      auctionData: auctionData,
-      images: images,
-      locationId: auctionData['locationId'] ?? 1,
-    );
+      // List product with the service
+      final response = await _auctionService.listProduct(
+        auctionData: auctionData,
+        images: images,
+        locationId: auctionData['locationId'] ?? 0,
+      );
 
-    if (response['success']) {
-      _listProductError = '';
-      return response;
-    } else {
-      _listProductError = response['message'] ?? 'Failed to list product';
+      if (response['success']) {
+        _listProductError = '';
+        // --- Begin: Add new item to _listedProducts with correct itemLocation ---
+        try {
+          final data = response['data'] ?? {};
+          // Use the shippingDetails you just submitted
+          final shippingDetails = auctionData['shippingDetails'] ?? {};
+          final itemLocation = AuctionItem.createLocationFromApp(shippingDetails);
+          // Compose a new AuctionItem (fallback to fromJson, then override itemLocation)
+          AuctionItem newItem = AuctionItem.fromJson({
+            ...data,
+            'shippingDetails': shippingDetails,
+            'product': auctionData['product'],
+            // If API data already includes location, this is a safe override
+          });
+          newItem = newItem.copyWith(itemLocation: itemLocation);
+          _listedProducts.add(newItem);
+          notifyListeners();
+        } catch (e) {
+          debugPrint('Error adding new listed product locally: $e');
+        }
+        // --- End: Add new item to _listedProducts with correct itemLocation ---
+        return response;
+      } else {
+        _listProductError = response['message'] ?? 'Failed to list product';
+        throw Exception(_listProductError);
+      }
+    } catch (e) {
+      _listProductError = e.toString();
       throw Exception(_listProductError);
-    }
-  } catch (e) {
-    _listProductError = e.toString();
-    throw Exception(_listProductError);
-  } finally {
-    _isCreatingAuction = false;
-    notifyListeners();
+    } finally {
+      _isListingProduct = false;
+      notifyListeners();
   }
 }
 
