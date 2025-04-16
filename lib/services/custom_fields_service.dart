@@ -188,7 +188,7 @@ class CustomFieldsService {
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/products/$productId'),
+        Uri.parse('$baseUrl/auctions/listedProducts/$productId/details'),
       );
 
       // print('📥 Response status code: ${response.statusCode}');

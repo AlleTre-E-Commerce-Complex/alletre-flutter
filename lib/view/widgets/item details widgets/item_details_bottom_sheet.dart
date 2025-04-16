@@ -65,14 +65,14 @@ class ItemDetailsBottomSheet extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       children: [
         const SizedBox(height: 10),
-        // Add location information at the top
-        if (item.itemLocation != null) ...[
-          _buildFieldCard(
-            label: 'Location',
-            value: '${item.itemLocation?.city}, ${item.itemLocation?.country}',
-          ),
-          const SizedBox(height: 10),
-        ],
+        // // Add location information at the top
+        // if (item.itemLocation != null) ...[
+        //   _buildFieldCard(
+        //     label: 'Location',
+        //     value: '${item.itemLocation?.city}, ${item.itemLocation?.country}',
+        //   ),
+        //   const SizedBox(height: 10),
+        // ],
         ..._buildCustomFieldsContent()
       ],
     );
