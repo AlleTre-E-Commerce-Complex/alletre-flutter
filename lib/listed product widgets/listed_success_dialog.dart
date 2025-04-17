@@ -24,9 +24,9 @@ class ListedSuccessDialog {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Your product has been listed successfully',
+                  'Product listed successfully',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: onSecondaryColor,
                   ),
@@ -47,7 +47,7 @@ class ListedSuccessDialog {
                         ),
                       ),
                       child: const Text(
-                        'View Listed Products',
+                        'View Products',
                         style: TextStyle(color: secondaryColor),
                       ),
                     ),
