@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
               onTap: () {},
             ),
             ProfileListTile(
-              icon: Icons.account_balance_wallet_outlined,
+              icon: Icons.drafts_outlined,
               title: 'My Drafts',
               subtitle: 'View your drafted items',
               onTap: () {
