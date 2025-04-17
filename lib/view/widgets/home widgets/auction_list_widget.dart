@@ -174,7 +174,7 @@ class AuctionListWidget extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      const ProductDetailsScreen()),
+                                      const ProductDetailsScreen(title: 'List Product')),
                             );
                           }
                         } else {
