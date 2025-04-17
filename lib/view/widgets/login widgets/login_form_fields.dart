@@ -49,25 +49,25 @@ class LoginFormFields extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Transform.scale(
-                    scale: 0.8,
-                    child: Checkbox(
-                      value: userProvider.rememberPassword,
-                      onChanged: (_) => userProvider.toggleRememberPassword(),
-                    ),
-                  ),
-                  const Text(
-                    'Remember Password',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: onSecondaryColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     Transform.scale(
+              //       scale: 0.8,
+              //       child: Checkbox(
+              //         value: userProvider.rememberPassword,
+              //         onChanged: (_) => userProvider.toggleRememberPassword(),
+              //       ),
+              //     ),
+              //     const Text(
+              //       'Remember Password',
+              //       style: TextStyle(
+              //         fontSize: 15,
+              //         color: onSecondaryColor,
+              //         fontWeight: FontWeight.w500,
+              //       ),
+              //     ),
+              //   ],
+              // ),
               Padding(
                 padding: const EdgeInsets.only(left: 15),
                 child: GestureDetector(
