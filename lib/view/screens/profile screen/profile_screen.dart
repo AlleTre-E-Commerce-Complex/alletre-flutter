@@ -1,4 +1,5 @@
 import 'package:alletre_app/controller/providers/share_provider.dart';
+import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
@@ -8,6 +9,7 @@ import 'package:alletre_app/view/widgets/profile%20widgets/user_profile_card.dar
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import '../auction screen/drafts_page.dart';
 import '../edit profile screen/edit_profile_screen.dart';
 import '../faqs screen/faqs_screen.dart';
 import '../settings screen/settings_screen.dart';
@@ -91,15 +93,21 @@ class ProfileScreen extends StatelessWidget {
             ),
             ProfileListTile(
               icon: Icons.shopping_cart_outlined,
-              title: 'Purchases',
+              title: 'My Purchases',
               subtitle: 'View order history and details',
               onTap: () {},
             ),
             ProfileListTile(
               icon: Icons.account_balance_wallet_outlined,
-              title: 'Wallet',
-              subtitle: 'Check your transaction record',
-              onTap: () {},
+              title: 'My Drafts',
+              subtitle: 'View your drafted items',
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DraftsPage(
+                            draftAuction: AuctionItem.empty(), user: UserModel.empty())));
+              },
             ),
             Divider(color: dividerColor, thickness: 0.5),
             const ProfileSectionTitle(title: 'About'),

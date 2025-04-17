@@ -1,25 +1,30 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'dart:io';
 import 'dart:convert';
 import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/create_auction_validators.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:provider/provider.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/home widgets/categories widgets/categories_data.dart';
 import 'auction_details_screen.dart';
 import 'shipping_details_screen.dart';
+import 'drafts_page.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final String title;
-  const ProductDetailsScreen({super.key, this.title = 'Create Auction'});
+  final AuctionItem? draftAuction;
+  const ProductDetailsScreen({super.key, this.title = 'Create Auction', this.draftAuction});
 
   @override
   Widget build(BuildContext context) {
+    // Obtain the current user from Provider
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+
     // Add a ValueNotifier to track whether the form has been submitted
     final isSubmitted = ValueNotifier<bool>(false);
     final formKey = GlobalKey<FormState>();
@@ -36,6 +41,30 @@ class ProductDetailsScreen extends StatelessWidget {
     // Map to store the custom field controllers and dropdown values
     final customFieldControllers = <String, TextEditingController>{};
     final customFieldDropdownValues = <String, ValueNotifier<String?>>{};
+
+    // If draftAuction is provided, pre-fill controllers
+    if (draftAuction != null) {
+      itemNameController.text = draftAuction!.title;
+      priceController.text = draftAuction!.price.toString();
+      descriptionController.text = draftAuction!.description;
+      categoryController.value = draftAuction!.categoryName;
+      subCategoryController.value = draftAuction!.subCategoryName;
+      media.value = draftAuction!.imageLinks.map((url) => File(url)).toList();
+      condition.value = draftAuction!.usageStatus.toLowerCase();
+      // Pre-fill custom fields if available
+      if (draftAuction!.customFields != null) {
+        for (var field in draftAuction!.customFields!.fields) {
+          final key = field.key;
+          final value = field.value;
+          if (customFieldControllers.containsKey(key)) {
+            customFieldControllers[key]!.text = value?.toString() ?? '';
+          }
+          if (customFieldDropdownValues.containsKey(key)) {
+            customFieldDropdownValues[key]!.value = value?.toString();
+          }
+        }
+      }
+    }
 
     // Get categories list
     final categories = CategoryData.categories;
@@ -295,7 +324,8 @@ class ProductDetailsScreen extends StatelessWidget {
       }
 
       // Validate media section separately since it's async
-      final mediaError = await CreateAuctionValidation.validateMediaSection(media.value);
+      final mediaError =
+          await CreateAuctionValidation.validateMediaSection(media.value);
       if (mediaError != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(mediaError)),
@@ -330,8 +360,7 @@ class ProductDetailsScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: NavbarElementsAppbar(
-          appBarTitle: title, showBackButton: true),
+      appBar: NavbarElementsAppbar(appBarTitle: title, showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
         child: Form(
@@ -378,27 +407,27 @@ class ProductDetailsScreen extends StatelessWidget {
                 validator: CreateAuctionValidation.validateTitle,
               ),
               const SizedBox(height: 15),
-              if(title == "List Product")
-              TextFormField(
-                controller: priceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Price",
-                  labelStyle: labelTextStyle,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+              if (title == "List Product")
+                TextFormField(
+                  controller: priceController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: "Price",
+                    labelStyle: labelTextStyle,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: errorColor),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: errorColor),
+                    ),
                   ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: errorColor),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: errorColor),
-                  ),
+                  validator: CreateAuctionValidation.validateTitle,
                 ),
-                validator: CreateAuctionValidation.validateTitle,
-              ),
               const SizedBox(height: 15),
               ValueListenableBuilder<String?>(
                 valueListenable: categoryController,
@@ -521,7 +550,8 @@ class ProductDetailsScreen extends StatelessWidget {
                         value: selectedSubCategory,
                         // ignore: unnecessary_null_comparison
                         items: selectedCategory != null
-                            ? CategoryData.getSubCategories(selectedCategory).map((subcategory) {
+                            ? CategoryData.getSubCategories(selectedCategory)
+                                .map((subcategory) {
                                 return DropdownMenuItem(
                                   value: subcategory,
                                   child: Text(
@@ -784,7 +814,8 @@ class ProductDetailsScreen extends StatelessWidget {
                       color: onSecondaryColor),
                   children: [
                     TextSpan(
-                      text: '(You can upload upto 50 images & 1 video [max 50MB])',
+                      text:
+                          '(You can upload upto 50 images & 1 video [max 50MB])',
                       style: TextStyle(
                           color: greyColor, fontWeight: FontWeight.w500),
                     ),
@@ -814,14 +845,16 @@ class ProductDetailsScreen extends StatelessWidget {
                           mainAxisSpacing: 10,
                           childAspectRatio: 1,
                         ),
-                        itemCount: mediaList.length < 5 
+                        itemCount: mediaList.length < 5
                             ? 5 // Initial count
-                            : mediaList.length >= 50 
+                            : mediaList.length >= 50
                                 ? 50 // Max limit
-                                : mediaList.length + 1, // Current count + 1 empty slot
+                                : mediaList.length +
+                                    1, // Current count + 1 empty slot
                         itemBuilder: (context, index) {
                           // Generate a reordered media list with the cover photo (if set) first
-                          final reorderedMediaList = coverPhotoIndex.value != null &&
+                          final reorderedMediaList = coverPhotoIndex.value !=
+                                      null &&
                                   coverPhotoIndex.value! < mediaList.length
                               ? [
                                   mediaList[coverPhotoIndex.value!],
@@ -840,9 +873,11 @@ class ProductDetailsScreen extends StatelessWidget {
                                     final File? newMedia =
                                         await pickMediaFromGallery();
                                     if (newMedia != null) {
-                                      final updatedMedia = List<File>.from(mediaList);
+                                      final updatedMedia =
+                                          List<File>.from(mediaList);
                                       // Replace the correct item in the original list
-                                      final originalIndex = mediaList.indexOf(reorderedMediaList[index]);
+                                      final originalIndex = mediaList
+                                          .indexOf(reorderedMediaList[index]);
                                       updatedMedia[originalIndex] = newMedia;
                                       media.value = updatedMedia;
                                     }
@@ -856,7 +891,8 @@ class ProductDetailsScreen extends StatelessWidget {
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(10),
-                                      child: _buildMediaWidget(reorderedMediaList[index]),
+                                      child: _buildMediaWidget(
+                                          reorderedMediaList[index]),
                                     ),
                                   ),
                                 ),
@@ -870,13 +906,17 @@ class ProductDetailsScreen extends StatelessWidget {
                                       size: 16,
                                     ),
                                     onPressed: () {
-                                      final updatedMedia = List<File>.from(mediaList);
+                                      final updatedMedia =
+                                          List<File>.from(mediaList);
                                       // Remove the correct item from the original list
-                                      final originalIndex = mediaList.indexOf(reorderedMediaList[index]);
+                                      final originalIndex = mediaList
+                                          .indexOf(reorderedMediaList[index]);
                                       updatedMedia.removeAt(originalIndex);
                                       media.value = updatedMedia;
-                                      if (coverPhotoIndex.value == originalIndex) {
-                                        coverPhotoIndex.value = null; // Reset cover photo
+                                      if (coverPhotoIndex.value ==
+                                          originalIndex) {
+                                        coverPhotoIndex.value =
+                                            null; // Reset cover photo
                                       }
                                     },
                                   ),
@@ -971,11 +1011,14 @@ class ProductDetailsScreen extends StatelessWidget {
                         builder: (context, submitted, child) {
                           if (submitted) {
                             return FutureBuilder<String?>(
-                              future: CreateAuctionValidation.validateMediaSection(mediaList),
+                              future:
+                                  CreateAuctionValidation.validateMediaSection(
+                                      mediaList),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData && snapshot.data != null) {
                                   return Padding(
-                                    padding: const EdgeInsets.only(top: 10, left: 12),
+                                    padding: const EdgeInsets.only(
+                                        top: 10, left: 12),
                                     child: Text(
                                       snapshot.data!,
                                       style: const TextStyle(
@@ -1068,20 +1111,140 @@ class ProductDetailsScreen extends StatelessWidget {
                         final formValid = await validateForm();
 
                         if (formValid) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Saved in Drafts')),
-                          );
-                          // Navigate to the home page after a short delay
-                          Future.delayed(const Duration(seconds: 1), () {
-                            context.read<TabIndexProvider>().updateIndex(1);
+                          // Prepare categoryId and subCategoryId as int before building productData
+                          final int categoryId = categoryController.value is int
+                              ? categoryController.value as int
+                              : int.tryParse(
+                                      categoryController.value?.toString() ??
+                                          '') ??
+                                  0;
+                          final int subCategoryId = subCategoryController.value
+                                  is int
+                              ? subCategoryController.value as int
+                              : int.tryParse(
+                                      subCategoryController.value?.toString() ??
+                                          '') ??
+                                  0;
+                          // Collect product data as in the main flow
+                          final productData = {
+                            'title': itemNameController.text.trim(),
+                            'description': descriptionController.text.trim(),
+                            'categoryId': categoryId,
+                            'subCategoryId': subCategoryId,
+                            'usageStatus':
+                                condition.value?.toUpperCase() ?? 'UNKNOWN',
+                          };
+                          final customFields = <String, dynamic>{
+                            'screenSize': customFieldControllers['Screen Size']
+                                ?.text
+                                .trim(),
+                            'operatingSystem':
+                                customFieldControllers['Operating System']
+                                    ?.text
+                                    .trim(),
+                            'releaseYear':
+                                customFieldControllers['Release Year']
+                                    ?.text
+                                    .trim(),
+                            'regionOfManufacture':
+                                customFieldControllers['Region of Manufacture']
+                                    ?.text
+                                    .trim(),
+                            'ramSize':
+                                customFieldControllers['RAM Size']?.text.trim(),
+                            'processor': customFieldControllers['Processor']
+                                ?.text
+                                .trim(),
+                            'brand':
+                                customFieldControllers['Brand']?.text.trim(),
+                            'graphicCard':
+                                customFieldControllers['Graphic Card']
+                                    ?.text
+                                    .trim(),
+                            'model':
+                                customFieldControllers['Model']?.text.trim(),
+                            'color': customFieldDropdownValues['Color']?.value,
+                          };
+                          customFields.forEach((key, value) {
+                            if (value != null && value.toString().isNotEmpty) {
+                              if (['screenSize', 'releaseYear', 'ramSize']
+                                  .contains(key)) {
+                                try {
+                                  productData[key] =
+                                      num.tryParse(value.toString()) ?? value;
+                                } catch (_) {
+                                  productData[key] = value;
+                                }
+                              } else {
+                                productData[key] = value;
+                              }
+                            }
                           });
+                          // Get image paths from media files
+                          final imagePaths =
+                              media.value.map((file) => file.path).toList();
+                          // Create a minimal AuctionItem for preview (Draft)
+                          final draftAuction = AuctionItem(
+                            id: 0,
+                            productId: 0,
+                            postedBy: '',
+                            userName: null,
+                            phone: '',
+                            title: productData['title']?.toString() ?? '',
+                            description:
+                                productData['description']?.toString() ?? '',
+                            imageLinks: imagePaths,
+                            price: '0',
+                            productListingPrice: '0',
+                            startBidAmount: '0',
+                            currentBid: '0',
+                            buyNowPrice: '0',
+                            startDate: DateTime.now(),
+                            expiryDate:
+                                DateTime.now().add(const Duration(days: 7)),
+                            endDate: null,
+                            createdAt: DateTime.now(),
+                            status: 'DRAFT',
+                            type: 'ON_TIME',
+                            usageStatus:
+                                productData['usageStatus']?.toString() ?? '',
+                            itemLocation: null,
+                            bids: 0,
+                            buyNowEnabled: false,
+                            categoryId: int.tryParse(
+                                    productData['categoryId']?.toString() ??
+                                        '') ??
+                                0,
+                            subCategoryId: int.tryParse(
+                                    productData['subCategoryId']?.toString() ??
+                                        '') ??
+                                0,
+                            categoryName:
+                                categoryController.value?.toString() ?? '',
+                            subCategoryName:
+                                subCategoryController.value?.toString() ?? '',
+                            isAuctionProduct: true,
+                            customFields: null,
+                            product: productData,
+                            returnPolicyDescription: null,
+                            warrantyPolicyDescription: null,
+                          );
+                          // Navigate to DraftsPage
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DraftsPage(
+                                draftAuction: draftAuction,
+                                user: user,
+                              ),
+                            ),
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(80, 33),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              6), // Adjust border radius here
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         backgroundColor: Colors.grey[300],
                       ),
@@ -1103,24 +1266,47 @@ class ProductDetailsScreen extends StatelessWidget {
                           final Map<String, dynamic> productData = {
                             'title': itemNameController.text.trim(),
                             'description': descriptionController.text.trim(),
-                            'categoryId': CategoryData.getCategoryId(categoryController.value ?? '') ?? 1,
+                            'categoryId': CategoryData.getCategoryId(
+                                    categoryController.value ?? '') ??
+                                1,
                             'subCategoryId': CategoryData.getSubCategoryId(
-                                categoryController.value ?? '',
-                                subCategoryController.value ?? '') ?? 1,
-                            'usageStatus': condition.value?.toUpperCase() ?? 'UNKNOWN',
+                                    categoryController.value ?? '',
+                                    subCategoryController.value ?? '') ??
+                                1,
+                            'usageStatus':
+                                condition.value?.toUpperCase() ?? 'UNKNOWN',
                           };
 
                           // Add Electronics category custom fields with exact field names
                           final customFields = <String, dynamic>{
-                            'screenSize': customFieldControllers['Screen Size']?.text.trim(),
-                            'operatingSystem': customFieldControllers['Operating System']?.text.trim(),
-                            'releaseYear': customFieldControllers['Release Year']?.text.trim(),
-                            'regionOfManufacture': customFieldControllers['Region of Manufacture']?.text.trim(),
-                            'ramSize': customFieldControllers['RAM Size']?.text.trim(),
-                            'processor': customFieldControllers['Processor']?.text.trim(),
-                            'brand': customFieldControllers['Brand']?.text.trim(),
-                            'graphicCard': customFieldControllers['Graphic Card']?.text.trim(),
-                            'model': customFieldControllers['Model']?.text.trim(),
+                            'screenSize': customFieldControllers['Screen Size']
+                                ?.text
+                                .trim(),
+                            'operatingSystem':
+                                customFieldControllers['Operating System']
+                                    ?.text
+                                    .trim(),
+                            'releaseYear':
+                                customFieldControllers['Release Year']
+                                    ?.text
+                                    .trim(),
+                            'regionOfManufacture':
+                                customFieldControllers['Region of Manufacture']
+                                    ?.text
+                                    .trim(),
+                            'ramSize':
+                                customFieldControllers['RAM Size']?.text.trim(),
+                            'processor': customFieldControllers['Processor']
+                                ?.text
+                                .trim(),
+                            'brand':
+                                customFieldControllers['Brand']?.text.trim(),
+                            'graphicCard':
+                                customFieldControllers['Graphic Card']
+                                    ?.text
+                                    .trim(),
+                            'model':
+                                customFieldControllers['Model']?.text.trim(),
                             'color': customFieldDropdownValues['Color']?.value,
                           };
 
@@ -1128,9 +1314,11 @@ class ProductDetailsScreen extends StatelessWidget {
                           customFields.forEach((key, value) {
                             if (value != null && value.toString().isNotEmpty) {
                               // Convert numeric fields to numbers
-                              if (['screenSize', 'releaseYear', 'ramSize'].contains(key)) {
+                              if (['screenSize', 'releaseYear', 'ramSize']
+                                  .contains(key)) {
                                 try {
-                                  productData[key] = num.tryParse(value.toString()) ?? value;
+                                  productData[key] =
+                                      num.tryParse(value.toString()) ?? value;
                                 } catch (_) {
                                   productData[key] = value;
                                 }
@@ -1141,15 +1329,21 @@ class ProductDetailsScreen extends StatelessWidget {
                           });
 
                           // Validate required fields for Electronics category
-                          if (productData['brand']?.toString().isEmpty ?? true) {
+                          if (productData['brand']?.toString().isEmpty ??
+                              true) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Brand is required for Electronics category')),
+                              const SnackBar(
+                                  content: Text(
+                                      'Brand is required for Electronics category')),
                             );
                             return;
                           }
-                          if (productData['model']?.toString().isEmpty ?? true) {
+                          if (productData['model']?.toString().isEmpty ??
+                              true) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Model is required for Electronics category')),
+                              const SnackBar(
+                                  content: Text(
+                                      'Model is required for Electronics category')),
                             );
                             return;
                           }
@@ -1159,18 +1353,24 @@ class ProductDetailsScreen extends StatelessWidget {
                           debugPrint(json.encode(productData));
 
                           // Debug log media files
-                          debugPrint('ProductDetailsScreen - Media files before navigation:');
+                          debugPrint(
+                              'ProductDetailsScreen - Media files before navigation:');
                           debugPrint('Total files: ${media.value.length}');
                           for (var i = 0; i < media.value.length; i++) {
                             final file = media.value[i];
-                            final isVideo = file.path.toLowerCase().endsWith('.mp4') || file.path.toLowerCase().endsWith('.mov');
+                            final isVideo =
+                                file.path.toLowerCase().endsWith('.mp4') ||
+                                    file.path.toLowerCase().endsWith('.mov');
                             debugPrint('  File $i: ${file.path}');
-                            debugPrint('    Type: ${isVideo ? 'Video' : 'Image'}');
-                            debugPrint('    Size: ${(file.lengthSync() / 1024).toStringAsFixed(2)} KB');
+                            debugPrint(
+                                '    Type: ${isVideo ? 'Video' : 'Image'}');
+                            debugPrint(
+                                '    Size: ${(file.lengthSync() / 1024).toStringAsFixed(2)} KB');
                           }
 
                           // Get image paths from media files
-                          final imagePaths = media.value.map((file) => file.path).toList();
+                          final imagePaths =
+                              media.value.map((file) => file.path).toList();
 
                           if (title == 'Create Auction') {
                             // Navigate to auction details for auction creation
@@ -1191,7 +1391,7 @@ class ProductDetailsScreen extends StatelessWidget {
                                 'price': priceController.text.trim(),
                               },
                             };
-                            
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -1212,8 +1412,7 @@ class ProductDetailsScreen extends StatelessWidget {
                         ),
                         backgroundColor: Theme.of(context).primaryColor,
                       ),
-                      child: const Text(
-                          "Next",
+                      child: const Text("Next",
                           style: TextStyle(color: secondaryColor)),
                     ),
                   ],
