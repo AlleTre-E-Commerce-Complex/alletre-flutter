@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
@@ -16,7 +18,9 @@ class AddLocationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = context.read<UserProvider>();
     final phoneController = TextEditingController();
+    final addressLabelController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     return Scaffold(
@@ -75,33 +79,51 @@ class AddLocationScreen extends StatelessWidget {
                       layout: Layout.vertical,
                       flagState: CountryFlag.ENABLE,
                       onCountryChanged: (country) {
+                        print('Picker country: $country');
                         // UAE is always countryId 1
                         locationProvider.updateCountry(country, id: 1);
                       },
                       onStateChanged: (state) {
-                        // Map state name to ID based on position in UAE cities
+                        print('Picker state: $state');
                         int? stateId;
-                        // Find city ID by matching name in our map
+                        String normalizedState = (state ?? '').trim().toLowerCase()
+                          .replaceAll('emirate', '')
+                          .replaceAll('-', ' ')
+                          .replaceAll(RegExp(r'\s+'), ' ')
+                          .replaceAll('umm al quwain', 'umm al quwain')
+                          .replaceAll('ras al khaimah', 'ras al khaimah')
+                          .replaceAll('abu dhabi', 'abu dhabi')
+                          .replaceAll('ajman', 'ajman')
+                          .replaceAll('dubai', 'dubai')
+                          .replaceAll('fujairah', 'fujairah')
+                          .replaceAll('sharjah', 'sharjah')
+                          .trim();
+
                         cityIdToName.forEach((id, name) {
-                          if (name.toLowerCase() == state?.toLowerCase() || 
-                              name.contains(state ?? '')) {
+                          String backendName = name.trim().toLowerCase()
+                            .replaceAll('-', ' ')
+                            .replaceAll(RegExp(r'\s+'), ' ')
+                            .replaceAll('umm al quwain', 'umm al quwain')
+                            .replaceAll('ras al khaimah', 'ras al khaimah')
+                            .replaceAll('abu dhabi', 'abu dhabi')
+                            .replaceAll('ajman', 'ajman')
+                            .replaceAll('dubai', 'dubai')
+                            .replaceAll('fujairah', 'fujairah')
+                            .replaceAll('sharjah', 'sharjah')
+                            .trim();
+                          if (backendName == normalizedState) {
                             stateId = id;
                           }
                         });
+                        print('Normalized state: "$normalizedState"');
+                        print('Matched stateId (cityId): $stateId for state "$state"');
+                        if (stateId == null) {
+                          print('WARNING: Could not match "$state" to any cityId. Check cityIdToName map!');
+                        }
                         locationProvider.updateState(state, id: stateId);
-                        print('🌍 Selected state: $state (ID: $stateId)');
                       },
                       onCityChanged: (city) {
-                        // Find the correct city ID from our map
-                        int? cityId;
-                        cityIdToName.forEach((id, name) {
-                          if (name.toLowerCase() == city?.toLowerCase() || 
-                              (city != null && name.toLowerCase().contains(city.toLowerCase()))) {
-                            cityId = id;
-                          }
-                        });
-                        locationProvider.updateCity(city, id: cityId);
-                        print('🌍 Selected city: $city (ID: $cityId)');
+                        print('Picker city (ignored for backend): $city');
                       },
                       countryFilter: const [CscCountry.United_Arab_Emirates],
                       countryDropdownLabel: "Select Country",
@@ -175,50 +197,75 @@ class AddLocationScreen extends StatelessWidget {
                           phoneController.text),
                     ),
                   ),
-
-                  // Add Address Button
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: InkWell(
-                      onTap: () async {
-                        final selectedLocation = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const GoogleMapScreen(),
-                          ),
-                        );
-
-                        if (selectedLocation != null) {
-                          // ignore: use_build_context_synchronously
-                          context
-                              .read<UserProvider>()
-                              .addAddress(selectedLocation);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: addressLabelController,
+                    decoration: InputDecoration(
+                      labelText: 'Address Label',
+                      labelStyle: const TextStyle(
+                        color: onSecondaryColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                      border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade400),
                         ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade600),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade400),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 10,
+                        ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Add Address Button
+                  InkWell(
+                    onTap: () async {
+                      final selectedLocation = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GoogleMapScreen(),
+                        ),
+                      );
+                  
+                      if (selectedLocation != null) {
+                        // ignore: use_build_context_synchronously
+                        context
+                            .read<UserProvider>()
+                            .addAddress(selectedLocation);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add,
+                            color: onSecondaryColor,
+                            size: 22,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Add Address',
+                            style: TextStyle(
                               color: onSecondaryColor,
-                              size: 22,
+                              fontWeight: FontWeight.w500,
                             ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Add Address',
-                              style: TextStyle(
-                                color: onSecondaryColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -226,7 +273,7 @@ class AddLocationScreen extends StatelessWidget {
                   // Display Address List
                   Consumer<UserProvider>(
                     builder: (context, userProvider, child) {
-                      final addresses = userProvider.addresses;
+                      final addresses = userProvider.addresses.toSet().toList();
                       final defaultAddress = userProvider.defaultAddress;
 
                       // Sort addresses to put default address first
@@ -240,6 +287,7 @@ class AddLocationScreen extends StatelessWidget {
                         children: [
                           for (final address in sortedAddresses)
                             AddressCard(
+                              addressLabel: addressLabelController.text,
                               address: address,
                               isDefault: address == defaultAddress,
                               onMakeDefault: () =>
@@ -265,7 +313,6 @@ class AddLocationScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -287,42 +334,47 @@ class AddLocationScreen extends StatelessWidget {
                         onPressed: () {
                           final locationProvider =
                               context.read<LocationProvider>();
-                          final userProvider = context.read<UserProvider>();
 
-                          if (locationProvider.selectedCountry == null ||
-                              locationProvider.selectedState == null ||
-                              locationProvider.selectedCity == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Please select the country, state, and city'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                            return;
-                          }
+                          String? address;
+                          String? addressLabel;
+                          String? phone;
+                          address = userProvider.addresses.isNotEmpty ? userProvider.addresses.last : '';
+                          addressLabel = addressLabelController.text.trim();
+                          // Use the provider's phoneNumber, which is set by onInputChanged
+                          phone = userProvider.phoneNumber;
+                          print('phoneController.text: ${phoneController.text}');
+                          print('userProvider.phoneNumber: ${userProvider.phoneNumber}');
 
-                          if (userProvider.addresses.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Please add at least one address'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                            return;
-                          }
+                          final countryId = locationProvider.countryId;
+                          final cityId = locationProvider.stateId; // Use stateId as cityId for backend
 
-                          if (formKey.currentState?.validate() ?? false) {
-                            Navigator.pop(context);
-                          } else {
+                          print('address: \'$address\'');
+                          print('addressLabel: \'$addressLabel\'');
+                          print('countryId: $countryId');
+                          print('phone: \'$phone\'');
+                          print('selectedState: \'${locationProvider.selectedState}\'');
+
+                          if (address.isEmpty || countryId == null || cityId == null || addressLabel.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Please fill all the fields'),
                                 duration: Duration(seconds: 2),
                               ),
                             );
+                            return;
                           }
+
+                          final locationMap = {
+                            'address': address,
+                            'addressLabel': addressLabel,
+                            'countryId': countryId,
+                            'cityId': cityId, // This is the stateId
+                            'phone': phone,
+                          };
+
+                          print('locationMap: $locationMap');
+
+                          Navigator.pop(context, locationMap);
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(80, 33),

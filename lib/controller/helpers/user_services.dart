@@ -48,8 +48,8 @@ class UserService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'Bearer $refreshToken',
         },
+        body: jsonEncode({'refreshToken': refreshToken}),
       );
 
       debugPrint('Refresh token response status: ${response.statusCode}');

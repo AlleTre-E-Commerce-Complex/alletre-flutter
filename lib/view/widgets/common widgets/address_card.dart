@@ -3,6 +3,9 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 
 class AddressCard extends StatelessWidget {
   final String address;
+  final String? addressLabel;
+  final String? phone;
+  final String? subtitle;
   final bool isDefault;
   final VoidCallback? onMakeDefault;
   final VoidCallback? onEdit;
@@ -11,10 +14,13 @@ class AddressCard extends StatelessWidget {
   const AddressCard({
     super.key,
     required this.address,
+    this.addressLabel,
+    this.phone,
     required this.isDefault,
     this.onMakeDefault,
     this.onEdit,
     this.onDelete,
+    this.subtitle,
   });
 
   @override
@@ -26,7 +32,8 @@ class AddressCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(14, isDefault ? 2 : 14, 14, isDefault ? 14 : 2),
+        padding:
+            EdgeInsets.fromLTRB(14, isDefault ? 2 : 14, 14, isDefault ? 14 : 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -62,6 +69,15 @@ class AddressCard extends StatelessWidget {
               ],
             ),
             if (isDefault) const SizedBox(height: 0),
+            if (addressLabel != null && addressLabel!.trim().isNotEmpty)
+              Text(
+                addressLabel!,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: onSecondaryColor,
+                ),
+              ),
+            const SizedBox(height: 2),
             Text(
               address,
               style: const TextStyle(
@@ -69,6 +85,25 @@ class AddressCard extends StatelessWidget {
                 color: onSecondaryColor,
               ),
             ),
+            if (subtitle != null && subtitle!.trim().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
+                child: Text(
+                  subtitle!,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: onSecondaryColor,
+                  ),
+                ),
+              ),
+            if (phone != null && phone!.trim().isNotEmpty)
+              Text(
+                phone!,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: onSecondaryColor,
+                ),
+              ),
             if (!isDefault)
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -95,7 +130,8 @@ class AddressCard extends StatelessWidget {
                     onPressed: onEdit,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, size: 18, color: primaryColor),
+                    icon:
+                        const Icon(Icons.delete, size: 18, color: primaryColor),
                     onPressed: onDelete,
                   ),
                 ],

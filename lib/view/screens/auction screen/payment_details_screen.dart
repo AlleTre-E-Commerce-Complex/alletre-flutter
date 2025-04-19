@@ -300,7 +300,6 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     debugPrint('🔍 API Response data: ${response.data}');
 
     if (response.data['success']) {
-
       // Navigate to success screen or refresh current screen
       if (mounted) {
         PaymentSuccessDialog.show(context);
@@ -333,7 +332,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Your session has expired. Please log in again.'),
+              content: Text('Session expired. Please login again.'),
               backgroundColor: errorColor,
             ),
           );

@@ -318,15 +318,42 @@ class AuctionService {
       debugPrint('Headers: ${response.headers}');
       debugPrint('Body: $responseData');
 
-      final data = jsonDecode(responseData) as Map<String, dynamic>;
+      // --- Token refresh logic ---
+      if (response.statusCode == 403 && responseData.contains('jwt expired')) {
+        // Try to refresh token and retry once
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          request.headers['Authorization'] = 'Bearer $accessToken';
+          debugPrint('Retrying request with refreshed token...');
+          final retryResponse = await request.send();
+          final retryResponseData = await retryResponse.stream.bytesToString();
+          debugPrint('Retry Response Status: ${retryResponse.statusCode}');
+          debugPrint('Retry Response body: $retryResponseData');
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return data;
-      } else {
-        debugPrint('Error Response Body: $data');
-        debugPrint('Error Message: ${data['message']}');
-        throw Exception('Failed to create auction: ${data['message']}');
+          if (retryResponse.statusCode == 403 && retryResponseData.contains('jwt expired')) {
+            throw Exception('Session expired. Please login again.');
+          }
+
+          final retryData = jsonDecode(retryResponseData) as Map<String, dynamic>;
+          return retryData;
+        } else {
+          throw Exception('Session expired. Please login again.');
+        }
       }
+      // --- End Token refresh logic ---
+
+      final data = jsonDecode(responseData) as Map<String, dynamic>;
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        // Replace jwt expired error message for user
+        if (data['message']?.toString().contains('jwt expired') ?? false) {
+          throw Exception('Session expired. Please login again.');
+        } else {
+          throw Exception('Failed to create auction: ${data['message']}');
+        }
+      }
+      return data;
     } catch (e, stackTrace) {
       debugPrint('Error creating auction: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -553,15 +580,42 @@ class AuctionService {
       debugPrint('Headers: ${response.headers}');
       debugPrint('Body: $responseData');
 
-      final data = jsonDecode(responseData) as Map<String, dynamic>;
+      // --- Token refresh logic ---
+      if (response.statusCode == 403 && responseData.contains('jwt expired')) {
+        // Try to refresh token and retry once
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          request.headers['Authorization'] = 'Bearer $accessToken';
+          debugPrint('Retrying request with refreshed token...');
+          final retryResponse = await request.send();
+          final retryResponseData = await retryResponse.stream.bytesToString();
+          debugPrint('Retry Response Status: ${retryResponse.statusCode}');
+          debugPrint('Retry Response body: $retryResponseData');
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return data;
-      } else {
-        debugPrint('Error Response Body: $data');
-        debugPrint('Error Message: ${data['message']}');
-        throw Exception('Failed to create auction: ${data['message']}');
+          if (retryResponse.statusCode == 403 && retryResponseData.contains('jwt expired')) {
+            throw Exception('Session expired. Please login again.');
+          }
+
+          final retryData = jsonDecode(retryResponseData) as Map<String, dynamic>;
+          return retryData;
+        } else {
+          throw Exception('Session expired. Please login again.');
+        }
       }
+      // --- End Token refresh logic ---
+
+      final data = jsonDecode(responseData) as Map<String, dynamic>;
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        // Replace jwt expired error message for user
+        if (data['message']?.toString().contains('jwt expired') ?? false) {
+          throw Exception('Session expired. Please login again.');
+        } else {
+          throw Exception('Failed to create auction: ${data['message']}');
+        }
+      }
+      return data;
     } catch (e, stackTrace) {
       debugPrint('Error creating auction: $e');
       debugPrint('Stack trace: $stackTrace');

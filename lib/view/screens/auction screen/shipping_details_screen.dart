@@ -34,6 +34,8 @@ class ShippingDetailsScreen extends StatelessWidget {
     final auctionProvider = Provider.of<AuctionProvider>(context);
     final loginProvider = Provider.of<LoggedInProvider>(context);
     final defaultAddress = userProvider.defaultAddress;
+    final addressLabelController = TextEditingController();
+    // final phoneController = TextEditingController();
 
     return Scaffold(
       appBar: NavbarElementsAppbar(
@@ -63,7 +65,7 @@ class ShippingDetailsScreen extends StatelessWidget {
                   // Address Cards
                   Consumer<UserProvider>(
                     builder: (context, userProvider, child) {
-                      final addresses = userProvider.addresses;
+                      final addresses = userProvider.addresses.toSet().toList();
                       final defaultAddress = userProvider.defaultAddress;
 
                       // Sort addresses to put default address first
@@ -78,6 +80,8 @@ class ShippingDetailsScreen extends StatelessWidget {
                           for (final address in sortedAddresses)
                             AddressCard(
                               address: address,
+                              addressLabel: addressLabelController.text,
+                              phone: userProvider.phoneNumber,
                               isDefault: address == defaultAddress,
                               onMakeDefault: () =>
                                   userProvider.setDefaultAddress(address),
@@ -276,8 +280,8 @@ class ShippingDetailsScreen extends StatelessWidget {
                             // Use cityId from locationProvider, defaulting to 1 (Dubai) if not set
                             'cityId': locationProvider.cityId ?? 1,
                             // Add address and addressLabel for backend DTO
-                            'address': defaultAddress ?? '',
-                            'addressLabel': 'Main Address',
+                            // 'address': defaultAddress ?? '',
+                            // 'addressLabel': 'Main Address',
                           },
                           // 'locationId': locationProvider.selectedLocationId ?? 0,
                           'shippingDetails': {
@@ -296,10 +300,7 @@ class ShippingDetailsScreen extends StatelessWidget {
 
                         // Clean and convert product data
                         var productData = fullAuctionData['product'] as Map<String, dynamic>;
-                        
-                        // Remove null/empty values
                         productData.removeWhere((key, value) => value == null || value == '');
-                        
                         // Convert numeric fields
                         if (productData['categoryId'] != null) {
                           productData['categoryId'] = int.parse(productData['categoryId'].toString());
@@ -311,6 +312,19 @@ class ShippingDetailsScreen extends StatelessWidget {
                           productData['quantity'] = int.parse(productData['quantity'].toString());
                         }
                         fullAuctionData['product'] = productData;
+
+                        // --- LOGIC UPDATE: Use selectedLocationId ---
+                        final int? locationId = locationProvider.selectedLocationId;
+                        if (locationId == null) {
+                          throw Exception('Please select a shipping address before listing your product.');
+                        }
+                        // Remove address/addressLabel from productData to avoid backend confusion
+                        productData.remove('address');
+                        productData.remove('addressLabel');
+                        // Remove cityId/countryId from productData if your backend expects them only via locationId
+                        // productData.remove('cityId');
+                        // productData.remove('countryId');
+                        // --- END LOGIC UPDATE ---
 
                         // Validate product data structure
                         final product = fullAuctionData['product'] as Map<String, dynamic>;
@@ -348,8 +362,8 @@ class ShippingDetailsScreen extends StatelessWidget {
                           }
                         }
 
-                        // Create auction with image paths
-                        debugPrint('Creating auction with data: $fullAuctionData');
+                        // Ensure locationId is included in fullAuctionData before API call
+                        fullAuctionData['locationId'] = locationId;
                         debugPrint('End time before API call: ${endTime.toIso8601String()}');
                         
                         // Debug the auction data before API call
@@ -438,9 +452,18 @@ class ShippingDetailsScreen extends StatelessWidget {
 
                         // Show error message
                         if (context.mounted) {
+                          String errorMsg = e.toString();
+                          // Remove 'Exception:' prefix if present
+                          if (errorMsg.startsWith('Exception: Exception:')) {
+                            errorMsg = errorMsg.replaceFirst('Exception: Exception:', '').trim();
+                          }
+                          // Replace auction message with product message if listing product
+                          if (errorMsg.startsWith('Failed to create auction:')) {
+                            errorMsg = errorMsg.replaceFirst('Failed to create auction:', 'Failed to list product:').trim();
+                          }
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Failed to create auction: $e'),
+                              content: Text(errorMsg),
                             ),
                           );
                         }

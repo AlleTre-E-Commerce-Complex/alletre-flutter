@@ -15,6 +15,7 @@ class LocationProvider with ChangeNotifier {
   int? countryId;
   int? stateId;
   int? cityId;
+  String? phone;
   
   final List<LocationModel> _locations = [];
   List<LocationModel> get locations => _locations;
@@ -51,6 +52,7 @@ class LocationProvider with ChangeNotifier {
     return {
       'countryId': countryId ?? 1, // Default to UAE
       'cityId': cityId ?? 1, // Default to Dubai
+      'phone': phone ?? 'xxxxxxxxxx',
     };
   }
   

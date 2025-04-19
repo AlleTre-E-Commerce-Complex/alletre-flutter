@@ -49,26 +49,23 @@ class AuctionProvider with ChangeNotifier {
     ];
 
     // Get all products from the same category
-    final sameCategory = allProducts.where((item) => 
-      item.id != currentItem.id && 
-      item.categoryId == currentItem.categoryId
-    ).toList();
+    final sameCategory = allProducts
+        .where((item) =>
+            item.id != currentItem.id &&
+            item.categoryId == currentItem.categoryId)
+        .toList();
 
     // If current item is an auction, only show similar auctions
     if (currentItem.isAuctionProduct) {
-      final similarAuctions = sameCategory
-          .where((item) => item.isAuctionProduct)
-          .take(10)
-          .toList();
-      
+      final similarAuctions =
+          sameCategory.where((item) => item.isAuctionProduct).take(10).toList();
+
       return similarAuctions;
     }
-    
+
     // If current item is a listed product, only show similar listed products
-    final similarProducts = sameCategory
-        .where((item) => !item.isAuctionProduct)
-        .take(10)
-        .toList();
+    final similarProducts =
+        sameCategory.where((item) => !item.isAuctionProduct).take(10).toList();
 
     return similarProducts;
   }
@@ -133,7 +130,7 @@ class AuctionProvider with ChangeNotifier {
     final String auctionId = data['auctionId']?.toString() ?? '';
     final String newBid = data['amount']?.toString() ?? '0';
     final int totalBids = data['totalBids'] ?? 0;
-    
+
     void updateList(List<AuctionItem> list) {
       final index = list.indexWhere((item) => item.id.toString() == auctionId);
       if (index != -1) {
@@ -152,11 +149,16 @@ class AuctionProvider with ChangeNotifier {
 
   void _updateAuctionStatus(String auctionId, Map<String, dynamic> statusData) {
     // Remove from old status list and add to new status list
-    final auction = [..._liveAuctions, ..._listedProducts, ..._upcomingAuctions, ..._expiredAuctions]
-        .firstWhere(
-          (item) => item.id.toString() == auctionId,
-          orElse: () => AuctionItem.fromJson(statusData), // Create a new item if not found
-        );
+    final auction = [
+      ..._liveAuctions,
+      ..._listedProducts,
+      ..._upcomingAuctions,
+      ..._expiredAuctions
+    ].firstWhere(
+      (item) => item.id.toString() == auctionId,
+      orElse: () =>
+          AuctionItem.fromJson(statusData), // Create a new item if not found
+    );
 
     // // Parse dates in UTC
     // DateTime? expiryDate;
@@ -166,7 +168,9 @@ class AuctionProvider with ChangeNotifier {
 
     final updatedAuction = auction.copyWith(
       status: statusData['status'],
-      expiryDate: statusData['expiryDate'] != null ? DateTime.parse(statusData['expiryDate']) : null,
+      expiryDate: statusData['expiryDate'] != null
+          ? DateTime.parse(statusData['expiryDate'])
+          : null,
     );
 
     // Remove from all lists
@@ -174,40 +178,40 @@ class AuctionProvider with ChangeNotifier {
     _listedProducts.removeWhere((item) => item.id.toString() == auctionId);
     _upcomingAuctions.removeWhere((item) => item.id.toString() == auctionId);
     _expiredAuctions.removeWhere((item) => item.id.toString() == auctionId);
-    
-      switch (statusData['status']) {
-        case 'live':
-          _liveAuctions.add(updatedAuction);
-          break;
-        case 'listed':
-          _listedProducts.add(updatedAuction);
-          break;
-        case 'upcoming':
-          _upcomingAuctions.add(updatedAuction);
-          break;
-        case 'expired':
-          _expiredAuctions.add(updatedAuction);
-          break;
-      }
+
+    switch (statusData['status']) {
+      case 'live':
+        _liveAuctions.add(updatedAuction);
+        break;
+      case 'listed':
+        _listedProducts.add(updatedAuction);
+        break;
+      case 'upcoming':
+        _upcomingAuctions.add(updatedAuction);
+        break;
+      case 'expired':
+        _expiredAuctions.add(updatedAuction);
+        break;
+    }
 
     notifyListeners();
   }
 
   void _addNewAuction(Map<String, dynamic> auctionData) {
     final newAuction = AuctionItem.fromJson(auctionData);
-    
-      switch (newAuction.status) {
-        case 'live':
-          _liveAuctions.add(newAuction);
-          break;
-        case 'listed':
-          _listedProducts.add(newAuction);
-          break;
-        case 'upcoming':
-          _upcomingAuctions.add(newAuction);
-          break;
-      }
-    
+
+    switch (newAuction.status) {
+      case 'live':
+        _liveAuctions.add(newAuction);
+        break;
+      case 'listed':
+        _listedProducts.add(newAuction);
+        break;
+      case 'upcoming':
+        _upcomingAuctions.add(newAuction);
+        break;
+    }
+
     notifyListeners();
   }
 
@@ -241,19 +245,31 @@ class AuctionProvider with ChangeNotifier {
 
   void searchItems(String query) {
     _searchQuery = query.toLowerCase();
-  
-    _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-    _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-    _filteredUpcomingAuctions = _upcomingAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-    _filteredExpiredAuctions = _expiredAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+
+    _filteredLiveAuctions = _liveAuctions
+        .where((item) => item.title.toLowerCase().contains(_searchQuery))
+        .toList();
+    _filteredListedProducts = _listedProducts
+        .where((item) => item.title.toLowerCase().contains(_searchQuery))
+        .toList();
+    _filteredUpcomingAuctions = _upcomingAuctions
+        .where((item) => item.title.toLowerCase().contains(_searchQuery))
+        .toList();
+    _filteredExpiredAuctions = _expiredAuctions
+        .where((item) => item.title.toLowerCase().contains(_searchQuery))
+        .toList();
 
     notifyListeners();
   }
 
-  List<AuctionItem> get filteredLiveAuctions => _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
-  List<AuctionItem> get filteredListedProducts => _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
-  List<AuctionItem> get filteredUpcomingAuctions => _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
-  List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
+  List<AuctionItem> get filteredLiveAuctions =>
+      _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
+  List<AuctionItem> get filteredListedProducts =>
+      _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
+  List<AuctionItem> get filteredUpcomingAuctions =>
+      _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
+  List<AuctionItem> get filteredExpiredAuctions =>
+      _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
 
   Future<bool> placeBid(String auctionId, double amount) async {
     return await _socketService.placeBid(auctionId, amount);
@@ -309,7 +325,7 @@ class AuctionProvider with ChangeNotifier {
       debugPrint('Error fetching listed products: $e');
       if (e.toString().contains('Authentication failed')) {
         // Token refresh failed, user needs to re-login
-        _errorListedProducts = 'Session expired. Please login again.';
+        _errorListedProducts = 'Session expired. Please login again';
       } else {
         _errorListedProducts = 'Failed to load products. Please try again.';
       }
@@ -351,12 +367,13 @@ class AuctionProvider with ChangeNotifier {
     try {
       // print('Fetching expired auctions...');
       final auctions = await _auctionService.fetchExpiredAuctions();
-      
+
       // Filter out auctions with CANCELLED_BEFORE_EXP_DATE status
-      _expiredAuctions = auctions.where((auction) => 
-        auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE'
-      ).toList();
-      
+      _expiredAuctions = auctions
+          .where((auction) =>
+              auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE')
+          .toList();
+
       if (_expiredAuctions.isEmpty) {
         print('No valid expired auctions found');
       }
@@ -371,61 +388,63 @@ class AuctionProvider with ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> createAuction({
-  required Map<String, dynamic> auctionData,
-  required List<String> imagePaths,
-}) async {
-  try {
-    _isCreatingAuction = true;
-    _createAuctionError = '';
-    notifyListeners();
-
-    // Convert image paths to File objects
-    final List<File> images = imagePaths.map((path) => File(path)).toList();
-
-    // Make sure the product field exists and is a proper object
-    if (!auctionData.containsKey('product') || auctionData['product'] is! Map<String, dynamic>) {
-      throw Exception('Product data must be a non-empty object');
-    }
-
-    // Create auction with the service
-    final response = await _auctionService.createAuction(
-      auctionData: auctionData,
-      images: images,
-      locationId: auctionData['locationId'] ?? 1,
-    );
-
-    if (response['success']) {
+    required Map<String, dynamic> auctionData,
+    required List<String> imagePaths,
+  }) async {
+    try {
+      _isCreatingAuction = true;
       _createAuctionError = '';
-      return response;
-    } else {
-      _createAuctionError = response['message'] ?? 'Failed to create auction';
+      notifyListeners();
+
+      // Convert image paths to File objects
+      final List<File> images = imagePaths.map((path) => File(path)).toList();
+
+      // Make sure the product field exists and is a proper object
+      if (!auctionData.containsKey('product') ||
+          auctionData['product'] is! Map<String, dynamic>) {
+        throw Exception('Product data must be a non-empty object');
+      }
+
+      // Create auction with the service
+      final response = await _auctionService.createAuction(
+        auctionData: auctionData,
+        images: images,
+        locationId: auctionData['locationId'] ?? 1,
+      );
+
+      if (response['success']) {
+        _createAuctionError = '';
+        return response;
+      } else {
+        _createAuctionError = response['message'] ?? 'Failed to create auction';
+        throw Exception(_createAuctionError);
+      }
+    } catch (e) {
+      _createAuctionError = e.toString();
       throw Exception(_createAuctionError);
+    } finally {
+      _isCreatingAuction = false;
+      notifyListeners();
     }
-  } catch (e) {
-    _createAuctionError = e.toString();
-    throw Exception(_createAuctionError);
-  } finally {
-    _isCreatingAuction = false;
-    notifyListeners();
   }
-}
 
-Future<Map<String, dynamic>> listProduct({
-  required Map<String, dynamic> auctionData,
-  required List<String> imagePaths,
-}) async {
-  try {
-    _isListingProduct = true;
-    _listProductError = '';
-    notifyListeners();
+  Future<Map<String, dynamic>> listProduct({
+    required Map<String, dynamic> auctionData,
+    required List<String> imagePaths,
+  }) async {
+    try {
+      _isListingProduct = true;
+      _listProductError = '';
+      notifyListeners();
 
-    // Convert image paths to File objects
-    final List<File> images = imagePaths.map((path) => File(path)).toList();
+      // Convert image paths to File objects
+      final List<File> images = imagePaths.map((path) => File(path)).toList();
 
-    // Make sure the product field exists and is a proper object
-    if (!auctionData.containsKey('product') || auctionData['product'] is! Map<String, dynamic>) {
-      throw Exception('Product data must be a non-empty object');
-    }
+      // Make sure the product field exists and is a proper object
+      if (!auctionData.containsKey('product') ||
+          auctionData['product'] is! Map<String, dynamic>) {
+        throw Exception('Product data must be a non-empty object');
+      }
 
       // List product with the service
       final response = await _auctionService.listProduct(
@@ -441,7 +460,8 @@ Future<Map<String, dynamic>> listProduct({
           final data = response['data'] ?? {};
           // Use the shippingDetails you just submitted
           final shippingDetails = auctionData['shippingDetails'] ?? {};
-          final itemLocation = AuctionItem.createLocationFromApp(shippingDetails);
+          final itemLocation =
+              AuctionItem.createLocationFromApp(shippingDetails);
           // Compose a new AuctionItem (fallback to fromJson, then override itemLocation)
           AuctionItem newItem = AuctionItem.fromJson({
             ...data,
@@ -467,8 +487,8 @@ Future<Map<String, dynamic>> listProduct({
     } finally {
       _isListingProduct = false;
       notifyListeners();
+    }
   }
-}
 
   @override
   void dispose() {

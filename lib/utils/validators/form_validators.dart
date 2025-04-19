@@ -30,9 +30,6 @@ class FormValidators {
     if (value == null || value.isEmpty) {
       return 'This field is required';
     }
-    //    if (value.length != 11) {
-    //   return 'Invalid phone number';
-    // }
     return null;
   }
 

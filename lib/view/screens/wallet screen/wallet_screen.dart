@@ -35,7 +35,7 @@ class WalletScreen extends StatelessWidget {
     try {
       final token = await _getValidToken();
       if (token == null) {
-        throw Exception('Session expired. Please login again.');
+        throw Exception('Session expired. Please login again');
       }
 
       // Fetch balance
@@ -51,7 +51,7 @@ class WalletScreen extends StatelessWidget {
           balance = double.tryParse(balanceData.toString()) ?? 0.0;
         }
       } else if (balanceResponse.statusCode == 403) {
-        throw Exception('Session expired. Please login again.');
+        throw Exception('Session expired. Please login again');
       }
 
       // Fetch transactions
@@ -65,7 +65,7 @@ class WalletScreen extends StatelessWidget {
             .toList()
           ..sort((a, b) => b.date.compareTo(a.date));
       } else if (transactionsResponse.statusCode == 403) {
-        throw Exception('Session expired. Please login again.');
+        throw Exception('Session expired. Please login again');
       }
 
       return {
@@ -76,7 +76,7 @@ class WalletScreen extends StatelessWidget {
     } catch (e) {
       debugPrint('Error fetching wallet data: $e');
       if (e.toString().contains('403') || e.toString().contains('token')) {
-        throw Exception('Session expired. Please login again.');
+        throw Exception('Session expired. Please login again');
       }
       // Return empty data instead of throwing an error
       return {
@@ -94,7 +94,7 @@ class WalletScreen extends StatelessWidget {
     // Show error message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Your session has expired. Please log in again.'),
+        content: Text('Session expired. Please log in again.'),
         backgroundColor: errorColor,
       ),
     );
@@ -125,7 +125,7 @@ class WalletScreen extends StatelessWidget {
               });
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             // Show a more user-friendly error state
             return Center(
               child: Column(
@@ -184,7 +184,9 @@ class WalletScreen extends StatelessWidget {
                   TextButton(
                     onPressed: () {
                       // Navigate to login screen using TabIndexProvider
-                      context.read<TabIndexProvider>().updateIndex(18); // login page index
+                      context
+                          .read<TabIndexProvider>()
+                          .updateIndex(18); // login page index
                     },
                     child: const Text('Login'),
                   ),

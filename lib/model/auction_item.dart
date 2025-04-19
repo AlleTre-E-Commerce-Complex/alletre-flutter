@@ -326,6 +326,7 @@ class AuctionItem {
           countryId: product['countryId'],
           address: address,
           addressLabel: addressLabel,
+          phone: product['phone'] ?? '',
         );
         print('[💡💡💡AuctionItem.fromJson] Created itemLocation from product IDs: city=${itemLocation.city}, country=${itemLocation.country}, address=${itemLocation.address}');
       } else if (json['cityId'] != null || json['countryId'] != null) {
@@ -337,6 +338,7 @@ class AuctionItem {
           countryId: json['countryId'],
           address: json['address'] ?? '',
           addressLabel: json['addressLabel'] ?? '',
+          phone: json['phone'] ?? '',
         );
         print('[AuctionItem.fromJson] Created itemLocation from IDs: city=${itemLocation.city}, country=${itemLocation.country}, address=${itemLocation.address}');
       } else {
