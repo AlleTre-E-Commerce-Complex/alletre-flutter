@@ -418,4 +418,21 @@ class UserProvider with ChangeNotifier {
   //     throw Exception('Login failed: $e');
   //   }
   // }
+
+  // Make address default (backend + frontend)
+  Future<Map<String, dynamic>> makeDefaultAddress(String locationId, String address) async {
+    setLoading(true);
+    try {
+      final result = await _userService.makeDefaultAddress(locationId);
+      if (result['success']) {
+        _defaultAddress = address;
+        notifyListeners();
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to make address default'};
+    } finally {
+      setLoading(false);
+    }
+  }
 }

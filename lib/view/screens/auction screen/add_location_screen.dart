@@ -17,7 +17,6 @@ class AddLocationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = context.read<UserProvider>();
-    userProvider.clearAddresses();
     final phoneController = TextEditingController();
     final addressLabelController = TextEditingController();
     final formKey = GlobalKey<FormState>();

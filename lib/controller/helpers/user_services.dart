@@ -93,8 +93,8 @@ class UserService {
           'userName': name,
           'email': email.trim(),
           'phone': phoneNumber,
-          'password': password,
           // 'platform': 'mobile_app'
+          'password': password,
         }),
       );
 
@@ -426,6 +426,28 @@ class UserService {
         'success': false,
         'error': e.toString()
       };
+    }
+  }
+
+  // Make address default via API
+  Future<Map<String, dynamic>> makeDefaultAddress(String locationId) async {
+    try {
+      final tokens = await getTokens();
+      final accessToken = tokens['accessToken'];
+      if (accessToken == null) {
+        return {'success': false, 'message': 'Not authenticated'};
+      }
+      final response = await http.post(
+        Uri.parse('http://192.168.0.158:3001/api/users/locations/$locationId/make-default'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+      return await handleApiResponse(response);
+    } catch (e) {
+      debugPrint('Error making address default: $e');
+      return {'success': false, 'message': 'Failed to make address default'};
     }
   }
 

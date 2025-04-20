@@ -92,6 +92,23 @@ class EditProfileScreen extends StatelessWidget {
       return response.statusCode == 201 || response.statusCode == 200;
     }
 
+    // --- Add helper function for making default address ---
+    Future<bool> makeDefaultAddressOnBackend(String locationId) async {
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'access_token');
+      final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId/make-default');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      debugPrint('Make Default API status: \u001b[33m${response.statusCode}\u001b[0m');
+      debugPrint('Make Default API raw body: \u001b[36m${response.body}\u001b[0m');
+      return response.statusCode == 200 || response.statusCode == 201;
+    }
+
     return Scaffold(
       appBar: const NavbarElementsAppbar(
           appBarTitle: 'Edit Profile', showBackButton: true),
@@ -203,6 +220,7 @@ class EditProfileScreen extends StatelessWidget {
                                 'country': e['country']?['nameEn'] ?? '',
                                 'city': e['city']?['nameEn'] ?? '',
                                 'isBackend': true,
+                                'id': e['id'],
                               }).where((a) => a['address'] != '').toList();
                               final localDisplayAddresses = userProvider.addresses.toSet().toList().map((a) => {
                                 'address': a,
@@ -237,7 +255,27 @@ class EditProfileScreen extends StatelessWidget {
                                       isDefault: addr['address'] == defaultAddress,
                                       // Show country/city for backend addresses
                                       subtitle: addr['isBackend'] ? '${addr['city']}, ${addr['country']}' : null,
-                                      onMakeDefault: () => userProvider.setDefaultAddress(addr['address']),
+                                      onMakeDefault: () async {
+                                        final locationId = addr['id'];
+                                        if (locationId == null) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Unable to set as default: missing address ID.')),
+                                          );
+                                          return;
+                                        }
+                                        final success = await makeDefaultAddressOnBackend(locationId.toString());
+                                        if (success) {
+                                          userProvider.setDefaultAddress(addr['address']);
+                                          addressRefreshKey.value++;
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Default address updated!')),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Failed to update default address.')),
+                                          );
+                                        }
+                                      },
                                       onEdit: () async {
                                         final editedAddress = await Navigator.push(
                                           context,

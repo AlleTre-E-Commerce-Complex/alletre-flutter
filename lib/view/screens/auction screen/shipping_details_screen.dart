@@ -83,8 +83,28 @@ class ShippingDetailsScreen extends StatelessWidget {
                               addressLabel: addressLabelController.text,
                               phone: userProvider.phoneNumber,
                               isDefault: address == defaultAddress,
-                              onMakeDefault: () =>
-                                  userProvider.setDefaultAddress(address),
+                              onMakeDefault: () async {
+                                // You will need to get the location ID for the address here.
+                                // For this example, let's assume address is a model with id and address fields.
+                                // If address is just a string, you must adjust this to use your real model.
+                                final locationId = address;
+                                if (locationId.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Invalid address ID')),
+                                  );
+                                  return;
+                                }
+                                final result = await userProvider.makeDefaultAddress(locationId, address);
+                                if (result['success']) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Default address updated')),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(result['message'] ?? 'Failed to update default address')),
+                                  );
+                                }
+                              },
                               onEdit: () async {
                                 final editedAddress = await Navigator.push(
                                   context,
