@@ -1,6 +1,4 @@
 // ignore_for_file: avoid_print
-
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/location_maps.dart';
@@ -19,6 +17,7 @@ class AddLocationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = context.read<UserProvider>();
+    userProvider.clearAddresses();
     final phoneController = TextEditingController();
     final addressLabelController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -36,6 +35,11 @@ class AddLocationScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
+            addressLabelController.clear();
+            phoneController.clear();
+            userProvider.clearAddresses();
+            final locationProvider = context.read<LocationProvider>();
+            locationProvider.reset();
             Navigator.pop(context);
           },
         ),
@@ -269,7 +273,7 @@ class AddLocationScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 26),
+                  const SizedBox(height: 25),
                   // Display Address List
                   Consumer<UserProvider>(
                     builder: (context, userProvider, child) {
@@ -287,27 +291,14 @@ class AddLocationScreen extends StatelessWidget {
                         children: [
                           for (final address in sortedAddresses)
                             AddressCard(
-                              addressLabel: addressLabelController.text,
                               address: address,
-                              isDefault: address == defaultAddress,
-                              onMakeDefault: () =>
-                                  userProvider.setDefaultAddress(address),
-                              onEdit: () async {
-                                final editedAddress = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const GoogleMapScreen(),
-                                  ),
-                                );
-
-                                if (editedAddress != null) {
-                                  userProvider.editAddress(
-                                      address, editedAddress);
-                                }
-                              },
-                              onDelete: () =>
-                                  userProvider.removeAddress(address),
+                              addressLabel: '',
+                              phone: '',
+                              isDefault: false,
+                              subtitle: null,
+                              onMakeDefault: null,
+                              onEdit: null,
+                              onDelete: null,
                             ),
                         ],
                       );
@@ -318,7 +309,12 @@ class AddLocationScreen extends StatelessWidget {
                     children: [
                       TextButton(
                         onPressed: () {
-                          context.read<TabIndexProvider>().updateIndex(1);
+                          addressLabelController.clear();
+                          phoneController.clear();
+                          userProvider.clearAddresses();
+                          final locationProvider = context.read<LocationProvider>();
+                          locationProvider.reset();
+                          Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(80, 33),

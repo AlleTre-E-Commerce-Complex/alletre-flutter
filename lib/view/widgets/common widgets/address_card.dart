@@ -33,7 +33,7 @@ class AddressCard extends StatelessWidget {
       ),
       child: Padding(
         padding:
-            EdgeInsets.fromLTRB(14, isDefault ? 2 : 14, 14, isDefault ? 14 : 2),
+            EdgeInsets.fromLTRB(12, isDefault ? 2 : 14, 12, isDefault ? 14 : 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -104,36 +104,40 @@ class AddressCard extends StatelessWidget {
                   color: onSecondaryColor,
                 ),
               ),
-            if (!isDefault)
+            // Only show action row if any action is provided
+            if (!isDefault && (onMakeDefault != null || onEdit != null || onDelete != null))
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  TextButton(
-                    onPressed: onMakeDefault,
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text(
-                      'Make Default',
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 11,
+                  if (onMakeDefault != null)
+                    TextButton(
+                      onPressed: onMakeDefault,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Make Default',
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
-                  ),
                   const SizedBox(width: 128),
-                  IconButton(
-                    icon: const Icon(Icons.edit, size: 18, color: primaryColor),
-                    onPressed: onEdit,
-                  ),
-                  IconButton(
-                    icon:
-                        const Icon(Icons.delete, size: 18, color: primaryColor),
-                    onPressed: onDelete,
-                  ),
+                  if (onEdit != null)
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 18, color: primaryColor),
+                      onPressed: onEdit,
+                    ),
+                  if (onDelete != null)
+                    IconButton(
+                      icon:
+                          const Icon(Icons.delete, size: 18, color: primaryColor),
+                      onPressed: onDelete,
+                    ),
                 ],
               ),
           ],

@@ -186,6 +186,13 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Clear all addresses
+  void clearAddresses() {
+    _addresses.clear();
+    _defaultAddress = null;
+    notifyListeners();
+  }
+
   // Toggle loading state
   void setLoading(bool value) {
     _isLoading = value;

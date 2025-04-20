@@ -289,7 +289,7 @@ class EditProfileScreen extends StatelessWidget {
                                           ),
                                           SizedBox(width: 8),
                                           Text(
-                                            'Add Address',
+                                            'Add Location',
                                             style: TextStyle(
                                               color: primaryColor,
                                               fontWeight: FontWeight.w500,

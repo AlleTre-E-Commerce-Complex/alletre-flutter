@@ -57,7 +57,7 @@ class UserService {
 
       final Map<String, dynamic> data = json.decode(response.body);
 
-      if (response.statusCode == 200 && data['data'] != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) && data['data'] != null) {
         final String newAccessToken = data['data']['accessToken'];
         final String newRefreshToken = data['data']['refreshToken'];
 

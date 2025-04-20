@@ -61,6 +61,18 @@ class LocationProvider with ChangeNotifier {
     notifyListeners();
   }
   
+  void reset() {
+    selectedCountry = null;
+    selectedState = null;
+    selectedCity = null;
+    countryId = null;
+    stateId = null;
+    cityId = null;
+    phone = null;
+    _selectedLocationId = null;
+    notifyListeners();
+  }
+  
   // For debugging
   void printLocationInfo() {
     print('🌍 Location Info:');
