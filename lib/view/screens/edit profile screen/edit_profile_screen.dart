@@ -1,5 +1,4 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'dart:io';
 import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
@@ -20,7 +19,6 @@ import '../../widgets/edit profile widgets/edit_profile_card_section.dart';
 import '../../widgets/edit profile widgets/edit_profile_title.dart';
 import '../../widgets/profile widgets/user_profile_card.dart';
 import '../auction screen/add_location_screen.dart';
-import 'add_address_screen.dart';
 
 final addressRefreshKey = ValueNotifier<int>(0);
 
@@ -55,11 +53,13 @@ class EditProfileScreen extends StatelessWidget {
           'Content-Type': 'application/json',
         },
       );
-      debugPrint('Address API status: \u001b[33m${response.statusCode}\u001b[0m');
+      debugPrint(
+          'Address API status: \u001b[33m${response.statusCode}\u001b[0m');
       debugPrint('Address API raw body: \u001b[36m${response.body}\u001b[0m');
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        debugPrint('Parsed API response: \u001b[32m${json.encode(data)}\u001b[0m');
+        debugPrint(
+            'Parsed API response: \u001b[32m${json.encode(data)}\u001b[0m');
         if (data['success'] == true && data['data'] is List) {
           return List<Map<String, dynamic>>.from(data['data']);
         }
@@ -87,7 +87,8 @@ class EditProfileScreen extends StatelessWidget {
         },
         body: body,
       );
-      debugPrint('POST address status: \u001b[33m${response.statusCode}\u001b[0m');
+      debugPrint(
+          'POST address status: \u001b[33m${response.statusCode}\u001b[0m');
       debugPrint('POST address raw body: \u001b[36m${response.body}\u001b[0m');
       return response.statusCode == 201 || response.statusCode == 200;
     }
@@ -96,7 +97,8 @@ class EditProfileScreen extends StatelessWidget {
     Future<bool> makeDefaultAddressOnBackend(String locationId) async {
       const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'access_token');
-      final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId/make-default');
+      final url = Uri.parse(
+          '${ApiEndpoints.baseUrl}/users/locations/$locationId/make-default');
       final response = await http.patch(
         url,
         headers: {
@@ -104,8 +106,41 @@ class EditProfileScreen extends StatelessWidget {
           'Content-Type': 'application/json',
         },
       );
-      debugPrint('Make Default API status: \u001b[33m${response.statusCode}\u001b[0m');
-      debugPrint('Make Default API raw body: \u001b[36m${response.body}\u001b[0m');
+      debugPrint(
+          'Make Default API status: \u001b[33m${response.statusCode}\u001b[0m');
+      debugPrint(
+          'Make Default API raw body: \u001b[36m${response.body}\u001b[0m');
+      return response.statusCode == 200 || response.statusCode == 201;
+    }
+
+    Future<bool> updateUserAddress(
+        String locationId, Map<String, dynamic> updatedAddress) async {
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'access_token');
+      final url =
+          Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId');
+      final body = json.encode({
+        'address': updatedAddress['address'],
+        'addressLabel': updatedAddress['addressLabel'] ?? updatedAddress['address'],
+        'countryId': (updatedAddress['countryId'] is Map)
+            ? updatedAddress['countryId']['id'] ?? updatedAddress['countryId']['nameEn']
+            : updatedAddress['countryId'],
+        'cityId': (updatedAddress['cityId'] is Map)
+            ? updatedAddress['cityId']['id'] ?? updatedAddress['cityId']['nameEn']
+            : updatedAddress['cityId'],
+        'phone': updatedAddress['phone'] ?? '',
+        // Add other fields as needed
+      });
+      final response = await http.put(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      );
+      debugPrint('PUT address status: [33m${response.statusCode}[0m');
+      debugPrint('PUT address raw body: [36m${response.body}[0m');
       return response.statusCode == 200 || response.statusCode == 201;
     }
 
@@ -198,115 +233,262 @@ class EditProfileScreen extends StatelessWidget {
                     return FutureBuilder<List<Map<String, dynamic>>>(
                       future: fetchUserAddresses(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         if (snapshot.hasError) {
-                          debugPrint('Error fetching addresses: \u001b[31m${snapshot.error}\u001b[0m');
+                          debugPrint(
+                              'Error fetching addresses: \u001b[31m${snapshot.error}\u001b[0m');
                           return const Text('Failed to load addresses');
                         }
                         final apiAddresses = snapshot.data ?? [];
-                        debugPrint('Final address list for UI: \u001b[34m${json.encode(apiAddresses)}\u001b[0m');
+                        debugPrint(
+                            'Final address list for UI: \u001b[34m${json.encode(apiAddresses)}\u001b[0m');
                         return EditProfileCardSection(
                           child: Consumer<UserProvider>(
                             builder: (context, userProvider, child) {
                               // --- Merge backend and frontend addresses ---
                               // Build a list of display objects for addresses
-                              final backendDisplayAddresses = apiAddresses.map((e) => {
-                                'address': e['address'] ?? '',
-                                'addressLabel': e['addressLabel'] ?? '',
-                                'phone': e['phone'] ?? '',
-                                'isDefault': e['isMain'] == true,
-                                'country': e['country']?['nameEn'] ?? '',
-                                'city': e['city']?['nameEn'] ?? '',
-                                'isBackend': true,
-                                'id': e['id'],
-                              }).where((a) => a['address'] != '').toList();
-                              final localDisplayAddresses = userProvider.addresses.toSet().toList().map((a) => {
-                                'address': a,
-                                'addressLabel': '',
-                                'phone': '',
-                                'isDefault': false,
-                                'country': '',
-                                'city': '',
-                                'isBackend': false,
-                              }).toList();
-                              // Avoid duplicates (by address string)
+                              final backendDisplayAddresses = apiAddresses
+                                  .map((e) => {
+                                        'address': e['address'] ?? '',
+                                        'addressLabel': e['addressLabel'] ?? '',
+                                        'phone': e['phone'] ?? '',
+                                        'isDefault': e['isMain'] == true,
+                                        'country':
+                                            e['country']?['nameEn'] ?? '',
+                                        'city': e['city']?['nameEn'] ?? '',
+                                        'isBackend': true,
+                                        'id': e['id'],
+                                      })
+                                  .where((a) => a['address'] != '')
+                                  .toList();
+                              final localDisplayAddresses =
+                                  userProvider.addresses
+                                      .toSet()
+                                      .toList()
+                                      .map((a) => {
+                                            'address': a['address'] ?? '',
+                                            'addressLabel':
+                                                a['addressLabel'] ?? '',
+                                            'phone': a['phone'] ?? '',
+                                            'isDefault': false,
+                                            'country': a['country'] ?? '',
+                                            'city': a['city'] ?? '',
+                                            'isBackend': false,
+                                            'id': a['id'],
+                                          })
+                                      .toList();
+                              // Avoid duplicates (by id, not address string)
                               final mergedDisplayAddresses = [
                                 ...backendDisplayAddresses,
-                                ...localDisplayAddresses.where((a) => backendDisplayAddresses.every((b) => b['address'] != a['address'])),
+                                ...localDisplayAddresses.where((a) =>
+                                    backendDisplayAddresses
+                                        .every((b) => b['id'] != a['id'])),
                               ];
                               // Default address logic
-                              final defaultAddressObj = backendDisplayAddresses.firstWhereOrNull((e) => e['isDefault'] == true);
-                              final defaultAddress = defaultAddressObj?['address'] ?? userProvider.defaultAddress;
-                              final sortedDisplayAddresses = [...mergedDisplayAddresses]..sort((a, b) {
-                                if (a['address'] == defaultAddress) return -1;
-                                if (b['address'] == defaultAddress) return 1;
-                                return 0;
-                              });
+                              final defaultAddressObj =
+                                  backendDisplayAddresses.firstWhereOrNull(
+                                      (e) => e['isDefault'] == true);
+                              final defaultAddress =
+                                  defaultAddressObj?['address'] ??
+                                      userProvider.defaultAddress;
+                              final sortedDisplayAddresses = [
+                                ...mergedDisplayAddresses
+                              ]..sort((a, b) {
+                                  if (a['address'] == defaultAddress) return -1;
+                                  if (b['address'] == defaultAddress) return 1;
+                                  return 0;
+                                });
                               return Column(
                                 children: [
                                   // List of Addresses
                                   for (final addr in sortedDisplayAddresses)
-                                    AddressCard(
-                                      address: addr['address'],
-                                      addressLabel: addr['addressLabel'],
-                                      phone: addr['phone'],
-                                      isDefault: addr['address'] == defaultAddress,
-                                      // Show country/city for backend addresses
-                                      subtitle: addr['isBackend'] ? '${addr['city']}, ${addr['country']}' : null,
-                                      onMakeDefault: () async {
-                                        final locationId = addr['id'];
-                                        if (locationId == null) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Unable to set as default: missing address ID.')),
-                                          );
-                                          return;
-                                        }
-                                        final success = await makeDefaultAddressOnBackend(locationId.toString());
-                                        if (success) {
-                                          userProvider.setDefaultAddress(addr['address']);
-                                          addressRefreshKey.value++;
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Default address updated!')),
-                                          );
-                                        } else {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Failed to update default address.')),
-                                          );
-                                        }
-                                      },
-                                      onEdit: () async {
-                                        final editedAddress = await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => const GoogleMapScreen(),
-                                          ),
+                                    Builder(
+                                      builder: (context) {
+                                        // Find the real address map by id in userProvider.addresses
+                                        final realAddress =
+                                            userProvider.addresses.firstWhere(
+                                          (a) => a['id'] == addr['id'],
+                                          orElse: () => addr,
                                         );
-                                        if (editedAddress != null) {
-                                          userProvider.editAddress(addr['address'], editedAddress);
-                                        }
+                                        return AddressCard(
+                                          key: ValueKey(realAddress['id']),
+                                          address: realAddress['address'],
+                                          addressLabel:
+                                              realAddress['addressLabel'],
+                                          phone: realAddress['phone'],
+                                          isDefault: realAddress['address'] ==
+                                              defaultAddress,
+                                          subtitle: ((realAddress['city']
+                                                          is Map &&
+                                                      realAddress['city']
+                                                              ['nameEn'] !=
+                                                          null)
+                                                  ? realAddress['city']
+                                                      ['nameEn']
+                                                  : realAddress['city']
+                                                          ?.toString() ??
+                                                      '') +
+                                              ((realAddress['country'] is Map &&
+                                                      realAddress['country']
+                                                              ['nameEn'] !=
+                                                          null)
+                                                  ? ', ${realAddress['country']['nameEn']}'
+                                                  : realAddress['country'] !=
+                                                          null
+                                                      ? ', ${realAddress['country']}'
+                                                      : ''),
+                                          onMakeDefault: () async {
+                                            final locationId =
+                                                realAddress['id'];
+                                            if (locationId == null) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Unable to set as default: missing address ID.')),
+                                              );
+                                              return;
+                                            }
+                                            final success =
+                                                await makeDefaultAddressOnBackend(
+                                                    locationId.toString());
+                                            if (success) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Default address updated successfully!')),
+                                              );
+                                              userProvider.markAddressAsDefault(
+                                                  locationId); // <-- local instant update
+                                              // Optionally, also fetch from backend for full sync:
+                                              final updatedAddresses =
+                                                  await fetchUserAddresses();
+                                              userProvider
+                                                  .setAddresses(updatedAddresses);
+                                              addressRefreshKey.value++;
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Failed to update default address.')),
+                                              );
+                                            }
+                                          },
+                                          onEdit: () async {
+                                            final editedAddress = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AddLocationScreen(
+                                                  initialAddressMap:
+                                                      realAddress,
+                                                  initialAddressLabel:
+                                                      realAddress[
+                                                          'addressLabel'],
+                                                  initialPhone:
+                                                      realAddress['phone'],
+                                                  initialCountry: realAddress[
+                                                          'country'] is Map
+                                                      ? realAddress['country']
+                                                          ['nameEn']
+                                                      : realAddress['country']
+                                                          ?.toString(),
+                                                  initialCity: realAddress[
+                                                          'city'] is Map
+                                                      ? realAddress['city']
+                                                          ['nameEn']
+                                                      : realAddress['city']
+                                                          ?.toString(),
+                                                  initialState: realAddress[
+                                                          'state'] is Map
+                                                      ? realAddress['state']
+                                                          ['nameEn']
+                                                      : realAddress['state']
+                                                          ?.toString(),
+                                                ),
+                                              ),
+                                            );
+                                            if (editedAddress != null) {
+                                              final mergedAddress =
+                                                  <String, dynamic>{
+                                                ...realAddress,
+                                                ...editedAddress
+                                              };
+                                              final locationId =
+                                                  mergedAddress['id']
+                                                      .toString();
+                                              final success =
+                                                  await updateUserAddress(
+                                                      locationId,
+                                                      mergedAddress);
+                                              if (success) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                      content: Text(
+                                                          'Address updated successfully!')),
+                                                );
+                                                final updatedAddresses =
+                                                    await fetchUserAddresses();
+                                                userProvider
+                                                    .setAddresses(updatedAddresses);
+                                                addressRefreshKey.value++;
+                                              } else {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                      content: Text(
+                                                          'Failed to update address on backend.')),
+                                                );
+                                              }
+                                            }
+                                          },
+                                          onDelete: () => userProvider
+                                              .removeAddress(realAddress),
+                                        );
                                       },
-                                      onDelete: () => userProvider.removeAddress(addr['address']),
                                     ),
                                   const SizedBox(height: 8),
                                   InkWell(
                                     onTap: () async {
-                                      final selectedLocation = await Navigator.push(
+                                      final selectedLocation =
+                                          await Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => const AddLocationScreen(),
+                                          builder: (context) =>
+                                              const AddLocationScreen(),
                                           // builder: (context) => const GoogleMapScreen(),
                                         ),
                                       );
                                       if (selectedLocation != null) {
-                                        final success = await postUserAddress(selectedLocation);
+                                        final success = await postUserAddress(
+                                            selectedLocation);
                                         if (success) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Address added successfully!')),
+                                          );
+                                          // Always fetch the latest addresses from backend after adding
+                                          final updatedAddresses =
+                                              await fetchUserAddresses();
+                                          userProvider
+                                              .setAddresses(updatedAddresses);
                                           addressRefreshKey.value++;
                                           return;
                                         } else {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Failed to save address to backend.')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Failed to save address to backend.')),
                                           );
                                         }
                                       }
@@ -314,11 +496,13 @@ class EditProfileScreen extends StatelessWidget {
                                     child: Container(
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey.shade400),
+                                        border: Border.all(
+                                            color: Colors.grey.shade400),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: const Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.add,

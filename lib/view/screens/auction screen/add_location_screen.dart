@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/location_maps.dart';
@@ -9,24 +9,59 @@ import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
-import '../../widgets/common widgets/address_card.dart';
 
 class AddLocationScreen extends StatelessWidget {
-  const AddLocationScreen({super.key});
+  final Map<String, dynamic>? initialAddressMap;
+  final String? initialAddressLabel;
+  final String? initialPhone;
+  final String? initialCountry;
+  final String? initialCity;
+  final String? initialState;
+
+  const AddLocationScreen({
+    super.key,
+    this.initialAddressMap,
+    this.initialAddressLabel,
+    this.initialPhone,
+    this.initialCountry,
+    this.initialCity,
+    this.initialState,
+  });
 
   @override
   Widget build(BuildContext context) {
     final userProvider = context.read<UserProvider>();
-    final phoneController = TextEditingController();
-    final addressLabelController = TextEditingController();
+    final locationProvider = context.read<LocationProvider>();
+
+    // 🏁 DEBUG: Print initial country and state values on screen open
+    print('number: $initialPhone');
+    print('address: ${initialAddressMap?['address'] ?? ''}');
+    print('addressLabel: $initialAddressLabel');
+    print('initialCountry: $initialCountry');
+    print('initialCity: $initialCity');
+    print('initialState: $initialState');
+
+    final phoneController = TextEditingController(text: initialPhone ?? '');
+    final addressLabelController =
+        TextEditingController(text: initialAddressLabel ?? '');
     final formKey = GlobalKey<FormState>();
+
+    // Schedule address initialization after build to avoid setState error
+    if (initialAddressMap != null && userProvider.addresses.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        userProvider.addAddress(initialAddressMap!);
+      });
+    }
+
+    // When passing address maps, always ensure an 'id' is present for editing
+    Map<String, dynamic>? editingAddressMap = initialAddressMap;
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
-          'Add Location',
-          style: TextStyle(
+        title: Text(
+          editingAddressMap != null ? 'Edit Location' : 'Add Location',
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
           ),
@@ -37,7 +72,6 @@ class AddLocationScreen extends StatelessWidget {
             addressLabelController.clear();
             phoneController.clear();
             userProvider.clearAddresses();
-            final locationProvider = context.read<LocationProvider>();
             locationProvider.reset();
             Navigator.pop(context);
           },
@@ -81,6 +115,9 @@ class AddLocationScreen extends StatelessWidget {
                         CSCPickerPlus(
                       layout: Layout.vertical,
                       flagState: CountryFlag.ENABLE,
+                      currentCountry: initialCountry,
+                      showCities: false,
+                      currentState: initialCity,
                       onCountryChanged: (country) {
                         print('Picker country: $country');
                         // UAE is always countryId 1
@@ -89,21 +126,10 @@ class AddLocationScreen extends StatelessWidget {
                       onStateChanged: (state) {
                         print('Picker state: $state');
                         int? stateId;
-                        String normalizedState = (state ?? '').trim().toLowerCase()
-                          .replaceAll('emirate', '')
-                          .replaceAll('-', ' ')
-                          .replaceAll(RegExp(r'\s+'), ' ')
-                          .replaceAll('umm al quwain', 'umm al quwain')
-                          .replaceAll('ras al khaimah', 'ras al khaimah')
-                          .replaceAll('abu dhabi', 'abu dhabi')
-                          .replaceAll('ajman', 'ajman')
-                          .replaceAll('dubai', 'dubai')
-                          .replaceAll('fujairah', 'fujairah')
-                          .replaceAll('sharjah', 'sharjah')
-                          .trim();
-
-                        cityIdToName.forEach((id, name) {
-                          String backendName = name.trim().toLowerCase()
+                        String normalizedState = (state ?? '')
+                            .trim()
+                            .toLowerCase()
+                            .replaceAll('emirate', '')
                             .replaceAll('-', ' ')
                             .replaceAll(RegExp(r'\s+'), ' ')
                             .replaceAll('umm al quwain', 'umm al quwain')
@@ -114,14 +140,31 @@ class AddLocationScreen extends StatelessWidget {
                             .replaceAll('fujairah', 'fujairah')
                             .replaceAll('sharjah', 'sharjah')
                             .trim();
+
+                        cityIdToName.forEach((id, name) {
+                          String backendName = name
+                              .trim()
+                              .toLowerCase()
+                              .replaceAll('-', ' ')
+                              .replaceAll(RegExp(r'\s+'), ' ')
+                              .replaceAll('umm al quwain', 'umm al quwain')
+                              .replaceAll('ras al khaimah', 'ras al khaimah')
+                              .replaceAll('abu dhabi', 'abu dhabi')
+                              .replaceAll('ajman', 'ajman')
+                              .replaceAll('dubai', 'dubai')
+                              .replaceAll('fujairah', 'fujairah')
+                              .replaceAll('sharjah', 'sharjah')
+                              .trim();
                           if (backendName == normalizedState) {
                             stateId = id;
                           }
                         });
                         print('Normalized state: "$normalizedState"');
-                        print('Matched stateId (cityId): $stateId for state "$state"');
+                        print(
+                            'Matched stateId (cityId): $stateId for state "$state"');
                         if (stateId == null) {
-                          print('WARNING: Could not match "$state" to any cityId. Check cityIdToName map!');
+                          print(
+                              'WARNING: Could not match "$state" to any cityId. Check cityIdToName map!');
                         }
                         locationProvider.updateState(state, id: stateId);
                       },
@@ -211,26 +254,61 @@ class AddLocationScreen extends StatelessWidget {
                         fontSize: 14,
                       ),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade600),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 10,
-                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade400),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade600),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade400),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 10,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Add Address Button
+                  Consumer<UserProvider>(
+                    builder: (context, provider, child) {
+                      final address = provider.addresses.isNotEmpty
+                          ? provider.addresses.last['address'] ?? ''
+                          : (editingAddressMap?['address'] ?? '');
+                      return TextFormField(
+                        readOnly: true,
+                        maxLines: 3,
+                        controller: TextEditingController(text: address),
+                        style: const TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                          labelText: 'Address',
+                          labelStyle: const TextStyle(
+                            color: onSecondaryColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.grey.shade400),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.grey.shade600),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.grey.shade400),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 25),
+                  // Add/Edit Address Button
                   InkWell(
+                    borderRadius: BorderRadius.circular(8),
                     onTap: () async {
                       final selectedLocation = await Navigator.push(
                         context,
@@ -238,71 +316,66 @@ class AddLocationScreen extends StatelessWidget {
                           builder: (context) => const GoogleMapScreen(),
                         ),
                       );
-                  
                       if (selectedLocation != null) {
-                        // ignore: use_build_context_synchronously
-                        context
-                            .read<UserProvider>()
-                            .addAddress(selectedLocation);
+                        // Ensure selectedLocation is a Map<String, dynamic>
+                        Map<String, dynamic> selectedMap;
+                        if (selectedLocation is String) {
+                          selectedMap = {'address': selectedLocation};
+                        } else if (selectedLocation is Map<String, dynamic>) {
+                          selectedMap = selectedLocation;
+                        } else {
+                          // Unexpected type, fallback
+                          selectedMap = {
+                            'address': selectedLocation.toString()
+                          };
+                        }
+                        // If editing, preserve the id
+                        if (editingAddressMap != null &&
+                            editingAddressMap['id'] != null) {
+                          selectedMap['id'] = editingAddressMap['id'];
+                        }
+                        final userProvider = context.read<UserProvider>();
+                        if (editingAddressMap != null) {
+                          userProvider.editAddress(
+                              editingAddressMap, selectedMap);
+                        } else {
+                          userProvider.addAddress(selectedMap);
+                        }
                       }
                     },
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
+                        border: Border.all(color: avatarColor),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add,
-                            color: onSecondaryColor,
-                            size: 22,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Add Address',
-                            style: TextStyle(
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              editingAddressMap != null
+                                  ? Icons.edit
+                                  : Icons.add,
                               color: onSecondaryColor,
-                              fontWeight: FontWeight.w500,
+                              size: 22,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Text(
+                              editingAddressMap != null
+                                  ? 'Edit Address'
+                                  : 'Add Address',
+                              style: const TextStyle(
+                                color: onSecondaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 25),
-                  // Display Address List
-                  Consumer<UserProvider>(
-                    builder: (context, userProvider, child) {
-                      final addresses = userProvider.addresses.toSet().toList();
-                      final defaultAddress = userProvider.defaultAddress;
-
-                      // Sort addresses to put default address first
-                      final sortedAddresses = [...addresses]..sort((a, b) {
-                          if (a == defaultAddress) return -1;
-                          if (b == defaultAddress) return 1;
-                          return 0;
-                        });
-
-                      return Column(
-                        children: [
-                          for (final address in sortedAddresses)
-                            AddressCard(
-                              address: address,
-                              addressLabel: '',
-                              phone: '',
-                              isDefault: false,
-                              subtitle: null,
-                              onMakeDefault: null,
-                              onEdit: null,
-                              onDelete: null,
-                            ),
-                        ],
-                      );
-                    },
-                  ),
+                  const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -311,7 +384,6 @@ class AddLocationScreen extends StatelessWidget {
                           addressLabelController.clear();
                           phoneController.clear();
                           userProvider.clearAddresses();
-                          final locationProvider = context.read<LocationProvider>();
                           locationProvider.reset();
                           Navigator.pop(context);
                         },
@@ -330,29 +402,52 @@ class AddLocationScreen extends StatelessWidget {
                           final locationProvider =
                               context.read<LocationProvider>();
 
+                          // 🐞 DEBUG: Print values on Done button press
+                          print(
+                              '🟢 [DONE] locationProvider.countryId: ${locationProvider.countryId}');
+                          print(
+                              '🔵 [DONE] locationProvider.stateId: ${locationProvider.stateId}');
+                          print(
+                              '🟡 [DONE] locationProvider.selectedCountry: ${locationProvider.selectedCountry}');
+                          print(
+                              '🟠 [DONE] locationProvider.selectedState: ${locationProvider.selectedState}');
+
                           String? address;
                           String? addressLabel;
                           String? phone;
-                          address = userProvider.addresses.isNotEmpty ? userProvider.addresses.last : '';
+                          // Use address map structure
+                          Map<String, dynamic>? currentAddressMap =
+                              userProvider.addresses.isNotEmpty
+                                  ? userProvider.addresses.last
+                                  : (editingAddressMap);
+                          address = currentAddressMap?['address'] ?? '';
                           addressLabel = addressLabelController.text.trim();
                           // Use the provider's phoneNumber, which is set by onInputChanged
-                          phone = userProvider.phoneNumber;
-                          print('phoneController.text: ${phoneController.text}');
-                          print('userProvider.phoneNumber: ${userProvider.phoneNumber}');
+                          phone = phoneController.text;
+                          print(
+                              'phoneController.text: ${phoneController.text}');
+                          print(
+                              'userProvider.phoneNumber: ${userProvider.phoneNumber}');
 
                           final countryId = locationProvider.countryId;
-                          final cityId = locationProvider.stateId; // Use stateId as cityId for backend
+                          final cityId = locationProvider
+                              .stateId; // Use stateId as cityId for backend
 
                           print('address: \'$address\'');
                           print('addressLabel: \'$addressLabel\'');
                           print('countryId: $countryId');
                           print('phone: \'$phone\'');
-                          print('selectedState: \'${locationProvider.selectedState}\'');
+                          print(
+                              'selectedState: \'${locationProvider.selectedState}\'');
 
-                          if (address.isEmpty || countryId == null || cityId == null || addressLabel.isEmpty) {
+                          if (address!.isEmpty ||
+                              countryId == null ||
+                              cityId == null ||
+                              addressLabel.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Please fill all the fields'),
+                                content: Center(
+                                    child: Text('Please fill all the fields')),
                                 duration: Duration(seconds: 2),
                               ),
                             );
@@ -366,6 +461,11 @@ class AddLocationScreen extends StatelessWidget {
                             'cityId': cityId, // This is the stateId
                             'phone': phone,
                           };
+                          // If editing, preserve the id
+                          if (editingAddressMap != null &&
+                              editingAddressMap['id'] != null) {
+                            locationMap['id'] = editingAddressMap['id'];
+                          }
 
                           print('locationMap: $locationMap');
 
