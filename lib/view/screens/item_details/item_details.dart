@@ -55,6 +55,11 @@ class ItemDetailsScreen extends StatelessWidget {
       }
     });
 
+    // Compute the username before the widget tree
+    final String? userName = item.isAuctionProduct
+        ? context.watch<AuctionDetailsProvider>().getUserName(item.id.toString())
+        : (item.product?['user']?['userName'] as String? ?? item.postedBy);
+
     return Scaffold(
       appBar: AppBar(
         title: Center(
@@ -191,69 +196,49 @@ class ItemDetailsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                     ],
-                    IntrinsicWidth(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          border: Border.all(color: Colors.grey[400]!),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.person,
-                                size: 14, color: onSecondaryColor),
-                            const SizedBox(width: 3),
-                            Text(
-                              'Posted by ',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .copyWith(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: onSecondaryColor),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Expanded(
-                              child: item.isAuctionProduct
-                                  ? Consumer<AuctionDetailsProvider>(
-                                      builder: (context, detailsProvider, _) {
-                                        final userName = detailsProvider
-                                            .getUserName(item.id.toString());
-                                        return Text(
-                                          userName ?? item.postedBy,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge!
-                                              .copyWith(
-                                                fontSize: 11,
-                                                color: primaryColor,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                        );
-                                      },
-                                    )
-                                  : Text(
-                                      item.product?['user']?['userName']
-                                              as String? ??
-                                          item.postedBy,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge!
-                                          .copyWith(
-                                            fontSize: 11,
-                                            color: primaryColor,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                            ),
-                          ],
+                    // Only show the "Posted by" row if the username is available
+                    if (userName != null && userName.isNotEmpty)
+                      IntrinsicWidth(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            border: Border.all(color: Colors.grey[400]!),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.person, size: 14, color: onSecondaryColor),
+                              const SizedBox(width: 3),
+                              Text(
+                                'Posted by ',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge!
+                                    .copyWith(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: onSecondaryColor),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  userName,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .copyWith(
+                                        fontSize: 11,
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 15),
                     TextButton.icon(
                       onPressed: () => _showDetailsBottomSheet(context),

@@ -14,6 +14,7 @@ class AuctionDetailsProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error fetching auction details: $e');
     }
   }

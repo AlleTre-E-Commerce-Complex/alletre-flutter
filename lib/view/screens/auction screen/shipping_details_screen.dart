@@ -94,14 +94,17 @@ class ShippingDetailsScreen extends StatelessWidget {
               child: FutureBuilder<List<Map<String, dynamic>>>(
                 future: _cachedAddressesFuture,
                 builder: (context, snapshot) {
-                  // print('ShippingDetailsScreen FutureBuilder called. State: ${snapshot.connectionState}');
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
+                    print('\u001b[31mError fetching addresses: ${snapshot.error}');
                     return const Text('Failed to load addresses');
                   }
                   final apiAddresses = snapshot.data ?? [];
+                  if (apiAddresses.isEmpty) {
+                    return const Center(child: Text('No addresses found. Please add a location.'));
+                  }
                   return Consumer<UserProvider>(
                     builder: (context, userProvider, child) {
                       // --- Merge backend and frontend addresses logic (copied from EditProfileScreen) ---
