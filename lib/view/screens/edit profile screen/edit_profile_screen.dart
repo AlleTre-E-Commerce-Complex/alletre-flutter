@@ -431,8 +431,10 @@ class EditProfileScreen extends StatelessWidget {
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(
                                                   const SnackBar(
-                                                      content: Text(
-                                                          'Address updated successfully!')),
+                                                      content: Center(
+                                                        child: Text(
+                                                            'Address updated successfully!'),
+                                                      )),
                                                 );
                                                 final updatedAddresses =
                                                     await fetchUserAddresses();
@@ -449,8 +451,50 @@ class EditProfileScreen extends StatelessWidget {
                                               }
                                             }
                                           },
-                                          onDelete: () => userProvider
-                                              .removeAddress(realAddress),
+                                          onDelete: () async {
+                                            final locationId = realAddress['id'];
+                                            if (locationId == null) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Unable to delete: missing address ID.')),
+                                              );
+                                              return;
+                                            }
+                                            // Call backend DELETE API
+                                            const storage = FlutterSecureStorage();
+                                            final token = await storage.read(key: 'access_token');
+                                            final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId');
+                                            final response = await http.delete(
+                                              url,
+                                              headers: {
+                                                'Authorization': 'Bearer $token',
+                                                'Content-Type': 'application/json',
+                                              },
+                                            );
+                                            if (response.statusCode == 200 || response.statusCode == 204) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Center(
+                                                      child: Text(
+                                                          'Address deleted successfully!'),
+                                                    )),
+                                              );
+                                              // Always fetch the latest addresses from backend after deleting
+                                              final updatedAddresses = await fetchUserAddresses();
+                                              userProvider.setAddresses(updatedAddresses);
+                                              addressRefreshKey.value++;
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Failed to delete address from backend.')),
+                                              );
+                                            }
+                                          },
                                         );
                                       },
                                     ),
@@ -473,8 +517,10 @@ class EditProfileScreen extends StatelessWidget {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(
-                                                content: Text(
-                                                    'Address added successfully!')),
+                                                content: Center(
+                                                  child: Text(
+                                                      'Address added successfully!'),
+                                                )),
                                           );
                                           // Always fetch the latest addresses from backend after adding
                                           final updatedAddresses =
