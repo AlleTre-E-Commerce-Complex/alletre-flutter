@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/utils/ui_helpers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -312,13 +313,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 // Helper method to show error toast
   void _showErrorToast(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: errorColor,
-          duration: const Duration(seconds: 5),
-        ),
-      );
+      showError(context, message);
     }
   }
 

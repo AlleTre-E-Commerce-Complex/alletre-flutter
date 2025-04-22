@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:alletre_app/utils/ui_helpers.dart';
 import '../../widgets/common widgets/address_card.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/edit profile widgets/custom button widgets/add_phone_button.dart';
@@ -239,8 +240,7 @@ class EditProfileScreen extends StatelessWidget {
                               child: CircularProgressIndicator());
                         }
                         if (snapshot.hasError) {
-                          debugPrint(
-                              'Error fetching addresses: \u001b[31m${snapshot.error}\u001b[0m');
+                          showError(context, snapshot.error);
                           return const Text('Failed to load addresses');
                         }
                         final apiAddresses = snapshot.data ?? [];
@@ -345,12 +345,9 @@ class EditProfileScreen extends StatelessWidget {
                                             final locationId =
                                                 realAddress['id'];
                                             if (locationId == null) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Unable to set as default: missing address ID.')),
-                                              );
+                                              showError(
+                                                  context,
+                                                  'Unable to set as default: missing address ID.');
                                               return;
                                             }
                                             final success =
@@ -372,12 +369,9 @@ class EditProfileScreen extends StatelessWidget {
                                                   .setAddresses(updatedAddresses);
                                               addressRefreshKey.value++;
                                             } else {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Failed to update default address.')),
-                                              );
+                                              showError(
+                                                  context,
+                                                  'Failed to update default address.');
                                             }
                                           },
                                           onEdit: () async {
@@ -442,24 +436,18 @@ class EditProfileScreen extends StatelessWidget {
                                                     .setAddresses(updatedAddresses);
                                                 addressRefreshKey.value++;
                                               } else {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                      content: Text(
-                                                          'Failed to update address on backend.')),
-                                                );
+                                                showError(
+                                                    context,
+                                                    'Failed to update address on backend.');
                                               }
                                             }
                                           },
                                           onDelete: () async {
                                             final locationId = realAddress['id'];
                                             if (locationId == null) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Unable to delete: missing address ID.')),
-                                              );
+                                              showError(
+                                                  context,
+                                                  'Unable to delete: missing address ID.');
                                               return;
                                             }
                                             // Call backend DELETE API
@@ -487,12 +475,9 @@ class EditProfileScreen extends StatelessWidget {
                                               userProvider.setAddresses(updatedAddresses);
                                               addressRefreshKey.value++;
                                             } else {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Failed to delete address from backend.')),
-                                              );
+                                              showError(
+                                                  context,
+                                                  'Failed to delete address from backend.');
                                             }
                                           },
                                         );
@@ -530,12 +515,9 @@ class EditProfileScreen extends StatelessWidget {
                                           addressRefreshKey.value++;
                                           return;
                                         } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text(
-                                                    'Failed to save address to backend.')),
-                                          );
+                                          showError(
+                                              context,
+                                              'Failed to save address to backend.');
                                         }
                                       }
                                     },

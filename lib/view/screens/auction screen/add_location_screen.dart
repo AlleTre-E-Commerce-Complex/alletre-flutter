@@ -9,6 +9,7 @@ import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
+import 'package:alletre_app/utils/ui_helpers.dart';
 
 class AddLocationScreen extends StatelessWidget {
   final Map<String, dynamic>? initialAddressMap;
@@ -446,13 +447,7 @@ class AddLocationScreen extends StatelessWidget {
                               countryId == null ||
                               cityId == null ||
                               addressLabel.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Center(
-                                    child: Text('Please fill all the fields')),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
+                            showError(context, 'Please fill all the fields');
                             return;
                           }
 

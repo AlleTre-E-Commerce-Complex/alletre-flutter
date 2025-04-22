@@ -609,9 +609,9 @@ class ShippingDetailsScreen extends StatelessWidget {
                   // Show error message
                   if (context.mounted) {
                     String errorMsg = e.toString();
-                    // Remove 'Exception:' prefix if present
-                    if (errorMsg.startsWith('Exception: Exception:')) {
-                      errorMsg = errorMsg.replaceFirst('Exception: Exception:', '').trim();
+                    // Remove all 'Exception:' prefixes (even nested)
+                    while (errorMsg.trim().toLowerCase().startsWith('exception:')) {
+                      errorMsg = errorMsg.substring(10).trim();
                     }
                     // Replace auction message with product message if listing product
                     if (errorMsg.startsWith('Failed to create auction:')) {

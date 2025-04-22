@@ -14,6 +14,7 @@ import '../../widgets/home widgets/categories widgets/categories_data.dart';
 import 'auction_details_screen.dart';
 import 'shipping_details_screen.dart';
 import 'drafts_page.dart';
+import 'package:alletre_app/utils/ui_helpers.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final String title;
@@ -327,9 +328,7 @@ class ProductDetailsScreen extends StatelessWidget {
       final mediaError =
           await CreateAuctionValidation.validateMediaSection(media.value);
       if (mediaError != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(mediaError)),
-        );
+        showError(context, mediaError);
         return false;
       }
 
@@ -342,17 +341,13 @@ class ProductDetailsScreen extends StatelessWidget {
       });
 
       if (!isDropdownsValid) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill in all dropdown fields')),
-        );
+        showError(context, 'Please fill in all dropdown fields');
         return false;
       }
 
       // Validate condition for non-property items
       if (categoryController.value != "Properties" && condition.value == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select item condition')),
-        );
+        showError(context, 'Please select item condition');
         return false;
       }
 
@@ -1331,20 +1326,12 @@ class ProductDetailsScreen extends StatelessWidget {
                           // Validate required fields for Electronics category
                           if (productData['brand']?.toString().isEmpty ??
                               true) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'Brand is required for Electronics category')),
-                            );
+                            showError(context, 'Brand is required for Electronics category');
                             return;
                           }
                           if (productData['model']?.toString().isEmpty ??
                               true) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'Model is required for Electronics category')),
-                            );
+                            showError(context, 'Model is required for Electronics category');
                             return;
                           }
 
