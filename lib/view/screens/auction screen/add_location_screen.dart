@@ -17,6 +17,7 @@ class AddLocationScreen extends StatelessWidget {
   final String? initialCountry;
   final String? initialCity;
   final String? initialState;
+  final Map<String, dynamic>? existingAddress;
 
   const AddLocationScreen({
     super.key,
@@ -26,6 +27,7 @@ class AddLocationScreen extends StatelessWidget {
     this.initialCountry,
     this.initialCity,
     this.initialState,
+    this.existingAddress,
   });
 
   @override
@@ -54,7 +56,7 @@ class AddLocationScreen extends StatelessWidget {
     }
 
     // When passing address maps, always ensure an 'id' is present for editing
-    Map<String, dynamic>? editingAddressMap = initialAddressMap;
+    Map<String, dynamic>? editingAddressMap = existingAddress ?? initialAddressMap;
 
     return Scaffold(
       appBar: AppBar(

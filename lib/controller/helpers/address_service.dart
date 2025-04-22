@@ -1,0 +1,99 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
+
+class AddressService {
+  static const _storage = FlutterSecureStorage();
+
+  static Future<String?> _getToken() async {
+    return await _storage.read(key: 'access_token');
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchAddresses() async {
+    final token = await _getToken();
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/users/my-locations');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['success'] == true && data['data'] is List) {
+        return List<Map<String, dynamic>>.from(data['data']);
+      }
+    }
+    return [];
+  }
+
+  static Future<bool> addAddress(Map<String, dynamic> address) async {
+    final token = await _getToken();
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations');
+    final body = json.encode({
+      'address': address['address'],
+      'addressLabel': address['addressLabel'] ?? address['address'],
+      'countryId': address['countryId'],
+      'cityId': address['cityId'],
+      'phone': address['phone'] ?? '',
+    });
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: body,
+    );
+    return response.statusCode == 201 || response.statusCode == 200;
+  }
+
+  static Future<bool> updateAddress(String locationId, Map<String, dynamic> updatedAddress) async {
+    final token = await _getToken();
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId');
+    final body = json.encode({
+      'address': updatedAddress['address'],
+      'addressLabel': updatedAddress['addressLabel'] ?? updatedAddress['address'],
+      'countryId': updatedAddress['countryId'] is Map ? updatedAddress['countryId']['id'] ?? updatedAddress['countryId']['nameEn'] : updatedAddress['countryId'],
+      'cityId': updatedAddress['cityId'] is Map ? updatedAddress['cityId']['id'] ?? updatedAddress['cityId']['nameEn'] : updatedAddress['cityId'],
+      'phone': updatedAddress['phone'] ?? '',
+    });
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: body,
+    );
+    return response.statusCode == 200 || response.statusCode == 201;
+  }
+
+  static Future<bool> deleteAddress(String locationId) async {
+    final token = await _getToken();
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    return response.statusCode == 200 || response.statusCode == 204;
+  }
+
+  static Future<bool> makeDefaultAddress(String locationId) async {
+    final token = await _getToken();
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId/make-default');
+    final response = await http.patch(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    return response.statusCode == 200 || response.statusCode == 201;
+  }
+}
