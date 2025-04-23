@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -17,7 +18,7 @@ class ShareProvider with ChangeNotifier {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Unable to share: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: errorColor,
           ),
         );
       }

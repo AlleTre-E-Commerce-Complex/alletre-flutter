@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class LocationProvider with ChangeNotifier {
   int? _selectedLocationId;
-  
+
   // Display names
   String? selectedCountry;
   String? selectedState;
@@ -16,7 +16,7 @@ class LocationProvider with ChangeNotifier {
   int? stateId;
   int? cityId;
   String? phone;
-  
+
   final List<LocationModel> _locations = [];
   List<LocationModel> get locations => _locations;
   int? get selectedLocationId => _selectedLocationId;
@@ -27,11 +27,11 @@ class LocationProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   // Update methods that store both display name and ID
   void updateCountry(String? country, {int? id}) {
     selectedCountry = country;
-    countryId = id ?? 1; // Default to UAE (ID: 1) if not provided
+    countryId = id;
     notifyListeners();
   }
 
@@ -55,12 +55,12 @@ class LocationProvider with ChangeNotifier {
       'phone': phone ?? 'xxxxxxxxxx',
     };
   }
-  
+
   void addLocation(LocationModel location) {
     _locations.add(location);
     notifyListeners();
   }
-  
+
   void reset() {
     selectedCountry = null;
     selectedState = null;
@@ -72,7 +72,7 @@ class LocationProvider with ChangeNotifier {
     _selectedLocationId = null;
     notifyListeners();
   }
-  
+
   // For debugging
   void printLocationInfo() {
     print('🌍 Location Info:');

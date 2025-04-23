@@ -341,8 +341,6 @@ class AuctionItem {
           phone: json['phone'] ?? '',
         );
         print('[AuctionItem.fromJson] Created itemLocation from IDs: city=${itemLocation.city}, country=${itemLocation.country}, address=${itemLocation.address}');
-      } else {
-        print('[AuctionItem.fromJson] No location data found in JSON!');
       }
 
       return AuctionItem(

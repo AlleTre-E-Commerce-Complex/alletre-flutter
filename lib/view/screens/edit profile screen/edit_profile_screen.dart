@@ -492,12 +492,44 @@ class EditProfileScreen extends StatelessWidget {
                                         MaterialPageRoute(
                                           builder: (context) =>
                                               const AddLocationScreen(),
-                                          // builder: (context) => const GoogleMapScreen(),
                                         ),
                                       );
                                       if (selectedLocation != null) {
-                                        final success = await postUserAddress(
-                                            selectedLocation);
+                                        // Validate fields before sending to backend
+                                        final errors = <String>[];
+                                        final address = selectedLocation['address']?.toString().trim() ?? '';
+                                        final addressLabel = selectedLocation['addressLabel']?.toString().trim() ?? '';
+                                        final countryId = selectedLocation['countryId'];
+                                        final cityId = selectedLocation['cityId'];
+                                        final phone = selectedLocation['phone']?.toString().trim() ?? '';
+
+                                        // Address validation
+                                        if (address.isEmpty) {
+                                          errors.add('Address is required.');
+                                        }
+                                        if (addressLabel.isEmpty) {
+                                          errors.add('Address label is required.');
+                                        }
+                                        if (countryId == null || countryId.toString().isEmpty) {
+                                          errors.add('Country is required.');
+                                        }
+                                        if (cityId == null || cityId.toString().isEmpty) {
+                                          errors.add('State is required.');
+                                        }
+                                        if (phone.isEmpty) {
+                                          errors.add('Phone number is required.');
+                                        }
+
+                                        if (errors.isNotEmpty) {
+                                          showError(context, errors.join('\n'));
+                                          return;
+                                        }
+
+                                        // Optimistic UI update: add address to provider and trigger UI refresh
+                                        userProvider.addAddress(selectedLocation);
+                                        addressRefreshKey.value++;
+
+                                        final success = await postUserAddress(selectedLocation);
                                         if (success) {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
@@ -510,14 +542,10 @@ class EditProfileScreen extends StatelessWidget {
                                           // Always fetch the latest addresses from backend after adding
                                           final updatedAddresses =
                                               await fetchUserAddresses();
-                                          userProvider
-                                              .setAddresses(updatedAddresses);
+                                          userProvider.setAddresses(updatedAddresses);
                                           addressRefreshKey.value++;
-                                          return;
                                         } else {
-                                          showError(
-                                              context,
-                                              'Failed to save address to backend.');
+                                          showError(context, 'Failed to save address to backend.');
                                         }
                                       }
                                     },

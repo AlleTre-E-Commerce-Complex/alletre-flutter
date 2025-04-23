@@ -30,6 +30,7 @@ class AddressService {
   }
 
   static Future<bool> addAddress(Map<String, dynamic> address) async {
+    
     final token = await _getToken();
     final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations');
     final body = json.encode({
@@ -37,8 +38,10 @@ class AddressService {
       'addressLabel': address['addressLabel'] ?? address['address'],
       'countryId': address['countryId'],
       'cityId': address['cityId'],
-      'phone': address['phone'] ?? '',
+      'phone': address['phone'],
     });
+    print('[DEBUG] AddressService.addAddress payload:');
+    print(body);
     final response = await http.post(
       url,
       headers: {
@@ -47,6 +50,8 @@ class AddressService {
       },
       body: body,
     );
+    print('[DEBUG] AddressService.addAddress status: ${response.statusCode}');
+    print('[DEBUG] AddressService.addAddress response: ${response.body}');
     return response.statusCode == 201 || response.statusCode == 200;
   }
 

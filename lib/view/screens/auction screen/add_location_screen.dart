@@ -3,13 +3,11 @@ import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/location_maps.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:alletre_app/utils/validators/form_validators.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/add_address_screen.dart';
 import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
-import 'package:alletre_app/utils/ui_helpers.dart';
 
 class AddLocationScreen extends StatelessWidget {
   final Map<String, dynamic>? initialAddressMap;
@@ -35,29 +33,14 @@ class AddLocationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = context.read<UserProvider>();
     final locationProvider = context.read<LocationProvider>();
-
-    // 🏁 DEBUG: Print initial country and state values on screen open
-    print('number: $initialPhone');
-    print('address: ${initialAddressMap?['address'] ?? ''}');
-    print('addressLabel: $initialAddressLabel');
-    print('initialCountry: $initialCountry');
-    print('initialCity: $initialCity');
-    print('initialState: $initialState');
-
     final phoneController = TextEditingController(text: initialPhone ?? '');
-    final addressLabelController =
-        TextEditingController(text: initialAddressLabel ?? '');
+    final addressLabelController = TextEditingController(text: initialAddressLabel ?? '');
     final formKey = GlobalKey<FormState>();
-
-    // Schedule address initialization after build to avoid setState error
-    if (initialAddressMap != null && userProvider.addresses.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        userProvider.addAddress(initialAddressMap!);
-      });
-    }
-
-    // When passing address maps, always ensure an 'id' is present for editing
+    final errorNotifier = ValueNotifier<String?>(null);
     Map<String, dynamic>? editingAddressMap = existingAddress ?? initialAddressMap;
+    // Track phone validity
+    final phoneValidNotifier = ValueNotifier<bool>(false);
+    PhoneNumber? parsedPhoneNumber;
 
     return Scaffold(
       appBar: AppBar(
@@ -85,6 +68,33 @@ class AddLocationScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ValueListenableBuilder<String?>(
+              valueListenable: errorNotifier,
+              builder: (context, error, child) {
+                if (error == null) return const SizedBox.shrink();
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: errorColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: errorColor.withOpacity(0.5)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error, color: errorColor, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          error,
+                          style: const TextStyle(color: errorColor, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
             const Text.rich(
               TextSpan(
                 children: [
@@ -209,6 +219,10 @@ class AddLocationScreen extends StatelessWidget {
                         InternationalPhoneNumberInput(
                       onInputChanged: (PhoneNumber number) {
                         provider.setPhoneNumber(number);
+                        parsedPhoneNumber = number;
+                      },
+                      onInputValidated: (bool value) {
+                        phoneValidNotifier.value = value;
                       },
                       selectorConfig: const SelectorConfig(
                         selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
@@ -242,8 +256,6 @@ class AddLocationScreen extends StatelessWidget {
                           horizontal: 10,
                         ),
                       ),
-                      validator: (_) => FormValidators.validatePhoneNumber(
-                          phoneController.text),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -401,72 +413,69 @@ class AddLocationScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
                       ElevatedButton(
-                        onPressed: () {
-                          final locationProvider =
-                              context.read<LocationProvider>();
-
-                          // 🐞 DEBUG: Print values on Done button press
-                          print(
-                              '🟢 [DONE] locationProvider.countryId: ${locationProvider.countryId}');
-                          print(
-                              '🔵 [DONE] locationProvider.stateId: ${locationProvider.stateId}');
-                          print(
-                              '🟡 [DONE] locationProvider.selectedCountry: ${locationProvider.selectedCountry}');
-                          print(
-                              '🟠 [DONE] locationProvider.selectedState: ${locationProvider.selectedState}');
-
-                          String? address;
-                          String? addressLabel;
-                          String? phone;
-                          // Use address map structure
-                          Map<String, dynamic>? currentAddressMap =
-                              userProvider.addresses.isNotEmpty
-                                  ? userProvider.addresses.last
-                                  : (editingAddressMap);
-                          address = currentAddressMap?['address'] ?? '';
-                          addressLabel = addressLabelController.text.trim();
-                          // Use the provider's phoneNumber, which is set by onInputChanged
-                          phone = phoneController.text;
-                          print(
-                              'phoneController.text: ${phoneController.text}');
-                          print(
-                              'userProvider.phoneNumber: ${userProvider.phoneNumber}');
-
+                        onPressed: () async {
+                          final address = userProvider.addresses.isNotEmpty
+                              ? userProvider.addresses.last['address'] ?? ''
+                              : (editingAddressMap?['address'] ?? '');
+                          final addressLabel = addressLabelController.text.trim();
                           final countryId = locationProvider.countryId;
-                          final cityId = locationProvider
-                              .stateId; // Use stateId as cityId for backend
-
-                          print('address: \'$address\'');
-                          print('addressLabel: \'$addressLabel\'');
-                          print('countryId: $countryId');
-                          print('phone: \'$phone\'');
-                          print(
-                              'selectedState: \'${locationProvider.selectedState}\'');
-
-                          if (address!.isEmpty ||
-                              countryId == null ||
-                              cityId == null ||
-                              addressLabel.isEmpty) {
-                            showError(context, 'Please fill all the fields');
+                          final cityId = locationProvider.stateId;
+                          // Defensive: treat 0, null, or empty as not selected
+                          bool countryMissing = countryId == null || countryId == 0 || countryId.toString().isEmpty;
+                          bool cityMissing = cityId == null || cityId == 0 || cityId.toString().isEmpty;
+                          print('[DEBUG] countryId: \x1B[33m$countryId\x1B[0m, cityId: \x1B[33m$cityId\x1B[0m');
+                          print('[DEBUG] countryMissing: $countryMissing, cityMissing: $cityMissing');
+                          final rawPhone = phoneController.text.trim();
+                          final errors = <String>[];
+                          if (address.isEmpty) {
+                            errors.add('Address is required.');
+                          }
+                          if (addressLabel.isEmpty) {
+                            errors.add('Address label is required.');
+                          }
+                          if (countryMissing) {
+                            errors.add('Country is required.');
+                          }
+                          if (cityMissing) {
+                            errors.add('State is required.');
+                          }
+                          // Use intl_phone_number_input validation
+                          final phoneIsValid = phoneValidNotifier.value;
+                          if (!phoneIsValid) {
+                            errors.add('Phone number must be valid.');
+                          }
+                          // Use parsed phone number in E.164 format if possible
+                          String? normalizedPhone;
+                          if (parsedPhoneNumber != null && phoneIsValid) {
+                            normalizedPhone = parsedPhoneNumber!.phoneNumber;
+                          } else {
+                            normalizedPhone = rawPhone;
+                          }
+                          print('[DEBUG] Phone entered: "$rawPhone"');
+                          print('[DEBUG] Phone normalized: "$normalizedPhone"');
+                          if (errors.isNotEmpty) {
+                            errorNotifier.value = errors.join('\n');
                             return;
                           }
-
-                          final locationMap = {
+                          errorNotifier.value = null;
+                          print('[DEBUG] Location map sent to backend:');
+                          print({
                             'address': address,
                             'addressLabel': addressLabel,
                             'countryId': countryId,
-                            'cityId': cityId, // This is the stateId
-                            'phone': phone,
-                          };
-                          // If editing, preserve the id
-                          if (editingAddressMap != null &&
-                              editingAddressMap['id'] != null) {
-                            locationMap['id'] = editingAddressMap['id'];
-                          }
-
-                          print('locationMap: $locationMap');
-
-                          Navigator.pop(context, locationMap);
+                            'cityId': cityId,
+                            'phone': normalizedPhone,
+                            ...?editingAddressMap,
+                          });
+                          Navigator.pop(context, {
+                            'address': address,
+                            'addressLabel': addressLabel,
+                            'countryId': countryId,
+                            'cityId': cityId,
+                            'phone': normalizedPhone,
+                            ...?editingAddressMap,
+                          });
+                          userProvider.clearAddresses();
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(80, 33),
