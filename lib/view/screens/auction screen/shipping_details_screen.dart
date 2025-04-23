@@ -586,6 +586,10 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                     throw Exception('Product data missing required fields');
                   }
 
+                  // --- Ensure locationId is included in product payload ---
+                  product['locationId'] = locationId;
+                                  fullAuctionData['product'] = product;
+
                   // Add optional policies if present
                   if (widget.auctionData['returnPolicy'] != null) {
                     fullAuctionData['returnPolicy'] =
