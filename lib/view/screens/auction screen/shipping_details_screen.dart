@@ -274,7 +274,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                                 addressRefreshKey.value++;
                               } else {
                                 showError(context,
-                                    'Failed to delete address from backend.');
+                                    'Failed to delete address.');
                               }
                               _refreshAddresses();
                             },
@@ -348,7 +348,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                       userProvider.clearAddresses();
                       _refreshAddresses();
                     } else {
-                      showError(context, 'Failed to save address to backend.');
+                      showError(context, 'Failed to save address.');
                     }
                   }
                 },

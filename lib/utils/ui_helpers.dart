@@ -7,6 +7,6 @@ void showError(BuildContext context, dynamic e) {
     errorMsg = errorMsg.substring(10).trim();
   }
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(errorMsg)),
+    SnackBar(content: Center(child: Text(errorMsg))),
   );
 }

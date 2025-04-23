@@ -477,7 +477,7 @@ class EditProfileScreen extends StatelessWidget {
                                             } else {
                                               showError(
                                                   context,
-                                                  'Failed to delete address from backend.');
+                                                  'Failed to delete address.');
                                             }
                                           },
                                         );
@@ -545,7 +545,7 @@ class EditProfileScreen extends StatelessWidget {
                                           userProvider.setAddresses(updatedAddresses);
                                           addressRefreshKey.value++;
                                         } else {
-                                          showError(context, 'Failed to save address to backend.');
+                                          showError(context, 'Failed to save address.');
                                         }
                                       }
                                     },

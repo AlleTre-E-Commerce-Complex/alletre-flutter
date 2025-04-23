@@ -102,7 +102,7 @@ class GoogleAuthService {
           await FirebaseAuth.instance.signOut();
           await _googleSignIn.signOut();
           
-          final error = jsonDecode(response.body)['message'] ?? 'Failed to authenticate with backend';
+          final error = jsonDecode(response.body)['message'] ?? 'Failed to authenticate';
           throw Exception(error);
         }
 

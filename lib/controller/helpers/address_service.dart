@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -30,7 +32,6 @@ class AddressService {
   }
 
   static Future<bool> addAddress(Map<String, dynamic> address) async {
-    
     final token = await _getToken();
     final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations');
     final body = json.encode({
@@ -39,6 +40,8 @@ class AddressService {
       'countryId': address['countryId'],
       'cityId': address['cityId'],
       'phone': address['phone'],
+      if (address['lat'] != null) 'lat': address['lat'],
+      if (address['lng'] != null) 'lng': address['lng'],
     });
     print('[DEBUG] AddressService.addAddress payload:');
     print(body);

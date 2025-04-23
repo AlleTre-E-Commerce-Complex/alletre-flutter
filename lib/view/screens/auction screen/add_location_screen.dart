@@ -42,6 +42,11 @@ class AddLocationScreen extends StatelessWidget {
     final phoneValidNotifier = ValueNotifier<bool>(false);
     PhoneNumber? parsedPhoneNumber;
 
+    // Address value notifier for reactive updates
+    final addressValueNotifier = ValueNotifier<String>(
+      existingAddress?['address'] ?? initialAddressMap?['address'] ?? ''
+    );
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -287,11 +292,9 @@ class AddLocationScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Consumer<UserProvider>(
-                    builder: (context, provider, child) {
-                      final address = provider.addresses.isNotEmpty
-                          ? provider.addresses.last['address'] ?? ''
-                          : (editingAddressMap?['address'] ?? '');
+                  ValueListenableBuilder<String>(
+                    valueListenable: addressValueNotifier,
+                    builder: (context, address, _) {
                       return TextFormField(
                         readOnly: true,
                         maxLines: 3,
@@ -346,13 +349,20 @@ class AddLocationScreen extends StatelessWidget {
                         }
                         // If editing, preserve the id
                         if (editingAddressMap != null &&
-                            editingAddressMap['id'] != null) {
-                          selectedMap['id'] = editingAddressMap['id'];
+                            editingAddressMap?['id'] != null) {
+                          selectedMap['id'] = editingAddressMap?['id'];
                         }
+                        // --- Ensure we merge the map result into editingAddressMap ---
+                        editingAddressMap = {
+                          ...?editingAddressMap,
+                          ...selectedMap, // This ensures lat/lng are present for submission
+                        };
+                        // Update address notifier
+                        addressValueNotifier.value = selectedMap['address'] ?? '';
                         final userProvider = context.read<UserProvider>();
                         if (editingAddressMap != null) {
                           userProvider.editAddress(
-                              editingAddressMap, selectedMap);
+                              editingAddressMap!, selectedMap);
                         } else {
                           userProvider.addAddress(selectedMap);
                         }
@@ -459,12 +469,16 @@ class AddLocationScreen extends StatelessWidget {
                           }
                           errorNotifier.value = null;
                           print('[DEBUG] Location map sent to backend:');
+                          final lat = editingAddressMap?['lat'];
+                          final lng = editingAddressMap?['lng'];
                           print({
                             'address': address,
                             'addressLabel': addressLabel,
                             'countryId': countryId,
                             'cityId': cityId,
                             'phone': normalizedPhone,
+                            if (lat != null) 'lat': lat,
+                            if (lng != null) 'lng': lng,
                             ...?editingAddressMap,
                           });
                           Navigator.pop(context, {
@@ -473,6 +487,8 @@ class AddLocationScreen extends StatelessWidget {
                             'countryId': countryId,
                             'cityId': cityId,
                             'phone': normalizedPhone,
+                            if (lat != null) 'lat': lat,
+                            if (lng != null) 'lng': lng,
                             ...?editingAddressMap,
                           });
                           userProvider.clearAddresses();
