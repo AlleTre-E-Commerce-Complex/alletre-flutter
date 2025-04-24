@@ -47,6 +47,20 @@ class AddLocationScreen extends StatelessWidget {
       existingAddress?['address'] ?? initialAddressMap?['address'] ?? ''
     );
 
+    // --- Ensure initial phone number is validated if pre-filled ---
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (phoneController.text.isNotEmpty) {
+        try {
+          final phoneNumber = await PhoneNumber.getRegionInfoFromPhoneNumber(phoneController.text);
+          // Optionally, validate further if needed
+          phoneValidNotifier.value = true;
+          parsedPhoneNumber = phoneNumber;
+        } catch (e) {
+          phoneValidNotifier.value = false;
+        }
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -359,6 +373,8 @@ class AddLocationScreen extends StatelessWidget {
                         };
                         // Update address notifier
                         addressValueNotifier.value = selectedMap['address'] ?? '';
+                        // --- Update phone in editingAddressMap if edited ---
+                        editingAddressMap?['phone'] = phoneController.text.trim();
                         final userProvider = context.read<UserProvider>();
                         if (editingAddressMap != null) {
                           userProvider.editAddress(
@@ -472,6 +488,7 @@ class AddLocationScreen extends StatelessWidget {
                           final lat = editingAddressMap?['lat'];
                           final lng = editingAddressMap?['lng'];
                           print({
+                            ...?editingAddressMap,
                             'address': address,
                             'addressLabel': addressLabel,
                             'countryId': countryId,
@@ -479,9 +496,9 @@ class AddLocationScreen extends StatelessWidget {
                             'phone': normalizedPhone,
                             if (lat != null) 'lat': lat,
                             if (lng != null) 'lng': lng,
-                            ...?editingAddressMap,
                           });
                           Navigator.pop(context, {
+                            ...?editingAddressMap,
                             'address': address,
                             'addressLabel': addressLabel,
                             'countryId': countryId,
@@ -489,7 +506,6 @@ class AddLocationScreen extends StatelessWidget {
                             'phone': normalizedPhone,
                             if (lat != null) 'lat': lat,
                             if (lng != null) 'lng': lng,
-                            ...?editingAddressMap,
                           });
                           userProvider.clearAddresses();
                         },

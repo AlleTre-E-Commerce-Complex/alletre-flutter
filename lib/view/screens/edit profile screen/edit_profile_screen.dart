@@ -28,6 +28,7 @@ class EditProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaffoldContext = context; // Top-level context for all SnackBars and errors
     // Get the current user info from the provider
     final userProvider = Provider.of<UserProvider>(context);
     final displayName = userProvider.displayName.isNotEmpty
@@ -240,7 +241,7 @@ class EditProfileScreen extends StatelessWidget {
                               child: CircularProgressIndicator());
                         }
                         if (snapshot.hasError) {
-                          showError(context, snapshot.error);
+                          showError(scaffoldContext, snapshot.error);
                           return const Text('Failed to load addresses');
                         }
                         final apiAddresses = snapshot.data ?? [];
@@ -302,282 +303,285 @@ class EditProfileScreen extends StatelessWidget {
                                   if (b['address'] == defaultAddress) return 1;
                                   return 0;
                                 });
-                              return Column(
-                                children: [
-                                  // List of Addresses
-                                  for (final addr in sortedDisplayAddresses)
-                                    Builder(
-                                      builder: (context) {
-                                        // Find the real address map by id in userProvider.addresses
-                                        final realAddress =
-                                            userProvider.addresses.firstWhere(
-                                          (a) => a['id'] == addr['id'],
-                                          orElse: () => addr,
-                                        );
-                                        return AddressCard(
-                                          key: ValueKey(realAddress['id']),
-                                          address: realAddress['address'],
-                                          addressLabel:
-                                              realAddress['addressLabel'],
-                                          phone: realAddress['phone'],
-                                          isDefault: realAddress['address'] ==
-                                              defaultAddress,
-                                          subtitle: ((realAddress['city']
-                                                          is Map &&
-                                                      realAddress['city']
-                                                              ['nameEn'] !=
-                                                          null)
-                                                  ? realAddress['city']
-                                                      ['nameEn']
-                                                  : realAddress['city']
-                                                          ?.toString() ??
-                                                      '') +
-                                              ((realAddress['country'] is Map &&
-                                                      realAddress['country']
-                                                              ['nameEn'] !=
-                                                          null)
-                                                  ? ', ${realAddress['country']['nameEn']}'
-                                                  : realAddress['country'] !=
-                                                          null
-                                                      ? ', ${realAddress['country']}'
-                                                      : ''),
-                                          onMakeDefault: () async {
-                                            final locationId =
-                                                realAddress['id'];
-                                            if (locationId == null) {
-                                              showError(
-                                                  context,
-                                                  'Unable to set as default: missing address ID.');
-                                              return;
-                                            }
-                                            final success =
-                                                await makeDefaultAddressOnBackend(
-                                                    locationId.toString());
-                                            if (success) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Default address updated successfully!')),
-                                              );
-                                              userProvider.markAddressAsDefault(
-                                                  locationId); // <-- local instant update
-                                              // Optionally, also fetch from backend for full sync:
-                                              final updatedAddresses =
-                                                  await fetchUserAddresses();
-                                              userProvider
-                                                  .setAddresses(updatedAddresses);
-                                              addressRefreshKey.value++;
-                                            } else {
-                                              showError(
-                                                  context,
-                                                  'Failed to update default address.');
-                                            }
-                                          },
-                                          onEdit: () async {
-                                            final editedAddress = await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AddLocationScreen(
-                                                  initialAddressMap:
-                                                      realAddress,
-                                                  initialAddressLabel:
-                                                      realAddress[
-                                                          'addressLabel'],
-                                                  initialPhone:
-                                                      realAddress['phone'],
-                                                  initialCountry: realAddress[
-                                                          'country'] is Map
-                                                      ? realAddress['country']
-                                                          ['nameEn']
-                                                      : realAddress['country']
-                                                          ?.toString(),
-                                                  initialCity: realAddress[
-                                                          'city'] is Map
-                                                      ? realAddress['city']
-                                                          ['nameEn']
-                                                      : realAddress['city']
-                                                          ?.toString(),
-                                                  initialState: realAddress[
-                                                          'state'] is Map
-                                                      ? realAddress['state']
-                                                          ['nameEn']
-                                                      : realAddress['state']
-                                                          ?.toString(),
-                                                ),
-                                              ),
+                              return Builder(
+                                builder: (context) {
+                                  final parentContext = context;
+                                  return Column(
+                                    children: [
+                                      // List of Addresses
+                                      for (final addr in sortedDisplayAddresses)
+                                        Builder(
+                                          builder: (context) {
+                                            // Find the real address map by id in userProvider.addresses
+                                            final realAddress =
+                                                userProvider.addresses.firstWhere(
+                                              (a) => a['id'] == addr['id'],
+                                              orElse: () => addr,
                                             );
-                                            if (editedAddress != null) {
-                                              final mergedAddress =
-                                                  <String, dynamic>{
-                                                ...realAddress,
-                                                ...editedAddress
-                                              };
-                                              final locationId =
-                                                  mergedAddress['id']
-                                                      .toString();
-                                              final success =
-                                                  await updateUserAddress(
-                                                      locationId,
-                                                      mergedAddress);
-                                              if (success) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                      content: Center(
-                                                        child: Text(
-                                                            'Address updated successfully!'),
-                                                      )),
+                                            return AddressCard(
+                                              key: ValueKey(realAddress['id']),
+                                              address: realAddress['address'],
+                                              addressLabel:
+                                                  realAddress['addressLabel'],
+                                              phone: realAddress['phone'],
+                                              isDefault: realAddress['address'] ==
+                                                  defaultAddress,
+                                              subtitle: ((realAddress['city']
+                                                              is Map &&
+                                                          realAddress['city']
+                                                                  ['nameEn'] !=
+                                                              null)
+                                                      ? realAddress['city']
+                                                              ['nameEn']
+                                                      : realAddress['city']
+                                                              ?.toString() ??
+                                                          '') +
+                                                  ((realAddress['country'] is Map &&
+                                                          realAddress['country']
+                                                                  ['nameEn'] !=
+                                                              null)
+                                                      ? ', ${realAddress['country']['nameEn']}'
+                                                      : realAddress['country'] !=
+                                                              null
+                                                          ? ', ${realAddress['country']}'
+                                                          : ''),
+                                              onMakeDefault: () async {
+                                                final locationId =
+                                                    realAddress['id'];
+                                                if (locationId == null) {
+                                                  showError(
+                                                      scaffoldContext,
+                                                      'Unable to set as default: missing address ID.');
+                                                  return;
+                                                }
+                                                final success =
+                                                    await makeDefaultAddressOnBackend(
+                                                        locationId.toString());
+                                                if (success) {
+                                                  ScaffoldMessenger.of(scaffoldContext)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                        content: Text(
+                                                            'Default address updated successfully!')),
+                                                  );
+                                                  userProvider.markAddressAsDefault(
+                                                      locationId); // <-- local instant update
+                                                  // Optionally, also fetch from backend for full sync:
+                                                  final updatedAddresses =
+                                                      await fetchUserAddresses();
+                                                  userProvider
+                                                      .setAddresses(updatedAddresses);
+                                                  addressRefreshKey.value++;
+                                                } else {
+                                                  showError(
+                                                      scaffoldContext,
+                                                      'Failed to update default address.');
+                                                }
+                                              },
+                                              onEdit: () async {
+                                                final editedAddress = await Navigator.push(
+                                                  scaffoldContext,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AddLocationScreen(
+                                                      initialAddressMap:
+                                                          realAddress,
+                                                      initialAddressLabel:
+                                                          realAddress[
+                                                              'addressLabel'],
+                                                      initialPhone:
+                                                          realAddress['phone'],
+                                                      initialCountry: realAddress[
+                                                                  'country'] is Map
+                                                              ? realAddress['country']
+                                                                      ['nameEn']
+                                                              : realAddress['country']
+                                                                      ?.toString(),
+                                                      initialCity: realAddress[
+                                                                  'city'] is Map
+                                                              ? realAddress['city']
+                                                                      ['nameEn']
+                                                              : realAddress['city']
+                                                                      ?.toString(),
+                                                      initialState: realAddress[
+                                                                  'state'] is Map
+                                                              ? realAddress['state']
+                                                                      ['nameEn']
+                                                              : realAddress['state']
+                                                                      ?.toString(),
+                                                    ),
+                                                  ),
                                                 );
-                                                final updatedAddresses =
-                                                    await fetchUserAddresses();
-                                                userProvider
-                                                    .setAddresses(updatedAddresses);
-                                                addressRefreshKey.value++;
-                                              } else {
-                                                showError(
-                                                    context,
-                                                    'Failed to update address on backend.');
-                                              }
-                                            }
-                                          },
-                                          onDelete: () async {
-                                            final locationId = realAddress['id'];
-                                            if (locationId == null) {
-                                              showError(
-                                                  context,
-                                                  'Unable to delete: missing address ID.');
-                                              return;
-                                            }
-                                            // Call backend DELETE API
-                                            const storage = FlutterSecureStorage();
-                                            final token = await storage.read(key: 'access_token');
-                                            final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId');
-                                            final response = await http.delete(
-                                              url,
-                                              headers: {
-                                                'Authorization': 'Bearer $token',
-                                                'Content-Type': 'application/json',
+                                                if (editedAddress != null) {
+                                                  final mergedAddress =
+                                                      <String, dynamic>{
+                                                    ...realAddress,
+                                                    ...editedAddress
+                                                  };
+                                                  final locationId =
+                                                      mergedAddress['id']
+                                                          .toString();
+                                                  final success =
+                                                      await updateUserAddress(
+                                                          locationId,
+                                                          mergedAddress);
+                                                  if (success) {
+                                                    ScaffoldMessenger.of(scaffoldContext)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                          content: Center(
+                                                            child: Text(
+                                                                'Address updated successfully!'),
+                                                          )),
+                                                    );
+                                                    final updatedAddresses =
+                                                        await fetchUserAddresses();
+                                                    userProvider
+                                                        .setAddresses(updatedAddresses);
+                                                    addressRefreshKey.value++;
+                                                  } else {
+                                                    showError(scaffoldContext, 'Failed to update address.');
+                                                  }
+                                                }
+                                              },
+                                              onDelete: () async {
+                                                final locationId = realAddress['id'];
+                                                if (locationId == null) {
+                                                  showError(
+                                                      scaffoldContext,
+                                                      'Unable to delete: missing address ID.');
+                                                  return;
+                                                }
+                                                // Call backend DELETE API
+                                                const storage = FlutterSecureStorage();
+                                                final token = await storage.read(key: 'access_token');
+                                                final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId');
+                                                final response = await http.delete(
+                                                  url,
+                                                  headers: {
+                                                    'Authorization': 'Bearer $token',
+                                                    'Content-Type': 'application/json',
+                                                  },
+                                                );
+                                                if (response.statusCode == 200 || response.statusCode == 204) {
+                                                  ScaffoldMessenger.of(scaffoldContext)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                        content: Center(
+                                                          child: Text(
+                                                              'Address deleted successfully!'),
+                                                        )),
+                                                  );
+                                                  // Always fetch the latest addresses from backend after deleting
+                                                  final updatedAddresses = await fetchUserAddresses();
+                                                  userProvider.setAddresses(updatedAddresses);
+                                                  addressRefreshKey.value++;
+                                                } else {
+                                                  showError(
+                                                      scaffoldContext,
+                                                      'Failed to delete address.');
+                                                }
                                               },
                                             );
-                                            if (response.statusCode == 200 || response.statusCode == 204) {
-                                              ScaffoldMessenger.of(context)
+                                          },
+                                        ),
+                                      const SizedBox(height: 8),
+                                      InkWell(
+                                        onTap: () async {
+                                          final selectedLocation =
+                                              await Navigator.push(
+                                            scaffoldContext,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const AddLocationScreen(),
+                                            ),
+                                          );
+                                          if (selectedLocation != null) {
+                                            // Validate fields before sending to backend
+                                            final errors = <String>[];
+                                            final address = selectedLocation['address']?.toString().trim() ?? '';
+                                            final addressLabel = selectedLocation['addressLabel']?.toString().trim() ?? '';
+                                            final countryId = selectedLocation['countryId'];
+                                            final cityId = selectedLocation['cityId'];
+                                            final phone = selectedLocation['phone']?.toString().trim() ?? '';
+
+                                            // Address validation
+                                            if (address.isEmpty) {
+                                              errors.add('Address is required.');
+                                            }
+                                            if (addressLabel.isEmpty) {
+                                              errors.add('Address label is required.');
+                                            }
+                                            if (countryId == null || countryId.toString().isEmpty) {
+                                              errors.add('Country is required.');
+                                            }
+                                            if (cityId == null || cityId.toString().isEmpty) {
+                                              errors.add('State is required.');
+                                            }
+                                            if (phone.isEmpty) {
+                                              errors.add('Phone number is required.');
+                                            }
+
+                                            if (errors.isNotEmpty) {
+                                              showError(scaffoldContext, errors.join('\n'));
+                                              return;
+                                            }
+
+                                            // Optimistic UI update: add address to provider and trigger UI refresh
+                                            userProvider.addAddress(selectedLocation);
+                                            addressRefreshKey.value++;
+
+                                            final success = await postUserAddress(selectedLocation);
+                                            if (success) {
+                                              ScaffoldMessenger.of(scaffoldContext)
                                                   .showSnackBar(
                                                 const SnackBar(
                                                     content: Center(
                                                       child: Text(
-                                                          'Address deleted successfully!'),
+                                                          'Address added successfully!'),
                                                     )),
                                               );
-                                              // Always fetch the latest addresses from backend after deleting
-                                              final updatedAddresses = await fetchUserAddresses();
+                                              // Always fetch the latest addresses from backend after adding
+                                              final updatedAddresses =
+                                                  await fetchUserAddresses();
                                               userProvider.setAddresses(updatedAddresses);
                                               addressRefreshKey.value++;
                                             } else {
-                                              showError(
-                                                  context,
-                                                  'Failed to delete address.');
+                                              showError(scaffoldContext, 'Failed to save address.');
                                             }
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  const SizedBox(height: 8),
-                                  InkWell(
-                                    onTap: () async {
-                                      final selectedLocation =
-                                          await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const AddLocationScreen(),
+                                          }
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.grey.shade400),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: const Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.add,
+                                                color: primaryColor,
+                                                size: 22,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                'Add Location',
+                                                style: TextStyle(
+                                                  color: primaryColor,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      );
-                                      if (selectedLocation != null) {
-                                        // Validate fields before sending to backend
-                                        final errors = <String>[];
-                                        final address = selectedLocation['address']?.toString().trim() ?? '';
-                                        final addressLabel = selectedLocation['addressLabel']?.toString().trim() ?? '';
-                                        final countryId = selectedLocation['countryId'];
-                                        final cityId = selectedLocation['cityId'];
-                                        final phone = selectedLocation['phone']?.toString().trim() ?? '';
-
-                                        // Address validation
-                                        if (address.isEmpty) {
-                                          errors.add('Address is required.');
-                                        }
-                                        if (addressLabel.isEmpty) {
-                                          errors.add('Address label is required.');
-                                        }
-                                        if (countryId == null || countryId.toString().isEmpty) {
-                                          errors.add('Country is required.');
-                                        }
-                                        if (cityId == null || cityId.toString().isEmpty) {
-                                          errors.add('State is required.');
-                                        }
-                                        if (phone.isEmpty) {
-                                          errors.add('Phone number is required.');
-                                        }
-
-                                        if (errors.isNotEmpty) {
-                                          showError(context, errors.join('\n'));
-                                          return;
-                                        }
-
-                                        // Optimistic UI update: add address to provider and trigger UI refresh
-                                        userProvider.addAddress(selectedLocation);
-                                        addressRefreshKey.value++;
-
-                                        final success = await postUserAddress(selectedLocation);
-                                        if (success) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Center(
-                                                  child: Text(
-                                                      'Address added successfully!'),
-                                                )),
-                                          );
-                                          // Always fetch the latest addresses from backend after adding
-                                          final updatedAddresses =
-                                              await fetchUserAddresses();
-                                          userProvider.setAddresses(updatedAddresses);
-                                          addressRefreshKey.value++;
-                                        } else {
-                                          showError(context, 'Failed to save address.');
-                                        }
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Colors.grey.shade400),
-                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: const Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.add,
-                                            color: primaryColor,
-                                            size: 22,
-                                          ),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            'Add Location',
-                                            style: TextStyle(
-                                              color: primaryColor,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                    ],
+                                  );
+                                },
                               );
                             },
                           ),

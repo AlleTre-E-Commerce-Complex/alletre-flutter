@@ -251,7 +251,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                                   addressRefreshKey.value++;
                                 } else {
                                   showError(context,
-                                      'Failed to update address on backend.');
+                                      'Failed to update address.');
                                 }
                               }
                               _refreshAddresses();

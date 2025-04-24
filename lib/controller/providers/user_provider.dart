@@ -177,8 +177,9 @@ class UserProvider with ChangeNotifier {
 
   // Edit an address
   void editAddress(Map<String, dynamic> oldAddress, Map<String, dynamic> newAddress) {
-    // Use id for matching
     final id = oldAddress['id'];
+    debugPrint('[UserProvider] editAddress called with id: $id');
+    debugPrint('[UserProvider] Current addresses: $_addresses');
     final index = _addresses.indexWhere((a) => a['id'] == id);
     if (index != -1) {
       // Preserve the id in the new address
@@ -188,6 +189,8 @@ class UserProvider with ChangeNotifier {
         _defaultAddress = newAddress;
       }
       notifyListeners();
+    } else {
+      debugPrint('[UserProvider] No address found with id: $id');
     }
   }
 
