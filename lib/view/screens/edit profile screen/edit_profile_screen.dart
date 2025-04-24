@@ -305,7 +305,6 @@ class EditProfileScreen extends StatelessWidget {
                                 });
                               return Builder(
                                 builder: (context) {
-                                  final parentContext = context;
                                   return Column(
                                     children: [
                                       // List of Addresses
