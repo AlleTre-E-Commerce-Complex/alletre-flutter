@@ -23,7 +23,8 @@ import 'package:alletre_app/services/custom_fields_service.dart'; // Import Cust
 class ProductDetailsScreen extends StatelessWidget {
   final String title;
   final AuctionItem? draftAuction;
-  const ProductDetailsScreen({super.key, this.title = 'Create Auction', this.draftAuction});
+  const ProductDetailsScreen(
+      {super.key, this.title = 'Create Auction', this.draftAuction});
 
   @override
   Widget build(BuildContext context) {
@@ -41,18 +42,24 @@ class ProductDetailsScreen extends StatelessWidget {
         ValueNotifier<int?>(null); // Track selected cover photo
 
     // Dynamic Custom Fields State
-    final ValueNotifier<List<CustomField>> dynamicCustomFields = ValueNotifier([]);
+    final ValueNotifier<List<CustomField>> dynamicCustomFields =
+        ValueNotifier([]);
     final customFieldControllers = <String, TextEditingController>{};
     final customFieldDropdownValues = <String, ValueNotifier<String?>>{};
 
     // Fetch fields dynamically when category/subcategory changes
-    Future<void> fetchAndSetupCustomFields({int? categoryId, int? subCategoryId}) async {
+    Future<void> fetchAndSetupCustomFields(
+        {int? categoryId, int? subCategoryId}) async {
       List<CustomField> fields = [];
       if (subCategoryId != null) {
-        final categoryFields = await CustomFieldsService.getCustomFieldsBySubcategory(subCategoryId.toString());
+        final categoryFields =
+            await CustomFieldsService.getCustomFieldsBySubcategory(
+                subCategoryId.toString());
         fields = categoryFields.fields;
       } else if (categoryId != null) {
-        final categoryFields = await CustomFieldsService.getCustomFieldsByCategory(categoryId.toString());
+        final categoryFields =
+            await CustomFieldsService.getCustomFieldsByCategory(
+                categoryId.toString());
         fields = categoryFields.fields;
       }
       dynamicCustomFields.value = fields;
@@ -246,7 +253,8 @@ class ProductDetailsScreen extends StatelessWidget {
                       customFieldDropdownValues.clear();
 
                       // Fetch custom fields for the selected category
-                      fetchAndSetupCustomFields(categoryId: CategoryData.getCategoryId(value ?? ''));
+                      fetchAndSetupCustomFields(
+                          categoryId: CategoryData.getCategoryId(value ?? ''));
                     },
                     validator: CreateAuctionValidation.validateCategory,
                   );
@@ -256,13 +264,8 @@ class ProductDetailsScreen extends StatelessWidget {
               ValueListenableBuilder<String?>(
                 valueListenable: categoryController,
                 builder: (context, selectedCategory, child) {
-                  if (selectedCategory == null) {
-                    return const SizedBox(); // No subcategory dropdown if category not selected
-                  }
-
-                  // Hide subcategory dropdown if category is 'Cars'
-                  if (selectedCategory == "Cars") {
-                    return const SizedBox();
+                  if (selectedCategory == null || selectedCategory == 'Cars') {
+                    return const SizedBox.shrink(); // No subcategory dropdown if category not selected
                   }
 
                   return ValueListenableBuilder<String?>(
@@ -304,9 +307,10 @@ class ProductDetailsScreen extends StatelessWidget {
                             : [],
                         onChanged: (value) {
                           subCategoryController.value = value;
-
                           // Fetch custom fields for the selected subcategory
-                          fetchAndSetupCustomFields(subCategoryId: CategoryData.getSubCategoryId(selectedCategory, value ?? ''));
+                          fetchAndSetupCustomFields(
+                              subCategoryId: CategoryData.getSubCategoryId(
+                                  selectedCategory, value ?? ''));
                         },
                         validator: CreateAuctionValidation.validateSubCategory,
                       );
@@ -314,8 +318,15 @@ class ProductDetailsScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 16),
-
+              ValueListenableBuilder<String?>(
+                valueListenable: categoryController,
+                builder: (context, selectedCategory, _) {
+                  if (selectedCategory != 'Cars') {
+                    return const SizedBox(height: 16);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               // Dynamic Custom Fields
               ValueListenableBuilder<List<CustomField>>(
                 valueListenable: dynamicCustomFields,
@@ -323,31 +334,46 @@ class ProductDetailsScreen extends StatelessWidget {
                   // Display 2 fields per row using GridView
                   return GridView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 2.8, // Adjust for field height
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 4.5, // Adjust for field height
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12),
                     itemCount: fields.length,
                     itemBuilder: (context, index) {
                       final field = fields[index];
                       if (field.type == 'dropdown') {
                         return ValueListenableBuilder<String?>(
-                          valueListenable: customFieldDropdownValues[field.key]!,
+                          valueListenable:
+                              customFieldDropdownValues[field.key]!,
                           builder: (context, value, child) {
                             return DropdownButtonFormField<String>(
                               value: value,
-                              decoration: InputDecoration(labelText: field.labelEn.isNotEmpty ? field.labelEn : field.key),
-                              items: field.options?.map((option) => DropdownMenuItem(
-                                value: option,
-                                child: Text(option),
-                              )).toList(),
+                              decoration: InputDecoration(
+                                labelText: field.labelEn.isNotEmpty
+                                    ? field.labelEn
+                                    : field.key,
+                                labelStyle: const TextStyle(
+                                    fontSize: 12), // smaller label
+                              ),
+                              items: field.options
+                                  ?.map((option) => DropdownMenuItem(
+                                        value: option,
+                                        child: Text(option,
+                                            style: const TextStyle(
+                                                fontSize:
+                                                    12)), // smaller dropdown text
+                                      ))
+                                  .toList(),
                               onChanged: (newValue) {
-                                customFieldDropdownValues[field.key]!.value = newValue;
+                                customFieldDropdownValues[field.key]!.value =
+                                    newValue;
                               },
-                              validator: field.isRequired ? (v) => v == null ? 'Required' : null : null,
+                              validator: field.isRequired
+                                  ? (v) => v == null ? 'Required' : null
+                                  : null,
                             );
                           },
                         );
@@ -355,16 +381,32 @@ class ProductDetailsScreen extends StatelessWidget {
                         final controller = customFieldControllers[field.key]!;
                         return TextFormField(
                           controller: controller,
-                          decoration: InputDecoration(labelText: field.labelEn.isNotEmpty ? field.labelEn : field.key),
-                          keyboardType: field.type == 'number' ? TextInputType.number : TextInputType.text,
-                          validator: field.isRequired ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
+                          decoration: InputDecoration(
+                            labelText: field.labelEn.isNotEmpty
+                                ? field.labelEn
+                                : field.key,
+                            labelStyle:
+                                const TextStyle(fontSize: 12), // smaller label
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 12),
+                          ),
+                          style: const TextStyle(
+                              fontSize: 12), // smaller input text
+                          showCursor: false,
+                          keyboardType: field.type == 'number'
+                              ? TextInputType.number
+                              : TextInputType.text,
+                          validator: field.isRequired
+                              ? (v) =>
+                                  (v == null || v.isEmpty) ? 'Required' : null
+                              : null,
                         );
                       }
                     },
                   );
                 },
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 16),
 
               TextFormField(
                 controller: descriptionController,
@@ -720,20 +762,25 @@ class ProductDetailsScreen extends StatelessWidget {
                                   customFieldDropdownValues[field.key]?.value;
                             } else {
                               customFields[field.key] =
-                                  customFieldControllers[field.key]?.text.trim();
+                                  customFieldControllers[field.key]
+                                      ?.text
+                                      .trim();
                             }
                           }
 
                           // Validate required fields using API data
                           for (final field in dynamicCustomFields.value) {
-                            if (field.isRequired && customFields[field.key] == null) {
-                              showError(context, 'Please fill in all required fields');
+                            if (field.isRequired &&
+                                customFields[field.key] == null) {
+                              showError(context,
+                                  'Please fill in all required fields');
                               return;
                             }
                           }
 
                           // Debug log the product structure
-                          debugPrint('Preparing to save draft with the following datas:');
+                          debugPrint(
+                              'Preparing to save draft with the following datas:');
                           debugPrint(json.encode(productData));
 
                           // Get image files from media
@@ -744,41 +791,64 @@ class ProductDetailsScreen extends StatelessWidget {
                               auctionData: productData, images: imageFiles);
                           if (result['success'] == true) {
                             // Fetch full draft details from backend
-                            final details = await AuctionDetailsService.getAuctionDetails(result['data']['id'].toString());
-                            if (details['success'] == true && details['data'] != null) {
-                              final AuctionItem fetchedDraft = AuctionItem.fromJson(details['data']);
+                            final details =
+                                await AuctionDetailsService.getAuctionDetails(
+                                    result['data']['id'].toString());
+                            if (details['success'] == true &&
+                                details['data'] != null) {
+                              final AuctionItem fetchedDraft =
+                                  AuctionItem.fromJson(details['data']);
                               debugPrint('--- CONTINUE BUTTON PRESSED ---');
                               debugPrint('AuctionItem fields after fetch:');
                               debugPrint('id: ${fetchedDraft.id}');
                               debugPrint('productId: ${fetchedDraft.productId}');
                               debugPrint('title: ${fetchedDraft.title}');
-                              debugPrint('description: ${fetchedDraft.description}');
-                              debugPrint('categoryId: ${fetchedDraft.categoryId}');
-                              debugPrint('subCategoryId: ${fetchedDraft.subCategoryId}');
-                              debugPrint('categoryName: ${fetchedDraft.categoryName}');
-                              debugPrint('subCategoryName: ${fetchedDraft.subCategoryName}');
-                              debugPrint('usageStatus: ${fetchedDraft.usageStatus}');
+                              debugPrint(
+                                  'description: ${fetchedDraft.description}');
+                              debugPrint(
+                                  'categoryId: ${fetchedDraft.categoryId}');
+                              debugPrint(
+                                  'subCategoryId: ${fetchedDraft.subCategoryId}');
+                              debugPrint(
+                                  'categoryName: ${fetchedDraft.categoryName}');
+                              debugPrint(
+                                  'subCategoryName: ${fetchedDraft.subCategoryName}');
+                              debugPrint(
+                                  'usageStatus: ${fetchedDraft.usageStatus}');
                               debugPrint('status: ${fetchedDraft.status}');
-                              debugPrint('imageLinks: ${fetchedDraft.imageLinks}');
-                              debugPrint('createdAt: ${fetchedDraft.createdAt}');
+                              debugPrint(
+                                  'imageLinks: ${fetchedDraft.imageLinks}');
+                              debugPrint(
+                                  'createdAt: ${fetchedDraft.createdAt}');
                               debugPrint('price: ${fetchedDraft.price}');
-                              debugPrint('productListingPrice: ${fetchedDraft.productListingPrice}');
-                              debugPrint('startBidAmount: ${fetchedDraft.startBidAmount}');
-                              debugPrint('currentBid: ${fetchedDraft.currentBid}');
-                              debugPrint('buyNowPrice: ${fetchedDraft.buyNowPrice}');
-                              debugPrint('startDate: ${fetchedDraft.startDate}');
-                              debugPrint('expiryDate: ${fetchedDraft.expiryDate}');
+                              debugPrint(
+                                  'productListingPrice: ${fetchedDraft.productListingPrice}');
+                              debugPrint(
+                                  'startBidAmount: ${fetchedDraft.startBidAmount}');
+                              debugPrint(
+                                  'currentBid: ${fetchedDraft.currentBid}');
+                              debugPrint(
+                                  'buyNowPrice: ${fetchedDraft.buyNowPrice}');
+                              debugPrint(
+                                  'startDate: ${fetchedDraft.startDate}');
+                              debugPrint(
+                                  'expiryDate: ${fetchedDraft.expiryDate}');
                               debugPrint('endDate: ${fetchedDraft.endDate}');
                               debugPrint('type: ${fetchedDraft.type}');
-                              debugPrint('itemLocation: ${fetchedDraft.itemLocation}');
+                              debugPrint(
+                                  'itemLocation: ${fetchedDraft.itemLocation}');
                               debugPrint('bids: ${fetchedDraft.bids}');
-                              debugPrint('buyNowEnabled: ${fetchedDraft.buyNowEnabled}');
+                              debugPrint(
+                                  'buyNowEnabled: ${fetchedDraft.buyNowEnabled}');
                               debugPrint('userName: ${fetchedDraft.userName}');
                               debugPrint('phone: ${fetchedDraft.phone}');
-                              debugPrint('customFields: ${fetchedDraft.customFields}');
+                              debugPrint(
+                                  'customFields: ${fetchedDraft.customFields}');
                               debugPrint('-----------------------------------');
                               // Get user from provider
-                              final user = Provider.of<UserProvider>(context, listen: false).user;
+                              final user = Provider.of<UserProvider>(context,
+                                      listen: false)
+                                  .user;
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                   builder: (context) => DraftsPage(
@@ -790,15 +860,19 @@ class ProductDetailsScreen extends StatelessWidget {
                             } else {
                               // Fallback: show error or fallback to previous logic
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Failed to fetch full draft details.')),
+                                const SnackBar(
+                                    content: Text(
+                                        'Failed to fetch full draft details.')),
                               );
                             }
                           } else {
                             String errorMessage;
                             if (result['message'] is List) {
-                              errorMessage = (result['message'] as List).join('\n');
+                              errorMessage =
+                                  (result['message'] as List).join('\n');
                             } else {
-                              errorMessage = result['message']?.toString() ?? 'Failed to save draft.';
+                              errorMessage = result['message']?.toString() ??
+                                  'Failed to save draft.';
                             }
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -852,14 +926,18 @@ class ProductDetailsScreen extends StatelessWidget {
                                   customFieldDropdownValues[field.key]?.value;
                             } else {
                               customFields[field.key] =
-                                  customFieldControllers[field.key]?.text.trim();
+                                  customFieldControllers[field.key]
+                                      ?.text
+                                      .trim();
                             }
                           }
 
                           // Validate required fields using API data
                           for (final field in dynamicCustomFields.value) {
-                            if (field.isRequired && customFields[field.key] == null) {
-                              showError(context, 'Please fill in all required fields');
+                            if (field.isRequired &&
+                                customFields[field.key] == null) {
+                              showError(context,
+                                  'Please fill in all required fields');
                               return;
                             }
                           }
