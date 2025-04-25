@@ -152,6 +152,14 @@ class AuctionService {
           cleanProduct['ramSize'] =
               int.parse(cleanProduct['ramSize'].toString());
         }
+        if (cleanProduct['memory'] != null) {
+          cleanProduct['memory'] =
+              int.parse(cleanProduct['memory'].toString());
+        }
+        if (cleanProduct['age'] != null) {
+          cleanProduct['age'] =
+              int.parse(cleanProduct['age'].toString());
+        }
 
         // Validate required fields
         if (!cleanProduct.containsKey('title') ||
@@ -233,6 +241,19 @@ class AuctionService {
         shipping.forEach((key, value) {
           request.fields['shippingDetails[$key]'] = value.toString();
         });
+      }
+
+      // Debug: print all request fields before sending
+      debugPrint('Request fields being sent to backend:');
+      request.fields.forEach((key, value) {
+        debugPrint('  $key: $value (type: \'${value.runtimeType}\')');
+      });
+      // Double-check required fields
+      final requiredFields = ['title', 'description', 'categoryId'];
+      for (final field in requiredFields) {
+        if (!request.fields.containsKey(field) || request.fields[field]!.trim().isEmpty) {
+          debugPrint('ERROR: Required field "$field" is missing or empty!');
+        }
       }
 
       // Add media files (images and videos)
@@ -497,6 +518,19 @@ class AuctionService {
         });
       }
 
+      // Debug: print all request fields before sending
+      debugPrint('Request fields being sent to backend:');
+      request.fields.forEach((key, value) {
+        debugPrint('  $key: $value (type: \'${value.runtimeType}\')');
+      });
+      // Double-check required fields
+      final requiredFields = ['title', 'description', 'categoryId'];
+      for (final field in requiredFields) {
+        if (!request.fields.containsKey(field) || request.fields[field]!.trim().isEmpty) {
+          debugPrint('ERROR: Required field "$field" is missing or empty!');
+        }
+      }
+
       // Add media files (images and videos)
       debugPrint('Adding ${images.length} media files...');
 
@@ -620,6 +654,124 @@ class AuctionService {
       debugPrint('Error creating auction: $e');
       debugPrint('Stack trace: $stackTrace');
       rethrow;
+    }
+  }
+
+  // Save auction as draft
+  Future<Map<String, dynamic>> saveDraft({
+    required Map<String, dynamic> auctionData,
+    required List<File> images,
+    // required int locationId,
+  }) async {
+    try {
+      debugPrint('Starting save draft...');
+      String? accessToken = await _getAccessToken();
+
+      if (accessToken == null) {
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+        } else {
+          throw Exception('Failed to get valid access token');
+        }
+      }
+
+      debugPrint('Token acquired, preparing draft request...');
+      // If there are images, use multipart, else send JSON
+      if (images.isNotEmpty) {
+        // Use multipart for images
+        final request = http.MultipartRequest(
+          'POST',
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/save-draft'),
+        );
+
+        // Set headers
+        request.headers.addAll({
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        });
+
+        // Add all product fields at the top level (not nested under 'product')
+        auctionData.forEach((key, value) {
+          if (value != null) {
+            request.fields[key] = value.toString();
+          }
+        });
+        // Debug: print all request fields before sending
+        debugPrint('Request fields being sent to backend:');
+        request.fields.forEach((key, value) {
+          debugPrint('  $key: $value (type: \'${value.runtimeType}\')');
+        });
+        // Double-check required fields
+        final requiredFields = ['title', 'description', 'categoryId'];
+        for (final field in requiredFields) {
+          if (!request.fields.containsKey(field) || request.fields[field]!.trim().isEmpty) {
+            debugPrint('ERROR: Required field "$field" is missing or empty!');
+          }
+        }
+
+        // Add media files (images and videos)
+        debugPrint('Adding ${images.length} media files to draft...');
+        for (var i = 0; i < images.length; i++) {
+          final file = images[i];
+          final fileName = file.path.split('/').last;
+          final isVideo = fileName.toLowerCase().endsWith('.mp4') || fileName.toLowerCase().endsWith('.mov');
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              isVideo ? 'videos' : 'images',
+              file.path,
+              contentType: isVideo
+                  ? MediaType('video', 'mp4')
+                  : MediaType('image', 'jpeg'),
+            ),
+          );
+        }
+
+        // Send request
+        final streamedResponse = await request.send();
+        final response = await http.Response.fromStream(streamedResponse);
+        debugPrint('Save draft response status: ${response.statusCode}');
+        debugPrint('Save draft response body: ${response.body}');
+
+        final data = json.decode(response.body);
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          return {'success': true, 'data': data['data']};
+        } else {
+          return {
+            'success': false,
+            'message': data['message'] ?? 'Failed to save draft',
+          };
+        }
+      } else {
+        // No images: send as JSON
+        final response = await http.post(
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/save-draft'),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode(auctionData),
+        );
+        debugPrint('Save draft response status: ${response.statusCode}');
+        debugPrint('Save draft response body: ${response.body}');
+        final data = json.decode(response.body);
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          return {'success': true, 'data': data['data']};
+        } else {
+          return {
+            'success': false,
+            'message': data['message'] ?? 'Failed to save draft',
+          };
+        }
+      }
+    } catch (e) {
+      debugPrint('Error saving draft: $e');
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
     }
   }
 

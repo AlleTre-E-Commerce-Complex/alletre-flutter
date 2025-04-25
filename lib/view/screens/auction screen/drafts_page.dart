@@ -17,6 +17,30 @@ class DraftsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Print the backend values for each field for debugging
+    debugPrint('--- DraftAuction Backend Data ---');
+    debugPrint('id: ${draftAuction.id}');
+    debugPrint('productId: ${draftAuction.productId}');
+    debugPrint('title: ${draftAuction.title}');
+    debugPrint('description: ${draftAuction.description}');
+    debugPrint('categoryId: ${draftAuction.categoryId}');
+    debugPrint('subCategoryId: ${draftAuction.subCategoryId}');
+    debugPrint('categoryName: ${draftAuction.categoryName}');
+    debugPrint('subCategoryName: ${draftAuction.subCategoryName}');
+    debugPrint('usageStatus: ${draftAuction.usageStatus}');
+    final productMap = draftAuction.product;
+    final customFieldsObj = draftAuction.customFields;
+    debugPrint('brand: ${productMap != null ? productMap['brand'] : 'N/A'}');
+    debugPrint('model: ${productMap != null ? productMap['model'] : 'N/A'}');
+    debugPrint('status: ${draftAuction.status}');
+    debugPrint('imageLinks: ${draftAuction.imageLinks}');
+    debugPrint('createdAt: ${draftAuction.createdAt}');
+    debugPrint('userId: ${productMap != null ? productMap['userId'] : draftAuction.toJson()['userId'] ?? 'N/A'}');
+    debugPrint('locationId: ${draftAuction.itemLocation?.id}');
+    debugPrint('product: $productMap');
+    debugPrint('customFields: $customFieldsObj');
+    debugPrint('------------------------------');
+
     final List<AuctionItem> draftAuctions = [draftAuction];
     return Scaffold(
       appBar: AppBar(

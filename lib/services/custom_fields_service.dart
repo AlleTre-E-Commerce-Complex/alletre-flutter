@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:alletre_app/model/custom_field_model.dart';
 
 class CustomFieldsService {
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'http://alletre.com/api';
 
   // Get all system fields
   static Future<CategoryFields> getSystemFields() async {
@@ -63,9 +63,64 @@ class CustomFieldsService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true && data['data'] != null) {
-          final fields = CategoryFields.fromJson(data);
-          print('✅ Successfully parsed category custom fields');
-          return fields;
+          final Map<String, dynamic> fieldsData = data['data'];
+          final List<Map<String, dynamic>> fields = [];
+
+          // Process array custom fields
+          if (fieldsData['arrayCustomFields'] != null) {
+            final arrayFields = fieldsData['arrayCustomFields'] as List<dynamic>;
+            for (var field in arrayFields) {
+              final fieldMap = field as Map<String, dynamic>;
+              fields.add({
+                ...fieldMap,
+                'type': 'array',
+                'isArray': true,
+              });
+            }
+          }
+
+          // Process regular custom fields
+          if (fieldsData['regularCustomFields'] != null) {
+            final regularFields = fieldsData['regularCustomFields'] as List<dynamic>;
+            for (var field in regularFields) {
+              final fieldMap = field as Map<String, dynamic>;
+              String type = fieldMap['type'] ?? 'text';
+              final key = fieldMap['key'] as String;
+              // Determine correct type based on field key
+              switch (key) {
+                case 'screenSize':
+                case 'memory':
+                case 'releaseYear':
+                  type = 'number';
+                  break;
+                case 'operatingSystem':
+                case 'regionOfManufacture':
+                case 'brandId':
+                case 'model':
+                  type = 'text';
+                  break;
+              }
+              fields.add({
+                ...fieldMap,
+                'type': type,
+                'isArray': false,
+              });
+            }
+          }
+
+          // Always add 'model' field if present in response (not in arrays or regulars)
+          if (fieldsData['model'] != null) {
+            final modelField = fieldsData['model'] as Map<String, dynamic>;
+            fields.add({
+              ...modelField,
+              'type': modelField['type'] ?? 'text',
+              'isArray': false,
+            });
+          }
+
+          final categoryFields = CategoryFields.fromJson({'data': fields});
+          print('✅ Successfully created CategoryFields');
+          return categoryFields;
         }
       }
 
@@ -113,7 +168,6 @@ class CustomFieldsService {
               final fieldMap = field as Map<String, dynamic>;
               String type = fieldMap['type'] ?? 'text';
               final key = fieldMap['key'] as String;
-              
               // Determine correct type based on field key
               switch (key) {
                 case 'screenSize':
@@ -128,13 +182,38 @@ class CustomFieldsService {
                   type = 'text';
                   break;
               }
-
               fields.add({
                 ...fieldMap,
                 'type': type,
                 'isArray': false,
               });
             }
+          }
+
+          // Always add 'model' field if present in response (not in arrays or regulars)
+          if (fieldsData['model'] != null) {
+            final modelField = fieldsData['model'] as Map<String, dynamic>;
+            fields.add({
+              ...modelField,
+              'type': modelField['type'] ?? 'text',
+              'isArray': false,
+            });
+          }
+
+          // Always add 'brand' field for Home Appliances (subCategoryId == 1 or 16-20) if not present
+          final brandSubcategoryIds = ['1', '16', '17', '18', '19', '20'];
+          if (brandSubcategoryIds.contains(subCategoryId) && !fields.any((f) => (f['key'] == 'brand' || f['resKey'] == 'brand'))) {
+            fields.add({
+              'id': -1,
+              'subCategoryId': int.tryParse(subCategoryId) ?? -1,
+              'key': 'brand',
+              'resKey': 'brand',
+              'type': 'text',
+              'labelAr': 'ماركة',
+              'labelEn': 'Brand',
+              'isArray': false,
+              'isRequired': true
+            });
           }
 
           final categoryFields = CategoryFields.fromJson({'data': fields});

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
 import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/model/custom_field_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/create_auction_validators.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +14,11 @@ import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/home widgets/categories widgets/categories_data.dart';
 import 'auction_details_screen.dart';
 import 'shipping_details_screen.dart';
-import 'drafts_page.dart';
 import 'package:alletre_app/utils/ui_helpers.dart';
+import 'package:alletre_app/controller/helpers/auction_service.dart';
+import 'drafts_page.dart'; // Import DraftsPage
+import 'package:alletre_app/controller/services/auction_details_service.dart'; // Correct import for AuctionDetailsService
+import 'package:alletre_app/services/custom_fields_service.dart'; // Import CustomFieldsService
 
 class ProductDetailsScreen extends StatelessWidget {
   final String title;
@@ -23,9 +27,6 @@ class ProductDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Obtain the current user from Provider
-    final user = Provider.of<UserProvider>(context, listen: false).user;
-
     // Add a ValueNotifier to track whether the form has been submitted
     final isSubmitted = ValueNotifier<bool>(false);
     final formKey = GlobalKey<FormState>();
@@ -39,9 +40,31 @@ class ProductDetailsScreen extends StatelessWidget {
     final coverPhotoIndex =
         ValueNotifier<int?>(null); // Track selected cover photo
 
-    // Map to store the custom field controllers and dropdown values
+    // Dynamic Custom Fields State
+    final ValueNotifier<List<CustomField>> dynamicCustomFields = ValueNotifier([]);
     final customFieldControllers = <String, TextEditingController>{};
     final customFieldDropdownValues = <String, ValueNotifier<String?>>{};
+
+    // Fetch fields dynamically when category/subcategory changes
+    Future<void> fetchAndSetupCustomFields({int? categoryId, int? subCategoryId}) async {
+      List<CustomField> fields = [];
+      if (subCategoryId != null) {
+        final categoryFields = await CustomFieldsService.getCustomFieldsBySubcategory(subCategoryId.toString());
+        fields = categoryFields.fields;
+      } else if (categoryId != null) {
+        final categoryFields = await CustomFieldsService.getCustomFieldsByCategory(categoryId.toString());
+        fields = categoryFields.fields;
+      }
+      dynamicCustomFields.value = fields;
+      // Setup controllers/notifiers for each field
+      for (final field in fields) {
+        if (field.type == 'dropdown') {
+          customFieldDropdownValues[field.key] = ValueNotifier<String?>(null);
+        } else {
+          customFieldControllers[field.key] = TextEditingController();
+        }
+      }
+    }
 
     // If draftAuction is provided, pre-fill controllers
     if (draftAuction != null) {
@@ -72,252 +95,6 @@ class ProductDetailsScreen extends StatelessWidget {
 
     // Define consistent label text style
     const labelTextStyle = TextStyle(fontSize: 14);
-
-    // Define color options for dropdown
-    final List<String> colorOptions = [
-      'White',
-      'Black',
-      'Blue',
-      'Red',
-      'Green',
-      'Yellow',
-      'Orange',
-      'Purple',
-      'Brown',
-      'Pink',
-      'Cyan',
-      'Grey',
-      'Silver',
-      'Bronze',
-      'Golden',
-      'Pearl',
-      'Matte Black',
-      'Champagne',
-      'Other color',
-      'Multi color'
-    ];
-
-    // Define camera type options for dropdown
-    final List<String> cameraTypeOptions = [
-      'Digital',
-      'Compact',
-      'Mirrorless Interchangeable Lens',
-      'DSLR',
-      'Action Camera',
-      'Instant Camera',
-      '360 Camera',
-      'Other'
-    ];
-
-    // Define memory options for dropdown
-    final List<String> memoryOptions = [
-      '4GB',
-      '8GB',
-      '16GB',
-      '32GB',
-      '64GB',
-      '128GB',
-      '256GB',
-      '512GB',
-      '1TB',
-      '2TB'
-    ];
-
-    // Define material options for dropdown
-    final List<String> materialOptions = [
-      'ABS',
-      'Plastic',
-      'Metal',
-      'Silicon',
-      'Glass',
-      'Wood',
-      'Carbon Fiber',
-      'Leather',
-      'Other'
-    ];
-
-    // Define country options for dropdown
-    final List<String> countryOptions = ['United Arab Emirates'];
-
-    // Define city options for dropdown
-    final List<String> cityOptions = [
-      'Abu Dhabi',
-      'Ajman',
-      'Dubai',
-      'Fujairah',
-      'Ras al Khaimah',
-      'Sharjah',
-      'Umm al Quwain'
-    ];
-
-    final List<String> carType = [
-      'Micro Cars, Hatchback',
-      'Sedan',
-      'SUV',
-      'MPV',
-      'Coupe',
-      'Convertible',
-      'Wagon',
-      'Luxury'
-    ];
-
-    // Define subcategory custom fields mapping
-    Map<String, dynamic> getSubCategoryFields(String? subCategory) {
-      if (subCategory == null) return {};
-
-      switch (subCategory) {
-        case "Cars":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Brand": {"type": "text"},
-            "Model": {"type": "text"},
-          };
-        case "Computers & tablets":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Screen Size": {"type": "number"},
-            "Operating System": {"type": "text"},
-            "Release Year": {"type": "number"},
-            "Region of Manufacture": {"type": "text"},
-            "RAM Size": {"type": "number"},
-            "Processor": {"type": "text"},
-            "Graphics Card": {"type": "text"},
-            "Brand": {"type": "text"},
-            "Model": {"type": "text"},
-          };
-        case "Cameras & photos":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Camera Type": {"type": "dropdown", "options": cameraTypeOptions},
-            "Release Year": {"type": "number"},
-            "Region of Manufacture": {"type": "text"},
-            "Brand": {"type": "text"},
-            "Model": {"type": "text"},
-          };
-        case "Smart Phones":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Memory": {"type": "dropdown", "options": memoryOptions},
-            "Screen Size": {"type": "number"},
-            "Operating System": {"type": "text"},
-            "Release Year": {"type": "number"},
-            "Region of Manufacture": {"type": "text"},
-            "Brand": {"type": "text"},
-            "Model": {"type": "text"},
-          };
-        case "Accessories":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Material": {"type": "dropdown", "options": materialOptions},
-            "Type": {"type": "text"},
-            "Brand": {"type": "text"},
-            "Model": {"type": "text"},
-          };
-        case "TVs & Audios":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Screen Size": {"type": "number"},
-            "Release Year": {"type": "number"},
-            "Region of Manufacture": {"type": "text"},
-            "Brand": {"type": "text"},
-            "Model": {"type": "text"},
-          };
-        case "Home Appliances":
-          return {
-            "Age": {"type": "number"},
-            "Brand": {"type": "text"},
-            "Model": {"type": "text"},
-          };
-        case "Gold":
-        case "Diamond":
-        case "Silver":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Brand": {"type": "text"},
-            "Model": {"type": "text"},
-          };
-        case "House":
-        case "Townhouse":
-        case "Villa":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Country": {
-              "type": "dropdown",
-              "options": countryOptions,
-              "textStyle": const TextStyle(
-                  fontSize: 10,
-                  color: onSecondaryColor,
-                  fontWeight: FontWeight.w500)
-            },
-            "City": {"type": "dropdown", "options": cityOptions},
-            "Age": {"type": "number"},
-            "Number of Rooms": {"type": "number"},
-            "Total Area (Sq Ft)": {"type": "number"},
-            "Number of Floors": {"type": "number"},
-          };
-        case "Unit":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Country": {"type": "dropdown", "options": countryOptions},
-            "City": {"type": "dropdown", "options": cityOptions},
-            "Age": {"type": "number"},
-            "Number of Rooms": {"type": "number"},
-            "Total Area (Sq Ft)": {"type": "number"},
-          };
-        case "Land":
-          return {
-            "Country": {"type": "dropdown", "options": countryOptions},
-            "City": {"type": "dropdown", "options": cityOptions},
-            "Land Type": {"type": "text"},
-            "Total Area (Sq Ft)": {"type": "number"},
-          };
-        case "Office":
-          return {
-            "Color": {"type": "dropdown", "options": colorOptions},
-            "Country": {"type": "dropdown", "options": countryOptions},
-            "City": {"type": "dropdown", "options": cityOptions},
-            "Age": {"type": "number"},
-            "Number of Rooms": {"type": "number"},
-            "Total Area (Sq Ft)": {"type": "number"},
-          };
-        case "Table and chairs":
-        case "Cupboards and Beds":
-        case "Paintings":
-        case "Currency":
-        case "Others":
-          return {
-            "Material": {"type": "text"},
-            "Brand": {"type": "text"},
-          };
-        default:
-          return {};
-      }
-    }
-
-    // Function to initialize custom field controllers and dropdown values
-    void initializeCustomFieldControllers(String? subCategory) {
-      if (subCategory == null) return;
-
-      // Clear existing controllers and dropdown values
-      customFieldControllers.forEach((key, controller) {
-        controller.clear();
-      });
-      customFieldControllers.clear();
-      customFieldDropdownValues.clear();
-
-      final fields = categoryController.value == "Cars"
-          ? getSubCategoryFields("Cars")
-          : getSubCategoryFields(subCategory);
-
-      // Create new controllers and dropdown values
-      fields.forEach((key, value) {
-        if (value["type"] == "text") {
-          customFieldControllers[key] = TextEditingController();
-        } else if (value["type"] == "dropdown") {
-          customFieldDropdownValues[key] = ValueNotifier<String?>(null);
-        }
-      });
-    }
 
     Future<bool> validateForm() async {
       if (!formKey.currentState!.validate()) {
@@ -467,6 +244,9 @@ class ProductDetailsScreen extends StatelessWidget {
                       });
                       customFieldControllers.clear();
                       customFieldDropdownValues.clear();
+
+                      // Fetch custom fields for the selected category
+                      fetchAndSetupCustomFields(categoryId: CategoryData.getCategoryId(value ?? ''));
                     },
                     validator: CreateAuctionValidation.validateCategory,
                   );
@@ -480,49 +260,11 @@ class ProductDetailsScreen extends StatelessWidget {
                     return const SizedBox(); // No subcategory dropdown if category not selected
                   }
 
+                  // Hide subcategory dropdown if category is 'Cars'
                   if (selectedCategory == "Cars") {
-                    return ValueListenableBuilder<String?>(
-                      valueListenable: subCategoryController,
-                      builder: (context, selectedSubCategory, child) {
-                        return DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
-                            labelText: "Car Type",
-                            labelStyle: labelTextStyle,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: errorColor),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: errorColor),
-                            ),
-                          ),
-                          value: selectedSubCategory,
-                          items: carType.map((type) {
-                            return DropdownMenuItem(
-                              value: type,
-                              child: Text(
-                                type,
-                                style: const TextStyle(
-                                  color: onSecondaryColor,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            subCategoryController.value = value;
-                          },
-                          validator:
-                              CreateAuctionValidation.validateSubCategory,
-                        );
-                      },
-                    );
+                    return const SizedBox();
                   }
+
                   return ValueListenableBuilder<String?>(
                     valueListenable: subCategoryController,
                     builder: (context, selectedSubCategory, child) {
@@ -562,8 +304,9 @@ class ProductDetailsScreen extends StatelessWidget {
                             : [],
                         onChanged: (value) {
                           subCategoryController.value = value;
-                          // Initialize controllers for this subcategory
-                          initializeCustomFieldControllers(value);
+
+                          // Fetch custom fields for the selected subcategory
+                          fetchAndSetupCustomFields(subCategoryId: CategoryData.getSubCategoryId(selectedCategory, value ?? ''));
                         },
                         validator: CreateAuctionValidation.validateSubCategory,
                       );
@@ -573,200 +316,50 @@ class ProductDetailsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Dynamic Custom Fields based on selected subcategory
-              ValueListenableBuilder<String?>(
-                valueListenable: subCategoryController,
-                builder: (context, selectedSubCategory, child) {
-                  if (selectedSubCategory == null) {
-                    return const SizedBox();
-                  }
-
-                  final fields = categoryController.value == "Cars"
-                      ? getSubCategoryFields("Cars")
-                      : getSubCategoryFields(selectedSubCategory);
-
-                  if (fields.isEmpty) {
-                    return const SizedBox();
-                  }
-
-                  // Get required fields map
-                  final requiredFields =
-                      CreateAuctionValidation.getRequiredFields(
-                          selectedSubCategory);
-
-                  // Ensure all fields have controllers or dropdown values
-                  fields.forEach((key, value) {
-                    if (value["type"] == "text" &&
-                        !customFieldControllers.containsKey(key)) {
-                      customFieldControllers[key] = TextEditingController();
-                    } else if (value["type"] == "dropdown" &&
-                        !customFieldDropdownValues.containsKey(key)) {
-                      customFieldDropdownValues[key] =
-                          ValueNotifier<String?>(null);
-                    }
-                  });
-
+              // Dynamic Custom Fields
+              ValueListenableBuilder<List<CustomField>>(
+                valueListenable: dynamicCustomFields,
+                builder: (context, fields, child) {
+                  // Display 2 fields per row using GridView
                   return GridView.builder(
-                    key: ValueKey('grid-$selectedSubCategory'),
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 3,
-                      mainAxisExtent:
-                          60, // Slightly increased to ensure error messages are visible
+                      childAspectRatio: 2.8, // Adjust for field height
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
                     ),
                     itemCount: fields.length,
                     itemBuilder: (context, index) {
-                      final fieldName = fields.keys.elementAt(index);
-                      final fieldValue = fields[fieldName];
-                      final isRequired = requiredFields[fieldName] ?? false;
-
-                      if (fieldValue["type"] == "text") {
-                        return TextFormField(
-                          controller: customFieldControllers[fieldName],
-                          decoration: InputDecoration(
-                            labelText: fieldName,
-                            labelStyle: const TextStyle(fontSize: 12),
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 11),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: errorColor),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: errorColor),
-                            ),
-                            errorStyle: const TextStyle(
-                              fontSize: 9,
-                              height: 0.7,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          style: const TextStyle(fontSize: 12),
-                          validator: (value) {
-                            // if (fieldName == 'Model') {
-                            //   return CreateAuctionValidation.validateModel(
-                            //       value);
-                            // }
-                            return CreateAuctionValidation.validateCustomField(
-                              fieldName,
-                              value,
-                              'text',
-                              isRequired: isRequired,
-                            );
-                          },
-                        );
-                      } else if (fieldValue["type"] == "number") {
-                        return TextFormField(
-                          controller: customFieldControllers[fieldName],
-                          decoration: InputDecoration(
-                            labelText: fieldName,
-                            labelStyle: const TextStyle(fontSize: 12),
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 8),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: errorColor),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: errorColor),
-                            ),
-                            errorStyle: const TextStyle(
-                              fontSize: 9,
-                              height: 0.7,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) =>
-                              CreateAuctionValidation.validateCustomField(
-                            fieldName,
-                            value,
-                            'number',
-                            isRequired: isRequired,
-                          ),
-                        );
-                      } else if (fieldValue["type"] == "dropdown") {
+                      final field = fields[index];
+                      if (field.type == 'dropdown') {
                         return ValueListenableBuilder<String?>(
-                          valueListenable:
-                              customFieldDropdownValues[fieldName]!,
-                          builder: (context, selectedValue, child) {
+                          valueListenable: customFieldDropdownValues[field.key]!,
+                          builder: (context, value, child) {
                             return DropdownButtonFormField<String>(
-                              decoration: InputDecoration(
-                                labelText: fieldName,
-                                labelStyle: const TextStyle(fontSize: 12),
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 8),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                errorBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide:
-                                      const BorderSide(color: errorColor),
-                                ),
-                                focusedErrorBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide:
-                                      const BorderSide(color: errorColor),
-                                ),
-                                errorStyle: const TextStyle(
-                                  fontSize: 9,
-                                  height: 0.7,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              value: selectedValue,
-                              items: fieldValue["options"]
-                                  .map<DropdownMenuItem<String>>((option) {
-                                return DropdownMenuItem<String>(
-                                  value: option,
-                                  child: Text(
-                                    option,
-                                    style: (fieldValue["textStyle"]
-                                            as TextStyle?) ??
-                                        const TextStyle(
-                                          color: onSecondaryColor,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                customFieldDropdownValues[fieldName]!.value =
-                                    value;
+                              value: value,
+                              decoration: InputDecoration(labelText: field.labelEn.isNotEmpty ? field.labelEn : field.key),
+                              items: field.options?.map((option) => DropdownMenuItem(
+                                value: option,
+                                child: Text(option),
+                              )).toList(),
+                              onChanged: (newValue) {
+                                customFieldDropdownValues[field.key]!.value = newValue;
                               },
-                              validator: (value) {
-                                return CreateAuctionValidation
-                                    .validateCustomField(
-                                  fieldName,
-                                  value,
-                                  'select',
-                                  isRequired: isRequired,
-                                );
-                              },
-                              isExpanded: true,
+                              validator: field.isRequired ? (v) => v == null ? 'Required' : null : null,
                             );
                           },
+                        );
+                      } else {
+                        final controller = customFieldControllers[field.key]!;
+                        return TextFormField(
+                          controller: controller,
+                          decoration: InputDecoration(labelText: field.labelEn.isNotEmpty ? field.labelEn : field.key),
+                          keyboardType: field.type == 'number' ? TextInputType.number : TextInputType.text,
+                          validator: field.isRequired ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
                         );
                       }
-                      return null;
-                      // return const SizedBox();
                     },
                   );
                 },
@@ -1106,134 +699,114 @@ class ProductDetailsScreen extends StatelessWidget {
                         final formValid = await validateForm();
 
                         if (formValid) {
-                          // Prepare categoryId and subCategoryId as int before building productData
-                          final int categoryId = categoryController.value is int
-                              ? categoryController.value as int
-                              : int.tryParse(
-                                      categoryController.value?.toString() ??
-                                          '') ??
-                                  0;
-                          final int subCategoryId = subCategoryController.value
-                                  is int
-                              ? subCategoryController.value as int
-                              : int.tryParse(
-                                      subCategoryController.value?.toString() ??
-                                          '') ??
-                                  0;
-                          // Collect product data as in the main flow
-                          final productData = {
+                          final Map<String, dynamic> productData = {
                             'title': itemNameController.text.trim(),
                             'description': descriptionController.text.trim(),
-                            'categoryId': categoryId,
-                            'subCategoryId': subCategoryId,
+                            'categoryId': CategoryData.getCategoryId(
+                                    categoryController.value ?? '') ??
+                                1,
+                            'subCategoryId': CategoryData.getSubCategoryId(
+                                    categoryController.value ?? '',
+                                    subCategoryController.value ?? '') ??
+                                1,
                             'usageStatus':
                                 condition.value?.toUpperCase() ?? 'UNKNOWN',
                           };
-                          final customFields = <String, dynamic>{
-                            'screenSize': customFieldControllers['Screen Size']
-                                ?.text
-                                .trim(),
-                            'operatingSystem':
-                                customFieldControllers['Operating System']
-                                    ?.text
-                                    .trim(),
-                            'releaseYear':
-                                customFieldControllers['Release Year']
-                                    ?.text
-                                    .trim(),
-                            'regionOfManufacture':
-                                customFieldControllers['Region of Manufacture']
-                                    ?.text
-                                    .trim(),
-                            'ramSize':
-                                customFieldControllers['RAM Size']?.text.trim(),
-                            'processor': customFieldControllers['Processor']
-                                ?.text
-                                .trim(),
-                            'brand':
-                                customFieldControllers['Brand']?.text.trim(),
-                            'graphicCard':
-                                customFieldControllers['Graphic Card']
-                                    ?.text
-                                    .trim(),
-                            'model':
-                                customFieldControllers['Model']?.text.trim(),
-                            'color': customFieldDropdownValues['Color']?.value,
-                          };
-                          customFields.forEach((key, value) {
-                            if (value != null && value.toString().isNotEmpty) {
-                              if (['screenSize', 'releaseYear', 'ramSize']
-                                  .contains(key)) {
-                                try {
-                                  productData[key] =
-                                      num.tryParse(value.toString()) ?? value;
-                                } catch (_) {
-                                  productData[key] = value;
-                                }
-                              } else {
-                                productData[key] = value;
-                              }
+
+                          final customFields = <String, dynamic>{};
+                          for (final field in dynamicCustomFields.value) {
+                            if (field.type == 'dropdown') {
+                              customFields[field.key] =
+                                  customFieldDropdownValues[field.key]?.value;
+                            } else {
+                              customFields[field.key] =
+                                  customFieldControllers[field.key]?.text.trim();
                             }
-                          });
-                          // Get image paths from media files
-                          final imagePaths =
-                              media.value.map((file) => file.path).toList();
-                          // Create a minimal AuctionItem for preview (Draft)
-                          final draftAuction = AuctionItem(
-                            id: 0,
-                            productId: 0,
-                            postedBy: '',
-                            userName: null,
-                            phone: '',
-                            title: productData['title']?.toString() ?? '',
-                            description:
-                                productData['description']?.toString() ?? '',
-                            imageLinks: imagePaths,
-                            price: '0',
-                            productListingPrice: '0',
-                            startBidAmount: '0',
-                            currentBid: '0',
-                            buyNowPrice: '0',
-                            startDate: DateTime.now(),
-                            expiryDate:
-                                DateTime.now().add(const Duration(days: 7)),
-                            endDate: null,
-                            createdAt: DateTime.now(),
-                            status: 'DRAFT',
-                            type: 'ON_TIME',
-                            usageStatus:
-                                productData['usageStatus']?.toString() ?? '',
-                            itemLocation: null,
-                            bids: 0,
-                            buyNowEnabled: false,
-                            categoryId: int.tryParse(
-                                    productData['categoryId']?.toString() ??
-                                        '') ??
-                                0,
-                            subCategoryId: int.tryParse(
-                                    productData['subCategoryId']?.toString() ??
-                                        '') ??
-                                0,
-                            categoryName:
-                                categoryController.value?.toString() ?? '',
-                            subCategoryName:
-                                subCategoryController.value?.toString() ?? '',
-                            isAuctionProduct: true,
-                            customFields: null,
-                            product: productData,
-                            returnPolicyDescription: null,
-                            warrantyPolicyDescription: null,
-                          );
-                          // Navigate to DraftsPage
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DraftsPage(
-                                draftAuction: draftAuction,
-                                user: user,
+                          }
+
+                          // Validate required fields using API data
+                          for (final field in dynamicCustomFields.value) {
+                            if (field.isRequired && customFields[field.key] == null) {
+                              showError(context, 'Please fill in all required fields');
+                              return;
+                            }
+                          }
+
+                          // Debug log the product structure
+                          debugPrint('Preparing to save draft with the following datas:');
+                          debugPrint(json.encode(productData));
+
+                          // Get image files from media
+                          final imageFiles = media.value;
+                          // Call saveDraft from AuctionService
+                          final auctionService = AuctionService();
+                          final result = await auctionService.saveDraft(
+                              auctionData: productData, images: imageFiles);
+                          if (result['success'] == true) {
+                            // Fetch full draft details from backend
+                            final details = await AuctionDetailsService.getAuctionDetails(result['data']['id'].toString());
+                            if (details['success'] == true && details['data'] != null) {
+                              final AuctionItem fetchedDraft = AuctionItem.fromJson(details['data']);
+                              debugPrint('--- CONTINUE BUTTON PRESSED ---');
+                              debugPrint('AuctionItem fields after fetch:');
+                              debugPrint('id: ${fetchedDraft.id}');
+                              debugPrint('productId: ${fetchedDraft.productId}');
+                              debugPrint('title: ${fetchedDraft.title}');
+                              debugPrint('description: ${fetchedDraft.description}');
+                              debugPrint('categoryId: ${fetchedDraft.categoryId}');
+                              debugPrint('subCategoryId: ${fetchedDraft.subCategoryId}');
+                              debugPrint('categoryName: ${fetchedDraft.categoryName}');
+                              debugPrint('subCategoryName: ${fetchedDraft.subCategoryName}');
+                              debugPrint('usageStatus: ${fetchedDraft.usageStatus}');
+                              debugPrint('status: ${fetchedDraft.status}');
+                              debugPrint('imageLinks: ${fetchedDraft.imageLinks}');
+                              debugPrint('createdAt: ${fetchedDraft.createdAt}');
+                              debugPrint('price: ${fetchedDraft.price}');
+                              debugPrint('productListingPrice: ${fetchedDraft.productListingPrice}');
+                              debugPrint('startBidAmount: ${fetchedDraft.startBidAmount}');
+                              debugPrint('currentBid: ${fetchedDraft.currentBid}');
+                              debugPrint('buyNowPrice: ${fetchedDraft.buyNowPrice}');
+                              debugPrint('startDate: ${fetchedDraft.startDate}');
+                              debugPrint('expiryDate: ${fetchedDraft.expiryDate}');
+                              debugPrint('endDate: ${fetchedDraft.endDate}');
+                              debugPrint('type: ${fetchedDraft.type}');
+                              debugPrint('itemLocation: ${fetchedDraft.itemLocation}');
+                              debugPrint('bids: ${fetchedDraft.bids}');
+                              debugPrint('buyNowEnabled: ${fetchedDraft.buyNowEnabled}');
+                              debugPrint('userName: ${fetchedDraft.userName}');
+                              debugPrint('phone: ${fetchedDraft.phone}');
+                              debugPrint('customFields: ${fetchedDraft.customFields}');
+                              debugPrint('-----------------------------------');
+                              // Get user from provider
+                              final user = Provider.of<UserProvider>(context, listen: false).user;
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => DraftsPage(
+                                    draftAuction: fetchedDraft,
+                                    user: user,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              // Fallback: show error or fallback to previous logic
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Failed to fetch full draft details.')),
+                              );
+                            }
+                          } else {
+                            String errorMessage;
+                            if (result['message'] is List) {
+                              errorMessage = (result['message'] as List).join('\n');
+                            } else {
+                              errorMessage = result['message']?.toString() ?? 'Failed to save draft.';
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(errorMessage),
+                                backgroundColor: errorColor,
                               ),
-                            ),
-                          );
+                            );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -1272,67 +845,23 @@ class ProductDetailsScreen extends StatelessWidget {
                                 condition.value?.toUpperCase() ?? 'UNKNOWN',
                           };
 
-                          // Add Electronics category custom fields with exact field names
-                          final customFields = <String, dynamic>{
-                            'screenSize': customFieldControllers['Screen Size']
-                                ?.text
-                                .trim(),
-                            'operatingSystem':
-                                customFieldControllers['Operating System']
-                                    ?.text
-                                    .trim(),
-                            'releaseYear':
-                                customFieldControllers['Release Year']
-                                    ?.text
-                                    .trim(),
-                            'regionOfManufacture':
-                                customFieldControllers['Region of Manufacture']
-                                    ?.text
-                                    .trim(),
-                            'ramSize':
-                                customFieldControllers['RAM Size']?.text.trim(),
-                            'processor': customFieldControllers['Processor']
-                                ?.text
-                                .trim(),
-                            'brand':
-                                customFieldControllers['Brand']?.text.trim(),
-                            'graphicCard':
-                                customFieldControllers['Graphic Card']
-                                    ?.text
-                                    .trim(),
-                            'model':
-                                customFieldControllers['Model']?.text.trim(),
-                            'color': customFieldDropdownValues['Color']?.value,
-                          };
-
-                          // Add non-empty custom fields to product data
-                          customFields.forEach((key, value) {
-                            if (value != null && value.toString().isNotEmpty) {
-                              // Convert numeric fields to numbers
-                              if (['screenSize', 'releaseYear', 'ramSize']
-                                  .contains(key)) {
-                                try {
-                                  productData[key] =
-                                      num.tryParse(value.toString()) ?? value;
-                                } catch (_) {
-                                  productData[key] = value;
-                                }
-                              } else {
-                                productData[key] = value;
-                              }
+                          final customFields = <String, dynamic>{};
+                          for (final field in dynamicCustomFields.value) {
+                            if (field.type == 'dropdown') {
+                              customFields[field.key] =
+                                  customFieldDropdownValues[field.key]?.value;
+                            } else {
+                              customFields[field.key] =
+                                  customFieldControllers[field.key]?.text.trim();
                             }
-                          });
-
-                          // Validate required fields for Electronics category
-                          if (productData['brand']?.toString().isEmpty ??
-                              true) {
-                            showError(context, 'Brand is required for Electronics category');
-                            return;
                           }
-                          if (productData['model']?.toString().isEmpty ??
-                              true) {
-                            showError(context, 'Model is required for Electronics category');
-                            return;
+
+                          // Validate required fields using API data
+                          for (final field in dynamicCustomFields.value) {
+                            if (field.isRequired && customFields[field.key] == null) {
+                              showError(context, 'Please fill in all required fields');
+                              return;
+                            }
                           }
 
                           // Debug log the product structure
@@ -1365,7 +894,7 @@ class ProductDetailsScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => AuctionDetailsScreen(
-                                  productData: {'product': productData},
+                                  productData: productData,
                                   imagePaths: imagePaths,
                                 ),
                               ),
