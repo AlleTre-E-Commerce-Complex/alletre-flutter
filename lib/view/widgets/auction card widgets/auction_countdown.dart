@@ -92,10 +92,12 @@ class AuctionCountdown extends StatelessWidget {
             children: [
               TextSpan(
                 text: '$prefix\n',
-                style: textStyle ?? Theme.of(context).textTheme.labelSmall!.copyWith(
+                style: (textStyle ?? Theme.of(context).textTheme.labelSmall!.copyWith(
                           color: primaryVariantColor,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
+                        )).copyWith(
+                          color: onSecondaryColor,
                         ),
               ),
               TextSpan(
