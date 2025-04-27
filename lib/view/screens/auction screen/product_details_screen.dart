@@ -265,7 +265,8 @@ class ProductDetailsScreen extends StatelessWidget {
                 valueListenable: categoryController,
                 builder: (context, selectedCategory, child) {
                   if (selectedCategory == null || selectedCategory == 'Cars') {
-                    return const SizedBox.shrink(); // No subcategory dropdown if category not selected
+                    return const SizedBox
+                        .shrink(); // No subcategory dropdown if category not selected
                   }
 
                   return ValueListenableBuilder<String?>(
@@ -728,10 +729,11 @@ class ProductDetailsScreen extends StatelessWidget {
               ),
 
               Padding(
-                padding: const EdgeInsets.only(top: 16, bottom: 16),
+                padding: const EdgeInsets.only(top: 10, bottom: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    if(title == 'Create Auction')...[
                     ElevatedButton(
                       onPressed: () async {
                         // Save as draft logic
@@ -801,7 +803,8 @@ class ProductDetailsScreen extends StatelessWidget {
                               debugPrint('--- CONTINUE BUTTON PRESSED ---');
                               debugPrint('AuctionItem fields after fetch:');
                               debugPrint('id: ${fetchedDraft.id}');
-                              debugPrint('productId: ${fetchedDraft.productId}');
+                              debugPrint(
+                                  'productId: ${fetchedDraft.productId}');
                               debugPrint('title: ${fetchedDraft.title}');
                               debugPrint(
                                   'description: ${fetchedDraft.description}');
@@ -867,13 +870,17 @@ class ProductDetailsScreen extends StatelessWidget {
                             }
                           } else {
                             String errorMessage;
+
                             if (result['message'] is List) {
-                              errorMessage =
-                                  (result['message'] as List).join('\n');
+                              errorMessage = (result['message'] as List)
+                                  .map((e) => mapBackendErrorToUserMessage(
+                                      e.toString()))
+                                  .join('\n');
                             } else {
-                              errorMessage = result['message']?.toString() ??
-                                  'Failed to save draft.';
+                              errorMessage = mapBackendErrorToUserMessage(
+                                  result['message']?.toString());
                             }
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(errorMessage),
@@ -895,6 +902,7 @@ class ProductDetailsScreen extends StatelessWidget {
                         style: TextStyle(color: onSecondaryColor),
                       ),
                     ),
+                    ],
                     const SizedBox(width: 16),
                     ElevatedButton(
                       onPressed: () async {
@@ -1009,7 +1017,7 @@ class ProductDetailsScreen extends StatelessWidget {
                       child: const Text("Next",
                           style: TextStyle(color: secondaryColor)),
                     ),
-                  ],
+                  ]
                 ),
               ),
             ],

@@ -429,7 +429,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                 if (addressesSnapshot.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please add at least one address'),
+                      content: Center(child: Text('Please add at least one address')),
                     ),
                   );
                   return;

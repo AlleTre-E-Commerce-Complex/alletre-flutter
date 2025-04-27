@@ -16,3 +16,31 @@ void showError(BuildContext context, dynamic e) {
     SnackBar(content: Center(child: Text(errorMsg))),
   );
 }
+
+/// Maps backend technical errors to user-friendly readable messages.
+String mapBackendErrorToUserMessage(String? backendMessage) {
+  if (backendMessage == null || backendMessage.isEmpty) {
+    return 'Something went wrong. Please try again';
+  }
+
+  final lowerMsg = backendMessage.toLowerCase();
+
+  if (lowerMsg.contains('title')) {
+    return 'Please provide a title for your product';
+  } else if (lowerMsg.contains('category')) {
+    return 'Please select a category';
+  } else if (lowerMsg.contains('sub category')) {
+    return 'Please select a sub-category';
+  } else if (lowerMsg.contains('unauthorized')) {
+    return 'Session expired. Please login again';
+  } else if (lowerMsg.contains('server error')) {
+    return 'Server is not responding. Please try again later';
+  } else if (lowerMsg.contains('failed to save draft')) {
+    return 'Could not save your draft. Please check your internet and try again';
+  } else if (lowerMsg.contains('validation failed')) {
+    return 'Please fill all required fields properly';
+  }
+
+  // Fallback default
+  return 'Session expired. Please login again';
+}
