@@ -624,7 +624,7 @@ class ItemDetailsScreen extends StatelessWidget {
             auctionId: item.id.toString(),
             customPrefix: 'Time Left',
             textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600, color: primaryColor, fontSize: 12),
+                fontWeight: FontWeight.w600, color: onSecondaryColor, fontSize: 12),
           ),
         ],
       ),
