@@ -489,7 +489,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                             const SnackBar(
                                               content: Center(
                                                   child: Text(
-                                                      'Invalid wallet balance')),
+                                                      'Insufficient wallet balance')),
+                                              duration: Duration(seconds: 1),
                                               backgroundColor: errorColor,
                                             ),
                                           );
