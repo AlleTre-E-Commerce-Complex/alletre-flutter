@@ -8,6 +8,7 @@ import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:provider/provider.dart';
 import '../withdraw_screens/withdraw_screen.dart';
+import 'package:alletre_app/utils/ui_helpers.dart';
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
@@ -92,12 +93,7 @@ class WalletScreen extends StatelessWidget {
     const FlutterSecureStorage().delete(key: 'access_token');
 
     // Show error message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Session expired. Please log in again.'),
-        backgroundColor: errorColor,
-      ),
-    );
+    showError(context, 'Session expired. Please login again');
 
     // Navigate to login screen using TabIndexProvider
     context.read<TabIndexProvider>().updateIndex(18); // login page index

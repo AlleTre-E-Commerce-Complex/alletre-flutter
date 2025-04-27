@@ -325,12 +325,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       if (!refreshResult['success']) {
         // Handle failed refresh by logging out
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Session expired. Please login again.'),
-              backgroundColor: errorColor,
-            ),
-          );
+          showError(context, 'Session expired. Please login again');
           // Navigate to login screen
           // Navigator.pushReplacementNamed(context, YourRoutes.login);
         }
@@ -485,10 +480,26 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                 ),
                                 const SizedBox(width: 15),
                                 ElevatedButton(
-                                  onPressed:
-                                      isLoading ? null : _handleWalletPayment,
+                                  onPressed: (isLoading ||
+                                          (walletBalance ?? 0) <
+                                              (depositAmount ?? 0))
+                                      ? () {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Center(
+                                                  child: Text(
+                                                      'Invalid wallet balance')),
+                                              backgroundColor: errorColor,
+                                            ),
+                                          );
+                                        }
+                                      : _handleWalletPayment,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: primaryColor,
+                                    backgroundColor: ((walletBalance ?? 0) <
+                                            (depositAmount ?? 0))
+                                        ? greyColor
+                                        : primaryColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(6),
                                     ),
@@ -509,8 +520,12 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                       : Text(
                                           'Pay AED ${depositAmount?.toString() ?? 'Unknown'}',
                                           textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                              color: secondaryColor),
+                                          style: TextStyle(
+                                            color: ((walletBalance ?? 0) <
+                                                    (depositAmount ?? 0))
+                                                ? Colors.grey[300]
+                                                : secondaryColor,
+                                          ),
                                         ),
                                 ),
                               ],

@@ -365,6 +365,7 @@ class AuctionDetailsScreen extends StatelessWidget {
                       if (isValid) {
                         // Collect form data
                         final auctionData = {
+                          'product': productData, // Ensure product details are included
                           ...productData, // Keep the product data structure intact
                           'startingPrice': double.tryParse(priceController.text)?.toString() ?? '0',
                           'duration': selectedDuration.value ?? '1 DAYS', // Pass full duration string including unit
@@ -378,7 +379,14 @@ class AuctionDetailsScreen extends StatelessWidget {
                         };
 
                         // Validate required fields
-                        final product = auctionData['product'] as Map<String, dynamic>;
+                        final productRaw = auctionData['product'];
+                        if (productRaw == null || productRaw is! Map<String, dynamic>) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Product details are missing or invalid')),
+                          );
+                          return;
+                        }
+                        final product = productRaw;
                         
                         if (product['title']?.isEmpty ?? true) {
                           ScaffoldMessenger.of(context).showSnackBar(
