@@ -19,6 +19,9 @@ import 'package:alletre_app/controller/helpers/auction_service.dart';
 import 'drafts_page.dart';
 import 'package:alletre_app/controller/services/auction_details_service.dart';
 import 'package:alletre_app/services/custom_fields_service.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class ProductDetailsScreen extends StatelessWidget {
   final String title;
@@ -163,15 +166,44 @@ class ProductDetailsScreen extends StatelessWidget {
       });
     }
 
+    // Helper function to download image from URL and save as local file
+    Future<File> _downloadImage(String url) async {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        // Get temporary directory
+        final tempDir = await getTemporaryDirectory();
+        // Create a unique filename
+        final filename = path.basename(url).split('?')[0];
+        final file = File('${tempDir.path}/$filename');
+        // Write the downloaded bytes to the file
+        await file.writeAsBytes(response.bodyBytes);
+        return file;
+      } else {
+        throw Exception('Failed to download image: ${response.statusCode}');
+      }
+    }
+
     // If draftAuction is provided, pre-fill controllers and custom fields
-    Future<void> getSetupFieldsFuture() {
+    Future<void> getSetupFieldsFuture() async {
       if (draftAuction != null) {
         itemNameController.text = draftAuction!.title;
         priceController.text = draftAuction!.price.toString();
         descriptionController.text = draftAuction!.description;
         categoryController.value = draftAuction!.categoryName;
         subCategoryController.value = draftAuction!.subCategoryName;
-        media.value = draftAuction!.imageLinks.map((url) => File(url)).toList();
+        
+        // Download images from URLs and convert to File objects
+        final List<File> downloadedFiles = [];
+        for (final url in draftAuction!.imageLinks) {
+          try {
+            final file = await _downloadImage(url);
+            downloadedFiles.add(file);
+          } catch (e) {
+            debugPrint('Error downloading image: $e');
+          }
+        }
+        media.value = downloadedFiles;
+        
         condition.value = draftAuction!.usageStatus.toLowerCase();
         // Pre-fill dynamic fields after fetching them
         return fetchAndSetupCustomFields(
