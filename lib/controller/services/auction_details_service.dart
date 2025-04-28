@@ -29,4 +29,24 @@ class AuctionDetailsService {
       rethrow;
     }
   }
+
+  // New: Fetch draft auction details for editing
+  static Future<Map<String, dynamic>> getDraftAuctionDetails(String auctionId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/auctions/user/$auctionId'),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return data;
+      } else {
+        final error = '❌ Failed to fetch draft auction details: ${response.statusCode}';
+        debugPrint(error);
+        throw Exception(error);
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error fetching draft auction details: $e');
+      rethrow;
+    }
+  }
 }

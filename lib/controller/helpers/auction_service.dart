@@ -731,8 +731,6 @@ class AuctionService {
         // Send request
         final streamedResponse = await request.send();
         final response = await http.Response.fromStream(streamedResponse);
-        debugPrint('Save draft response status: ${response.statusCode}');
-        debugPrint('Save draft response body: ${response.body}');
 
         final data = json.decode(response.body);
         if (response.statusCode >= 200 && response.statusCode < 300) {

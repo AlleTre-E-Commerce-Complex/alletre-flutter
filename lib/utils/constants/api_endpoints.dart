@@ -5,6 +5,9 @@ class ApiEndpoints {
   static const String auctions = '/auctions';
   static const String productListing = '/auctions/product-listing';
 
+  // Draft auction details endpoint
+  static String userAuctionDetails(String auctionId) => '/auctions/user/$auctionId';
+
   // Category endpoints
   static const String categories = '/categories/all';
   static const String _subCategoriesPath = '/categories/sub-categories';

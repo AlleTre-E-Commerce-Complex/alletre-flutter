@@ -30,15 +30,13 @@ class DraftsPage extends StatelessWidget {
     debugPrint('usageStatus: ${draftAuction.usageStatus}');
     final productMap = draftAuction.product;
     final customFieldsObj = draftAuction.customFields;
-    debugPrint('brand: ${productMap != null ? productMap['brand'] : 'N/A'}');
-    debugPrint('model: ${productMap != null ? productMap['model'] : 'N/A'}');
     debugPrint('status: ${draftAuction.status}');
     debugPrint('imageLinks: ${draftAuction.imageLinks}');
     debugPrint('createdAt: ${draftAuction.createdAt}');
     debugPrint('userId: ${productMap != null ? productMap['userId'] : draftAuction.toJson()['userId'] ?? 'N/A'}');
     debugPrint('locationId: ${draftAuction.itemLocation?.id}');
     debugPrint('product: $productMap');
-    debugPrint('customFields: $customFieldsObj');
+    debugPrint('💡💡customFields: $customFieldsObj');
     debugPrint('------------------------------');
 
     final List<AuctionItem> draftAuctions = [draftAuction];
