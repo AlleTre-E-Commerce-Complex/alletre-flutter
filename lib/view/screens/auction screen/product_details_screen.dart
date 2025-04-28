@@ -33,6 +33,7 @@ class ProductDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Add a ValueNotifier to track whether the form has been submitted
     final isSubmitted = ValueNotifier<bool>(false);
+    final isSavingDraft = ValueNotifier<bool>(false); // Add loading state
     final formKey = GlobalKey<FormState>();
     final itemNameController = TextEditingController();
     final priceController = TextEditingController();
@@ -186,37 +187,45 @@ class ProductDetailsScreen extends StatelessWidget {
     // If draftAuction is provided, pre-fill controllers and custom fields
     Future<void> getSetupFieldsFuture() async {
       if (draftAuction != null) {
+        // Set initial values immediately
         itemNameController.text = draftAuction!.title;
         priceController.text = draftAuction!.price.toString();
         descriptionController.text = draftAuction!.description;
         categoryController.value = draftAuction!.categoryName;
         subCategoryController.value = draftAuction!.subCategoryName;
-        
-        // Download images from URLs and convert to File objects
-        final List<File> downloadedFiles = [];
-        for (final url in draftAuction!.imageLinks) {
-          try {
-            final file = await _downloadImage(url);
-            downloadedFiles.add(file);
-          } catch (e) {
-            debugPrint('Error downloading image: $e');
-          }
-        }
-        media.value = downloadedFiles;
-        
         condition.value = draftAuction!.usageStatus.toLowerCase();
-        // Pre-fill dynamic fields after fetching them
-        return fetchAndSetupCustomFields(
-          categoryId: draftAuction!.categoryId,
-          subCategoryId: draftAuction!.subCategoryId,
-          prefillFields: draftAuction!.customFields is Map<String, dynamic>
-              ? draftAuction!.customFields as Map<String, dynamic>
-              : (draftAuction!.customFields is String &&
-                      draftAuction!.customFields != null)
-                  ? parseDartMapString(draftAuction!.customFields as String)
-                  : null,
-          product: draftAuction!.product,
-        );
+
+        // Start loading images and custom fields in parallel
+        final futures = <Future>[
+          // Download images
+          () async {
+            final List<File> downloadedFiles = [];
+            for (final url in draftAuction!.imageLinks) {
+              try {
+                final file = await _downloadImage(url);
+                downloadedFiles.add(file);
+              } catch (e) {
+                debugPrint('Error downloading image: $e');
+              }
+            }
+            media.value = downloadedFiles;
+          }(),
+          // Fetch custom fields
+          fetchAndSetupCustomFields(
+            categoryId: draftAuction!.categoryId,
+            subCategoryId: draftAuction!.subCategoryId,
+            prefillFields: draftAuction!.customFields is Map<String, dynamic>
+                ? draftAuction!.customFields as Map<String, dynamic>
+                : (draftAuction!.customFields is String &&
+                        draftAuction!.customFields != null)
+                    ? parseDartMapString(draftAuction!.customFields as String)
+                    : null,
+            product: draftAuction!.product,
+          ),
+        ];
+
+        // Wait for all operations to complete
+        await Future.wait(futures);
       } else {
         return fetchAndSetupCustomFields();
       }
@@ -270,6 +279,11 @@ class ProductDetailsScreen extends StatelessWidget {
         child: FutureBuilder<void>(
             future: getSetupFieldsFuture(),
             builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
               return Form(
                 key: formKey,
                 child: ListView(
@@ -893,230 +907,207 @@ class ProductDetailsScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             if (title == 'Create Auction') ...[
-                              ElevatedButton(
-                                onPressed: () async {
-                                  // Save as draft logic
-                                  isSubmitted.value = true;
+                              ValueListenableBuilder<bool>(
+                                valueListenable: isSavingDraft,
+                                builder: (context, isSaving, child) {
+                                  return ElevatedButton(
+                                    onPressed: isSaving
+                                        ? null
+                                        : () async {
+                                            isSavingDraft.value = true;
+                                            isSubmitted.value = true;
 
-                                  // This will trigger the validators and show error messages
-                                  final formValid = await validateForm();
+                                            // This will trigger the validators and show error messages
+                                            final formValid = await validateForm();
 
-                                  if (formValid) {
-                                    final customFields = <String, dynamic>{};
-                                    for (final field
-                                        in dynamicCustomFields.value) {
-                                      if (field.type == 'dropdown') {
-                                        customFields[field.key] =
-                                            customFieldDropdownValues[field.key]
-                                                ?.value;
-                                      } else {
-                                        customFields[field.key] =
-                                            customFieldControllers[field.key]
-                                                ?.text
-                                                .trim();
-                                      }
-                                    }
+                                            if (formValid) {
+                                              final customFields = <String, dynamic>{};
+                                              for (final field in dynamicCustomFields.value) {
+                                                if (field.type == 'dropdown') {
+                                                  customFields[field.key] =
+                                                      customFieldDropdownValues[field.key]?.value;
+                                                } else {
+                                                  customFields[field.key] =
+                                                      customFieldControllers[field.key]?.text.trim();
+                                                }
+                                              }
 
-                                    // Filter customFields to remove empty or null values
-                                    final filteredCustomFields = <String, dynamic>{
-                                      for (final entry in customFields.entries)
-                                        if (entry.value != null && entry.value.toString().trim().isNotEmpty)
-                                          entry.key: entry.value
-                                    };
+                                              // Filter customFields to remove empty or null values
+                                              final filteredCustomFields = <String, dynamic>{
+                                                for (final entry in customFields.entries)
+                                                  if (entry.value != null && entry.value.toString().trim().isNotEmpty)
+                                                    entry.key: entry.value
+                                              };
 
-                                    final Map<String, dynamic> productData = {
-                                      'title': itemNameController.text.trim(),
-                                      'description':
-                                          descriptionController.text.trim(),
-                                      'categoryId': CategoryData.getCategoryId(
-                                              categoryController.value ?? '') ??
-                                          1,
-                                      'subCategoryId':
-                                          CategoryData.getSubCategoryId(
-                                                  categoryController.value ?? '',
-                                                  subCategoryController.value ??
-                                                      '') ??
-                                              1,
-                                      'usageStatus':
-                                          condition.value?.toUpperCase() ??
-                                              'UNKNOWN',
-                                      ...filteredCustomFields,
-                                    };
+                                              final Map<String, dynamic> productData = {
+                                                'title': itemNameController.text.trim(),
+                                                'description': descriptionController.text.trim(),
+                                                'categoryId': CategoryData.getCategoryId(
+                                                        categoryController.value ?? '') ??
+                                                    1,
+                                                'subCategoryId': CategoryData.getSubCategoryId(
+                                                        categoryController.value ?? '',
+                                                        subCategoryController.value ?? '') ??
+                                                    1,
+                                                'usageStatus': condition.value?.toUpperCase() ?? 'UNKNOWN',
+                                                ...filteredCustomFields,
+                                              };
 
-                                    // Validate required fields using API data
-                                    for (final field
-                                        in dynamicCustomFields.value) {
-                                      if (field.isRequired &&
-                                          customFields[field.key] == null) {
-                                        showError(context,
-                                            'Please fill in all required fields');
-                                        return;
-                                      }
-                                    }
+                                              // Validate required fields using API data
+                                              for (final field in dynamicCustomFields.value) {
+                                                if (field.isRequired && customFields[field.key] == null) {
+                                                  showError(context, 'Please fill in all required fields');
+                                                  isSavingDraft.value = false;
+                                                  return;
+                                                }
+                                              }
 
-                                    // Debug log the product structure
-                                    debugPrint(
-                                        'Preparing to save draft with the following datas:');
-                                    debugPrint(json.encode(productData));
+                                              // Get image files from media
+                                              final imageFiles = media.value;
+                                              // Call saveDraft from AuctionService
+                                              final auctionService = AuctionService();
+                                              final result = await auctionService.saveDraft(
+                                                  auctionData: productData, images: imageFiles);
+                                              
+                                              isSavingDraft.value = false;
+                                              
+                                              if (result['success'] == true) {
+                                                // Fetch full draft details from backend
+                                                final details =
+                                                    await AuctionDetailsService
+                                                        .getAuctionDetails(result['data']
+                                                                ['id']
+                                                            .toString());
+                                                if (details['success'] == true &&
+                                                    details['data'] != null) {
+                                                  final AuctionItem fetchedDraft =
+                                                      AuctionItem.fromJson(
+                                                          details['data']);
+                                                  debugPrint(
+                                                      '--- CONTINUE BUTTON PRESSED ---');
+                                                  debugPrint(
+                                                      'AuctionItem fields after fetch:');
+                                                  debugPrint('id: ${fetchedDraft.id}');
+                                                  debugPrint(
+                                                      'productId: ${fetchedDraft.productId}');
+                                                  debugPrint(
+                                                      'title: ${fetchedDraft.title}');
+                                                  debugPrint(
+                                                      'description: ${fetchedDraft.description}');
+                                                  debugPrint(
+                                                      'categoryId: ${fetchedDraft.categoryId}');
+                                                  debugPrint(
+                                                      'subCategoryId: ${fetchedDraft.subCategoryId}');
+                                                  debugPrint(
+                                                      'categoryName: ${fetchedDraft.categoryName}');
+                                                  debugPrint(
+                                                      'subCategoryName: ${fetchedDraft.subCategoryName}');
+                                                  debugPrint(
+                                                      'usageStatus: ${fetchedDraft.usageStatus}');
+                                                  debugPrint(
+                                                      'status: ${fetchedDraft.status}');
+                                                  debugPrint(
+                                                      'imageLinks: ${fetchedDraft.imageLinks}');
+                                                  debugPrint(
+                                                      'createdAt: ${fetchedDraft.createdAt}');
+                                                  debugPrint(
+                                                      'price: ${fetchedDraft.price}');
+                                                  debugPrint(
+                                                      'productListingPrice: ${fetchedDraft.productListingPrice}');
+                                                  debugPrint(
+                                                      'startBidAmount: ${fetchedDraft.startBidAmount}');
+                                                  debugPrint(
+                                                      'currentBid: ${fetchedDraft.currentBid}');
+                                                  debugPrint(
+                                                      'buyNowPrice: ${fetchedDraft.buyNowPrice}');
+                                                  debugPrint(
+                                                      'startDate: ${fetchedDraft.startDate}');
+                                                  debugPrint(
+                                                      'expiryDate: ${fetchedDraft.expiryDate}');
+                                                  debugPrint(
+                                                      'endDate: ${fetchedDraft.endDate}');
+                                                  debugPrint(
+                                                      'type: ${fetchedDraft.type}');
+                                                  debugPrint(
+                                                      'itemLocation: ${fetchedDraft.itemLocation}');
+                                                  debugPrint(
+                                                      'bids: ${fetchedDraft.bids}');
+                                                  debugPrint(
+                                                      'buyNowEnabled: ${fetchedDraft.buyNowEnabled}');
+                                                  debugPrint(
+                                                      'userName: ${fetchedDraft.userName}');
+                                                  debugPrint(
+                                                      'phone: ${fetchedDraft.phone}');
+                                                  debugPrint(
+                                                      'customFields: ${fetchedDraft.customFields}');
+                                                  debugPrint(
+                                                      '-----------------------------------');
+                                                  // Get user from provider
+                                                  final user = Provider.of<UserProvider>(
+                                                          context,
+                                                          listen: false)
+                                                      .user;
+                                                  Navigator.of(context).pushReplacement(
+                                                    MaterialPageRoute(
+                                                      builder: (context) => DraftsPage(
+                                                        draftAuction: fetchedDraft,
+                                                        user: user,
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else {
+                                                  // Fallback: show error or fallback to previous logic
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                        content: Text(
+                                                            'Failed to fetch full draft details.')),
+                                                  );
+                                                }
+                                              } else {
+                                                String errorMessage;
+                                                if (result['message'] is List) {
+                                                  errorMessage = (result['message'] as List)
+                                                      .map((e) => mapBackendErrorToUserMessage(e.toString()))
+                                                      .join('\n');
+                                                } else {
+                                                  errorMessage = mapBackendErrorToUserMessage(
+                                                      result['message']?.toString());
+                                                }
 
-                                    // Debug log media files
-                                    debugPrint(
-                                        'ProductDetailsScreen - Media files before navigation:');
-                                    debugPrint(
-                                        'Total files: ${media.value.length}');
-                                    for (var i = 0; i < media.value.length; i++) {
-                                      final file = media.value[i];
-                                      final isVideo = file.path
-                                              .toLowerCase()
-                                              .endsWith('.mp4') ||
-                                          file.path
-                                              .toLowerCase()
-                                              .endsWith('.mov');
-                                      debugPrint('  File $i: ${file.path}');
-                                      debugPrint(
-                                          '    Type: ${isVideo ? 'Video' : 'Image'}');
-                                      debugPrint(
-                                          '    Size: ${(file.lengthSync() / 1024).toStringAsFixed(2)} KB');
-                                    }
-
-                                    // Get image files from media
-                                    final imageFiles = media.value;
-                                    // Call saveDraft from AuctionService
-                                    final auctionService = AuctionService();
-                                    final result =
-                                        await auctionService.saveDraft(
-                                            auctionData: productData,
-                                            images: imageFiles);
-                                    if (result['success'] == true) {
-                                      // Fetch full draft details from backend
-                                      final details =
-                                          await AuctionDetailsService
-                                              .getAuctionDetails(result['data']
-                                                      ['id']
-                                                  .toString());
-                                      if (details['success'] == true &&
-                                          details['data'] != null) {
-                                        final AuctionItem fetchedDraft =
-                                            AuctionItem.fromJson(
-                                                details['data']);
-                                        debugPrint(
-                                            '--- CONTINUE BUTTON PRESSED ---');
-                                        debugPrint(
-                                            'AuctionItem fields after fetch:');
-                                        debugPrint('id: ${fetchedDraft.id}');
-                                        debugPrint(
-                                            'productId: ${fetchedDraft.productId}');
-                                        debugPrint(
-                                            'title: ${fetchedDraft.title}');
-                                        debugPrint(
-                                            'description: ${fetchedDraft.description}');
-                                        debugPrint(
-                                            'categoryId: ${fetchedDraft.categoryId}');
-                                        debugPrint(
-                                            'subCategoryId: ${fetchedDraft.subCategoryId}');
-                                        debugPrint(
-                                            'categoryName: ${fetchedDraft.categoryName}');
-                                        debugPrint(
-                                            'subCategoryName: ${fetchedDraft.subCategoryName}');
-                                        debugPrint(
-                                            'usageStatus: ${fetchedDraft.usageStatus}');
-                                        debugPrint(
-                                            'status: ${fetchedDraft.status}');
-                                        debugPrint(
-                                            'imageLinks: ${fetchedDraft.imageLinks}');
-                                        debugPrint(
-                                            'createdAt: ${fetchedDraft.createdAt}');
-                                        debugPrint(
-                                            'price: ${fetchedDraft.price}');
-                                        debugPrint(
-                                            'productListingPrice: ${fetchedDraft.productListingPrice}');
-                                        debugPrint(
-                                            'startBidAmount: ${fetchedDraft.startBidAmount}');
-                                        debugPrint(
-                                            'currentBid: ${fetchedDraft.currentBid}');
-                                        debugPrint(
-                                            'buyNowPrice: ${fetchedDraft.buyNowPrice}');
-                                        debugPrint(
-                                            'startDate: ${fetchedDraft.startDate}');
-                                        debugPrint(
-                                            'expiryDate: ${fetchedDraft.expiryDate}');
-                                        debugPrint(
-                                            'endDate: ${fetchedDraft.endDate}');
-                                        debugPrint(
-                                            'type: ${fetchedDraft.type}');
-                                        debugPrint(
-                                            'itemLocation: ${fetchedDraft.itemLocation}');
-                                        debugPrint(
-                                            'bids: ${fetchedDraft.bids}');
-                                        debugPrint(
-                                            'buyNowEnabled: ${fetchedDraft.buyNowEnabled}');
-                                        debugPrint(
-                                            'userName: ${fetchedDraft.userName}');
-                                        debugPrint(
-                                            'phone: ${fetchedDraft.phone}');
-                                        debugPrint(
-                                            'customFields: ${fetchedDraft.customFields}');
-                                        debugPrint(
-                                            '-----------------------------------');
-                                        // Get user from provider
-                                        final user = Provider.of<UserProvider>(
-                                                context,
-                                                listen: false)
-                                            .user;
-                                        Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(
-                                            builder: (context) => DraftsPage(
-                                              draftAuction: fetchedDraft,
-                                              user: user,
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(errorMessage),
+                                                    backgroundColor: errorColor,
+                                                  ),
+                                                );
+                                              }
+                                            } else {
+                                              isSavingDraft.value = false;
+                                            }
+                                          },
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: const Size(80, 33),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      backgroundColor: Colors.grey[300],
+                                    ),
+                                    child: isSaving
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(onSecondaryColor),
                                             ),
+                                          )
+                                        : const Text(
+                                            "Save as Draft",
+                                            style: TextStyle(color: onSecondaryColor),
                                           ),
-                                        );
-                                      } else {
-                                        // Fallback: show error or fallback to previous logic
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                              content: Text(
-                                                  'Failed to fetch full draft details.')),
-                                        );
-                                      }
-                                    } else {
-                                      String errorMessage;
-
-                                      if (result['message'] is List) {
-                                        errorMessage = (result['message']
-                                                as List)
-                                            .map((e) =>
-                                                mapBackendErrorToUserMessage(
-                                                    e.toString()))
-                                            .join('\n');
-                                      } else {
-                                        errorMessage =
-                                            mapBackendErrorToUserMessage(
-                                                result['message']?.toString());
-                                      }
-
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(errorMessage),
-                                          backgroundColor: errorColor,
-                                        ),
-                                      );
-                                    }
-                                  }
+                                  );
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size(80, 33),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  backgroundColor: Colors.grey[300],
-                                ),
-                                child: const Text(
-                                  "Save as Draft",
-                                  style: TextStyle(color: onSecondaryColor),
-                                ),
                               ),
                             ],
                             const SizedBox(width: 16),
