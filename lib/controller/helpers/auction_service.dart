@@ -1116,4 +1116,122 @@ class AuctionService {
       return [];
     }
   }
+
+  Future<List<AuctionItem>> fetchDrafts() async {
+    try {
+      // First try to get the token
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      // Add authorization header if we have a token
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
+
+      List<AuctionItem> allItems = [];
+      int page = 1;
+      bool hasMore = true;
+
+      while (hasMore) {
+        final response = await http.get(
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/ownes?page=$page&perPage=10&status=DRAFTED'),
+          headers: headers,
+        );
+
+        debugPrint('Drafts Response Code: ${response.statusCode} for page $page');
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List)
+                .map((item) => AuctionItem.fromJson(item))
+                .toList();
+
+            final pagination = data['pagination'] as Map<String, dynamic>;
+            final totalPages = pagination['totalPages'] as int;
+
+            allItems.addAll(items);
+            debugPrint('Successfully parsed ${items.length} drafts for page $page');
+
+            if (page >= totalPages) {
+              hasMore = false;
+              debugPrint('Reached last page of drafts');
+            } else {
+              page++;
+            }
+          } else {
+            hasMore = false;
+          }
+        
+          // Try to refresh token and retry once
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            continue;
+          } else {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      debugPrint('Total drafts fetched: ${allItems.length}');
+      return allItems;
+    } catch (e) {
+      debugPrint('Error fetching drafts: $e');
+      return [];
+    }
+  }
+
+  Future<bool> deleteDraft(String auctionId) async {
+    try {
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
+
+      final response = await http.delete(
+        Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.userAuctionDetails(auctionId)}'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+
+      // Handle token refresh if needed
+      if (response.statusCode == 401 && accessToken != null) {
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          final retryResponse = await http.delete(
+            Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.userAuctionDetails(auctionId)}'),
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+          );
+          return retryResponse.statusCode == 200;
+        }
+      }
+
+      return false;
+    } catch (e) {
+      debugPrint('Error deleting draft: $e');
+      return false;
+    }
+  }
 }

@@ -9,7 +9,7 @@ import 'package:alletre_app/view/widgets/profile%20widgets/user_profile_card.dar
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import '../auction screen/drafts_page.dart';
+import '../draft screen/draft_screen.dart';
 import '../edit profile screen/edit_profile_screen.dart';
 import '../faqs screen/faqs_screen.dart';
 import '../settings screen/settings_screen.dart';
@@ -17,7 +17,7 @@ import '../wishlist screen/wishlist_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? title;
-  
+
   const ProfileScreen({super.key, this.title});
 
   @override
@@ -56,7 +56,10 @@ class ProfileScreen extends StatelessWidget {
               user: user,
               buttonText: "Edit Profile",
               onButtonPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfileScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const EditProfileScreen()));
               },
             ),
             const SizedBox(height: 4),
@@ -105,8 +108,7 @@ class ProfileScreen extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => DraftsPage(
-                            draftAuction: AuctionItem.empty(), user: UserModel.empty())));
+                      builder: (context) => DraftsPage(user: user)));
               },
             ),
             Divider(color: dividerColor, thickness: 0.5),
@@ -124,7 +126,8 @@ class ProfileScreen extends StatelessWidget {
               title: 'FAQs',
               subtitle: 'Know more about the services',
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const FaqScreen()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const FaqScreen()));
               },
             ),
             ProfileListTile(
@@ -148,7 +151,10 @@ class ProfileScreen extends StatelessWidget {
               title: 'Settings',
               subtitle: 'View more settings',
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SettingsScreen()));
               },
             ),
           ],

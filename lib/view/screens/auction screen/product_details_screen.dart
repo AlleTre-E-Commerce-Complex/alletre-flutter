@@ -12,11 +12,11 @@ import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 import '../../widgets/home widgets/categories widgets/categories_data.dart';
+import '../draft screen/draft_screen.dart';
 import 'auction_details_screen.dart';
 import 'shipping_details_screen.dart';
 import 'package:alletre_app/utils/ui_helpers.dart';
 import 'package:alletre_app/controller/helpers/auction_service.dart';
-import 'drafts_page.dart';
 import 'package:alletre_app/controller/services/auction_details_service.dart';
 import 'package:alletre_app/services/custom_fields_service.dart';
 import 'package:http/http.dart' as http;
@@ -1050,7 +1050,6 @@ class ProductDetailsScreen extends StatelessWidget {
                                                   Navigator.of(context).pushReplacement(
                                                     MaterialPageRoute(
                                                       builder: (context) => DraftsPage(
-                                                        draftAuction: fetchedDraft,
                                                         user: user,
                                                       ),
                                                     ),
