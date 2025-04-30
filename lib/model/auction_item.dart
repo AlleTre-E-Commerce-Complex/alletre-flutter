@@ -36,6 +36,7 @@ class AuctionItem {
   final Map<String, dynamic>? product;
   final String? returnPolicyDescription;
   final String? warrantyPolicyDescription;
+  final bool isMyAuction;
 
   AuctionItem({
     required this.id,
@@ -70,6 +71,7 @@ class AuctionItem {
     this.product,
     this.returnPolicyDescription,
     this.warrantyPolicyDescription,
+    required this.isMyAuction,
   });
 
   // Add copyWith method for real-time updates
@@ -105,6 +107,7 @@ class AuctionItem {
     Map<String, dynamic>? product,
     String? returnPolicyDescription,
     String? warrantyPolicyDescription,
+    bool? isMyAuction,
   }) {
     return AuctionItem(
       id: id ?? this.id,
@@ -135,12 +138,13 @@ class AuctionItem {
       categoryName: categoryName ?? this.categoryName,
       subCategoryName: subCategoryName ?? this.subCategoryName,
       isAuctionProduct: isAuctionProduct ?? this.isAuctionProduct,
-      customFields: customFields ?? customFields,
+      customFields: customFields ?? this.customFields,
       product: product ?? this.product,
       returnPolicyDescription:
           returnPolicyDescription ?? this.returnPolicyDescription,
       warrantyPolicyDescription:
           warrantyPolicyDescription ?? this.warrantyPolicyDescription,
+      isMyAuction: isMyAuction ?? this.isMyAuction,
     );
   }
 
@@ -376,6 +380,7 @@ class AuctionItem {
         product: product,
         returnPolicyDescription: returnPolicyDescription,
         warrantyPolicyDescription: warrantyPolicyDescription,
+        isMyAuction: json['isMyAuction'] as bool? ?? false,
       );
     } catch (e) {
       log('Error creating AuctionItem: $e');
@@ -429,6 +434,7 @@ class AuctionItem {
       isAuctionProduct: false,
       customFields: null,
       product: null,
+      isMyAuction: false,
     );
   }
 
@@ -481,6 +487,7 @@ class AuctionItem {
       'isAuctionProduct': isAuctionProduct,
       'customFields': customFields?.fields,
       'product': product,
+      'isMyAuction': isMyAuction,
     };
   }
 }

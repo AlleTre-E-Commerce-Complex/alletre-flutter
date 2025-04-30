@@ -178,15 +178,15 @@ class DraftAuctionCard extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: text == 'Delete' ? avatarColor : primaryColor,
-          foregroundColor: text == 'Delete' ? Colors.black : secondaryColor,
+          backgroundColor: text == 'Delete' ? errorColor : primaryColor,
+          foregroundColor: secondaryColor,
           padding: const EdgeInsets.symmetric(vertical: 2),
           textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),
         ),
-        child: Text(text),
+        child: Text(text, style: const TextStyle(color: secondaryColor)),
       ),
     );
   }

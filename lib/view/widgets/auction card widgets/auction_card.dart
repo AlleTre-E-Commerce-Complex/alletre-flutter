@@ -271,10 +271,10 @@ class AuctionCard extends StatelessWidget {
                                     ),
                                     onPressed: () => _navigateToDetails(
                                         context, auction, user),
-                                    child: const Text(
-                                      'Bid Now',
+                                    child: Text(
+                                      auction.isMyAuction ? 'View Details' : 'Bid Now',
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: secondaryColor,
                                         fontSize: 10,
                                       ),
@@ -298,10 +298,10 @@ class AuctionCard extends StatelessWidget {
                                     ),
                                     onPressed: () => _navigateToDetails(
                                         context, auction, user),
-                                    child: const Text(
-                                      'Buy Now',
+                                    child: Text(
+                                      auction.isMyAuction ? 'View Details' : 'Buy Now',
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: primaryColor,
                                         fontSize: 10,
                                       ),
@@ -323,9 +323,9 @@ class AuctionCard extends StatelessWidget {
                               ),
                               onPressed: () =>
                                   _navigateToDetails(context, auction, user),
-                              child: const Text(
-                                'Bid Now',
-                                style: TextStyle(
+                              child: Text(
+                                auction.isMyAuction ? 'View Details' : 'Bid Now',
+                                style: const TextStyle(
                                   color: secondaryColor,
                                   fontSize: 12,
                                 ),
