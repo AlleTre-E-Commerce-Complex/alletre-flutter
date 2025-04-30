@@ -1,5 +1,4 @@
 import 'package:alletre_app/controller/providers/share_provider.dart';
-import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';

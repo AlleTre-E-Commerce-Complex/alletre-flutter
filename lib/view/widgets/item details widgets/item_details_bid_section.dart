@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/user_model.dart';
@@ -26,6 +27,9 @@ class ItemDetailsBidSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final isOwner = currentUser?.email == item.product?['user']?['email'];
+
     if (!item.isAuctionProduct || (title == "Similar Products" && !item.isAuctionProduct)) {
       return Column(
         children: [
@@ -34,6 +38,57 @@ class ItemDetailsBidSection extends StatelessWidget {
             width: double.infinity,
             child: Consumer<ContactButtonProvider>(
               builder: (context, contactProvider, child) {
+                if (isOwner) {
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // TODO: Implement change status functionality
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          child: Text(
+                            'Change Status',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(color: secondaryColor, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // TODO: Implement convert to auction functionality
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: secondaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              side: const BorderSide(color: primaryColor),
+                            ),
+                          ),
+                          child: Text(
+                            'Convert to Auction',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(color: primaryColor, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
                 return contactProvider.isShowingContactButtons(item.id)
                     ? Row(
                         children: [

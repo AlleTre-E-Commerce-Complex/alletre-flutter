@@ -168,7 +168,7 @@ class ProductDetailsScreen extends StatelessWidget {
     }
 
     // Helper function to download image from URL and save as local file
-    Future<File> _downloadImage(String url) async {
+    Future<File> downloadImage(String url) async {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         // Get temporary directory
@@ -202,7 +202,7 @@ class ProductDetailsScreen extends StatelessWidget {
             final List<File> downloadedFiles = [];
             for (final url in draftAuction!.imageLinks) {
               try {
-                final file = await _downloadImage(url);
+                final file = await downloadImage(url);
                 downloadedFiles.add(file);
               } catch (e) {
                 debugPrint('Error downloading image: $e');

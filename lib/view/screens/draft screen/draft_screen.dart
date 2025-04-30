@@ -14,42 +14,19 @@ class DraftsPage extends StatelessWidget {
   const DraftsPage({super.key, required this.user, this.onDelete});
 
   Future<void> _handleDelete(BuildContext context, AuctionItem draft, VoidCallback refreshCallback) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Draft'),
-        content: const Text('Are you sure you want to delete this draft? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: errorColor)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
       final success = await AuctionService().deleteDraft(draft.id.toString());
+
       if (success) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Draft deleted successfully')),
-          );
-          // Call the refresh callback to update the UI
           refreshCallback();
         }
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to delete draft')),
+            const SnackBar(content: Center(child: Text('Failed to delete draft'))),
           );
         }
       }
-    }
   }
 
   @override
@@ -97,7 +74,7 @@ class DraftsPage extends StatelessWidget {
                   return const Center(
                     child: Text(
                       'No drafts found',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16, color: onSecondaryColor),
                     ),
                   );
                 }

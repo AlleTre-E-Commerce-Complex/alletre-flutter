@@ -138,7 +138,7 @@ class AuctionItem {
       categoryName: categoryName ?? this.categoryName,
       subCategoryName: subCategoryName ?? this.subCategoryName,
       isAuctionProduct: isAuctionProduct ?? this.isAuctionProduct,
-      customFields: customFields ?? this.customFields,
+      customFields: customFields ?? customFields,
       product: product ?? this.product,
       returnPolicyDescription:
           returnPolicyDescription ?? this.returnPolicyDescription,
