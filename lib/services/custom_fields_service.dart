@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:alletre_app/model/custom_field_model.dart';
+import 'package:flutter/foundation.dart';
 
 class CustomFieldsService {
   static const String baseUrl = 'http://192.168.0.158:3001/api';
@@ -251,7 +252,8 @@ class CustomFieldsService {
       print('❌ Failed to fetch auction details');
       return null;
     } catch (e) {
-      print('❌ Error fetching auction details: $e');
+      // Suppress error message
+      debugPrint('Error fetching auction details: $e');
       return null;
     }
   }

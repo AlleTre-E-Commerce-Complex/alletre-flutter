@@ -2,6 +2,7 @@
 import 'dart:developer';
 import 'package:alletre_app/model/item_location.dart';
 import 'package:alletre_app/model/custom_field_model.dart';
+import 'package:flutter/foundation.dart';
 
 class AuctionItem {
   final int id;
@@ -209,7 +210,8 @@ class AuctionItem {
           createdAt = DateTime.parse(json['createdAt'] as String);
         }
       } catch (e) {
-        print('Error parsing createdAt: $e');
+        // Suppress error message
+        debugPrint('Error parsing createdAt: $e');
       }
 
       // Parse dates with validation
@@ -264,7 +266,8 @@ class AuctionItem {
           }
         }
       } catch (e) {
-        print('Error parsing dates: $e');
+        // Suppress error message
+        debugPrint('Error parsing dates: $e');
       }
 
       int bidCount = 0;
@@ -274,7 +277,8 @@ class AuctionItem {
           bidCount = countMap['bids'] as int? ?? 0;
         }
       } catch (e) {
-        print('Error parsing bid count: $e');
+        // Suppress error message
+        debugPrint('Error parsing bid count: $e');
       }
 
       // Get the latest bid amount if available
