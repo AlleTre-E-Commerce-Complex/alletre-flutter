@@ -9,7 +9,7 @@ class AuctionDetailsProvider extends ChangeNotifier {
   Future<void> fetchUserName(String auctionId) async {
     try {
       final data = await AuctionDetailsService.getAuctionDetails(auctionId);
-      if (data['success'] == true && data['data']?['user']?['userName'] != null) {
+      if (data!['success'] == true && data['data']?['user']?['userName'] != null) {
         _userNames[auctionId] = data['data']['user']['userName'];
         notifyListeners();
       }

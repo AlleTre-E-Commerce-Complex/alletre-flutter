@@ -978,7 +978,7 @@ class ProductDetailsScreen extends StatelessWidget {
                                                         .getAuctionDetails(result['data']
                                                                 ['id']
                                                             .toString());
-                                                if (details['success'] == true &&
+                                                if (details!['success'] == true &&
                                                     details['data'] != null) {
                                                   final AuctionItem fetchedDraft =
                                                       AuctionItem.fromJson(

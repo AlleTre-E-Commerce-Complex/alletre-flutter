@@ -95,7 +95,7 @@ class ItemDetailsScreen extends StatelessWidget {
               final String itemUrl = 'https://alletre.com/items/${item.id}';
               Share.share(
                 'Check out this ${title.toLowerCase()}: ${item.title}\n'
-                '${title == "Listed Products" ? "Price" : "Starting bid"}: AED ${NumberFormat.decimalPattern().format(double.tryParse(item.startBidAmount) ?? 0.0)}\n'
+                '${title == "Listed Products" ? "Price" : "Starting Bid"}: AED ${NumberFormat.decimalPattern().format(double.tryParse(item.startBidAmount) ?? 0.0)}\n'
                 '${title != "Listed Products" ? "Current Bid: AED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}\n" : ""}'
                 '$itemUrl',
                 subject: title == "Listed Products"
@@ -308,6 +308,14 @@ class ItemDetailsScreen extends StatelessWidget {
                                 ),
                                 child: Column(
                                   children: [
+                                    item.bids == 0
+                                    ? Text('Starting Bid', style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                              color: onSecondaryColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13),) :
                                     Text(
                                       'Current Bid',
                                       style: Theme.of(context)
