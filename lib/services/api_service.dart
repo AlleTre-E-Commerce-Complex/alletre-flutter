@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../controller/helpers/user_services.dart';
 import '../controller/helpers/navigation_services.dart';
-import '../utils/routes/main_stack.dart';
+import '../view/screens/login screen/login_page.dart';
 
 class ApiService {
   static final Dio _dio = Dio();
@@ -45,7 +45,7 @@ class ApiService {
                   queryParameters: opts.queryParameters,
                 );
                 return handler.resolve(cloneReq);
-              } catch (e) {
+              } catch (retryError) {
                 // If retry fails, logout
                 await UserService().logout();
                 final navigator = NavigationService.navigatorKey.currentState;
@@ -59,9 +59,16 @@ class ApiService {
                     ),
                   );
                   await Future.delayed(const Duration(seconds: 2));
-                  navigator.pushNamedAndRemoveUntil(MainStack.login, (route) => false);
+                  // Navigate to login screen using standard navigation
+                  navigator.pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                    (route) => false,
+                  );
                 }
-                return;
+                return handler.reject(DioException(
+                  requestOptions: opts,
+                  error: retryError,
+                ));
               }
             } else {
               // Refresh token expired or invalid: logout and redirect
@@ -77,9 +84,13 @@ class ApiService {
                   ),
                 );
                 await Future.delayed(const Duration(seconds: 2));
-                navigator.pushNamedAndRemoveUntil(MainStack.login, (route) => false);
+                // Navigate to login screen using standard navigation
+                navigator.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                  (route) => false,
+                );
               }
-              return;
+              return handler.reject(e);
             }
           }
           return handler.next(e);

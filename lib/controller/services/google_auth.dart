@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:alletre_app/controller/helpers/user_services.dart';
+import 'package:alletre_app/controller/services/token_refresh_service.dart';
 
 class GoogleAuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -13,32 +14,10 @@ class GoogleAuthService {
       'email',
       'profile',
     ],
-    serverClientId: '1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com', // Use web client ID as server client ID
+    serverClientId: '1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com',
   );
   final FirebaseAuth _googleAuth = FirebaseAuth.instance;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  Timer? _tokenRefreshTimer;
-
-  Future<void> _startTokenRefresh() async {
-    // Start periodic token refresh for backend tokens
-    Timer.periodic(const Duration(minutes: 25), (timer) async {
-      final userService = UserService();
-      final result = await userService.refreshTokens();
-      
-      if (!result['success']) {
-        debugPrint('Failed to refresh tokens: ${result['message']}');
-        timer.cancel();
-        return;
-      }
-      
-      debugPrint('Backend tokens refreshed successfully');
-    });
-  }
-
-  void _stopTokenRefresh() {
-    _tokenRefreshTimer?.cancel();
-    _tokenRefreshTimer = null;
-  }
 
   Future<String?> hCurrentToken() async {
     return await _storage.read(key: 'access_token');
@@ -48,27 +27,28 @@ class GoogleAuthService {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
+      debugPrint('Starting Google sign-in...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null; // User canceled sign-in
+      
+      if (googleUser == null) {
+        debugPrint('❌ Google sign-in cancelled by user');
+        return null;
+      }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
+      debugPrint('✅ Google sign-in successful');
+      debugPrint('Getting Google authentication...');
+      
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Sign in to Firebase with Google credential
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // Debug: Print Google auth tokens
-      debugPrint('Google Access Token: ${googleAuth.accessToken}');
-      debugPrint('Google ID Token: ${googleAuth.idToken}');
-
-      // Get and store Firebase ID token
+      final userCredential = await _googleAuth.signInWithCredential(credential);
+      
       if (userCredential.user != null) {
-        // Start token refresh for backend
-        _startTokenRefresh();
+        // Start token refresh service
+        TokenRefreshService().startTokenRefresh();
 
         // Call backend OAuth endpoint
         debugPrint('📤 Preparing OAuth request...');
@@ -130,13 +110,13 @@ class GoogleAuthService {
   }
 
   Future<void> signOut() async {
-    _stopTokenRefresh();
+    TokenRefreshService().stopTokenRefresh();
     await _storage.delete(key: 'access_token');
     await _googleSignIn.signOut();
     await _googleAuth.signOut();
   }
 
   void cleanup() {
-    _stopTokenRefresh();
+    TokenRefreshService().stopTokenRefresh();
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:alletre_app/controller/services/token_refresh_service.dart';
 
 class UserService {
   final String baseUrl = 'http://192.168.0.158:3001/api/auth';
@@ -144,6 +145,10 @@ class UserService {
           debugPrint('Storing tokens after login - Refresh: ${data['data']['refreshToken']}');
           await _storage.write(key: 'access_token', value: data['data']['accessToken']);
           await _storage.write(key: 'refresh_token', value: data['data']['refreshToken']);
+          
+          // Start token refresh service
+          TokenRefreshService().startTokenRefresh();
+          
           return {'success': true, 'message': 'Login successful'};
         }
       }
