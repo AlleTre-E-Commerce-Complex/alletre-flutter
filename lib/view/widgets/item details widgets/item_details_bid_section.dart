@@ -12,7 +12,7 @@ import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/controller/providers/contact_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 
-class ItemDetailsBidSection extends StatelessWidget {
+class ItemDetailsBidSection extends StatefulWidget {
   final AuctionItem item;
   final String title;
   final UserModel user;
@@ -25,12 +25,49 @@ class ItemDetailsBidSection extends StatelessWidget {
   });
 
   @override
+  State<ItemDetailsBidSection> createState() => _ItemDetailsBidSectionState();
+}
+
+class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
+  late TextEditingController _bidController;
+  late ValueNotifier<String> bidAmount;
+  late String minimumBid;
+
+  @override
+  void initState() {
+    super.initState();
+    minimumBid = widget.item.currentBid.isEmpty 
+        ? widget.item.startBidAmount 
+        : widget.item.currentBid;
+    bidAmount = ValueNotifier<String>(minimumBid);
+    _bidController = TextEditingController(
+      text: 'AED ${NumberFormat.decimalPattern().format(double.parse(minimumBid))}'
+    );
+    
+    bidAmount.addListener(_updateController);
+  }
+
+  void _updateController() {
+    final formattedValue = 'AED ${NumberFormat.decimalPattern().format(double.parse(bidAmount.value))}';
+    if (_bidController.text != formattedValue) {
+      _bidController.text = formattedValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _bidController.dispose();
+    bidAmount.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     final currentUser = FirebaseAuth.instance.currentUser;
-    final isOwner = currentUser?.email == item.product?['user']?['email'];
+    final isOwner = currentUser?.email == widget.item.product?['user']?['email'];
 
-    if (!item.isAuctionProduct || (title == "Similar Products" && !item.isAuctionProduct)) {
+    if (!widget.item.isAuctionProduct || (widget.title == "Similar Products" && !widget.item.isAuctionProduct)) {
       return Column(
         children: [
           const SizedBox(height: 10),
@@ -89,7 +126,7 @@ class ItemDetailsBidSection extends StatelessWidget {
                   );
                 }
 
-                return contactProvider.isShowingContactButtons(item.id)
+                return contactProvider.isShowingContactButtons(widget.item.id)
                     ? Row(
                         children: [
                           Expanded(
@@ -98,7 +135,7 @@ class ItemDetailsBidSection extends StatelessWidget {
                                 final message = Uri.encodeComponent(
                                     "Hello, I would like to inquire about your product listed on Alletre.");
                                 final whatsappUrl =
-                                    "https://wa.me/${item.phone}?text=$message";
+                                    "https://wa.me/${widget.item.phone}?text=$message";
                                 launchUrl(Uri.parse(whatsappUrl));
                               },
                               icon: const Icon(FontAwesomeIcons.whatsapp,
@@ -148,7 +185,7 @@ class ItemDetailsBidSection extends StatelessWidget {
                                                   color: Colors.grey[700]),
                                             ),
                                             Text(
-                                              item.phone,
+                                              widget.item.phone,
                                               style: TextStyle(
                                                 color: Theme.of(context)
                                                     .primaryColor,
@@ -211,7 +248,7 @@ class ItemDetailsBidSection extends StatelessWidget {
                                                 ElevatedButton(
                                                   onPressed: () {
                                                     final url =
-                                                        'tel:${item.phone}';
+                                                        'tel:${widget.item.phone}';
                                                     launchUrl(Uri.parse(url));
                                                   },
                                                   style:
@@ -267,7 +304,7 @@ class ItemDetailsBidSection extends StatelessWidget {
                           if (!isLoggedIn) {
                             AuthHelper.showAuthenticationRequiredMessage(context);
                           } else {
-                            contactProvider.toggleContactButtons(item.id);
+                            contactProvider.toggleContactButtons(widget.item.id);
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -292,18 +329,11 @@ class ItemDetailsBidSection extends StatelessWidget {
       );
     }
 
-    final ValueNotifier<String> bidAmount = ValueNotifier<String>(
-      item.currentBid.isEmpty ? item.startBidAmount : item.currentBid,
-    );
-
-    final String minimumBid =
-        item.currentBid.isEmpty ? item.startBidAmount : item.currentBid;
-
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
             border: Border.all(color: onSecondaryColor, width: 1.4),
             borderRadius: BorderRadius.circular(6),
@@ -338,34 +368,51 @@ class ItemDetailsBidSection extends StatelessWidget {
                 },
               ),
               Expanded(
-                child: ValueListenableBuilder<String>(
-                  valueListenable: bidAmount,
-                  builder: (context, value, child) {
-                    return Text(
-                      'AED ${NumberFormat.decimalPattern().format(double.parse(value))}',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: onSecondaryColor,
-                          fontSize: 15),
-                      textAlign: TextAlign.center,
-                    );
+                child: TextField(
+                  controller: _bidController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: onSecondaryColor,
+                      fontSize: 15),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: (newValue) {
+                    // Remove 'AED ' prefix and any commas
+                    final cleanValue = newValue.replaceAll('AED ', '').replaceAll(',', '');
+                    if (cleanValue.isNotEmpty) {
+                      final numericValue = double.tryParse(cleanValue);
+                      if (numericValue != null) {
+                        bidAmount.value = numericValue.toString();
+                      }
+                    }
                   },
                 ),
               ),
-              Container(
-                height: 30,
-                width: 30,
-                decoration: BoxDecoration(
-                  color: primaryColor,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.add, color: secondaryColor, size: 15),
-                  onPressed: () {
-                    final currentValue = double.parse(bidAmount.value);
-                    bidAmount.value = (currentValue + 50).toString();
-                  },
-                ),
+              ValueListenableBuilder<String>(
+                valueListenable: bidAmount,
+                builder: (context, value, child) {
+                  return Container(
+                    height: 30,
+                    width: 30,
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.add, color: secondaryColor, size: 15),
+                      onPressed: () {
+                        final currentValue = double.parse(value);
+                        bidAmount.value = (currentValue + 50).toString();
+                      },
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -376,8 +423,25 @@ class ItemDetailsBidSection extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () {
               if (!isLoggedIn) {
-                  AuthHelper.showAuthenticationRequiredMessage(context);
-                }
+                AuthHelper.showAuthenticationRequiredMessage(context);
+                return;
+              }
+              
+              final currentBid = double.parse(bidAmount.value);
+              final minBid = double.parse(minimumBid);
+              
+              if (currentBid <= minBid) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Bid amount must be more than AED ${NumberFormat.decimalPattern().format(minBid)}',
+                    style: const TextStyle(fontSize: 13)),
+                    backgroundColor: errorColor,
+                  ),
+                );
+                return;
+              }
+              
+              // TODO: Implement bid submission logic
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
