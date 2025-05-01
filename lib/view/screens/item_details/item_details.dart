@@ -298,8 +298,9 @@ class ItemDetailsScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (title == 'Live Auctions' ||
-                              title == 'Upcoming Auctions')
+                          if ((title == 'Live Auctions' ||
+                              title == 'Upcoming Auctions') ||
+                              item.isMyAuction)
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -382,7 +383,7 @@ class ItemDetailsScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                          if (item.buyNowEnabled) ...[
+                          if (item.buyNowEnabled && !item.isMyAuction) ...[
                             const SizedBox(width: 15),
                             Expanded(
                               child: ElevatedButton(
@@ -646,14 +647,14 @@ class ItemDetailsScreen extends StatelessWidget {
   }
 
   void _showDetailsBottomSheet(BuildContext context) async {
-    print('\nDEBUG: Opening details bottom sheet');
-    print('DEBUG: Item details:');
-    print('  - ID: ${item.id}');
-    print('  - Title: ${item.title}');
-    print('  - Custom fields: ${item.customFields}');
-    print('  - Subcategory ID: ${item.subCategoryId}');
-    print('  - Is auction: ${item.isAuctionProduct}');
-    print('  - 🪪 Product ID: ${item.productId}');
+    // Show loading indicator immediately
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
 
     CategoryFields? mergedFields;
     try {
@@ -723,6 +724,11 @@ class ItemDetailsScreen extends StatelessWidget {
       print('DEBUG: Error fetching custom fields: $e');
       // If custom fields fetch fails, use item custom fields as fallback
       mergedFields = item.customFields;
+    }
+
+    // Close the loading indicator
+    if (context.mounted) {
+      Navigator.pop(context);
     }
 
     // Show bottom sheet with available fields

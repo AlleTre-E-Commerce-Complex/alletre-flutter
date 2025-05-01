@@ -253,8 +253,26 @@ class AuctionCard extends StatelessWidget {
                         // Auction Card Action Buttons
                         if ((title != 'Listed Products' && title != 'Expired Auctions' && auction.isAuctionProduct) ||
                             (title == 'Similar Products' && auction.isAuctionProduct)) ...[
-                          const SizedBox(height: 10),
-                          if (auction.buyNowEnabled)...[
+                          
+                          if (auction.isMyAuction)
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 32),
+                                backgroundColor: primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
+                              onPressed: () => _navigateToDetails(context, auction, user),
+                              child: const Text(
+                                'View Details',
+                                style: TextStyle(
+                                  color: secondaryColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            )
+                          else if (auction.buyNowEnabled)...[
                             Row(
                               children: [
                                 SizedBox(
@@ -271,10 +289,10 @@ class AuctionCard extends StatelessWidget {
                                     ),
                                     onPressed: () => _navigateToDetails(
                                         context, auction, user),
-                                    child: Text(
-                                      auction.isMyAuction ? 'View Details' : 'Bid Now',
+                                    child: const Text(
+                                      'Bid Now',
                                       textAlign: TextAlign.center,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: secondaryColor,
                                         fontSize: 10,
                                       ),
@@ -298,17 +316,16 @@ class AuctionCard extends StatelessWidget {
                                     ),
                                     onPressed: () => _navigateToDetails(
                                         context, auction, user),
-                                    child: Text(
-                                      auction.isMyAuction ? 'View Details' : 'Buy Now',
+                                    child: const Text(
+                                      'Buy Now',
                                       textAlign: TextAlign.center,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: primaryColor,
                                         fontSize: 10,
                                       ),
                                     ),
                                   ),
                                 ),
-                                
                               ],
                             )
                           ]
@@ -323,9 +340,9 @@ class AuctionCard extends StatelessWidget {
                               ),
                               onPressed: () =>
                                   _navigateToDetails(context, auction, user),
-                              child: Text(
-                                auction.isMyAuction ? 'View Details' : 'Bid Now',
-                                style: const TextStyle(
+                              child: const Text(
+                                'Bid Now',
+                                style: TextStyle(
                                   color: secondaryColor,
                                   fontSize: 12,
                                 ),

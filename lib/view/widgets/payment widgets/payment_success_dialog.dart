@@ -1,6 +1,8 @@
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 
 class PaymentSuccessDialog {
   static void show(BuildContext context) {
@@ -42,8 +44,17 @@ class PaymentSuccessDialog {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
-                        // You can add navigation logic here
+                      onPressed: () async {
+                        // Refresh auction list before navigation
+                        final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+                        await auctionProvider.getLiveAuctions();
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const MainStack()),
+                            (Route<dynamic> route) => false,
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
@@ -59,12 +70,17 @@ class PaymentSuccessDialog {
                     ),
                     const SizedBox(width: 5),
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MainStack()),
-                          (Route<dynamic> route) => false,
-                        );
+                      onPressed: () async {
+                        // Refresh auction list before navigation
+                        final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+                        await auctionProvider.getLiveAuctions();
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const MainStack()),
+                            (Route<dynamic> route) => false,
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,

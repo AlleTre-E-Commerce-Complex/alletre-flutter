@@ -651,16 +651,6 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   }
 
                   if (response['success'] == true) {
-                    // Show success message
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content:
-                              Center(child: Text('Item created successfully')),
-                        ),
-                      );
-                    }
-
                     // Debug the data before navigation
                     debugPrint(
                         'Shipping Screen - Full auction data: $fullAuctionData');
