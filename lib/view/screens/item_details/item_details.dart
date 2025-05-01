@@ -42,18 +42,23 @@ class ItemDetailsScreen extends StatelessWidget {
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
 
+    // Join auction room and fetch details when screen is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final auctionProvider =
-          Provider.of<AuctionProvider>(context, listen: false);
+      final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
       auctionProvider.joinAuctionRoom(item.id.toString());
 
       // Fetch auction details to get username
       if (item.isAuctionProduct) {
-        final detailsProvider =
-            Provider.of<AuctionDetailsProvider>(context, listen: false);
+        final detailsProvider = Provider.of<AuctionDetailsProvider>(context, listen: false);
         detailsProvider.fetchUserName(item.id.toString());
       }
     });
+
+    // Get the latest item data from the provider
+    final currentItem = auctionProvider.liveAuctions.firstWhere(
+      (auction) => auction.id == item.id,
+      orElse: () => item,
+    );
 
     // Compute the username before the widget tree
     final String? userName = item.isAuctionProduct
@@ -108,16 +113,13 @@ class ItemDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: PopScope(
-        canPop: true,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) {
-            final auctionProvider =
-                Provider.of<AuctionProvider>(context, listen: false);
-            auctionProvider.leaveAuctionRoom(item.id.toString());
-          }
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Refresh auction data
+          await auctionProvider.getLiveAuctions();
         },
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -561,7 +563,11 @@ class ItemDetailsScreen extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    ItemDetailsBidSection(item: item, title: title, user: user),
+                    ItemDetailsBidSection(
+                      item: currentItem,
+                      title: title,
+                      user: user,
+                    ),
                     const SizedBox(height: 40),
                     AuctionListWidget(
                       user: UserModel.empty(),
