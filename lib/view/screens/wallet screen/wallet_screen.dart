@@ -8,7 +8,6 @@ import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:provider/provider.dart';
 import '../withdraw_screens/withdraw_screen.dart';
-import 'package:alletre_app/utils/ui_helpers.dart';
 import 'package:alletre_app/view/screens/login screen/login_page.dart';
 
 class WalletScreen extends StatelessWidget {

@@ -97,7 +97,7 @@ class AuctionCountdown extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         )).copyWith(
-                          color: onSecondaryColor,
+                          color: primaryVariantColor,
                         ),
               ),
               TextSpan(

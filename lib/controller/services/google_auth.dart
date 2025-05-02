@@ -5,7 +5,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/controller/services/token_refresh_service.dart';
 
 class GoogleAuthService {

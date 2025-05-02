@@ -20,6 +20,7 @@ class AuctionItem {
   final String startBidAmount;
   final String currentBid;
   final String buyNowPrice;
+  final bool isDepositPaid;
   String status;
   String type;
   String usageStatus;
@@ -55,6 +56,7 @@ class AuctionItem {
     required this.startBidAmount,
     required this.currentBid,
     required this.buyNowPrice,
+    required this.isDepositPaid,
     required this.status,
     required this.type,
     required this.usageStatus,
@@ -92,6 +94,7 @@ class AuctionItem {
     String? startBidAmount,
     String? currentBid,
     String? buyNowPrice,
+    bool? isDepositPaid,
     String? status,
     String? type,
     String? usageStatus,
@@ -126,6 +129,7 @@ class AuctionItem {
       startBidAmount: startBidAmount ?? this.startBidAmount,
       currentBid: currentBid ?? this.currentBid,
       buyNowPrice: buyNowPrice ?? this.buyNowPrice,
+      isDepositPaid: isDepositPaid ?? this.isDepositPaid,
       status: status ?? this.status,
       type: type ?? this.type,
       usageStatus: usageStatus ?? this.usageStatus,
@@ -371,6 +375,7 @@ class AuctionItem {
         type: json['type'] as String? ?? 'ON_TIME',
         usageStatus: product['usageStatus'] as String? ?? '',
         buyNowEnabled: json['isBuyNowAllowed'] as bool? ?? false,
+        isDepositPaid: json['isDepositPaid'] as bool? ?? true,
         startDate: startDate,
         expiryDate: expiryDate,
         endDate: endDate,
@@ -421,6 +426,7 @@ class AuctionItem {
       startBidAmount: '0',
       currentBid: '0',
       buyNowPrice: '0',
+      isDepositPaid: true,
       startDate: DateTime.now(),
       expiryDate: DateTime.now(),
       endDate: null,

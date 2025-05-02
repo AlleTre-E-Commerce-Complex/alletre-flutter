@@ -6,17 +6,13 @@ class AuctionDetailsService {
   static const String baseUrl = 'http://192.168.0.158:3001/api';
 
   static Future<Map<String, dynamic>?> getAuctionDetails(String auctionId) async {
-    // debugPrint('🎯 Fetching details for auction: $auctionId');
     final response = await http.get(
       Uri.parse('$baseUrl/auctions/user/$auctionId/details'),
     );
 
-    // debugPrint('📥 Response status code: ${response.statusCode}');
     final data = jsonDecode(response.body);
-    // debugPrint('📦 Response data: $data');
 
     if (response.statusCode == 200) {
-      // debugPrint('✅ Successfully fetched auction details');
       return data;
     }
     return null;
@@ -32,12 +28,9 @@ class AuctionDetailsService {
       if (response.statusCode == 200) {
         return data;
       } else {
-        final error = '❌ Failed to fetch draft auction details: ${response.statusCode}';
-        debugPrint(error);
-        throw Exception(error);
+        throw Exception('Failed to fetch draft auction details: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('⚠️ Error fetching draft auction details: $e');
       rethrow;
     }
   }

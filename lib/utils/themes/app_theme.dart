@@ -25,7 +25,7 @@ String getDisplayStatus(String status) {
     case 'PENDING_OWNER_DEPOIST':
       return 'PENDING';
     default:
-      return 'Unknown';
+      return 'UNKNOWN';
   }
 }
 
@@ -41,6 +41,8 @@ Color getStatusColor(String status) {
       return activeColor;
     case "IN_SCHEDULED":
       return scheduledColor;
+    case "PENDING_OWNER_DEPOIST":
+      return avatarColor;
     case "CANCELLED_BEFORE_EXP_DATE":
       return primaryColor;
     case "USED":

@@ -47,8 +47,8 @@ class ItemDetailsScreen extends StatelessWidget {
       final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
       auctionProvider.joinAuctionRoom(item.id.toString());
 
-      // Fetch auction details to get username
-      if (item.isAuctionProduct) {
+      // Fetch auction details to get username - only if not already fetched
+      if (item.isAuctionProduct && item.userName == null) {
         final detailsProvider = Provider.of<AuctionDetailsProvider>(context, listen: false);
         detailsProvider.fetchUserName(item.id.toString());
       }

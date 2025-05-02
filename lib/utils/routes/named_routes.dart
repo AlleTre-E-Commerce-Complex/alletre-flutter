@@ -10,6 +10,7 @@ import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dar
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/splash%20screen/splash_screen.dart';
 import 'package:flutter/material.dart';
+import '../../view/screens/auction screen/payment_details_screen.dart';
 import '../../view/screens/home screen/home_contents.dart';
 
 class AppRoutes {
@@ -28,7 +29,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String editProfile = '/editProfile';
   static const String categories = '/categories';
-
+  static const String paymentDetails = '/paymentDetails';
   // Static method to define all the routes in one place
   static Map<String, WidgetBuilder> get routes {
     return {
@@ -50,7 +51,8 @@ class AppRoutes {
       bids: (context) => const BidsScreen(),
       profile: (context) => const ProfileScreen(),
       editProfile: (context) => const EditProfileScreen(),
-      categories: (context) => CategoriesPage()
+      categories: (context) => CategoriesPage(),
+      paymentDetails: (context) => const PaymentDetailsScreen(auctionData: {}),
     };
   }
 }

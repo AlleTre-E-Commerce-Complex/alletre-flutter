@@ -1234,4 +1234,119 @@ class AuctionService {
       return false;
     }
   }
+
+  Future<Map<String, dynamic>> submitBid(String auctionId, double bidAmount) async {
+    try {
+      String? accessToken = await _getAccessToken();
+      if (accessToken == null) {
+        throw Exception('Not authenticated');
+      }
+
+      debugPrint('🔍 AuctionService.submitBid Debug:');
+      debugPrint('🔍 Received bid amount: $bidAmount');
+      debugPrint('🔍 Auction ID: $auctionId');
+      debugPrint('🔍 Access Token: ${accessToken.substring(0, 10)}...');
+      
+      final requestBody = jsonEncode({
+        'bidAmount': bidAmount,
+      });
+      debugPrint('🔍 Request Body (JSON): $requestBody');
+
+      final url = '${ApiEndpoints.baseUrl}${ApiEndpoints.userAuctionDetails(auctionId)}/submit-bid';
+      debugPrint('🔍 Request URL: $url');
+      debugPrint('🔍 Request Headers:');
+      debugPrint('  - Content-Type: application/json');
+      debugPrint('  - Authorization: Bearer ${accessToken.substring(0, 10)}...');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: requestBody,
+      );
+
+      debugPrint('🔍 Response Status Code: ${response.statusCode}');
+      debugPrint('🔍 Response Headers: ${response.headers}');
+      debugPrint('🔍 Response Body: ${response.body}');
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final error = jsonDecode(response.body);
+        debugPrint('🔍 Error Response Details:');
+        debugPrint('  - Status Code: ${response.statusCode}');
+        debugPrint('  - Error Body: $error');
+        
+        final errorMessage = error['message'] ?? error['error'] ?? 'Failed to submit bid';
+        debugPrint('🔍 Extracted Error Message: $errorMessage');
+        throw Exception(errorMessage);
+      }
+
+      final responseData = jsonDecode(response.body);
+      debugPrint('🔍 Successful Response Data: $responseData');
+      return responseData;
+    } catch (e) {
+      debugPrint('🔍 Bid Submission Error:');
+      debugPrint('  - Error Type: ${e.runtimeType}');
+      debugPrint('  - Error Message: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> processBidderDeposit(String auctionId, double bidAmount) async {
+    try {
+      String? accessToken = await _getAccessToken();
+      if (accessToken == null) {
+        throw Exception('Not authenticated');
+      }
+
+      final requestBody = jsonEncode({
+        'bidAmount': bidAmount,
+      });
+
+      final url = '${ApiEndpoints.baseUrl}${ApiEndpoints.userAuctionDetails(auctionId)}/bidder-deposit';
+      print('🔍 Deposit Payment Request:');
+      print('  - URL: $url');
+      print('  - Headers:');
+      print('    * Content-Type: application/json');
+      print('    * Authorization: Bearer ${accessToken.substring(0, 10)}...');
+      print('  - Body: $requestBody');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: requestBody,
+      );
+
+      print('🔍 Deposit Payment Response:');
+      print('  - Status Code: ${response.statusCode}');
+      print('  - Headers: ${response.headers}');
+      print('  - Body: ${response.body}');
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final error = jsonDecode(response.body);
+        final errorMessage = error['message'] ?? error['error'] ?? 'Failed to process deposit';
+        print('🔍 Deposit Payment Error:');
+        print('  - Status Code: ${response.statusCode}');
+        print('  - Error Message: $errorMessage');
+        print('  - Full Error: $error');
+        throw Exception(errorMessage);
+      }
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('🔍 Deposit Payment Exception:');
+      print('  - Error Type: ${e.runtimeType}');
+      print('  - Error Message: $e');
+      if (e is http.ClientException) {
+        print('  - Client Exception Details:');
+        print('    * Message: ${e.message}');
+        print('    * Uri: ${e.uri}');
+      }
+      rethrow;
+    }
+  }
 }

@@ -7,7 +7,7 @@ class AuctionDetailsProvider extends ChangeNotifier {
   String? getUserName(String auctionId) => _userNames[auctionId];
 
   Future<void> fetchUserName(String auctionId) async {
-    if (auctionId.isEmpty) return;
+    if (auctionId.isEmpty || _userNames.containsKey(auctionId)) return;
     
     try {
       final data = await AuctionDetailsService.getAuctionDetails(auctionId);
