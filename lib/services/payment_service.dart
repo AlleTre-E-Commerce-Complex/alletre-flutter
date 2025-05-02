@@ -156,7 +156,7 @@ class PaymentService {
       })}');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/user/bidder/deposit'),
+        Uri.parse('$baseUrl/auctions/user/$auctionId/bidder-deposit'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

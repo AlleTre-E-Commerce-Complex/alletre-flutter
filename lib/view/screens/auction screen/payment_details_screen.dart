@@ -149,10 +149,10 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 
       setState(() {
         depositAmount = deposit.toInt();
-        debugPrint('Calculated deposit amount: $depositAmount');
+        debugPrint('✅ Calculated deposit amount: $depositAmount');
       });
     } catch (e) {
-      debugPrint('Error calculating deposit amount: $e');
+      debugPrint('❌ Error calculating deposit amount: $e');
       depositAmount = null;
     }
   }
@@ -529,7 +529,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                           ),
                                         )
                                       : Text(
-                                          'Pay AED ${depositAmount?.toString() ?? 'Unknown'}',
+                                          'Pay AED ${NumberFormat("#,##0").format(double.tryParse(widget.auctionData['depositAmount']?.toString() ?? '0')?.round() ?? 0)}',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             color: ((walletBalance ?? 0) <
@@ -593,8 +593,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                     return;
                                   }
 
-                                  final categoryId = widget.auctionData['data']
-                                      ?['product']?['categoryId'];
+                                  final categoryId = widget.auctionData['categoryId'];
                                   print(
                                       'Category ID from auction data: $categoryId (${categoryId.runtimeType})');
                                   if (categoryId == null) {
@@ -618,7 +617,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                   }
 
                                   final auctionId =
-                                      widget.auctionData['data']?['id'];
+                                      widget.auctionData['id'];
                                   if (auctionId == null) {
                                     throw Exception('Invalid auction ID');
                                   }
@@ -627,11 +626,23 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 
                                   if (selectedPaymentMethod.value ==
                                       PaymentMethod.wallet) {
-                                    await PaymentService.walletPayForAuction(
-                                      auctionId: auctionId,
-                                      amount: amount,
-                                      token: token,
-                                    );
+                                    if (widget.auctionData['isMyAuction'] == true) {
+                                      // Seller payment
+                                      await PaymentService.walletPayForAuction(
+                                        auctionId: auctionId,
+                                        amount: amount,
+                                        token: token,
+                                      );
+                                    } else {
+                                      // Bidder payment
+                                      final bidAmount = double.tryParse(widget.auctionData['amount']?.toString() ?? '0') ?? 0;
+                                      await PaymentService.walletPayDepositByBidder(
+                                        auctionId: auctionId,
+                                        amount: amount,
+                                        bidAmount: bidAmount,
+                                        token: token,
+                                      );
+                                    }
 
                                     if (!context.mounted) return;
                                     PaymentSuccessDialog.show(context);
@@ -652,14 +663,28 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                     }
 
                                     try {
-                                      await PaymentService.payForAuction(
-                                        auctionId: auctionId,
-                                        amount: amount,
-                                        paymentType: 'card',
-                                        currency: 'AED',
-                                        token: token,
-                                        cardDetails: cardDetails,
-                                      );
+                                      if (widget.auctionData['isMyAuction'] == true) {
+                                        // Seller payment
+                                        await PaymentService.payForAuction(
+                                          auctionId: auctionId,
+                                          amount: amount,
+                                          paymentType: 'card',
+                                          currency: 'AED',
+                                          token: token,
+                                          cardDetails: cardDetails,
+                                        );
+                                      } else {
+                                        // Bidder payment
+                                        final bidAmount = double.tryParse(widget.auctionData['amount']?.toString() ?? '0') ?? 0;
+                                        await PaymentService.payDepositByBidder(
+                                          auctionId: auctionId,
+                                          amount: amount,
+                                          bidAmount: bidAmount,
+                                          currency: 'AED',
+                                          token: token,
+                                          cardDetails: cardDetails,
+                                        );
+                                      }
                                     } catch (e) {
                                       if (!context.mounted) return;
                                       ScaffoldMessenger.of(context)
