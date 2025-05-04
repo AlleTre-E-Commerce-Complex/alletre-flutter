@@ -49,62 +49,70 @@ class UserProfileCard extends StatelessWidget {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        // Profile image based on auth method
-                        if (photoUrl != null)
-                          CircleAvatar(
-                            radius: 36,
-                            backgroundImage: photoUrl.startsWith('http')
-                                ? NetworkImage(photoUrl)
-                                : FileImage(File(photoUrl)) as ImageProvider,
-                            backgroundColor: buttonBgColor,
-                          )
-                        else if (user.profileImagePath != null)
-                          SvgPicture.asset(
-                            user.profileImagePath!,
-                          )
-                        else
-                          CircleAvatar(
-                            radius: 36,
-                            backgroundColor: buttonBgColor,
-                            child: Icon(
-                              Icons.person,
-                              color: avatarColor,
-                              size: 36,
+                    Flexible(
+                      child: Row(
+                        children: [
+                          // Profile image based on auth method
+                          if (photoUrl != null)
+                            CircleAvatar(
+                              radius: 36,
+                              backgroundImage: photoUrl.startsWith('http')
+                                  ? NetworkImage(photoUrl)
+                                  : FileImage(File(photoUrl)) as ImageProvider,
+                              backgroundColor: buttonBgColor,
+                            )
+                          else if (user.profileImagePath != null)
+                            SvgPicture.asset(
+                              user.profileImagePath!,
+                            )
+                          else
+                            CircleAvatar(
+                              radius: 36,
+                              backgroundColor: buttonBgColor,
+                              child: Icon(
+                                Icons.person,
+                                color: avatarColor,
+                                size: 36,
+                              ),
+                            ),
+                          const SizedBox(width: 14),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  displayName,
+                                  style: theme.textTheme.titleMedium!.copyWith(fontSize: 18),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
+                                ElevatedButton(
+                                  onPressed: onButtonPressed,
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: primaryColor,
+                                    backgroundColor: buttonBgColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15, vertical: 6),
+                                    minimumSize: const Size(80, 31),
+                                    elevation: 0,
+                                  ),
+                                  child: Text(
+                                    buttonText,
+                                    style: theme.textTheme.labelSmall!.copyWith(
+                                        color: onSecondaryColor),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        const SizedBox(width: 14),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              displayName,
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            ElevatedButton(
-                              onPressed: onButtonPressed,
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: primaryColor,
-                                backgroundColor: buttonBgColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15, vertical: 6),
-                                minimumSize: const Size(80, 31),
-                                elevation: 0,
-                              ),
-                              child: Text(
-                                buttonText,
-                                style: theme.textTheme.labelSmall!.copyWith(
-                                    color: onSecondaryColor),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

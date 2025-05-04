@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/ui_helpers.dart';
 import 'package:alletre_app/utils/deposit_calculator.dart';
