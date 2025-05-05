@@ -44,10 +44,7 @@ class CategoryService {
         for (var categoryData in categoriesData) {
           final category = Category.fromJson(categoryData as Map<String, dynamic>);
           _categories[category.id] = category;
-          print('Added category: ${category.nameEn} (ID: ${category.id})');
         }
-      } else {
-        print('Invalid categories data format: success=${data['success']}, data=${data['data']}');
       }
     } catch (e) {
       print('Error initializing categories: $e');
@@ -97,15 +94,9 @@ class CategoryService {
               // print('🏆 Successfully added subcategory: ${subCategory.nameEn} (ID: ${subCategory.id})');
             } catch (e) {
               print('Error processing individual subcategory: $e');
-              print('Problematic data: $subCategoryData');
             }
           }
-        } else {
-          print('Could not find subcategories in response structure');
-          print('Available data structure: ${data['data']}');
-        }
-      } else {
-        print('Invalid response format: success=${data['success']}, data=${data['data']}');
+        } 
       }
     } catch (e, stackTrace) {
       print('Error initializing subcategories: $e');

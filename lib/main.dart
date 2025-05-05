@@ -7,7 +7,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:alletre_app/services/api/category_api_service.dart';
 import 'services/api_service.dart';
 
-void main() async {
+void main() async {  
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase

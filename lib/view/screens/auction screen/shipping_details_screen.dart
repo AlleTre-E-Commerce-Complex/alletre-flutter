@@ -21,7 +21,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import '../../../controller/helpers/address_service.dart';
 
-// Add this helper function at the top-level of the file (outside the widget class)
 Future<List<Map<String, dynamic>>> fetchUserAddresses() async {
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'access_token');
@@ -250,8 +249,8 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                                   userProvider.setAddresses(updatedAddresses);
                                   addressRefreshKey.value++;
                                 } else {
-                                  showError(context,
-                                      'Failed to update address.');
+                                  showError(
+                                      context, 'Failed to update address.');
                                 }
                               }
                               _refreshAddresses();
@@ -273,8 +272,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                                 userProvider.setAddresses(updatedAddresses);
                                 addressRefreshKey.value++;
                               } else {
-                                showError(context,
-                                    'Failed to delete address.');
+                                showError(context, 'Failed to delete address.');
                               }
                               _refreshAddresses();
                             },
@@ -429,7 +427,8 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                 if (addressesSnapshot.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Center(child: Text('Please add at least one address')),
+                      content: Center(
+                          child: Text('Please add at least one address')),
                     ),
                   );
                   return;
@@ -588,7 +587,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
 
                   // --- Ensure locationId is included in product payload ---
                   product['locationId'] = locationId;
-                                  fullAuctionData['product'] = product;
+                  fullAuctionData['product'] = product;
 
                   // Add optional policies if present
                   if (widget.auctionData['returnPolicy'] != null) {
@@ -651,53 +650,53 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   }
 
                   if (response['success'] == true) {
-                    // Debug the data before navigation
-                    debugPrint(
-                        'Shipping Screen - Full auction data: $fullAuctionData');
-                    debugPrint('Shipping Screen - API Response: $response');
-                    debugPrint(
-                        'Shipping Screen - End time: ${endTime.toIso8601String()}');
-                    final navigationData = {
-                      'success': response['success'],
-                      'data': {
-                        ...response['data'],
-                        'endTime': endTime.toIso8601String(),
-                        ...fullAuctionData,
-                        'ProductListingPrice': fullAuctionData['product']
-                            ['price'],
-                        'product': {
-                          ...fullAuctionData['product'],
-                          'images': widget.imagePaths,
+                    // Fetch auction details from backend to ensure isMyAuction is set
+                    try {
+                      final auctionId = response['data']['id'];
+                      final detailsUrl = Uri.parse(
+                          '${ApiEndpoints.baseUrl}/auctions/user/$auctionId/details');
+                      final token = await const FlutterSecureStorage()
+                          .read(key: 'access_token');
+                      final detailsResponse = await http.get(
+                        detailsUrl,
+                        headers: {
+                          'Authorization': 'Bearer $token',
+                          'Content-Type': 'application/json',
                         },
-                      }
-                    };
-                    debugPrint(
-                        'Shipping Screen - Navigation data: $navigationData');
-
-                    // Print item details
-                    print('🔦🔦New Item Created:');
-                    print(
-                        '🔦🔦Item Name: ${widget.auctionData['product']['title']}');
-                    print('🔦🔦Status: ${response['status']}');
-                    // Use ProductListingPrice for listed products, fallback to product price
-                    final listingPrice = navigationData['data']
-                            ['ProductListingPrice'] ??
-                        navigationData['data']['product']['price'];
-                    print('🔦🔦Listing Price: $listingPrice');
-
-                    if (context.mounted) {
-                      if (widget.title == 'Create Auction') {
-                        // Navigate to payment details for auctions
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PaymentDetailsScreen(
-                              auctionData: navigationData,
-                            ),
-                          ),
-                        );
+                      );
+                      final detailsJson = jsonDecode(detailsResponse.body);
+                      if (detailsJson['success'] == true) {
+                        // Optionally, merge in endTime and any extra data you want to pass
+                        detailsJson['data']['endTime'] =
+                            endTime.toIso8601String();
+                        detailsJson['data']['ProductListingPrice'] =
+                            fullAuctionData['product']['price'];
+                        detailsJson['data']['product']['images'] =
+                            widget.imagePaths;
+                        if (context.mounted) {
+                          if (widget.title == 'Create Auction') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PaymentDetailsScreen(
+                                  auctionData: {'data': detailsJson['data']},
+                                ),
+                              ),
+                            );
+                          } else {
+                            ListedSuccessDialog.show(context);
+                          }
+                        }
                       } else {
-                        ListedSuccessDialog.show(context);
+                        throw Exception('Failed to fetch details');
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Failed to fetch details: '
+                                  '${e.toString()}')),
+                        );
                       }
                     }
                   } else {

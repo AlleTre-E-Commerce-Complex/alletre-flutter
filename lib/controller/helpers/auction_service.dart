@@ -1295,8 +1295,15 @@ class AuctionService {
 
   Future<Map<String, dynamic>> processBidderDeposit(String auctionId, double bidAmount) async {
     try {
+      final now = DateTime.now();
+      print('==============================');
+      print('🔍 [${now.toIso8601String()}] Starting Bidder Deposit Payment');
+      print('  - Auction ID: $auctionId');
+      print('  - Bid Amount: $bidAmount');
       String? accessToken = await _getAccessToken();
+      print('  - Access Token: ${accessToken?.substring(0, 20) ?? "null"}...');
       if (accessToken == null) {
+        print('❌ No access token found!');
         throw Exception('Not authenticated');
       }
 
@@ -1309,7 +1316,7 @@ class AuctionService {
       print('  - URL: $url');
       print('  - Headers:');
       print('    * Content-Type: application/json');
-      print('    * Authorization: Bearer ${accessToken.substring(0, 10)}...');
+      print('    * Authorization: Bearer ${accessToken.substring(0, 20)}...');
       print('  - Body: $requestBody');
 
       final response = await http.post(
@@ -1336,11 +1343,45 @@ class AuctionService {
         throw Exception(errorMessage);
       }
 
-      return jsonDecode(response.body);
-    } catch (e) {
+      print('🔍 Detailed Debugging:');
+      print('  - Access Token: $accessToken');
+      print('  - Request Body: $requestBody');
+      print('  - Request Headers: ${{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      }}');
+      print('  - Response Status Code: ${response.statusCode}');
+      print('  - Response Headers: ${response.headers}');
+      print('  - Response Body: ${response.body}');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('✅ Deposit Payment Success!');
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        print('❌ Deposit Payment Error:');
+        print('  - Status Code: ${response.statusCode}');
+        print('  - Headers: ${response.headers}');
+        print('  - Body: ${response.body}');
+        try {
+          final errorJson = jsonDecode(response.body);
+          print('  - Backend Error Fields:');
+          print('    * statusCode: ${errorJson['statusCode']}');
+          print('    * message: ${errorJson['message']}');
+          if (errorJson['error'] != null) print('    * error: ${errorJson['error']}');
+          if (errorJson['stack'] != null) print('    * stack: ${errorJson['stack']}');
+          String errorDetails = 'Deposit payment failed [${response.statusCode}]: ${errorJson['message']}';
+          if (errorJson['error'] != null) errorDetails += ' (${errorJson['error']})';
+          if (errorJson['stack'] != null) errorDetails += '\nBackend stack: ${errorJson['stack']}';
+          throw Exception(errorDetails);
+        } catch (jsonErr) {
+          print('  - Could not parse backend error JSON: $jsonErr');
+          throw Exception('Deposit payment failed [${response.statusCode}]: ${response.body}');
+        }
+      }
+    } catch (e, stack) {
       print('🔍 Deposit Payment Exception:');
       print('  - Error Type: ${e.runtimeType}');
       print('  - Error Message: $e');
+      print('  - Stack Trace: $stack');
       if (e is http.ClientException) {
         print('  - Client Exception Details:');
         print('    * Message: ${e.message}');

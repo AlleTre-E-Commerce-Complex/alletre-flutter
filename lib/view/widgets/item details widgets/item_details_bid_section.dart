@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print
+
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:alletre_app/utils/deposit_calculator.dart';
@@ -783,11 +785,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                 );
                 return;
               }
-            } else {
-              print('❌ API Response Error:');
-              print('  - Status Code: ${auctionDetailsResponse.statusCode}');
-              print('  - Response Body: ${auctionDetailsResponse.body}');
-            }
+            } 
           } catch (e) {
             print('❌ Error fetching auction details: $e');
           }
