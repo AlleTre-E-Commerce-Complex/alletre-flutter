@@ -1063,11 +1063,15 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                         Text(
                           () {
                             // Access expiry date from the nested data structure
+                            // Print the full structure for debugging
+                            debugPrint('🔍 [DEBUG] auctionData: \\n${const JsonEncoder.withIndent('  ').convert(widget.auctionData)}');
                             final endTime =
                                 widget.auctionData['isDeposit'] == true
-                                    ? widget.auctionData['endDate']
-                                    : widget.auctionData['data']?['endDate'] ??
-                                        widget.auctionData['endDate'];
+                                    ? (widget.auctionData['endTime'] ?? widget.auctionData['expiryDate'])
+                                    : (widget.auctionData['data']?['endTime'] ??
+                                       widget.auctionData['data']?['endTime'] ??
+                                       widget.auctionData['endTime'] ??
+                                       widget.auctionData['endTime']);
                             debugPrint('🔍 Raw end date: $endTime');
 
                             if (endTime != null) {

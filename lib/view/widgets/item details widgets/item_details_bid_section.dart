@@ -281,7 +281,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     final currentUser = FirebaseAuth.instance.currentUser;
-    final isOwner = currentUser?.email == widget.item.product?['user']?['email'];
+    final productOwnerEmail = widget.item.product?['user']?['email'];
+    final isOwner = currentUser?.email == productOwnerEmail;
 
     if (!widget.item.isAuctionProduct || (widget.title == "Similar Products" && !widget.item.isAuctionProduct)) {
       return Column(
@@ -292,6 +293,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
             child: Consumer<ContactButtonProvider>(
               builder: (context, contactProvider, child) {
                 if (isOwner) {
+                  debugPrint('🔍 [isOwner DEBUG] Building owner buttons (Change Status, Convert to Auction)');
                   return Row(
                     children: [
                       Expanded(
@@ -688,6 +690,13 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
           'Content-Type': 'application/json',
         },
       );
+
+      // Print the response body in chunks so nothing is truncated
+      final body = response.body;
+      const chunkSize = 800;
+      for (var i = 0; i < body.length; i += chunkSize) {
+        debugPrint('🔍 [DepositStatus DEBUG] Response chunk: ${body.substring(i, i + chunkSize > body.length ? body.length : i + chunkSize)}');
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
