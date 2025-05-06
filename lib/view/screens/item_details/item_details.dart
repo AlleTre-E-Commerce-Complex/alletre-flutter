@@ -564,12 +564,13 @@ class ItemDetailsScreen extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    ItemDetailsBidSection(
-                      item: currentItem,
-                      title: title,
-                      user: user,
-                    ),
-                    const SizedBox(height: 40),
+                    if (!currentItem.isMyAuction)
+                      ItemDetailsBidSection(
+                        item: currentItem,
+                        title: title,
+                        user: user,
+                      ),
+                    const SizedBox(height: 22),
                     AuctionListWidget(
                       user: UserModel.empty(),
                       title: 'Similar Products',
