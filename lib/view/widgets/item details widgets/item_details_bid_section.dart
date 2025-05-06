@@ -71,42 +71,48 @@ class DepositConfirmationDialog extends StatelessWidget {
               color: primaryColor,
             ),
             const SizedBox(height: 16),
-            
+
             // Title
             Text(
-              'Congratulations on Your First Bid!',
+              'Congratulations on your First Bid!!!',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: onSecondaryColor,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            
+
             // Description
-            Text(
-              'You are about to place a bid for AED ${NumberFormat.decimalPattern().format(bidAmount)}. '
-              'In this auction, please note that you will need to pay a deposit of '
-              'AED ${NumberFormat.decimalPattern().format(depositAmount)} '
-              'of the price as a deposit only once, so you can freely enjoy bidding.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[700],
-              ),
+            RichText(
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            
-            // Bonus Amount Text
-            Text(
-              'You can use your bonus amount using wallet payment',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: expiredColor,
+                    ),
+                children: [
+                  const TextSpan(text: 'You are about to place a bid of '),
+                  TextSpan(
+                    text:
+                        'AED ${NumberFormat.decimalPattern().format(bidAmount)}',
+                    style: const TextStyle(color: primaryColor),
+                  ),
+                  const TextSpan(
+                      text:
+                          '. Please note that you will need to pay an amount of '),
+                  TextSpan(
+                    text:
+                        'AED ${NumberFormat.decimalPattern().format(depositAmount)}',
+                    style: TextStyle(color: snapchatColor),
+                  ),
+                  const TextSpan(
+                      text: ' as one-time deposit for the auction.'),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
+
             const SizedBox(height: 24),
-            
+
             // Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -144,12 +150,13 @@ class DepositConfirmationDialog extends StatelessWidget {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(secondaryColor),
                             ),
                           )
                         : Text(
-                            'Pay AED ${NumberFormat.decimalPattern().format(depositAmount)} Deposit',
-                            style: const TextStyle(color: Colors.white),
+                            'Pay AED ${NumberFormat.decimalPattern().format(depositAmount)}',
+                            style: const TextStyle(color: secondaryColor),
                           ),
                   ),
                 ),
@@ -174,14 +181,14 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
   @override
   void initState() {
     super.initState();
-    minimumBid = widget.item.currentBid.isEmpty 
-        ? widget.item.startBidAmount 
+    minimumBid = widget.item.currentBid.isEmpty
+        ? widget.item.startBidAmount
         : widget.item.currentBid;
     bidAmount = ValueNotifier<String>(minimumBid);
     _bidController = TextEditingController(
-      text: 'AED ${NumberFormat.decimalPattern().format(double.parse(minimumBid))}'
-    );
-    
+        text:
+            'AED ${NumberFormat.decimalPattern().format(double.parse(minimumBid))}');
+
     bidAmount.addListener(_updateController);
     _calculateDeposit();
   }
@@ -192,18 +199,19 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       debugPrint('🔍 Starting bid amount: ${widget.item.startBidAmount}');
       debugPrint('🔍 Latest bid amount: ${bidAmount.value}');
       debugPrint('🔍 Product data: ${widget.item.product}');
-      
+
       final startBidAmount = double.parse(widget.item.startBidAmount);
       final latestBidAmount = double.parse(bidAmount.value);
-      
+
       // Fetch category data if not available
       Map<String, dynamic>? category = widget.item.product?['category'];
       if (category == null && widget.item.product?['categoryId'] != null) {
         final categoryId = widget.item.product?['categoryId'];
-        
+
         try {
-          final url = '${ApiEndpoints.baseUrl}/categories/getParticularCatergory?categoryId=$categoryId';
-          
+          final url =
+              '${ApiEndpoints.baseUrl}/categories/getParticularCatergory?categoryId=$categoryId';
+
           final response = await http.get(
             Uri.parse(url),
             headers: {
@@ -211,13 +219,13 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
               'Content-Type': 'application/json',
             },
           );
-          
+
           if (response.statusCode == 200) {
             final data = jsonDecode(response.body);
             if (data['success'] == true && data['data'] != null) {
               category = data['data'];
               debugPrint('🔍 Successfully fetched category data: $category');
-            } 
+            }
           } else {
             debugPrint('❌ Failed to fetch category data:');
             debugPrint('  - Status Code: ${response.statusCode}');
@@ -240,8 +248,10 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       debugPrint('  - Name: ${category['nameEn']}');
       debugPrint('  - Fixed Deposit: ${category['bidderDepositFixedAmount']}');
       debugPrint('  - Luxury Amount: ${category['luxuaryAmount']}');
-      debugPrint('  - Luxury Percentage: ${category['percentageOfLuxuarySD_forBidder']}');
-      debugPrint('  - Min Luxury Deposit: ${category['minimumLuxuarySD_forBidder']}');
+      debugPrint(
+          '  - Luxury Percentage: ${category['percentageOfLuxuarySD_forBidder']}');
+      debugPrint(
+          '  - Min Luxury Deposit: ${category['minimumLuxuarySD_forBidder']}');
 
       _calculatedDeposit = DepositCalculator.calculateSecurityDeposit(
         startBidAmount: startBidAmount,
@@ -250,7 +260,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       );
 
       debugPrint('🔍 Calculated deposit amount: $_calculatedDeposit');
-      
+
       if (mounted) {
         setState(() {}); // Update UI with new deposit amount
       }
@@ -263,7 +273,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
   }
 
   void _updateController() {
-    final formattedValue = 'AED ${NumberFormat.decimalPattern().format(double.parse(bidAmount.value))}';
+    final formattedValue =
+        'AED ${NumberFormat.decimalPattern().format(double.parse(bidAmount.value))}';
     if (_bidController.text != formattedValue) {
       _bidController.text = formattedValue;
     }
@@ -284,7 +295,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
     final productOwnerEmail = widget.item.product?['user']?['email'];
     final isOwner = currentUser?.email == productOwnerEmail;
 
-    if (!widget.item.isAuctionProduct || (widget.title == "Similar Products" && !widget.item.isAuctionProduct)) {
+    if (!widget.item.isAuctionProduct ||
+        (widget.title == "Similar Products" && !widget.item.isAuctionProduct)) {
       return Column(
         children: [
           const SizedBox(height: 10),
@@ -293,7 +305,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
             child: Consumer<ContactButtonProvider>(
               builder: (context, contactProvider, child) {
                 if (isOwner) {
-                  debugPrint('🔍 [isOwner DEBUG] Building owner buttons (Change Status, Convert to Auction)');
+                  debugPrint(
+                      '🔍 [isOwner DEBUG] Building owner buttons (Change Status, Convert to Auction)');
                   return Row(
                     children: [
                       Expanded(
@@ -400,7 +413,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                                             Text(
                                               'You can connect on',
                                               style: TextStyle(
-                                                  color: Colors.grey[700]),
+                                                  color: expiredColor),
                                             ),
                                             Text(
                                               widget.item.phone,
@@ -520,9 +533,11 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                     : ElevatedButton(
                         onPressed: () {
                           if (!isLoggedIn) {
-                            AuthHelper.showAuthenticationRequiredMessage(context);
+                            AuthHelper.showAuthenticationRequiredMessage(
+                                context);
                           } else {
-                            contactProvider.toggleContactButtons(widget.item.id);
+                            contactProvider
+                                .toggleContactButtons(widget.item.id);
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -588,7 +603,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
               Expanded(
                 child: TextField(
                   controller: _bidController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontWeight: FontWeight.w600,
@@ -602,7 +618,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                   ),
                   onChanged: (newValue) {
                     // Remove 'AED ' prefix and any commas
-                    final cleanValue = newValue.replaceAll('AED ', '').replaceAll(',', '');
+                    final cleanValue =
+                        newValue.replaceAll('AED ', '').replaceAll(',', '');
                     if (cleanValue.isNotEmpty) {
                       final numericValue = double.tryParse(cleanValue);
                       if (numericValue != null) {
@@ -623,7 +640,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.add, color: secondaryColor, size: 15),
+                      icon: const Icon(Icons.add,
+                          color: secondaryColor, size: 15),
                       onPressed: () {
                         final currentValue = double.parse(value);
                         bidAmount.value = (currentValue + 50).toString();
@@ -684,7 +702,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
   Future<bool> _checkDepositStatus() async {
     try {
       final response = await http.get(
-        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/${widget.item.id}/details'),
+        Uri.parse(
+            '${ApiEndpoints.baseUrl}/auctions/user/${widget.item.id}/details'),
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -695,7 +714,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       final body = response.body;
       const chunkSize = 800;
       for (var i = 0; i < body.length; i += chunkSize) {
-        debugPrint('🔍 [DepositStatus DEBUG] Response chunk: ${body.substring(i, i + chunkSize > body.length ? body.length : i + chunkSize)}');
+        debugPrint(
+            '🔍 [DepositStatus DEBUG] Response chunk: ${body.substring(i, i + chunkSize > body.length ? body.length : i + chunkSize)}');
       }
 
       if (response.statusCode == 200) {
@@ -715,15 +735,16 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       AuthHelper.showAuthenticationRequiredMessage(context);
       return;
     }
-    
+
     final currentBid = double.parse(bidAmount.value);
     final minBid = double.parse(minimumBid);
-    
+
     if (currentBid <= minBid) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Bid amount must be more than AED ${NumberFormat.decimalPattern().format(minBid)}',
-          style: const TextStyle(fontSize: 13)),
+          content: Text(
+              'Bid amount must be more than AED ${NumberFormat.decimalPattern().format(minBid)}',
+              style: const TextStyle(fontSize: 13)),
           backgroundColor: errorColor,
         ),
       );
@@ -737,14 +758,14 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
     try {
       // First check if deposit is paid
       final isDepositPaid = await _checkDepositStatus();
-      
+
       if (!isDepositPaid) {
         // If deposit is not paid, show deposit dialog
         if (mounted) {
           setState(() {
             _isSubmitting = false;
           });
-          
+
           showDialog(
             context: context,
             barrierDismissible: false,
@@ -764,12 +785,13 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
             },
           );
         }
-      } else {        
+      } else {
         if (mounted) {
           // Fetch latest auction details
           try {
             final auctionDetailsResponse = await http.get(
-              Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/${widget.item.id}/details'),
+              Uri.parse(
+                  '${ApiEndpoints.baseUrl}/auctions/user/${widget.item.id}/details'),
               headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -778,12 +800,12 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
 
             if (auctionDetailsResponse.statusCode == 200) {
               final auctionData = jsonDecode(auctionDetailsResponse.body);
-              
-              if (auctionData['success'] == true && auctionData['data'] != null) {
-                
+
+              if (auctionData['success'] == true &&
+                  auctionData['data'] != null) {
                 // Log the exact data being passed
                 final dataToPass = auctionData['data'];
-                
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -794,11 +816,11 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                 );
                 return;
               }
-            } 
+            }
           } catch (e) {
             print('❌ Error fetching auction details: $e');
           }
-          
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -840,7 +862,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       print('🔍 Error in bid submission:');
       print('  - Error Type: ${e.runtimeType}');
       print('  - Error Message: $e');
-      
+
       if (mounted) {
         setState(() {
           _isSubmitting = false;
@@ -855,7 +877,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
             errorMessage = e.toString().replaceAll('Exception: ', '');
           }
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -891,15 +913,16 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
 
     try {
       final submittedBidAmount = double.parse(bidAmount.value);
-      
+
       print('🔍 Starting Deposit Payment:');
       print('  - Bid Amount: $submittedBidAmount');
       print('  - Auction ID: ${widget.item.id}');
       print('  - Current Bid: ${widget.item.currentBid}');
       print('  - Start Bid: ${widget.item.startBidAmount}');
       print('  - Calculated Deposit: $_calculatedDeposit');
-      
-      await _auctionService.processBidderDeposit(widget.item.id.toString(), submittedBidAmount);
+
+      await _auctionService.processBidderDeposit(
+          widget.item.id.toString(), submittedBidAmount);
 
       if (mounted) {
         print('🔍 Passing data to PaymentDetailsScreen:');
@@ -907,7 +930,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
         print('  - Expiry Date: ${widget.item.expiryDate}');
         print('  - End Date: ${widget.item.endDate}');
         print('  - Raw auction data: ${widget.item.product}');
-        
+
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -948,7 +971,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       print('🔍 Deposit Payment Error in UI:');
       print('  - Error Type: ${e.runtimeType}');
       print('  - Error Message: $e');
-      
+
       if (mounted) {
         String errorMessage = 'Failed to process deposit';
         if (e.toString().contains('{')) {
@@ -963,7 +986,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
             errorMessage = e.toString().replaceAll('Exception: ', '');
           }
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
