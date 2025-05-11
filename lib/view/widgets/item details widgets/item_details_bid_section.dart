@@ -15,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/user_model.dart';
+import 'package:alletre_app/services/category_service.dart';
 import 'package:alletre_app/controller/providers/contact_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/controller/helpers/auction_service.dart';
@@ -714,6 +715,32 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
     );
   }
 
+  /// Gets the user's highest previous bid for this auction
+  Future<double> _getUserHighestBid(int auctionId) async {
+    try {
+      final url = '${ApiEndpoints.baseUrl}/auctions/user/$auctionId/details';
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'access_token');
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final highestBid = data['data']?['highestBid'] ?? 0;
+        return (highestBid is num) ? highestBid.toDouble() : 0;
+      }
+      return 0;
+    } catch (e) {
+      print('🔍 Error fetching user highest bid: $e');
+      return 0;
+    }
+  }
+
   /// Checks if the current user is a first-time bidder for this auction by calling /auctions/user/{auctionId}/details
   Future<bool> _isFirstTimeBidder() async {
     try {
@@ -777,7 +804,18 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
 
     try {
       final isFirstTime = await _isFirstTimeBidder();
-      if (isFirstTime) {
+      final categoryName = CategoryService.getCategoryName(auction.categoryId).toLowerCase();
+      double userHighestBid = 0;
+      if (categoryName == 'cars') {
+        userHighestBid = await _getUserHighestBid(auction.id);
+      }
+      // Show deposit dialog if:
+      // - first time bidder (non-cars), or
+      // - cars: user has never bid >= 5000 and now bids >= 5000
+      final shouldShowDepositDialog =
+        (isFirstTime && categoryName != 'cars') ||
+        (categoryName == 'cars' && userHighestBid < 5000 && enteredBid >= 5000);
+      if (shouldShowDepositDialog) {
         print('[DEBUG] User is first-time bidder. Showing deposit dialog.');
         if (mounted) {
           setState(() {
@@ -863,19 +901,19 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
               widget.onBidPlaced!();
             }
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Center(child: Text('Bid placed successfully!'))),
+              const SnackBar(content: Center(child: Text('Bid placed successfully')), backgroundColor: activeColor),
             );
           } else {
             setState(() { _isSubmitting = false; });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Center(child: Text('Bid failed. Please try again.'))),
+              const SnackBar(content: Center(child: Text('Bid failed. Please try again.')), backgroundColor: errorColor),
             );
           }
         } catch (e) {
           // Network or other error
           setState(() { _isSubmitting = false; });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Center(child: Text('Network error. Please try again.'))),
+            const SnackBar(content: Center(child: Text('Network error. Please try again.')), backgroundColor: errorColor),
           );
         }
       }

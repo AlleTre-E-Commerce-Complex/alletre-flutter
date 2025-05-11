@@ -26,6 +26,9 @@ import '../../widgets/item details widgets/item_details_bottom_sheet.dart';
 import '../../widgets/item details widgets/item_details_category_info.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
+  void _popAndRefresh(BuildContext context) {
+    Navigator.pop(context, true);
+  }
   final AuctionItem item;
   final UserModel user;
   final String title;
@@ -68,6 +71,10 @@ class ItemDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => _popAndRefresh(context),
+        ),
         title: Center(
           child: Text(item.title,
               style:
