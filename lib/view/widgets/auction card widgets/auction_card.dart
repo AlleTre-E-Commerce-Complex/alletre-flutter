@@ -31,6 +31,11 @@ class AuctionCard extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    // Always get the latest auction object from provider
+    final latestAuction = context.select<AuctionProvider, AuctionItem?>(
+      (provider) => provider.getAuctionById(auction.id),
+    ) ?? auction;
+
     // Determine spacing based on the auction type
     const double titleToBidSpacing = 10;
 
@@ -57,10 +62,10 @@ class AuctionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     child: SizedBox(
                       height: 120,
-                      child: auction.imageLinks.isNotEmpty
-                          ? _isSvg(auction.imageLinks.first)
+                      child: latestAuction.imageLinks.isNotEmpty
+                          ? _isSvg(latestAuction.imageLinks.first)
                               ? SvgPicture.network(
-                                  auction.imageLinks.first,
+                                  latestAuction.imageLinks.first,
                                   width: double.infinity,
                                   fit: BoxFit.contain,
                                   placeholderBuilder: (context) =>

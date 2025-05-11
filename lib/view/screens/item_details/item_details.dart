@@ -41,6 +41,7 @@ class ItemDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
+    final latestItem = auctionProvider.getAuctionById(item.id) ?? item;
 
     // Join auction room and fetch details when screen is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -55,7 +56,7 @@ class ItemDetailsScreen extends StatelessWidget {
     });
 
     // Get the latest item data from the provider
-    final currentItem = auctionProvider.liveAuctions.firstWhere(
+    auctionProvider.liveAuctions.firstWhere(
       (auction) => auction.id == item.id,
       orElse: () => item,
     );
@@ -286,7 +287,7 @@ class ItemDetailsScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           _buildInfoCard(
-                              context, 'Total Bids', item.bids.toString()),
+                              context, 'Total Bids', latestItem.bids.toString()),
                           const Spacer(),
                           _buildEnhancedAuctionCountdown(context),
                         ],
@@ -311,7 +312,7 @@ class ItemDetailsScreen extends StatelessWidget {
                                 ),
                                 child: Column(
                                   children: [
-                                    item.bids == 0
+                                    latestItem.bids == 0
                                     ? Text('Starting Bid', style: Theme.of(context)
                                           .textTheme
                                           .titleLarge
@@ -332,7 +333,7 @@ class ItemDetailsScreen extends StatelessWidget {
                                     const SizedBox(height: 5),
                                     Center(
                                       child: Text(
-                                        'AED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}',
+                                        'AED ${NumberFormat.decimalPattern().format(double.tryParse(latestItem.currentBid) ?? 0.0)}',
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleLarge
@@ -564,18 +565,21 @@ class ItemDetailsScreen extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    if (!currentItem.isMyAuction)
+                    if (!latestItem.isMyAuction)
                       ItemDetailsBidSection(
-                        item: currentItem,
+                        item: latestItem,
                         title: title,
                         user: user,
+                        onBidPlaced: () async {
+                          await auctionProvider.getLiveAuctions();
+                        },
                       ),
                     const SizedBox(height: 22),
                     AuctionListWidget(
                       user: UserModel.empty(),
                       title: 'Similar Products',
                       subtitle: 'Explore Related Items',
-                      auctions: auctionProvider.getSimilarProducts(item),
+                      auctions: auctionProvider.getSimilarProducts(latestItem),
                       isLoading: auctionProvider.isLoadingListedProducts,
                       error: auctionProvider.errorListedProducts,
                       placeholder:
@@ -588,7 +592,7 @@ class ItemDetailsScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: ItemDetailsBottomBars(item: item),
+      bottomNavigationBar: ItemDetailsBottomBars(item: latestItem),
     );
   }
 

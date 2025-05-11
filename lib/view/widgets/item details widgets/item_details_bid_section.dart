@@ -1,10 +1,13 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
 
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:alletre_app/utils/deposit_calculator.dart';
+import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -23,12 +26,14 @@ class ItemDetailsBidSection extends StatefulWidget {
   final AuctionItem item;
   final String title;
   final UserModel user;
+  final VoidCallback? onBidPlaced;
 
   const ItemDetailsBidSection({
     super.key,
     required this.item,
     required this.title,
     required this.user,
+    this.onBidPlaced,
   });
 
   @override
@@ -105,8 +110,7 @@ class DepositConfirmationDialog extends StatelessWidget {
                         'AED ${NumberFormat.decimalPattern().format(depositAmount)}',
                     style: TextStyle(color: snapchatColor),
                   ),
-                  const TextSpan(
-                      text: ' as one-time deposit for the auction.'),
+                  const TextSpan(text: ' as one-time deposit for the auction.'),
                 ],
               ),
             ),
@@ -170,6 +174,7 @@ class DepositConfirmationDialog extends StatelessWidget {
 }
 
 class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
+  double? _optimisticCurrentBid;
   late TextEditingController _bidController;
   late ValueNotifier<String> bidAmount;
   late String minimumBid;
@@ -181,10 +186,12 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
   @override
   void initState() {
     super.initState();
-    minimumBid = widget.item.currentBid.isEmpty
-        ? widget.item.startBidAmount
-        : widget.item.currentBid;
+    final auction = context.read<AuctionProvider>().getAuctionById(widget.item.id) ?? widget.item;
+    minimumBid = auction.currentBid.isEmpty
+        ? auction.startBidAmount
+        : auction.currentBid;
     bidAmount = ValueNotifier<String>(minimumBid);
+    _optimisticCurrentBid = null; // Ensure reset on init
     _bidController = TextEditingController(
         text:
             'AED ${NumberFormat.decimalPattern().format(double.parse(minimumBid))}');
@@ -196,17 +203,18 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
   void _calculateDeposit() async {
     try {
       debugPrint('🔍 Deposit Calculation Debug:');
-      debugPrint('🔍 Starting bid amount: ${widget.item.startBidAmount}');
-      debugPrint('🔍 Latest bid amount: ${bidAmount.value}');
-      debugPrint('🔍 Product data: ${widget.item.product}');
+      final auction = context.read<AuctionProvider>().getAuctionById(widget.item.id) ?? widget.item;
+      debugPrint('🔍 Starting bid amount: ${auction.startBidAmount}');
+      debugPrint('🔍 Latest bid amount: ${auction.currentBid}');
+      debugPrint('🔍 Product data: ${auction.product}');
 
-      final startBidAmount = double.parse(widget.item.startBidAmount);
-      final latestBidAmount = double.parse(bidAmount.value);
+      final startBidAmount = double.parse(auction.startBidAmount);
+      final latestBidAmount = _optimisticCurrentBid ?? double.parse(auction.currentBid);
 
       // Fetch category data if not available
-      Map<String, dynamic>? category = widget.item.product?['category'];
-      if (category == null && widget.item.product?['categoryId'] != null) {
-        final categoryId = widget.item.product?['categoryId'];
+      Map<String, dynamic>? category = auction.product?['category'];
+      if (category == null && auction.product?['categoryId'] != null) {
+        final categoryId = auction.product?['categoryId'];
 
         try {
           final url =
@@ -290,13 +298,19 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
 
   @override
   Widget build(BuildContext context) {
+    final auctionProvider = context.watch<AuctionProvider>();
+    final auction = auctionProvider.getAuctionById(widget.item.id) ?? widget.item;
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     final currentUser = FirebaseAuth.instance.currentUser;
-    final productOwnerEmail = widget.item.product?['user']?['email'];
+    final productOwnerEmail = auction.product?['user']?['email'];
     final isOwner = currentUser?.email == productOwnerEmail;
 
-    if (!widget.item.isAuctionProduct ||
-        (widget.title == "Similar Products" && !widget.item.isAuctionProduct)) {
+    // Use robust current bid for all bid UI logic
+    final robustCurrentBid = auctionProvider.getCurrentBidForAuction(auction.id, auction.currentBid);
+    _optimisticCurrentBid = double.tryParse(robustCurrentBid);
+
+    if (!auction.isAuctionProduct ||
+        (widget.title == "Similar Products" && !auction.isAuctionProduct)) {
       return Column(
         children: [
           const SizedBox(height: 10),
@@ -304,6 +318,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
             width: double.infinity,
             child: Consumer<ContactButtonProvider>(
               builder: (context, contactProvider, child) {
+                // Use latest auction state for owner check
                 if (isOwner) {
                   debugPrint(
                       '🔍 [isOwner DEBUG] Building owner buttons (Change Status, Convert to Auction)');
@@ -577,7 +592,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                 valueListenable: bidAmount,
                 builder: (context, value, child) {
                   final bool canDecrease =
-                      double.parse(value) > double.parse(minimumBid);
+                      double.parse(value) > double.parse(auction.currentBid.isEmpty ? auction.startBidAmount : auction.currentBid);
                   return Container(
                     height: 30,
                     width: 30,
@@ -699,32 +714,34 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
     );
   }
 
-  Future<bool> _checkDepositStatus() async {
+  /// Checks if the current user is a first-time bidder for this auction by calling /auctions/user/{auctionId}/details
+  Future<bool> _isFirstTimeBidder() async {
     try {
+      final auction = context.read<AuctionProvider>().getAuctionById(widget.item.id) ?? widget.item;
+      final auctionId = auction.id;
+      final url = '${ApiEndpoints.baseUrl}/auctions/user/$auctionId/details';
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'access_token');
       final response = await http.get(
-        Uri.parse(
-            '${ApiEndpoints.baseUrl}/auctions/user/${widget.item.id}/details'),
+        Uri.parse(url),
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
         },
       );
 
-      // Print the response body in chunks so nothing is truncated
-      final body = response.body;
-      const chunkSize = 800;
-      for (var i = 0; i < body.length; i += chunkSize) {
-        debugPrint(
-            '🔍 [DepositStatus DEBUG] Response chunk: ${body.substring(i, i + chunkSize > body.length ? body.length : i + chunkSize)}');
-      }
-
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        return data['data']['isDepositPaid'] ?? false;
+        final hasBids = data['data']?['hasBids'] ?? false;
+        print('[DEBUG] _isFirstTimeBidder hasBids: $hasBids');
+        return hasBids == false; // true if first time bidder
       }
       return false;
     } catch (e) {
-      print('🔍 Error checking deposit status: $e');
+      print('🔍 Error checking deposit status via submit-bid: $e');
+      print(
+          '[DEBUG] _checkDepositStatus encountered an error, returning false.');
       return false;
     }
   }
@@ -736,18 +753,21 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       return;
     }
 
-    final currentBid = double.parse(bidAmount.value);
-    final minBid = double.parse(minimumBid);
-
-    if (currentBid <= minBid) {
+    // Always validate bid amount against current bid before any deposit logic
+    final enteredBid = double.tryParse(bidAmount.value);
+    final auction = context.read<AuctionProvider>().getAuctionById(widget.item.id) ?? widget.item;
+    final currentBidValue = _optimisticCurrentBid ?? double.tryParse(auction.currentBid);
+    if (enteredBid == null || currentBidValue == null || enteredBid <= currentBidValue) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              'Bid amount must be more than AED ${NumberFormat.decimalPattern().format(minBid)}',
-              style: const TextStyle(fontSize: 13)),
+            'Bid amount must be greater than the current bid (AED ${NumberFormat.decimalPattern().format(currentBidValue ?? 0)})',
+            style: const TextStyle(fontSize: 13),
+          ),
           backgroundColor: errorColor,
         ),
       );
+      setState(() { _isSubmitting = false; });
       return;
     }
 
@@ -756,22 +776,19 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
     });
 
     try {
-      // First check if deposit is paid
-      final isDepositPaid = await _checkDepositStatus();
-
-      if (!isDepositPaid) {
-        // If deposit is not paid, show deposit dialog
+      final isFirstTime = await _isFirstTimeBidder();
+      if (isFirstTime) {
+        print('[DEBUG] User is first-time bidder. Showing deposit dialog.');
         if (mounted) {
           setState(() {
             _isSubmitting = false;
           });
-
           showDialog(
             context: context,
             barrierDismissible: false,
             builder: (BuildContext context) {
               return DepositConfirmationDialog(
-                bidAmount: currentBid,
+                bidAmount: enteredBid,
                 depositAmount: _calculatedDeposit ?? 0,
                 onCancel: () {
                   Navigator.of(context).pop();
@@ -786,75 +803,79 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
           );
         }
       } else {
-        if (mounted) {
-          // Fetch latest auction details
-          try {
-            final auctionDetailsResponse = await http.get(
-              Uri.parse(
-                  '${ApiEndpoints.baseUrl}/auctions/user/${widget.item.id}/details'),
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-              },
-            );
-
-            if (auctionDetailsResponse.statusCode == 200) {
-              final auctionData = jsonDecode(auctionDetailsResponse.body);
-
-              if (auctionData['success'] == true &&
-                  auctionData['data'] != null) {
-                // Log the exact data being passed
-                final dataToPass = auctionData['data'];
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PaymentDetailsScreen(
-                      auctionData: dataToPass,
-                    ),
-                  ),
-                );
-                return;
-              }
-            }
-          } catch (e) {
-            print('❌ Error fetching auction details: $e');
-          }
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PaymentDetailsScreen(
-                auctionData: {
-                  'id': widget.item.id,
-                  'amount': currentBid,
-                  'isDeposit': false,
-                  'product': widget.item.product,
-                  'currentBid': widget.item.currentBid,
-                  'startBidAmount': widget.item.startBidAmount,
-                  'status': widget.item.status,
-                  'usageStatus': widget.item.usageStatus,
-                  'title': widget.item.title,
-                  'description': widget.item.description,
-                  'category': widget.item.product?['category'],
-                  'subCategory': widget.item.product?['subCategory'],
-                  'images': widget.item.imageLinks,
-                  'user': widget.item.product?['user'],
-                  'createdAt': widget.item.createdAt,
-                  'expiryDate': widget.item.expiryDate,
-                  'isAuctionProduct': widget.item.isAuctionProduct,
-                  'bids': widget.item.bids,
-                  'depositAmount': _calculatedDeposit,
-                  'isDepositPaid': widget.item.isDepositPaid,
-                  'buyNowEnabled': widget.item.buyNowEnabled,
-                  'buyNowPrice': widget.item.buyNowPrice,
-                  'categoryId': widget.item.categoryId,
-                  'subCategoryId': widget.item.subCategoryId,
-                  'categoryName': widget.item.categoryName,
-                  'subCategoryName': widget.item.subCategoryName,
-                },
+        // Deposit already paid, validate bid amount in frontend
+        print('[DEBUG] Deposit already paid. Validating bid and placing...');
+        final auctionProvider = context.read<AuctionProvider>();
+        final auction = auctionProvider.getAuctionById(widget.item.id) ?? widget.item;
+        final enteredBid = double.tryParse(bidAmount.value);
+        final currentBidValue = _optimisticCurrentBid ?? double.tryParse(auction.currentBid);
+        if (enteredBid == null || currentBidValue == null || enteredBid <= currentBidValue) {
+          // Validation failed: entered bid is not greater than current
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Bid amount must be greater than the current bid (AED ${NumberFormat.decimalPattern().format(currentBidValue ?? 0)})',
+                style: const TextStyle(fontSize: 13),
               ),
+              backgroundColor: errorColor,
             ),
+          );
+          setState(() { _isSubmitting = false; });
+          return;
+        }
+
+        // Send the bid to backend
+        try {
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success'] != true) {
+            // Auth error
+            setState(() { _isSubmitting = false; });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Center(child: Text('Authentication error. Please login again.'))),
+            );
+            return;
+          }
+          const storage = FlutterSecureStorage();
+          final token = await storage.read(key: 'access_token');
+          final response = await http.post(
+            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/${widget.item.id}/submit-bid'),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'bidAmount': enteredBid,
+            }),
+          );
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            // Only update provider/UI after backend confirms
+            auctionProvider.optimisticBidUpdate(
+              auction.id,
+              enteredBid,
+              (auction.bids) + 1,
+            );
+            setState(() {
+              _optimisticCurrentBid = enteredBid;
+            });
+            if (widget.onBidPlaced != null) {
+              widget.onBidPlaced!();
+            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Center(child: Text('Bid placed successfully!'))),
+            );
+          } else {
+            setState(() { _isSubmitting = false; });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Center(child: Text('Bid failed. Please try again.'))),
+            );
+          }
+        } catch (e) {
+          // Network or other error
+          setState(() { _isSubmitting = false; });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Center(child: Text('Network error. Please try again.'))),
           );
         }
       }
@@ -915,14 +936,15 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       final submittedBidAmount = double.parse(bidAmount.value);
 
       print('🔍 Starting Deposit Payment:');
+      final auction = context.read<AuctionProvider>().getAuctionById(widget.item.id) ?? widget.item;
       print('  - Bid Amount: $submittedBidAmount');
-      print('  - Auction ID: ${widget.item.id}');
-      print('  - Current Bid: ${widget.item.currentBid}');
-      print('  - Start Bid: ${widget.item.startBidAmount}');
+      print('  - Auction ID: ${auction.id}');
+      print('  - Current Bid: ${auction.currentBid}');
+      print('  - Start Bid: ${auction.startBidAmount}');
       print('  - Calculated Deposit: $_calculatedDeposit');
 
       await _auctionService.processBidderDeposit(
-          widget.item.id.toString(), submittedBidAmount);
+          auction.id.toString(), submittedBidAmount);
 
       if (mounted) {
         print('🔍 Passing data to PaymentDetailsScreen:');

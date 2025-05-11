@@ -184,11 +184,11 @@ class AuctionDetailsScreen extends StatelessWidget {
                                               isExpanded: true,
                                               items: (value == "quickAuction"
                                                       ? List.generate(
-                                                          23,
+                                                          24,
                                                           (index) =>
                                                               "${index + 1} hrs")
                                                       : List.generate(
-                                                          7,
+                                                          3,
                                                           (index) =>
                                                               "${index + 1} days"))
                                                   .map((duration) =>

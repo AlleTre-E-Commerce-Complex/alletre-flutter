@@ -6,6 +6,31 @@ import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
 
 class AuctionProvider with ChangeNotifier {
+  // Tracks pending optimistic bids: auctionId -> bidAmount
+  final Map<int, double> _pendingOptimisticBids = {};
+  void optimisticBidUpdate(int auctionId, double newBid, int newTotalBids) {
+    _pendingOptimisticBids[auctionId] = newBid;
+    void updateList(List<AuctionItem> list) {
+      final index = list.indexWhere((item) => item.id == auctionId);
+      if (index != -1) {
+        final updatedItem = list[index].copyWith(
+          currentBid: newBid.toString(),
+          bids: newTotalBids,
+        );
+        list[index] = updatedItem;
+      }
+    }
+    updateList(_liveAuctions);
+    updateList(_listedProducts);
+    notifyListeners();
+  }
+  AuctionItem? getAuctionById(int id) {
+    try {
+      return _liveAuctions.firstWhere((item) => item.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
   final SocketService _socketService = SocketService();
   final AuctionService _auctionService = AuctionService();
   List<AuctionItem> _liveAuctions = [];
@@ -127,24 +152,55 @@ class AuctionProvider with ChangeNotifier {
   }
 
   void _handleBidUpdate(Map<String, dynamic> data) {
-    final String auctionId = data['auctionId']?.toString() ?? '';
-    final String newBid = data['amount']?.toString() ?? '0';
+    final String auctionIdStr = data['auctionId']?.toString() ?? '';
+    final int? auctionId = int.tryParse(auctionIdStr);
+    final String newBidStr = data['amount']?.toString() ?? '0';
+    final double newBid = double.tryParse(newBidStr) ?? 0;
     final int totalBids = data['totalBids'] ?? 0;
 
     void updateList(List<AuctionItem> list) {
-      final index = list.indexWhere((item) => item.id.toString() == auctionId);
+      final index = list.indexWhere((item) => item.id.toString() == auctionIdStr);
       if (index != -1) {
-        final updatedItem = list[index].copyWith(
-          currentBid: newBid,
-          bids: totalBids,
-        );
-        list[index] = updatedItem;
+        double? optimisticBid = auctionId != null ? _pendingOptimisticBids[auctionId] : null;
+        // If there's a pending optimistic bid, only accept backend if it matches or exceeds
+        if (optimisticBid != null) {
+          if (newBid >= optimisticBid) {
+            // Backend caught up or surpassed, clear optimism and update
+            _pendingOptimisticBids.remove(auctionId);
+            final updatedItem = list[index].copyWith(
+              currentBid: newBidStr,
+              bids: totalBids,
+            );
+            list[index] = updatedItem;
+          } else {
+            // Backend is behind, keep optimistic value
+            // Do not update currentBid here
+            return;
+          }
+        } else {
+          // No optimism, just update
+          final updatedItem = list[index].copyWith(
+            currentBid: newBidStr,
+            bids: totalBids,
+          );
+          list[index] = updatedItem;
+        }
       }
     }
 
     updateList(_liveAuctions);
     updateList(_listedProducts);
     notifyListeners();
+  }
+
+  /// Returns the current bid for UI: max of backend and any pending optimistic bid
+  String getCurrentBidForAuction(int auctionId, String backendBid) {
+    final double backend = double.tryParse(backendBid) ?? 0;
+    final double? optimistic = _pendingOptimisticBids[auctionId];
+    if (optimistic != null && optimistic > backend) {
+      return optimistic.toString();
+    }
+    return backendBid;
   }
 
   void _updateAuctionStatus(String auctionId, Map<String, dynamic> statusData) {

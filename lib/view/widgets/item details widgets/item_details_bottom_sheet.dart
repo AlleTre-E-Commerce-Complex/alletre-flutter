@@ -2,6 +2,8 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/custom_field_model.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:provider/provider.dart';
 
 class ItemDetailsBottomSheet extends StatelessWidget {
   final String title;
@@ -45,10 +47,10 @@ class ItemDetailsBottomSheet extends StatelessWidget {
               Expanded(
                 child: TabBarView(
                   children: [
-                    _itemDetailsTab(),
+                    _itemDetailsTab(context),
                     if (title != "Listed Products") ...[
-                      _returnPolicyTab(),
-                      _warrantyPolicyTab(),
+                      _returnPolicyTab(context),
+                      _warrantyPolicyTab(context),
                     ],
                   ],
                 ),
@@ -60,20 +62,21 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _itemDetailsTab() {
+  Widget _itemDetailsTab(BuildContext context) {
+    final auction = context.watch<AuctionProvider>().getAuctionById(item.id) ?? item;
     return ListView(
       padding: const EdgeInsets.all(8),
       children: [
         const SizedBox(height: 10),
         // // Add location information at the top
-        // if (item.itemLocation != null) ...[
+        // if (auction.itemLocation != null) ...[
         //   _buildFieldCard(
         //     label: 'Location',
-        //     value: '${item.itemLocation?.city}, ${item.itemLocation?.country}',
+        //     value: '${auction.itemLocation?.city}, ${auction.itemLocation?.country}',
         //   ),
         //   const SizedBox(height: 10),
         // ],
-        ..._buildCustomFieldsContent()
+        ..._buildCustomFieldsContent(context, auction)
       ],
     );
   }
@@ -109,9 +112,9 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     }
   }
 
-  List<Widget> _buildCustomFieldsContent() {
+  List<Widget> _buildCustomFieldsContent(BuildContext context, AuctionItem auction) {
     // Get product data from the item
-    final Map<String, dynamic>? product = item.product;
+    final Map<String, dynamic>? product = auction.product;
     if (product == null) return [];
 
     // Create a list to store field widgets
@@ -183,8 +186,9 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _returnPolicyTab() {
-    final String? returnPolicy = item.returnPolicyDescription;
+  Widget _returnPolicyTab(BuildContext context) {
+    final auction = context.watch<AuctionProvider>().getAuctionById(item.id) ?? item;
+    final String? returnPolicy = auction.returnPolicyDescription;
 
     bool isPlaceholder = returnPolicy == null || returnPolicy.trim().isEmpty;
 
@@ -217,8 +221,9 @@ class ItemDetailsBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _warrantyPolicyTab() {
-    final String? warrantyPolicy = item.warrantyPolicyDescription;
+  Widget _warrantyPolicyTab(BuildContext context) {
+    final auction = context.watch<AuctionProvider>().getAuctionById(item.id) ?? item;
+    final String? warrantyPolicy = auction.warrantyPolicyDescription;
 
     bool isPlaceholder =
         warrantyPolicy == null || warrantyPolicy.trim().isEmpty;

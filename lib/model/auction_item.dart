@@ -18,7 +18,7 @@ class AuctionItem {
   final DateTime createdAt;
   final String description;
   final String startBidAmount;
-  final String currentBid;
+  String currentBid;
   final String buyNowPrice;
   final bool isDepositPaid;
   String status;
