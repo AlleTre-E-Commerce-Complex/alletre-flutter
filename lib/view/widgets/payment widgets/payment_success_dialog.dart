@@ -35,7 +35,7 @@ class PaymentSuccessDialog {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Your deposit has been successfully transferred',
+                  'Your deposit has been successfully transferred and your auction is active now',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: greyColor),
                 ),

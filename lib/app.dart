@@ -2,6 +2,7 @@ import 'package:alletre_app/controller/providers/auction_image_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/auction_details_provider.dart';
 import 'package:alletre_app/controller/providers/contact_provider.dart';
+import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/category_state.dart';
@@ -82,7 +83,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => AuctionDetailsProvider()),
           ChangeNotifierProvider(create: (context) => CategoryState()),
           ChangeNotifierProvider(create: (_) => FocusStateNotifier()),
-          // ChangeNotifierProvider(create: (context) => SearchProvider()),
+          ChangeNotifierProvider(create: (context) => SearchProvider()),
           ChangeNotifierProvider(create: (_) => TabIndexProvider()),
           ChangeNotifierProvider(create: (_) => LoggedInProvider()),
           ChangeNotifierProvider(create: (_) => LocationProvider()),

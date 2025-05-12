@@ -28,6 +28,7 @@ class WishlistScreen extends StatelessWidget {
           const SizedBox(height: 9),
           SearchFieldWidget(
             isNavigable: false,
+            query: context.watch<AuctionProvider>().searchQuery,
             onChanged: (value) {
               context.read<AuctionProvider>().searchItems(value);
             },

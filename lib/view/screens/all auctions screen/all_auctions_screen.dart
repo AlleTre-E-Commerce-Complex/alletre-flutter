@@ -58,6 +58,7 @@ class AllAuctionsScreen extends StatelessWidget {
           const SizedBox(height: 9),
           SearchFieldWidget(
             isNavigable: false,
+            query: auctionProvider.searchQuery,
             onChanged: (value) {
               auctionProvider.searchItems(value);
             },

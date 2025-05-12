@@ -23,10 +23,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   @override
   void initState() {
     super.initState();
-    // Clear search query on home navigation/reload
-    Future.microtask(() {
-      context.read<AuctionProvider>().searchItems('');
-    });
     // API calls happen after the widget is built, using Future.microtask.
     Future.microtask(() async {
       await context.read<AuctionProvider>().getLiveAuctions();
@@ -43,8 +39,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     final auctionProvider = context.watch<AuctionProvider>();
 
     Future<void> refreshHomePage() async {
-      // Clear search query on manual refresh as well
-      auctionProvider.searchItems('');
       await auctionProvider.getLiveAuctions();
       await auctionProvider.getListedProducts();
       await auctionProvider.getUpcomingAuctions();
@@ -74,6 +68,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               const SizedBox(height: 9),
               SearchFieldWidget(
                 isNavigable: false,
+                query: auctionProvider.searchQuery,
                 onChanged: (value) {
                   context.read<AuctionProvider>().searchItems(value);
                 },

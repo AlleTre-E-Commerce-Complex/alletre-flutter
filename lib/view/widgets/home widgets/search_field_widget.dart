@@ -1,4 +1,3 @@
-import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ class SearchFieldWidget extends StatelessWidget {
   final VoidCallback? onLeadingIconPressed;
   final bool isNavigable;
   final VoidCallback? onFilterPressed; // Callback for filter button
+  final String? query; // The current value for the search field
 
   const SearchFieldWidget({
     super.key,
@@ -19,11 +19,18 @@ class SearchFieldWidget extends StatelessWidget {
     this.leadingIcon = Icons.search, // Default to search icon
     this.onLeadingIconPressed,
     this.isNavigable = false, // flag for navigation behavior
-    this.onFilterPressed // function to handle filter button press
+    this.onFilterPressed, // function to handle filter button press
+    this.query,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Use the provider's query value to always show the latest search text
+    final controller = TextEditingController(text: query ?? '');
+    controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: controller.text.length),
+    );
+
     return GestureDetector(
       onTap: isNavigable
           ? () {
@@ -36,10 +43,9 @@ class SearchFieldWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
           child: TextField(
+            controller: controller,
             autofocus: autofocus,
-            onChanged: (value) {
-              context.read<AuctionProvider>().searchItems(value);
-            },
+            onChanged: onChanged,
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               hintText: 'Search on Alletre',
