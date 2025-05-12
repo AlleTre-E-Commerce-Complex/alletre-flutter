@@ -37,9 +37,9 @@ class SearchFieldWidget extends StatelessWidget {
           padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
           child: TextField(
             autofocus: autofocus,
-             onChanged: (value) {
-    context.read<AuctionProvider>().searchItems(value);
-  },
+            onChanged: (value) {
+              context.read<AuctionProvider>().searchItems(value);
+            },
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               hintText: 'Search on Alletre',
