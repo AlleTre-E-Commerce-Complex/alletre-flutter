@@ -13,6 +13,109 @@ import 'user_services.dart';
 class AuctionService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
+  Future<Map<String, dynamic>> setDeliveryType(String userId, String auctionId, String deliveryType) async {
+    try {
+      String? accessToken = await _getAccessToken();
+      final url = Uri.parse('http://localhost:3001/api/auctions/user/$userId/set-delivery-type');
+      final body = jsonEncode({
+        'auctionId': auctionId,
+        'deliveryType': deliveryType,
+      });
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      };
+      var response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 401) {
+        // Try refresh
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          headers['Authorization'] = 'Bearer $accessToken';
+          response = await http.post(url, headers: headers, body: body);
+        } else {
+          return {'success': false, 'message': 'Authentication failed'};
+        }
+      }
+      final data = json.decode(response.body);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return {'success': true, 'data': data['data']};
+      } else {
+        return {'success': false, 'message': data['message'] ?? 'Failed to set delivery type'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Future<Map<String, dynamic>> getAuctionDetails(String userId, String auctionId) async {
+  //   try {
+  //     String? accessToken = await _getAccessToken();
+  //     final url = Uri.parse('http://localhost:3001/api/auctions/user/$userId/details');
+  //     final body = jsonEncode({'auctionId': auctionId});
+  //     Map<String, String> headers = {
+  //       'Authorization': 'Bearer $accessToken',
+  //       'Content-Type': 'application/json',
+  //     };
+  //     var response = await http.post(url, headers: headers, body: body);
+  //     if (response.statusCode == 401) {
+  //       // Try refresh
+  //       final userService = UserService();
+  //       final refreshResult = await userService.refreshTokens();
+  //       if (refreshResult['success']) {
+  //         accessToken = refreshResult['data']['accessToken'];
+  //         headers['Authorization'] = 'Bearer $accessToken';
+  //         response = await http.post(url, headers: headers, body: body);
+  //       } else {
+  //         return {'success': false, 'message': 'Authentication failed'};
+  //       }
+  //     }
+  //     final data = json.decode(response.body);
+  //     if (response.statusCode >= 200 && response.statusCode < 300) {
+  //       return {'success': true, 'data': data['data']};
+  //     } else {
+  //       return {'success': false, 'message': data['message'] ?? 'Failed to get auction details'};
+  //     }
+  //   } catch (e) {
+  //     return {'success': false, 'message': e.toString()};
+  //   }
+  // }
+
+  Future<Map<String, dynamic>> buyNow(String userId, String auctionId) async {
+    try {
+      String? accessToken = await _getAccessToken();
+      final url = Uri.parse('http://localhost:3001/api/auctions/user/$userId/buy-now');
+      final body = jsonEncode({'auctionId': auctionId});
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      };
+      var response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 401) {
+        // Try refresh
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          headers['Authorization'] = 'Bearer $accessToken';
+          response = await http.post(url, headers: headers, body: body);
+        } else {
+          return {'success': false, 'message': 'Authentication failed'};
+        }
+      }
+      final data = json.decode(response.body);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return {'success': true, 'data': data['data']};
+      } else {
+        return {'success': false, 'message': data['message'] ?? 'Buy Now failed'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+
   Future<String?> _getAccessToken() async {
     try {
       // Get server-issued access token

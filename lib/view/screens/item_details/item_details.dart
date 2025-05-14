@@ -1,5 +1,7 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
+import 'package:alletre_app/controller/helpers/auction_service.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/controller/services/auction_details_service.dart';
 import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,11 +26,103 @@ import '../../widgets/item details widgets/item_details_bid_section.dart';
 import '../../widgets/item details widgets/item_details_bottom_bar.dart';
 import '../../widgets/item details widgets/item_details_bottom_sheet.dart';
 import '../../widgets/item details widgets/item_details_category_info.dart';
+import '../../widgets/item details widgets/delivery_type_modal.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   void _popAndRefresh(BuildContext context) {
     Navigator.pop(context, true);
   }
+
+  Future<void> _handleBuyNowFlow(BuildContext context, AuctionItem item) async {
+    final userId = item.postedBy;
+    final auctionId = item.id.toString();
+    final scaffold = ScaffoldMessenger.of(context);
+
+    // Always fetch latest auction details (with location) from API
+    AuctionItem? freshItem;
+    try {
+      final detailsRes = await AuctionDetailsService.getAuctionDetails(auctionId);
+      if (detailsRes != null && detailsRes['data'] != null) {
+        freshItem = AuctionItem.fromJson(detailsRes['data']);
+      } else {
+        scaffold.showSnackBar(const SnackBar(
+          content: Center(child: Text('Failed to get auction details')),
+        ));
+        return;
+      }
+    } catch (e) {
+      scaffold.showSnackBar(SnackBar(content: Text('Error fetching auction details: $e')));
+      return;
+    }
+
+    // Debug print the address fields
+    print('Address Label: ${freshItem.sellerAddressLabel}');
+    print('Address: ${freshItem.sellerAddress}');
+    print('City: ${freshItem.sellerCity}');
+    print('Country: ${freshItem.sellerCountry}');
+    print('Contact Number: ${freshItem.sellerPhone}');
+
+    final deliveryTypes = [
+      'Pick up yourself',
+      'Deliver by company',
+    ];
+
+    String? selectedType;
+    
+    await showDialog(
+      context: context,
+      builder: (context) => DeliveryTypeModal(
+        deliveryTypes: deliveryTypes,
+        onSubmit: (type) {
+          selectedType = type;
+        },
+        auction: freshItem!,
+      ),
+    );
+    if (selectedType == null) return;
+
+    final auctionService = AuctionService();
+    try {
+      // 1. Set delivery type
+      final setDeliveryRes = await auctionService.setDeliveryType(
+          userId, auctionId, selectedType!);
+      if (setDeliveryRes['success'] != true) {
+        scaffold.showSnackBar(SnackBar(
+            content: Text(
+                setDeliveryRes['message'] ?? 'Failed to set delivery type')));
+        return;
+      }
+
+      // 2. Get auction details again (optional: for absolute latest, or skip if not needed)
+      final detailsRes =
+          await AuctionDetailsService.getAuctionDetails(auctionId);
+      if (detailsRes == null || detailsRes['data'] == null) {
+        scaffold.showSnackBar(const SnackBar(
+            content: Center(
+              child: Text(
+                  'Failed to get auction details'),
+            )));
+        return;
+      }
+
+      // 3. Buy now
+      final buyNowRes = await auctionService.buyNow(userId, auctionId);
+      if (buyNowRes['success'] != true) {
+        scaffold.showSnackBar(
+            SnackBar(content: Text(buyNowRes['message'] ?? 'Buy Now failed')));
+        return;
+      }
+
+      // 4. Navigate to payment details screen (replace with your actual screen)
+      Navigator.of(context).pushNamed('/payment-details', arguments: {
+        'auction': freshItem,
+        'details': detailsRes['data'],
+      });
+    } catch (e) {
+      scaffold.showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+    }
+  }
+
   final AuctionItem item;
   final UserModel user;
   final String title;
@@ -48,12 +142,14 @@ class ItemDetailsScreen extends StatelessWidget {
 
     // Join auction room and fetch details when screen is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+      final auctionProvider =
+          Provider.of<AuctionProvider>(context, listen: false);
       auctionProvider.joinAuctionRoom(item.id.toString());
 
       // Fetch auction details to get username - only if not already fetched
       if (item.isAuctionProduct && item.userName == null) {
-        final detailsProvider = Provider.of<AuctionDetailsProvider>(context, listen: false);
+        final detailsProvider =
+            Provider.of<AuctionDetailsProvider>(context, listen: false);
         detailsProvider.fetchUserName(item.id.toString());
       }
     });
@@ -66,7 +162,9 @@ class ItemDetailsScreen extends StatelessWidget {
 
     // Compute the username before the widget tree
     final String? userName = item.isAuctionProduct
-        ? context.watch<AuctionDetailsProvider>().getUserName(item.id.toString())
+        ? context
+            .watch<AuctionDetailsProvider>()
+            .getUserName(item.id.toString())
         : (item.product?['user']?['userName'] as String? ?? item.postedBy);
 
     return Scaffold(
@@ -210,7 +308,8 @@ class ItemDetailsScreen extends StatelessWidget {
                     if (userName != null && userName.isNotEmpty)
                       IntrinsicWidth(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 7),
                           decoration: BoxDecoration(
                             color: Colors.grey[300],
                             border: Border.all(color: Colors.grey[400]!),
@@ -219,7 +318,8 @@ class ItemDetailsScreen extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              const Icon(Icons.person, size: 14, color: onSecondaryColor),
+                              const Icon(Icons.person,
+                                  size: 14, color: onSecondaryColor),
                               const SizedBox(width: 3),
                               Text(
                                 'Posted by ',
@@ -293,8 +393,8 @@ class ItemDetailsScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          _buildInfoCard(
-                              context, 'Total Bids', latestItem.bids.toString()),
+                          _buildInfoCard(context, 'Total Bids',
+                              latestItem.bids.toString()),
                           const Spacer(),
                           _buildEnhancedAuctionCountdown(context),
                         ],
@@ -307,7 +407,7 @@ class ItemDetailsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           if ((title == 'Live Auctions' ||
-                              title == 'Upcoming Auctions') ||
+                                  title == 'Upcoming Auctions') ||
                               item.isMyAuction)
                             Expanded(
                               child: Container(
@@ -320,23 +420,26 @@ class ItemDetailsScreen extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     latestItem.bids == 0
-                                    ? Text('Starting Bid', style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                              color: onSecondaryColor,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 13),) :
-                                    Text(
-                                      'Current Bid',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                              color: onSecondaryColor,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 13),
-                                    ),
+                                        ? Text(
+                                            'Starting Bid',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge
+                                                ?.copyWith(
+                                                    color: onSecondaryColor,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 13),
+                                          )
+                                        : Text(
+                                            'Current Bid',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge
+                                                ?.copyWith(
+                                                    color: onSecondaryColor,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 13),
+                                          ),
                                     const SizedBox(height: 5),
                                     Center(
                                       child: Text(
@@ -396,7 +499,8 @@ class ItemDetailsScreen extends StatelessWidget {
                             Expanded(
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: primaryColor.withOpacity(0.1),
+                                  backgroundColor:
+                                      primaryColor.withOpacity(0.1),
                                   elevation: 0,
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 8),
@@ -406,12 +510,14 @@ class ItemDetailsScreen extends StatelessWidget {
                                         color: primaryColor, width: 1.2),
                                   ),
                                 ),
-                                onPressed: () {
+                                onPressed: () async {
                                   if (!isLoggedIn) {
                                     AuthHelper
                                         .showAuthenticationRequiredMessage(
                                             context);
+                                    return;
                                   }
+                                  await _handleBuyNowFlow(context, latestItem);
                                 },
                                 child: Column(
                                   children: [

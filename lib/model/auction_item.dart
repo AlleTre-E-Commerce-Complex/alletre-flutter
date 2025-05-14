@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 import 'dart:developer';
+import 'dart:convert';
 import 'package:alletre_app/model/item_location.dart';
 import 'package:alletre_app/model/custom_field_model.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,11 @@ class AuctionItem {
   final String productListingPrice;
   final int bids;
   final Location? itemLocation;
+  final String? sellerAddress;
+  final String? sellerAddressLabel;
+  final String? sellerCity;
+  final String? sellerCountry;
+  final String? sellerPhone;
   final DateTime createdAt;
   final String description;
   final String startBidAmount;
@@ -51,6 +57,11 @@ class AuctionItem {
     required this.productListingPrice,
     required this.bids,
     required this.itemLocation,
+    required this.sellerAddress,
+    required this.sellerAddressLabel,
+    required this.sellerCity,
+    required this.sellerCountry,
+    required this.sellerPhone,
     required this.createdAt,
     required this.description,
     required this.startBidAmount,
@@ -89,6 +100,11 @@ class AuctionItem {
     String? productListingPrice,
     int? bids,
     Location? itemLocation,
+    String? sellerAddress,
+    String? sellerAddressLabel,
+    String? sellerCity,
+    String? sellerCountry,
+    String? sellerPhone,
     DateTime? createdAt,
     String? description,
     String? startBidAmount,
@@ -124,6 +140,11 @@ class AuctionItem {
       productListingPrice: productListingPrice ?? this.productListingPrice,
       bids: bids ?? this.bids,
       itemLocation: itemLocation ?? this.itemLocation,
+      sellerAddress: sellerAddress ?? this.sellerAddress,
+      sellerAddressLabel: sellerAddressLabel ?? this.sellerAddressLabel,
+      sellerCity: sellerCity ?? this.sellerCity,
+      sellerCountry: sellerCountry ?? this.sellerCountry,
+      sellerPhone: sellerPhone ?? this.sellerPhone,
       createdAt: createdAt ?? this.createdAt,
       description: description ?? this.description,
       startBidAmount: startBidAmount ?? this.startBidAmount,
@@ -151,6 +172,14 @@ class AuctionItem {
           warrantyPolicyDescription ?? this.warrantyPolicyDescription,
       isMyAuction: isMyAuction ?? this.isMyAuction,
     );
+  }
+
+  // Helper for printing long strings in chunks
+  static void printLongString(String text) {
+    final pattern = RegExp('.{1,800}');
+    for (final match in pattern.allMatches(text)) {
+      print(match.group(0));
+    }
   }
 
   factory AuctionItem.fromJson(Map<String, dynamic> json) {
@@ -355,6 +384,14 @@ class AuctionItem {
         print('[AuctionItem.fromJson] Created itemLocation from IDs: city=${itemLocation.city}, country=${itemLocation.country}, address=${itemLocation.address}');
       }
 
+      // Debug: Print the relevant fields just before returning
+      printLongString('[AuctionItem.fromJson] RAW JSON: ${jsonEncode(json)}');
+      print('[AuctionItem.fromJson] sellerAddress: ${json['location']?['address']}');
+      print('[AuctionItem.fromJson] sellerAddressLabel: ${json['location']?['addressLabel']}');
+      print('[AuctionItem.fromJson] sellerCity: ${json['location']?['city']?['nameEn']}');
+      print('[AuctionItem.fromJson] sellerCountry: ${json['location']?['country']?['nameEn']}');
+      print('[AuctionItem.fromJson] sellerPhone: ${json['location']?['phone']}');
+
       return AuctionItem(
         id: json['id'] as int? ?? 0,
         productId: product['id'] as int? ?? 0,
@@ -366,6 +403,11 @@ class AuctionItem {
         productListingPrice: product['ProductListingPrice'] as String? ?? '0',
         bids: bidCount,
         itemLocation: itemLocation,
+        sellerAddress: json['location']?['address'] ?? '',
+        sellerAddressLabel: json['location']?['addressLabel'] ?? '',
+        sellerCity: json['location']?['city']?['nameEn'] ?? '',
+        sellerCountry: json['location']?['country']?['nameEn'] ?? '',
+        sellerPhone: json['location']?['phone'] as String? ?? '',
         createdAt: createdAt,
         description: product['description'] as String? ?? '',
         startBidAmount: json['startBidAmount'] as String? ?? '0',
@@ -435,6 +477,11 @@ class AuctionItem {
       type: 'ON_TIME',
       usageStatus: '',
       itemLocation: null,
+      sellerAddress: '',
+      sellerAddressLabel: '',
+      sellerCity: '',
+      sellerCountry: '',
+      sellerPhone: '',
       bids: 0,
       buyNowEnabled: false,
       categoryId: 0,
@@ -478,6 +525,11 @@ class AuctionItem {
       'productListingPrice': productListingPrice,
       'bids': bids,
       'itemLocation': itemLocation,
+      'sellerAddress': sellerAddress,
+      'sellerAddressLabel': sellerAddressLabel,
+      'sellerCity': sellerCity,
+      'sellerCountry': sellerCountry,
+      'sellerPhone': sellerPhone,
       'createdAt': createdAt.toIso8601String(),
       'description': description,
       'startBidAmount': startBidAmount,
