@@ -29,6 +29,7 @@ import '../../widgets/item details widgets/item_details_category_info.dart';
 import '../../widgets/item details widgets/delivery_type_modal.dart';
 import 'package:alletre_app/controller/helpers/address_service.dart';
 import 'package:alletre_app/view/screens/auction screen/add_location_screen.dart';
+import 'package:alletre_app/view/screens/auction screen/payment_details_screen.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   void _popAndRefresh(BuildContext context) {
@@ -148,12 +149,19 @@ final deliveryTypeMap = {
         return;
       }
 
-      // 4. Navigate to payment details screen (replace with your actual screen)
-      closeDialogIfOpen();
-      Navigator.of(context).pushNamed('/payment-details', arguments: {
-        'auction': freshItem,
-        'details': detailsRes['data'],
-      });
+      // 4. Navigate to payment details screen (updated for Buy Now)
+    closeDialogIfOpen();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentDetailsScreen(
+          auctionData: {
+            'auction': freshItem,
+            'details': detailsRes['data'],
+          },
+        ),
+      ),
+    );
     } catch (e) {
       closeDialogIfOpen();
       scaffold.showSnackBar(SnackBar(content: Text('An error occurred: $e')));

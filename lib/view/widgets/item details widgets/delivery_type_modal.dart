@@ -82,19 +82,17 @@ class DeliveryTypeModal extends StatelessWidget {
                   ),
                 ),
                 if (selectedType == 'Pick up yourself') ...[
-                  const SizedBox(height: 10),
-                  Text(
+                  const SizedBox(height: 7),
+                  const Text(
                     'The buyer is responsible for collecting the item. No delivery fees apply.',
-                    style: TextStyle(color: Colors.green[700], fontSize: 13, fontWeight: FontWeight.w500),
+                    style: TextStyle(color: primaryColor, fontSize: 11, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 6),
                 ] else if (selectedType == 'Deliver by company') ...[
-                  const SizedBox(height: 10),
-                  Text(
+                  const SizedBox(height: 7),
+                  const Text(
                     'The company will arrange delivery, and the buyer will be responsible for the associated delivery fee.',
-                    style: TextStyle(color: Colors.blue[700], fontSize: 13, fontWeight: FontWeight.w500),
+                    style: TextStyle(color: primaryColor, fontSize: 11, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 6),
                 ],
                 const SizedBox(height: 16),
                 const Text('Seller Details',
