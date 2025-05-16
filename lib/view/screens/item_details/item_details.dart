@@ -27,6 +27,8 @@ import '../../widgets/item details widgets/item_details_bottom_bar.dart';
 import '../../widgets/item details widgets/item_details_bottom_sheet.dart';
 import '../../widgets/item details widgets/item_details_category_info.dart';
 import '../../widgets/item details widgets/delivery_type_modal.dart';
+import 'package:alletre_app/controller/helpers/address_service.dart';
+import 'package:alletre_app/view/screens/auction screen/add_location_screen.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   void _popAndRefresh(BuildContext context) {
@@ -34,7 +36,29 @@ class ItemDetailsScreen extends StatelessWidget {
   }
 
   Future<void> _handleBuyNowFlow(BuildContext context, AuctionItem item) async {
-    final userId = item.postedBy;
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    bool dialogClosed = false;
+    void closeDialogIfOpen() {
+      if (!dialogClosed && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+        dialogClosed = true;
+      }
+    }
+    // Address check: ensure user has at least one address
+    final addresses = await AddressService.fetchAddresses();
+    if (addresses.isEmpty) {
+      closeDialogIfOpen();
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AddLocationScreen()),
+      );
+      return;
+    }
+    
     final auctionId = item.id.toString();
     final scaffold = ScaffoldMessenger.of(context);
 
@@ -45,12 +69,14 @@ class ItemDetailsScreen extends StatelessWidget {
       if (detailsRes != null && detailsRes['data'] != null) {
         freshItem = AuctionItem.fromJson(detailsRes['data']);
       } else {
+        closeDialogIfOpen();
         scaffold.showSnackBar(const SnackBar(
           content: Center(child: Text('Failed to get auction details')),
         ));
         return;
       }
     } catch (e) {
+      closeDialogIfOpen();
       scaffold.showSnackBar(SnackBar(content: Text('Error fetching auction details: $e')));
       return;
     }
@@ -62,31 +88,38 @@ class ItemDetailsScreen extends StatelessWidget {
     print('Country: ${freshItem.sellerCountry}');
     print('Contact Number: ${freshItem.sellerPhone}');
 
-    final deliveryTypes = [
-      'Pick up yourself',
-      'Deliver by company',
-    ];
+
+
+final deliveryTypeMap = {
+  'Pick up yourself': 'PICKUP',
+  'Deliver by company': 'DELIVERY',
+};
 
     String? selectedType;
     
     await showDialog(
       context: context,
       builder: (context) => DeliveryTypeModal(
-        deliveryTypes: deliveryTypes,
+        deliveryTypes: deliveryTypeMap.keys.toList(),
         onSubmit: (type) {
           selectedType = type;
         },
         auction: freshItem!,
       ),
     );
-    if (selectedType == null) return;
+    if (selectedType == null) {
+      closeDialogIfOpen();
+      return;
+    }
 
     final auctionService = AuctionService();
     try {
       // 1. Set delivery type
+      final backendDeliveryType = deliveryTypeMap[selectedType]!;
       final setDeliveryRes = await auctionService.setDeliveryType(
-          userId, auctionId, selectedType!);
+        auctionId, backendDeliveryType);
       if (setDeliveryRes['success'] != true) {
+        closeDialogIfOpen();
         scaffold.showSnackBar(SnackBar(
             content: Text(
                 setDeliveryRes['message'] ?? 'Failed to set delivery type')));
@@ -97,6 +130,7 @@ class ItemDetailsScreen extends StatelessWidget {
       final detailsRes =
           await AuctionDetailsService.getAuctionDetails(auctionId);
       if (detailsRes == null || detailsRes['data'] == null) {
+        closeDialogIfOpen();
         scaffold.showSnackBar(const SnackBar(
             content: Center(
               child: Text(
@@ -106,19 +140,22 @@ class ItemDetailsScreen extends StatelessWidget {
       }
 
       // 3. Buy now
-      final buyNowRes = await auctionService.buyNow(userId, auctionId);
+      final buyNowRes = await auctionService.buyNow(auctionId);
       if (buyNowRes['success'] != true) {
+        closeDialogIfOpen();
         scaffold.showSnackBar(
             SnackBar(content: Text(buyNowRes['message'] ?? 'Buy Now failed')));
         return;
       }
 
       // 4. Navigate to payment details screen (replace with your actual screen)
+      closeDialogIfOpen();
       Navigator.of(context).pushNamed('/payment-details', arguments: {
         'auction': freshItem,
         'details': detailsRes['data'],
       });
     } catch (e) {
+      closeDialogIfOpen();
       scaffold.showSnackBar(SnackBar(content: Text('An error occurred: $e')));
     }
   }

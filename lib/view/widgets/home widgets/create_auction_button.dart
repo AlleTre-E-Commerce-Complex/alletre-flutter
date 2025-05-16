@@ -1,3 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:alletre_app/controller/helpers/address_service.dart';
+import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:provider/provider.dart';
@@ -13,9 +17,17 @@ class CreateAuctionButton extends StatelessWidget {
 
   void _handleOptionSelected(BuildContext context, String option) {
     if (option == 'Create Auction') {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen(title: 'Create Auction'))); 
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const ProductDetailsScreen(title: 'Create Auction')));
     } else if (option == 'List Product') {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen(title: 'List Product'))); 
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const ProductDetailsScreen(title: 'List Product')));
     }
   }
 
@@ -31,9 +43,17 @@ class CreateAuctionButton extends StatelessWidget {
         child: Center(
           child: FloatingActionButton.extended(
             heroTag: _getUniqueHeroTag(), // Use unique hero tag
-            onPressed: () {
+            onPressed: () async {
               if (!isLoggedIn) {
                 AuthHelper.showAuthenticationRequiredMessage(context);
+                return;
+              }
+              // Address check before auction creation
+              final addresses = await AddressService.fetchAddresses();
+              if (addresses.isEmpty) {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AddLocationScreen()),
+                );
                 return;
               }
               // Show popup menu manually
@@ -51,7 +71,8 @@ class CreateAuctionButton extends StatelessWidget {
                   PopupMenuItem<String>(
                     value: 'Create Auction',
                     child: const Center(child: Text('Create Auction')),
-                    onTap: () => _handleOptionSelected(context, 'Create Auction'),
+                    onTap: () =>
+                        _handleOptionSelected(context, 'Create Auction'),
                   ),
                   PopupMenuItem<String>(
                     value: 'List Product',
@@ -63,9 +84,7 @@ class CreateAuctionButton extends StatelessWidget {
             },
             label: Text(
               'Sell Now',
-              style: TextStyle(
-                color: Theme.of(context).primaryColor
-              ),
+              style: TextStyle(color: Theme.of(context).primaryColor),
             ),
             backgroundColor: Theme.of(context).splashColor,
             shape: RoundedRectangleBorder(

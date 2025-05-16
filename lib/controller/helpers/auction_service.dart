@@ -13,10 +13,10 @@ import 'user_services.dart';
 class AuctionService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  Future<Map<String, dynamic>> setDeliveryType(String userId, String auctionId, String deliveryType) async {
+  Future<Map<String, dynamic>> setDeliveryType(String auctionId, String deliveryType) async {
     try {
       String? accessToken = await _getAccessToken();
-      final url = Uri.parse('http://localhost:3001/api/auctions/user/$userId/set-delivery-type');
+      final url = Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/set-delivery-type');
       final body = jsonEncode({
         'auctionId': auctionId,
         'deliveryType': deliveryType,
@@ -25,67 +25,55 @@ class AuctionService {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
       };
-      var response = await http.post(url, headers: headers, body: body);
+
+      debugPrint('--- setDeliveryType DEBUG START ---');
+      debugPrint('Endpoint: $url');
+      debugPrint('Headers:');
+      headers.forEach((k, v) => debugPrint('  $k: $v'));
+      debugPrint('Request Body: $body');
+      debugPrint('--- Sending PUT request...');
+
+      var response = await http.put(url, headers: headers, body: body);
+
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+
       if (response.statusCode == 401) {
-        // Try refresh
+        debugPrint('401 Unauthorized. Attempting token refresh...');
         final userService = UserService();
         final refreshResult = await userService.refreshTokens();
         if (refreshResult['success']) {
           accessToken = refreshResult['data']['accessToken'];
           headers['Authorization'] = 'Bearer $accessToken';
+          debugPrint('Retrying POST with refreshed token...');
           response = await http.post(url, headers: headers, body: body);
+          debugPrint('Retry Response Status: ${response.statusCode}');
+          debugPrint('Retry Response Body: ${response.body}');
         } else {
+          debugPrint('Token refresh failed.');
           return {'success': false, 'message': 'Authentication failed'};
         }
       }
       final data = json.decode(response.body);
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('--- setDeliveryType DEBUG END: SUCCESS ---');
         return {'success': true, 'data': data['data']};
       } else {
+        debugPrint('--- setDeliveryType DEBUG END: FAILURE ---');
         return {'success': false, 'message': data['message'] ?? 'Failed to set delivery type'};
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('--- setDeliveryType DEBUG END: EXCEPTION ---');
+      debugPrint('Exception: $e');
+      debugPrint('Stack Trace: $stack');
       return {'success': false, 'message': e.toString()};
     }
   }
 
-  // Future<Map<String, dynamic>> getAuctionDetails(String userId, String auctionId) async {
-  //   try {
-  //     String? accessToken = await _getAccessToken();
-  //     final url = Uri.parse('http://localhost:3001/api/auctions/user/$userId/details');
-  //     final body = jsonEncode({'auctionId': auctionId});
-  //     Map<String, String> headers = {
-  //       'Authorization': 'Bearer $accessToken',
-  //       'Content-Type': 'application/json',
-  //     };
-  //     var response = await http.post(url, headers: headers, body: body);
-  //     if (response.statusCode == 401) {
-  //       // Try refresh
-  //       final userService = UserService();
-  //       final refreshResult = await userService.refreshTokens();
-  //       if (refreshResult['success']) {
-  //         accessToken = refreshResult['data']['accessToken'];
-  //         headers['Authorization'] = 'Bearer $accessToken';
-  //         response = await http.post(url, headers: headers, body: body);
-  //       } else {
-  //         return {'success': false, 'message': 'Authentication failed'};
-  //       }
-  //     }
-  //     final data = json.decode(response.body);
-  //     if (response.statusCode >= 200 && response.statusCode < 300) {
-  //       return {'success': true, 'data': data['data']};
-  //     } else {
-  //       return {'success': false, 'message': data['message'] ?? 'Failed to get auction details'};
-  //     }
-  //   } catch (e) {
-  //     return {'success': false, 'message': e.toString()};
-  //   }
-  // }
-
-  Future<Map<String, dynamic>> buyNow(String userId, String auctionId) async {
+  Future<Map<String, dynamic>> buyNow(String auctionId) async {
     try {
       String? accessToken = await _getAccessToken();
-      final url = Uri.parse('http://localhost:3001/api/auctions/user/$userId/buy-now');
+      final url = Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/buy-now');
       final body = jsonEncode({'auctionId': auctionId});
       Map<String, String> headers = {
         'Authorization': 'Bearer $accessToken',
