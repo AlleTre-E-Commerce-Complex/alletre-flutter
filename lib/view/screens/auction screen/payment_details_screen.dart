@@ -1402,38 +1402,36 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
           ),
           // Show total only for Buy Now flow
           if (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 6.0, bottom: 2.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Total',
-                    style: TextStyle(
-                      color: onSecondaryColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
+            const SizedBox(height: 22),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total',
+                  style: TextStyle(
+                    color: onSecondaryColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Builder(
-                    builder: (context) {
-                      final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
-                      final acceptedAmount = double.tryParse(acceptedAmountStr) ?? 0;
-                      final auctionFee = acceptedAmount / 200;
-                      final total = acceptedAmount + auctionFee;
-                      final formattedTotal = NumberFormat("#,##0.00").format(total);
-                      return Text(
-                        'AED $formattedTotal',
-                        style: const TextStyle(
-                          color: primaryColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
+                ),
+                Builder(
+                  builder: (context) {
+                    final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
+                    final acceptedAmount = double.tryParse(acceptedAmountStr) ?? 0;
+                    final auctionFee = acceptedAmount / 200;
+                    final total = acceptedAmount + auctionFee;
+                    final formattedTotal = NumberFormat("#,##0.00").format(total);
+                    return Text(
+                      'AED $formattedTotal',
+                      style: const TextStyle(
+                        color: primaryColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           const SizedBox(height: 32),
           // FAQ text and link
