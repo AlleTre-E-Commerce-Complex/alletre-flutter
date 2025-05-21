@@ -4,6 +4,97 @@ import 'dart:convert';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
 class PaymentService {
+
+  static Future<Map<String, dynamic>> buyNowAuction({
+    required int auctionId,
+    required double amount,
+    required String token,
+    required String currency,
+    CardFieldInputDetails? cardDetails,
+  }) async {
+    isLoadingPayment.value = true;
+    paymentError.value = null;
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auctions/user/$auctionId/buy-now'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'auctionId': auctionId,
+          'amount': amount,
+        }),
+      );
+
+      debugPrint('buyNowAuction response status: [32m${response.statusCode}[0m');
+      debugPrint('buyNowAuction response body: ${response.body}');
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final error = jsonDecode(response.body);
+        final errorMessage = error['message'];
+        if (errorMessage is Map) {
+          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? 'Buy Now failed');
+        }
+        throw Exception(errorMessage ?? 'Buy Now failed');
+      }
+
+      final data = jsonDecode(response.body);
+      // If Stripe confirmation is needed, handle here (optional)
+      return data['data'] ?? data;
+    } catch (e) {
+      paymentError.value = e.toString();
+      rethrow;
+    } finally {
+      isLoadingPayment.value = false;
+    }
+  }
+
+  static Future<Map<String, dynamic>> buyNowAuctionThroughWallet({
+    required int auctionId,
+    required double amount,
+    required String token,
+    required String currency,
+  }) async {
+    isLoadingPayment.value = true;
+    paymentError.value = null;
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auctions/user/$auctionId/buy-now-through-wallet'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'auctionId': auctionId,
+          'amount': amount,
+        }),
+      );
+
+      debugPrint('buyNowAuctionThroughWallet response status: [32m${response.statusCode}[0m');
+      debugPrint('buyNowAuctionThroughWallet response body: ${response.body}');
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final error = jsonDecode(response.body);
+        final errorMessage = error['message'];
+        if (errorMessage is Map) {
+          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? 'Buy Now (wallet) failed');
+        }
+        throw Exception(errorMessage ?? 'Buy Now (wallet) failed');
+      }
+
+      final data = jsonDecode(response.body);
+      return data['data'] ?? data;
+    } catch (e) {
+      paymentError.value = e.toString();
+      rethrow;
+    } finally {
+      isLoadingPayment.value = false;
+    }
+  }
+
   static final ValueNotifier<bool> isLoadingPayment = ValueNotifier<bool>(false);
   static final ValueNotifier<String?> paymentError = ValueNotifier<String?>(null);
 
@@ -280,7 +371,7 @@ class PaymentService {
       })}');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/user/auction/purchase'),
+        Uri.parse('$baseUrl/auctions/user/$auctionId/bidder-purchase'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -355,7 +446,7 @@ class PaymentService {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/user/auction/wallet-purchase'),
+        Uri.parse('$baseUrl/auctions/user/$auctionId/wallet-bidder-purchase'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
