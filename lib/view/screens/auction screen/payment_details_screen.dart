@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/ui_helpers.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/utils/deposit_calculator.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -209,10 +210,17 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       // Log the starting point of the payment process
       debugPrint('🔍 Starting wallet payment process...');
 
-      // Get the auction ID from widget data
-      final auctionId = widget.auctionData['data']?['id'];
+      // Get the auction ID from widget data (handle Buy Now and other flows)
+      int? auctionId;
+      if (widget.auctionData['details'] != null && widget.auctionData['details']['id'] != null) {
+        auctionId = widget.auctionData['details']['id'] as int?;
+        debugPrint('🔍 [Buy Now] Using auction ID from details: $auctionId');
+      } else if (widget.auctionData['data'] != null && widget.auctionData['data']['id'] != null) {
+        auctionId = widget.auctionData['data']['id'] as int?;
+        debugPrint('🔍 [Other Flow] Using auction ID from data: $auctionId');
+      }
       if (auctionId == null) {
-        throw Exception('Auction ID not found in data');
+        throw Exception('Auction ID not found in details or data');
       }
       debugPrint('🔍 Using auction ID: $auctionId');
 
@@ -494,22 +502,92 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                 ),
                                 const SizedBox(width: 15),
                                 ElevatedButton(
-                                  onPressed: (isLoading ||
-                                          (walletBalance ?? 0) <
-                                              (depositAmount ?? 0))
-                                      ? () {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
+                                  // --- Handle Buy Now flow for wallet payment ---
+                                  onPressed: () async {
+                                    final isBuyNow = widget.auctionData['auction'] != null && widget.auctionData['details'] != null;
+                                    double totalAmount = 0;
+                                    if (isBuyNow) {
+                                      final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
+                                      final acceptedAmount = double.tryParse(acceptedAmountStr) ?? 0;
+                                      final auctionFee = acceptedAmount / 200;
+                                      final cardFee = ((acceptedAmount + auctionFee) * 0.03) + 4;
+                                      totalAmount = double.parse((acceptedAmount + auctionFee + cardFee).toStringAsFixed(2));
+                                    }
+                                    final hasBalance = isBuyNow
+                                        ? (walletBalance ?? 0) >= totalAmount
+                                        : (walletBalance ?? 0) >= (depositAmount ?? 0);
+                                    if (isLoading || !hasBalance) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Center(child: Text('Insufficient wallet balance')),
+                                          duration: Duration(seconds: 1),
+                                          backgroundColor: errorColor,
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    if (isBuyNow) {
+                                      // --- Buy Now wallet payment ---
+                                      setState(() => isLoading = true);
+                                      try {
+                                        final auctionId = widget.auctionData['details']['id'];
+                                        // Retrieve token using the local helper
+                                        final token = await _getValidToken();
+                                        if (token == null) {
+                                          debugPrint('❌ No access token available for Buy Now wallet payment');
+                                          if (!context.mounted) return;
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             const SnackBar(
-                                              content: Center(
-                                                  child: Text(
-                                                      'Insufficient wallet balance')),
-                                              duration: Duration(seconds: 1),
+                                              content: Text('Authentication error: No access token'),
                                               backgroundColor: errorColor,
                                             ),
                                           );
+                                          return;
                                         }
-                                      : _handleWalletPayment,
+                                        final response = await PaymentService.buyNowAuctionThroughWallet(
+                                          auctionId: auctionId,
+                                          amount: totalAmount,
+                                          currency: 'AED',
+                                          token: token,
+                                        );
+                                        debugPrint('✅ Buy Now wallet payment response: $response');
+                                        if (!context.mounted) return;
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Center(child: Text('Great pick. Purchase successful!!')),
+                                            backgroundColor: activeColor,
+                                          ),
+                                        );
+                                        // Remove the auction from live auctions before navigating home
+                                        if (context.mounted) {
+                                          final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+                                          final auctionIdInt = auctionId is int ? auctionId : int.tryParse(auctionId.toString());
+                                          if (auctionIdInt != null) {
+                                            auctionProvider.removeAuctionFromLive(auctionIdInt);
+                                          }
+                                        }
+                                        // Navigate to home page after short delay
+                                        await Future.delayed(const Duration(milliseconds: 300));
+                                        if (context.mounted) {
+                                          Navigator.of(context).popUntil((route) => route.isFirst);
+                                        }
+                                      } catch (e) {
+                                        debugPrint('❌ Buy Now wallet payment failed: $e');
+                                        if (!context.mounted) return;
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Buy Now wallet payment failed: $e'),
+                                            backgroundColor: errorColor,
+                                          ),
+                                        );
+                                      } finally {
+                                        if (mounted) setState(() => isLoading = false);
+                                      }
+                                    } else {
+                                      _handleWalletPayment();
+                                    }
+                                  },
+
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: ((walletBalance ?? 0) <
                                             (depositAmount ?? 0))
@@ -534,53 +612,30 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                         )
                                       : Text(
                                           () {
+                                            final isBuyNow = widget.auctionData['auction'] != null && widget.auctionData['details'] != null;
+                                            if (isBuyNow) {
+                                              final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
+                                              final acceptedAmount = double.tryParse(acceptedAmountStr) ?? 0;
+                                              final auctionFee = acceptedAmount / 200;
+                                              final cardFee = ((acceptedAmount + auctionFee) * 0.03) + 4;
+                                              final totalAmount = double.parse((acceptedAmount + auctionFee + cardFee).toStringAsFixed(2));
+                                              return 'Pay AED ${NumberFormat("#,##0.00").format(totalAmount)}';
+                                            }
                                             // For newly created auctions, calculate deposit based on category
-                                            if (widget.auctionData[
-                                                        'isDeposit'] ==
-                                                    null &&
-                                                widget.auctionData['data'] !=
-                                                    null) {
-                                              final categoryId = widget
-                                                      .auctionData['data']
-                                                  ['product']?['categoryId'];
+                                            if (widget.auctionData['isDeposit'] == null && widget.auctionData['data'] != null) {
+                                              final categoryId = widget.auctionData['data']['product']?['categoryId'];
                                               if (categoryId != null) {
-                                                final depositAmount =
-                                                    CategoryService
-                                                        .getSellerDepositAmount(
-                                                            int.parse(categoryId
-                                                                .toString()));
-                                                debugPrint(
-                                                    '🔍 Calculated Deposit Amount for Pay Button: $depositAmount');
+                                                final depositAmount = CategoryService.getSellerDepositAmount(int.parse(categoryId.toString()));
+                                                debugPrint('🔍 Calculated Deposit Amount for Pay Button: $depositAmount');
                                                 return 'Pay AED ${NumberFormat("#,##0").format(double.tryParse(depositAmount)?.round() ?? 0)}';
                                               }
                                             }
-
                                             // For existing deposits, use the provided amount
-                                            final depositAmount = widget
-                                                            .auctionData[
-                                                        'isDeposit'] ==
-                                                    true
-                                                ? widget.auctionData[
-                                                        'depositAmount']
-                                                    ?.toString()
-                                                : widget.auctionData['data']
-                                                            ?['depositAmount']
-                                                        ?.toString() ??
-                                                    widget.auctionData[
-                                                            'depositAmount']
-                                                        ?.toString();
-
-                                            debugPrint(
-                                                '🔍 Deposit Amount for Pay Button: $depositAmount');
-
-                                            final formattedAmount =
-                                                NumberFormat("#,##0").format(
-                                                    double.tryParse(
-                                                                depositAmount ??
-                                                                    '0')
-                                                            ?.round() ??
-                                                        0);
-
+                                            final depositAmount = widget.auctionData['isDeposit'] == true
+                                                ? widget.auctionData['depositAmount']?.toString()
+                                                : widget.auctionData['data']?['depositAmount']?.toString() ?? widget.auctionData['depositAmount']?.toString();
+                                            debugPrint('🔍 Deposit Amount for Pay Button: $depositAmount');
+                                            final formattedAmount = NumberFormat("#,##0").format(double.tryParse(depositAmount ?? '0')?.round() ?? 0);
                                             return 'Pay AED $formattedAmount';
                                           }(),
                                           textAlign: TextAlign.center,

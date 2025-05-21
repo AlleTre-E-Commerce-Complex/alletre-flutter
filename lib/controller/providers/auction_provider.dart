@@ -8,6 +8,12 @@ import 'package:alletre_app/model/auction_item.dart';
 class AuctionProvider with ChangeNotifier {
   // Tracks pending optimistic bids: auctionId -> bidAmount
   final Map<int, double> _pendingOptimisticBids = {};
+
+  /// Removes an auction from the live auctions list and notifies listeners
+  void removeAuctionFromLive(int auctionId) {
+    _liveAuctions.removeWhere((item) => item.id == auctionId);
+    notifyListeners();
+  }
   void optimisticBidUpdate(int auctionId, double newBid, int newTotalBids) {
     _pendingOptimisticBids[auctionId] = newBid;
     void updateList(List<AuctionItem> list) {
