@@ -321,8 +321,6 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
               builder: (context, contactProvider, child) {
                 // Use latest auction state for owner check
                 if (isOwner) {
-                  debugPrint(
-                      '🔍 [isOwner DEBUG] Building owner buttons (Change Status, Convert to Auction)');
                   return Row(
                     children: [
                       Expanded(

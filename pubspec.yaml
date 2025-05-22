@@ -48,18 +48,18 @@ dependencies:
   geolocator:
   geocoding:
   http:
-  flutter_secure_storage: ^8.0.0
+  flutter_secure_storage: ^9.2.4
   app_links:
   socket_io_client:
   share_plus:
   timeago:
   shimmer:
   photo_view:
-  flutter_credit_card: ^3.0.7
+  flutter_credit_card: ^4.1.0
   firebase_auth: ^5.5.1
   firebase_core: ^3.12.1
   google_sign_in: ^6.2.2
-  sign_in_with_apple: ^6.1.4
+  sign_in_with_apple: ^7.0.1
   video_player: ^2.9.3
   infinite_scroll_pagination:
 
@@ -82,7 +82,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
