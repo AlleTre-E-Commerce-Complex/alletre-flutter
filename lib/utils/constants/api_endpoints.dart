@@ -15,4 +15,9 @@ class ApiEndpoints {
   static String getSubCategoriesUrl(int categoryId) {
     return '$_subCategoriesPath?categoryId=$categoryId';
   }
+
+  // Wishlist endpoints
+  static const String saveToWishlist = '/watch-lists/save';
+  static const String getSavedWishlist = '/watch-lists/saved';
+  static String unSaveFromWishlist(int auctionId) => '/watch-lists/un-save?auctionId=$auctionId';
 }

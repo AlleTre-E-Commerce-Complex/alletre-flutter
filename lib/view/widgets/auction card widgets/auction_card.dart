@@ -474,7 +474,7 @@ class AuctionCard extends StatelessWidget {
           icon == FontAwesomeIcons.bookmark && isWishlisted
               ? Icons.bookmark
               : icon,
-          size: 12,
+          size: 13,
           color: icon == FontAwesomeIcons.bookmark && isWishlisted
               ? primaryColor
               : onSecondaryColor,

@@ -135,7 +135,7 @@ class ApiService {
 
   static Future<Response> post(String endpoint, {dynamic data}) async {
     final token = await _getToken();
-    debugPrint('🔍 API Request: POST $baseUrl$endpoint');
+    debugPrint('🔍 API Request: POST $endpoint');
     debugPrint('🔍 Request data: $data');
 
     if (token == null) {
@@ -144,8 +144,42 @@ class ApiService {
 
     try {
       final response = await _dio.post(
-        baseUrl + endpoint,
+        endpoint,
         data: data,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      debugPrint('🔍 API Response status: ${response.statusCode}');
+      debugPrint('🔍 API Response headers: ${response.headers}');
+      debugPrint('🔍 API Response data: ${response.data}');
+
+      return response;
+    } on DioException catch (e) {
+      debugPrint('🔍 API Error status: ${e.response?.statusCode}');
+      debugPrint('🔍 API Error data: ${e.response?.data}');
+      rethrow;
+    } catch (e) {
+      debugPrint('🔍 Unexpected API error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Response> delete(String endpoint) async {
+    final token = await _getToken();
+    debugPrint('🔍 API Request: DELETE $endpoint');
+
+    if (token == null) {
+      throw Exception('No access token found');
+    }
+
+    try {
+      final response = await _dio.delete(
+        endpoint,
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
