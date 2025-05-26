@@ -22,6 +22,7 @@ class AuctionCard extends StatelessWidget {
   final UserModel user;
   final String title;
   final double cardWidth;
+
   const AuctionCard({
     super.key,
     required this.auction,
@@ -61,7 +62,7 @@ class AuctionCard extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: SizedBox(
-                      height: 120,
+                      height: title == 'Active' || title == 'Scheduled' || title == 'Drafts' || title == 'Sold' || title == 'Pending' || title == 'Waiting for Delivery' || title == 'Expired' ? 160 : 120, // Increased height for My Auctions page
                       child: latestAuction.imageLinks.isNotEmpty
                           ? _isSvg(latestAuction.imageLinks.first)
                               ? SvgPicture.network(
@@ -92,12 +93,27 @@ class AuctionCard extends StatelessWidget {
                         // Status (if not Listed Products)
                         if ((title != 'Listed Products' && title != 'Similar Products') || 
                             (title == 'Similar Products' && auction.isAuctionProduct)) ...[
-                          _buildStatusText(context, auction.status),
-                          const SizedBox(height: 5),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildStatusText(context, auction.status),
+                              if (title == 'Active' || title == 'Scheduled' || title == 'Drafts' || title == 'Sold' || title == 'Pending' || title == 'Waiting for Delivery' || title == 'Expired')
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primaryVariantColor,
+                                    minimumSize: const Size(0, 28),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                  ),
+                                  onPressed: () => _navigateToDetails(context, auction, user),
+                                  child: const Text('View Details', style: TextStyle(color: secondaryColor, fontSize: 9)),
+                                ),
+                            ],
+                          ),
                         ],
                         // Title
                         SizedBox(
-                          height: 34,
+                          height: 32,
                           child: Consumer<AuctionProvider>(
                             builder: (context, auctionProvider, child) {
                               return HighlightedText(
@@ -258,8 +274,39 @@ class AuctionCard extends StatelessWidget {
                         // Auction Card Action Buttons
                         if ((title != 'Listed Products' && title != 'Expired Auctions' && auction.isAuctionProduct) ||
                             (title == 'Similar Products' && auction.isAuctionProduct)) ...[
-                          
-                          if (auction.isMyAuction)
+                          if (auction.isMyAuction && (title == 'Active' || title == 'Scheduled' || title == 'Drafts' || title == 'Sold' || title == 'Pending' || title == 'Waiting for Delivery' || title == 'Expired'))
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: primaryColor,
+                                      minimumSize: const Size(0, 32),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                    ),
+                                    onPressed: () {
+                                      // TODO: Implement Edit logic
+                                    },
+                                    child: const Text('Edit Auction', style: TextStyle(color: secondaryColor, fontSize: 11)),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: const Size(0, 32),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6),
+                                      side: BorderSide(color: primaryColor)),
+                                    ),
+                                    onPressed: () {
+                                      // TODO: Implement Cancel logic
+                                    },
+                                    child: const Text('Cancel Auction', style: TextStyle(color: primaryColor, fontSize: 11)),
+                                  ),
+                                ),
+                              ],
+                            )
+                          else if (auction.isMyAuction)
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 32),
@@ -273,7 +320,7 @@ class AuctionCard extends StatelessWidget {
                                 'View Details',
                                 style: TextStyle(
                                   color: secondaryColor,
-                                  fontSize: 12,
+                                  fontSize: 11,
                                 ),
                               ),
                             )
@@ -389,8 +436,9 @@ class AuctionCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     if ((title != 'Listed Products' && auction.isAuctionProduct) || 
-                            (title == 'Similar Products' && auction.isAuctionProduct)) 
-                    _buildIconButton(context, FontAwesomeIcons.bookmark, auction),
+                            (title == 'Similar Products' && auction.isAuctionProduct))
+                      if (!auction.isMyAuction) // Hide wishlist for my auctions
+                        _buildIconButton(context, FontAwesomeIcons.bookmark, auction),
                     const SizedBox(width: 4),
                     _buildIconButton(context, FontAwesomeIcons.shareFromSquare, auction),
                   ],

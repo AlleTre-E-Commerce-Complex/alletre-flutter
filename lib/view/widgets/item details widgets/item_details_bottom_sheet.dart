@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';

@@ -43,6 +43,7 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> _listedProducts = [];
   List<AuctionItem> _upcomingAuctions = [];
   List<AuctionItem> _expiredAuctions = [];
+  List<AuctionItem> _soldAuctions = [];
   final bool _isLoading = false;
   String? _error;
 
@@ -50,6 +51,7 @@ class AuctionProvider with ChangeNotifier {
   bool _isLoadingListedProducts = false;
   bool _isLoadingUpcoming = false;
   bool _isLoadingExpired = false;
+  bool _isLoadingSold = false;
   bool _isCreatingAuction = false;
   bool _isListingProduct = false;
 
@@ -57,6 +59,7 @@ class AuctionProvider with ChangeNotifier {
   String? _errorListedProducts;
   String? _errorUpcoming;
   String? _errorExpired;
+  String? _errorSold;
   String? _createAuctionError;
   String? _listProductError;
 
@@ -64,6 +67,7 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> get listedProducts => _listedProducts;
   List<AuctionItem> get upcomingAuctions => _upcomingAuctions;
   List<AuctionItem> get expiredAuctions => _expiredAuctions;
+  List<AuctionItem> get soldAuctions => _soldAuctions;
   bool get isLoading => _isLoading;
   bool get isCreatingAuction => _isCreatingAuction;
   bool get isListingProduct => _isListingProduct;
@@ -283,6 +287,7 @@ class AuctionProvider with ChangeNotifier {
     _listedProducts.removeWhere((item) => item.id.toString() == auctionId);
     _upcomingAuctions.removeWhere((item) => item.id.toString() == auctionId);
     _expiredAuctions.removeWhere((item) => item.id.toString() == auctionId);
+    _soldAuctions.removeWhere((item) => item.id.toString() == auctionId);
 
     notifyListeners();
   }
@@ -291,11 +296,13 @@ class AuctionProvider with ChangeNotifier {
   bool get isLoadingListedProducts => _isLoadingListedProducts;
   bool get isLoadingUpcoming => _isLoadingUpcoming;
   bool get isLoadingExpired => _isLoadingExpired;
+  bool get isLoadingSold => _isLoadingSold;
 
   String? get errorLive => _errorLive;
   String? get errorListedProducts => _errorListedProducts;
   String? get errorUpcoming => _errorUpcoming;
   String? get errorExpired => _errorExpired;
+  String? get errorSold => _errorSold;
 
   String _searchQuery = "";
   String get searchQuery => _searchQuery;
@@ -304,6 +311,7 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> _filteredListedProducts = [];
   List<AuctionItem> _filteredUpcomingAuctions = [];
   List<AuctionItem> _filteredExpiredAuctions = [];
+  List<AuctionItem> _filteredSoldAuctions = [];
 
   void searchItems(String query) {
     _searchQuery = query.toLowerCase();
@@ -320,6 +328,9 @@ class AuctionProvider with ChangeNotifier {
     _filteredExpiredAuctions = _expiredAuctions
         .where((item) => item.title.toLowerCase().contains(_searchQuery))
         .toList();
+    _filteredSoldAuctions = _soldAuctions
+        .where((item) => item.title.toLowerCase().contains(_searchQuery))
+        .toList();
 
     notifyListeners();
   }
@@ -332,6 +343,8 @@ class AuctionProvider with ChangeNotifier {
       _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
   List<AuctionItem> get filteredExpiredAuctions =>
       _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
+  List<AuctionItem> get filteredSoldAuctions =>
+      _searchQuery.isEmpty ? _soldAuctions : _filteredSoldAuctions;
 
   Future<bool> placeBid(String auctionId, double amount) async {
     return await _socketService.placeBid(auctionId, amount);
@@ -427,10 +440,7 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // print('Fetching expired auctions...');
       final auctions = await _auctionService.fetchExpiredAuctions();
-
-      // Filter out auctions with CANCELLED_BEFORE_EXP_DATE status
       _expiredAuctions = auctions
           .where((auction) =>
               auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE')
@@ -548,6 +558,26 @@ class AuctionProvider with ChangeNotifier {
       throw Exception(_listProductError);
     } finally {
       _isListingProduct = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getSoldAuctions() async {
+    if (_isLoadingSold) return;
+
+    _isLoadingSold = true;
+    _errorSold = null;
+    notifyListeners();
+
+    try {
+      final auctions = await _auctionService.fetchSoldAuctions();
+      _soldAuctions = auctions;
+      _errorSold = null;
+    } catch (e) {
+      debugPrint('Error fetching sold auctions: $e');
+      _errorSold = 'Failed to load sold auctions. Please try again.';
+    } finally {
+      _isLoadingSold = false;
       notifyListeners();
     }
   }

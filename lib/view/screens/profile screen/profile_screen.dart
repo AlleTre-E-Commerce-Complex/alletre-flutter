@@ -13,6 +13,7 @@ import '../edit profile screen/edit_profile_screen.dart';
 import '../faqs screen/faqs_screen.dart';
 import '../settings screen/settings_screen.dart';
 import '../wishlist screen/wishlist_screen.dart';
+import '../my_auctions_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? title;
@@ -79,7 +80,14 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.sell_outlined,
               title: 'My Auctions',
               subtitle: 'Manage your auction listings',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyAuctionsScreen(),
+                  ),
+                );
+              },
             ),
             ProfileListTile(
               icon: Icons.gavel,

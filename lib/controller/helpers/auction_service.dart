@@ -1126,6 +1126,48 @@ class AuctionService {
     }
   }
 
+  Future<List<AuctionItem>> fetchSoldAuctions() async {
+    try {
+      final accessToken = await _getAccessToken();
+      if (accessToken == null) {
+        throw Exception('Not authenticated');
+      }
+
+      final url = Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.auctions}/sold');
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 401) {
+        // Try refresh
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          final newAccessToken = refreshResult['data']['accessToken'];
+          final newResponse = await http.get(
+            url,
+            headers: {
+              'Authorization': 'Bearer $newAccessToken',
+              'Content-Type': 'application/json',
+            },
+          );
+          return _parseAuctionsResponse(newResponse);
+        } else {
+          throw Exception('Authentication failed');
+        }
+      }
+
+      return _parseAuctionsResponse(response);
+    } catch (e) {
+      debugPrint('Error fetching sold auctions: $e');
+      rethrow;
+    }
+  }
+
   Future<List<AuctionItem>> fetchExpiredAuctions() async {
     try {
       // First try to get the token
@@ -1208,6 +1250,16 @@ class AuctionService {
     }
   }
 
+  Future<List<AuctionItem>> _parseAuctionsResponse(http.Response response) async {
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      final List<dynamic> data = responseData is List ? responseData : responseData['data'] ?? [];
+      return Future.value(data.map((item) => AuctionItem.fromJson(item)).toList());
+    } else {
+      return Future.error('Failed to load auctions: ${response.statusCode}');
+    }
+  }
+
   Future<List<AuctionItem>> fetchDrafts() async {
     try {
       // First try to get the token
@@ -1256,15 +1308,18 @@ class AuctionService {
           } else {
             hasMore = false;
           }
-        
-          // Try to refresh token and retry once
+        } else if (response.statusCode == 401) {
+          // Handle 401 Unauthorized - try to refresh token and retry
+          debugPrint('401 Unauthorized. Attempting token refresh...');
           final userService = UserService();
           final refreshResult = await userService.refreshTokens();
           if (refreshResult['success']) {
             accessToken = refreshResult['data']['accessToken'];
             headers['Authorization'] = 'Bearer $accessToken';
-            continue;
+            debugPrint('Token refresh successful, retrying request...');
+            continue; // Retry the same page with new token
           } else {
+            debugPrint('Token refresh failed.');
             hasMore = false;
           }
         } else {
