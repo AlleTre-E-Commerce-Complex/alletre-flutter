@@ -139,6 +139,18 @@ class _AuctionsTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Fetch sold auctions when the widget is built
+    if (type == 'Sold') {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final provider = Provider.of<AuctionProvider>(context, listen: false);
+        if (!provider.isLoadingSold &&
+            provider.soldAuctions.isEmpty &&
+            provider.errorSold == null) {
+          await provider.getSoldAuctions();
+        }
+      });
+    }
+    
     // Map auction type to status and provider list
     final statusMap = {
       'Active': 'ACTIVE',
@@ -252,25 +264,35 @@ class _AuctionsTabView extends StatelessWidget {
             if (!provider.isLoadingSold &&
                 provider.soldAuctions.isEmpty &&
                 provider.errorSold == null) {
-              provider.getSoldAuctions();
+              // The auction fetch is now handled in the initState equivalent
             }
             if (provider.errorSold != null) {
               return EmptyState(message: provider.errorSold!);
             }
+            
+            // Debug logging
+            debugPrint('Total sold auctions: ${provider.soldAuctions.length}');
+            for (var auction in provider.soldAuctions) {
+              debugPrint('Auction ID: ${auction.id}, isMyAuction: ${auction.isMyAuction}, Status: ${auction.status}');
+            }
+            
             final filtered = provider.soldAuctions
                 .where((a) => a.isMyAuction)
                 .toList();
+                
+            debugPrint('Filtered sold auctions (isMyAuction=true): ${filtered.length}');
+            
             if (filtered.isEmpty) {
               return EmptyState(message: 'No $type auctions.');
             }
             final screenWidth = MediaQuery.of(context).size.width;
             final cardWidth = (screenWidth - 32 - 12) / 2;
-            final cardHeight = getCardHeight(type);
+            final cardHeight = 198;
 
             return GridView.builder(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(5),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+                crossAxisCount: 1,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 20,
                 childAspectRatio: cardWidth / cardHeight,
@@ -309,7 +331,7 @@ class _AuctionsTabView extends StatelessWidget {
             }
             final screenWidth = MediaQuery.of(context).size.width;
             final cardWidth = (screenWidth - 32 - 12) / 2;
-            final cardHeight = getCardHeight(type);
+            final cardHeight = 198;
 
             return GridView.builder(
               padding: const EdgeInsets.all(8),
@@ -335,6 +357,7 @@ class _AuctionsTabView extends StatelessWidget {
                 );
               },
             );
+
           case 'Expired':
             if (!provider.isLoadingExpired &&
                 provider.expiredAuctions.isEmpty &&

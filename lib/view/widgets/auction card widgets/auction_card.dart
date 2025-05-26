@@ -275,37 +275,61 @@ class AuctionCard extends StatelessWidget {
                         if ((title != 'Listed Products' && title != 'Expired Auctions' && auction.isAuctionProduct) ||
                             (title == 'Similar Products' && auction.isAuctionProduct)) ...[
                           if (auction.isMyAuction && (title == 'Active' || title == 'Scheduled' || title == 'Drafts' || title == 'Sold' || title == 'Pending' || title == 'Waiting for Delivery' || title == 'Expired'))
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
+                            auction.status == 'SOLD'
+                                ? ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: primaryColor,
-                                      minimumSize: const Size(0, 32),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                      minimumSize: const Size(double.infinity, 32),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
                                     ),
                                     onPressed: () {
-                                      // TODO: Implement Edit logic
+                                      // TODO: Implement View Buyer Details logic
                                     },
-                                    child: const Text('Edit Auction', style: TextStyle(color: secondaryColor, fontSize: 11)),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      minimumSize: const Size(0, 32),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6),
-                                      side: BorderSide(color: primaryColor)),
+                                    child: const Text(
+                                      'Buyer Contact Details',
+                                      style: TextStyle(
+                                        color: secondaryColor,
+                                        fontSize: 11,
+                                      ),
                                     ),
-                                    onPressed: () {
-                                      // TODO: Implement Cancel logic
-                                    },
-                                    child: const Text('Cancel Auction', style: TextStyle(color: primaryColor, fontSize: 11)),
-                                  ),
-                                ),
-                              ],
-                            )
+                                  )
+                                : Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: primaryColor,
+                                            minimumSize: const Size(0, 32),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(6)),
+                                          ),
+                                          onPressed: () {
+                                            // TODO: Implement Edit logic
+                                          },
+                                          child: const Text('Edit Auction',
+                                              style: TextStyle(color: secondaryColor, fontSize: 11)),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            minimumSize: const Size(0, 32),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(6),
+                                                side: BorderSide(color: primaryColor)),
+                                          ),
+                                          onPressed: () {
+                                            // TODO: Implement Cancel logic
+                                          },
+                                          child: const Text('Cancel Auction',
+                                              style: TextStyle(color: primaryColor, fontSize: 11)),
+                                        ),
+                                      ),
+                                    ],
+                                  )
                           else if (auction.isMyAuction)
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
