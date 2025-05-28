@@ -1126,6 +1126,82 @@ class AuctionService {
     }
   }
 
+  Future<List<AuctionItem>> fetchUserAuctionsByStatus(String status, {int page = 1, int perPage = 10}) async {
+    try {
+      // First try to get the token
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      // Add authorization header if we have a token
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
+
+      List<AuctionItem> allAuctions = [];
+
+      int userPage = 1;
+      bool hasMoreUser = true;
+
+      while (hasMoreUser) {
+        final userResponse = await http.get(
+          Uri.parse(
+              '${ApiEndpoints.baseUrl}/auctions/user/ownes?page=$userPage&perPage=$perPage&status=$status'),
+          headers: headers,
+        );
+
+        debugPrint(
+            'User Auctions Response Code: ${userResponse.statusCode} for page $userPage');
+
+        if (userResponse.statusCode == 200) {
+          final data = jsonDecode(userResponse.body);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List)
+                .map((item) => AuctionItem.fromJson(item))
+                .toList();
+
+            final pagination = data['pagination'] as Map<String, dynamic>;
+            final totalPages = pagination['totalPages'] as int;
+
+            allAuctions.addAll(items);
+            debugPrint(
+                'Successfully parsed ${items.length} user auctions for page $userPage');
+
+            if (userPage >= totalPages) {
+              hasMoreUser = false;
+              debugPrint('Reached last page of user auctions');
+            } else {
+              userPage++;
+            }
+          } else {
+            hasMoreUser = false;
+          }
+        } else if (userResponse.statusCode == 401 && accessToken != null) {
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            continue;
+          } else {
+            hasMoreUser = false;
+          }
+        } else {
+          hasMoreUser = false;
+        }
+      }
+
+      debugPrint(
+          'Total user auctions fetched: ${allAuctions.length}');
+      return allAuctions;
+    } catch (e) {
+      debugPrint('Error fetching user auctions: $e');
+      return [];
+    }
+  }
+
   Future<List<AuctionItem>> fetchSoldAuctions() async {
     try {
       final accessToken = await _getAccessToken();
@@ -1133,7 +1209,7 @@ class AuctionService {
         throw Exception('Not authenticated');
       }
 
-      final url = Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.auctions}/sold');
+      final url = Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions');
       final response = await http.get(
         url,
         headers: {

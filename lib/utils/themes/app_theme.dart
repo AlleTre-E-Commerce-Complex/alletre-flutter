@@ -63,7 +63,7 @@ double getCardHeight(String title, {bool isAuctionProduct = false}) {
 
   switch (title) {
     case "Live Auctions" || "Upcoming Auctions":
-      return 337; // Taller to accommodate the countdown and the buttons
+      return 325; // Taller to accommodate the countdown and the buttons
     case "Listed Products":
       return 333; // Tall enough for location and view details button
     default:

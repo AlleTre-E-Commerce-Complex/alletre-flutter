@@ -14,6 +14,7 @@ class AuctionProvider with ChangeNotifier {
     _liveAuctions.removeWhere((item) => item.id == auctionId);
     notifyListeners();
   }
+
   void optimisticBidUpdate(int auctionId, double newBid, int newTotalBids) {
     _pendingOptimisticBids[auctionId] = newBid;
     void updateList(List<AuctionItem> list) {
@@ -26,10 +27,12 @@ class AuctionProvider with ChangeNotifier {
         list[index] = updatedItem;
       }
     }
+
     updateList(_liveAuctions);
     updateList(_listedProducts);
     notifyListeners();
   }
+
   AuctionItem? getAuctionById(int id) {
     try {
       return _liveAuctions.firstWhere((item) => item.id == id);
@@ -37,41 +40,67 @@ class AuctionProvider with ChangeNotifier {
       return null;
     }
   }
+
   final SocketService _socketService = SocketService();
   final AuctionService _auctionService = AuctionService();
   List<AuctionItem> _liveAuctions = [];
+  List<AuctionItem> _liveMyAuctions = [];
   List<AuctionItem> _listedProducts = [];
   List<AuctionItem> _upcomingAuctions = [];
   List<AuctionItem> _expiredAuctions = [];
   List<AuctionItem> _soldAuctions = [];
+  List<AuctionItem> _pendingAuctions = [];
+  List<AuctionItem> _waitingForPaymentAuctions = [];
+  List<AuctionItem> _cancelledAuctions = [];
   final bool _isLoading = false;
   String? _error;
 
   bool _isLoadingLive = false;
+  bool _isLoadingMyLive = false;
   bool _isLoadingListedProducts = false;
   bool _isLoadingUpcoming = false;
   bool _isLoadingExpired = false;
   bool _isLoadingSold = false;
+  bool _isLoadingPending = false;
+  bool _isLoadingWaitingForPayment = false;
+  bool _isLoadingCancelled = false;
   bool _isCreatingAuction = false;
   bool _isListingProduct = false;
 
   String? _errorLive;
+  String? _errorMyLive;
   String? _errorListedProducts;
   String? _errorUpcoming;
   String? _errorExpired;
   String? _errorSold;
+  String? _errorPending;
+  String? _errorWaitingForPayment;
+  String? _errorCancelled;
   String? _createAuctionError;
   String? _listProductError;
 
   List<AuctionItem> get liveAuctions => _liveAuctions;
+  List<AuctionItem> get liveMyAuctions => _liveMyAuctions;
   List<AuctionItem> get listedProducts => _listedProducts;
   List<AuctionItem> get upcomingAuctions => _upcomingAuctions;
   List<AuctionItem> get expiredAuctions => _expiredAuctions;
   List<AuctionItem> get soldAuctions => _soldAuctions;
+  List<AuctionItem> get pendingAuctions => _pendingAuctions;
+  List<AuctionItem> get waitingForPaymentAuctions => _waitingForPaymentAuctions;
+  List<AuctionItem> get cancelledAuctions => _cancelledAuctions;
+
   bool get isLoading => _isLoading;
   bool get isCreatingAuction => _isCreatingAuction;
   bool get isListingProduct => _isListingProduct;
+  bool get isLoadingPending => _isLoadingPending;
+  bool get isLoadingWaitingForPayment => _isLoadingWaitingForPayment;
+  bool get isLoadingCancelled => _isLoadingCancelled;
+
   String? get error => _error;
+  
+  String? get errorPending => _errorPending;
+  String? get errorWaitingForPayment => _errorWaitingForPayment;
+  String? get errorCancelled => _errorCancelled;
   String? get createAuctionError => _createAuctionError;
   String? get listProductError => _listProductError;
 
@@ -169,9 +198,11 @@ class AuctionProvider with ChangeNotifier {
     final int totalBids = data['totalBids'] ?? 0;
 
     void updateList(List<AuctionItem> list) {
-      final index = list.indexWhere((item) => item.id.toString() == auctionIdStr);
+      final index =
+          list.indexWhere((item) => item.id.toString() == auctionIdStr);
       if (index != -1) {
-        double? optimisticBid = auctionId != null ? _pendingOptimisticBids[auctionId] : null;
+        double? optimisticBid =
+            auctionId != null ? _pendingOptimisticBids[auctionId] : null;
         // If there's a pending optimistic bid, only accept backend if it matches or exceeds
         if (optimisticBid != null) {
           if (newBid >= optimisticBid) {
@@ -293,12 +324,14 @@ class AuctionProvider with ChangeNotifier {
   }
 
   bool get isLoadingLive => _isLoadingLive;
+  bool get isLoadingMyLive => _isLoadingMyLive;
   bool get isLoadingListedProducts => _isLoadingListedProducts;
   bool get isLoadingUpcoming => _isLoadingUpcoming;
   bool get isLoadingExpired => _isLoadingExpired;
   bool get isLoadingSold => _isLoadingSold;
 
   String? get errorLive => _errorLive;
+  String? get errorMyLive => _errorMyLive;
   String? get errorListedProducts => _errorListedProducts;
   String? get errorUpcoming => _errorUpcoming;
   String? get errorExpired => _errorExpired;
@@ -358,6 +391,32 @@ class AuctionProvider with ChangeNotifier {
     _socketService.leaveAuctionRoom(auctionId);
   }
 
+  Future<void> getLiveMyAuctions() async {
+    if (_isLoadingMyLive) return;
+
+    _isLoadingMyLive = true;
+    _errorMyLive = null;
+    notifyListeners();
+
+    try {
+      // print('Starting to fetch live auctions...');
+      final status = 'ACTIVE';
+      final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
+      // print('Received ${auctions.length} live auctions from service');
+      _liveMyAuctions = auctions;
+      // print('Updated live auctions in provider');
+    } catch (e, stackTrace) {
+      // print('Error in getLiveAuctions:');
+      print(e);
+      print(stackTrace);
+      _errorMyLive = e.toString();
+    } finally {
+      _isLoadingMyLive = false;
+      // print('Notifying listeners about live auctions update');
+      notifyListeners();
+    }
+  }
+
   Future<void> getLiveAuctions() async {
     if (_isLoadingLive) return;
 
@@ -411,6 +470,28 @@ class AuctionProvider with ChangeNotifier {
     }
   }
 
+  Future<void> getUpcomingMyAuctions() async {
+    if (_isLoadingUpcoming) return;
+
+    _isLoadingUpcoming = true;
+    _errorUpcoming = null;
+    notifyListeners();
+
+    try {
+      // print('Fetching upcoming auctions...');
+      final status = 'IN_SCHEDULED';
+      final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
+      _upcomingAuctions = auctions;
+      // print('Upcoming Auctions Fetched: ${_upcomingAuctions.length}');
+    } catch (e) {
+      _errorUpcoming = e.toString();
+      // print('Error fetching upcoming auctions: $_error');
+    } finally {
+      _isLoadingUpcoming = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> getUpcomingAuctions() async {
     if (_isLoadingUpcoming) return;
 
@@ -432,6 +513,39 @@ class AuctionProvider with ChangeNotifier {
     }
   }
 
+  Future<void> getExpiredMyAuctions() async {
+    if (_isLoadingExpired) return;
+
+    _isLoadingExpired = true;
+    _errorExpired = null;
+    notifyListeners();
+
+    try {
+      debugPrint('🔄 [AuctionProvider] Fetching EXPIRED auctions...');
+      final status = 'EXPIRED';
+      final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
+      _expiredAuctions = auctions
+          .where((auction) =>
+              auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE')
+          .toList();
+      debugPrint(
+          '✅ [AuctionProvider] Fetched ${auctions.length} EXPIRED auctions');
+      if (auctions.isNotEmpty) {
+        debugPrint('   First auction status: ${auctions.first.status}');
+      }
+      if (_expiredAuctions.isEmpty) {
+        print('No valid expired auctions found');
+      }
+    } catch (e, stackTrace) {
+      _errorExpired = e.toString();
+      debugPrint('Error fetching expired auctions: $e');
+      print(stackTrace);
+    } finally {
+      _isLoadingExpired = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> getExpiredAuctions() async {
     if (_isLoadingExpired) return;
 
@@ -440,21 +554,56 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      debugPrint('🔄 [AuctionProvider] Fetching EXPIRED auctions...');
       final auctions = await _auctionService.fetchExpiredAuctions();
       _expiredAuctions = auctions
           .where((auction) =>
               auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE')
           .toList();
-
+      debugPrint(
+          '✅ [AuctionProvider] Fetched ${auctions.length} EXPIRED auctions');
+      if (auctions.isNotEmpty) {
+        debugPrint('   First auction status: ${auctions.first.status}');
+      }
       if (_expiredAuctions.isEmpty) {
         print('No valid expired auctions found');
       }
     } catch (e, stackTrace) {
       _errorExpired = e.toString();
-      // print('Error fetching expired auctions: $_error');
+      debugPrint('Error fetching expired auctions: $e');
       print(stackTrace);
     } finally {
       _isLoadingExpired = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getCancelledAuctions() async {
+    if (_isLoadingCancelled) return;
+
+    _isLoadingCancelled = true;
+    _errorCancelled = null;
+    notifyListeners();
+
+    try {
+      debugPrint('🔄 [AuctionProvider] Fetching CANCELLED auctions...');
+      final status = ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN'];
+      final auctions = await _auctionService.fetchUserAuctionsByStatus(status as String);
+      _cancelledAuctions = auctions;
+      debugPrint(
+          '✅ [AuctionProvider] Fetched ${auctions.length} CANCELLED auctions');
+      if (auctions.isNotEmpty) {
+        debugPrint('   First auction status: ${auctions.first.status}');
+      }
+      if (_cancelledAuctions.isEmpty) {
+        print('No valid cancelled auctions found');
+      }
+    } catch (e, stackTrace) {
+      _errorCancelled = e.toString();
+      debugPrint('Error fetching cancelled auctions: $e');
+      print(stackTrace);
+    } finally {
+      _isLoadingCancelled = false;
       notifyListeners();
     }
   }
@@ -570,14 +719,100 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final auctions = await _auctionService.fetchSoldAuctions();
+      debugPrint('🔄 [AuctionProvider] Fetching SOLD auctions...');
+      final status = 'SOLD';
+      final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
       _soldAuctions = auctions;
+      debugPrint(
+          '✅ [AuctionProvider] Fetched ${auctions.length} SOLD auctions');
+      if (auctions.isNotEmpty) {
+        debugPrint('   First auction status: ${auctions.first.status}');
+      }
       _errorSold = null;
     } catch (e) {
       debugPrint('Error fetching sold auctions: $e');
       _errorSold = 'Failed to load sold auctions. Please try again.';
     } finally {
       _isLoadingSold = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getPendingAuctions() async {
+    if (_isLoadingPending) {
+      debugPrint(
+          '⚠️ [AuctionProvider] Already loading pending auctions, skipping...');
+      return;
+    }
+
+    _isLoadingPending = true;
+    _errorPending = null;
+    notifyListeners();
+
+    debugPrint('🔄 [AuctionProvider] Fetching PENDING auctions...');
+
+    try {
+      final status = 'PENDING_OWNER_DEPOIST';
+      debugPrint(
+          '📡 [AuctionProvider] Calling fetchUserAuctionsByStatus with status: $status');
+
+      final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
+
+      debugPrint(
+          '✅ [AuctionProvider] Received ${auctions.length} pending auctions');
+      if (auctions.isNotEmpty) {
+        debugPrint('   First auction details:');
+        debugPrint('   - ID: ${auctions.first.id}');
+        debugPrint('   - Status: ${auctions.first.status}');
+        debugPrint('   - isMyAuction: ${auctions.first.isMyAuction}');
+      } else {
+        debugPrint('ℹ️ [AuctionProvider] No pending auctions received');
+      }
+
+      _pendingAuctions = auctions;
+      debugPrint(
+          '📊 [AuctionProvider] Updated _pendingAuctions with ${_pendingAuctions.length} items');
+    } catch (e, stackTrace) {
+      _errorPending = e.toString();
+      debugPrint('❌ [AuctionProvider] Error fetching pending auctions: $e');
+      debugPrint('Stack trace: $stackTrace');
+    } finally {
+      _isLoadingPending = false;
+      notifyListeners();
+
+      // Debug: Check the final state after update
+      debugPrint(
+          '🏁 [AuctionProvider] Final _pendingAuctions count: ${_pendingAuctions.length}');
+      if (_pendingAuctions.isNotEmpty) {
+        debugPrint('   First auction in final list:');
+        debugPrint('   - ID: ${_pendingAuctions.first.id}');
+        debugPrint('   - Status: ${_pendingAuctions.first.status}');
+      }
+    }
+  }
+
+  Future<void> getWaitingForPaymentAuctions() async {
+    try {
+      _isLoadingWaitingForPayment = true;
+      _errorWaitingForPayment = null;
+      notifyListeners();
+
+      debugPrint(
+          '🔄 [AuctionProvider] Fetching WAITING_FOR_PAYMENT auctions...');
+      final status = 'WAITING_FOR_PAYMENT';
+      final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
+      _waitingForPaymentAuctions = auctions;
+      debugPrint(
+          '✅ [AuctionProvider] Fetched ${auctions.length} WAITING_FOR_PAYMENT auctions');
+      if (auctions.isNotEmpty) {
+        debugPrint('   First auction status: ${auctions.first.status}');
+      }
+    } catch (e) {
+      _errorWaitingForPayment =
+          'Failed to load waiting for payment auctions: $e';
+      debugPrint('Error fetching waiting for payment auctions: $e');
+    } finally {
+      _isLoadingWaitingForPayment = false;
       notifyListeners();
     }
   }

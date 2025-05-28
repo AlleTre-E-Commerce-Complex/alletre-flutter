@@ -30,12 +30,14 @@ class AuctionCard extends StatelessWidget {
     required this.title,
     required this.cardWidth,
   });
+
   @override
   Widget build(BuildContext context) {
     // Always get the latest auction object from provider
     final latestAuction = context.select<AuctionProvider, AuctionItem?>(
-      (provider) => provider.getAuctionById(auction.id),
-    ) ?? auction;
+          (provider) => provider.getAuctionById(auction.id),
+        ) ??
+        auction;
 
     // Determine spacing based on the auction type
     const double titleToBidSpacing = 10;
@@ -62,7 +64,15 @@ class AuctionCard extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: SizedBox(
-                      height: title == 'Active' || title == 'Scheduled' || title == 'Drafts' || title == 'Sold' || title == 'Pending' || title == 'Waiting for Delivery' || title == 'Expired' ? 160 : 120, // Increased height for My Auctions page
+                      height: title == 'Active' ||
+                              title == 'Scheduled' ||
+                              title == 'Sold' ||
+                              title == 'Pending' ||
+                              title == 'Waiting for Payment' ||
+                              title == 'Expired' ||
+                              title == 'Cancelled'
+                          ? 160
+                          : 120, // Increased height for My Auctions page
                       child: latestAuction.imageLinks.isNotEmpty
                           ? _isSvg(latestAuction.imageLinks.first)
                               ? SvgPicture.network(
@@ -91,29 +101,43 @@ class AuctionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Status (if not Listed Products)
-                        if ((title != 'Listed Products' && title != 'Similar Products') || 
-                            (title == 'Similar Products' && auction.isAuctionProduct)) ...[
+                        if ((title != 'Listed Products' &&
+                                title != 'Similar Products') ||
+                            (title == 'Similar Products' &&
+                                auction.isAuctionProduct)) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               _buildStatusText(context, auction.status),
-                              if (title == 'Active' || title == 'Scheduled' || title == 'Drafts' || title == 'Sold' || title == 'Pending' || title == 'Waiting for Delivery' || title == 'Expired')
+                              SizedBox(height: 22),
+                              if (title == 'Active' ||
+                                  title == 'Scheduled' ||
+                                  title == 'Sold' ||
+                                  title == 'Pending' ||
+                                  title == 'Waiting for Payment' ||
+                                  title == 'Expired' ||
+                                  title == 'Cancelled')
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: primaryVariantColor,
                                     minimumSize: const Size(0, 28),
-                                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6)),
                                   ),
-                                  onPressed: () => _navigateToDetails(context, auction, user),
-                                  child: const Text('View Details', style: TextStyle(color: secondaryColor, fontSize: 9)),
+                                  onPressed: () => _navigateToDetails(
+                                      context, auction, user),
+                                  child: const Text('View Details',
+                                      style: TextStyle(
+                                          color: secondaryColor, fontSize: 9)),
                                 ),
                             ],
                           ),
                         ],
                         // Title
                         SizedBox(
-                          height: 32,
+                          height: 31,
                           child: Consumer<AuctionProvider>(
                             builder: (context, auctionProvider, child) {
                               return HighlightedText(
@@ -166,7 +190,7 @@ class AuctionCard extends StatelessWidget {
                                       fontSize: 10,
                                     ),
                               ),
-                              // if (auction.buyNowEnabled && double.tryParse(auction.buyNowPrice) != null && double.tryParse(auction.buyNowPrice)! > 0) ...[  
+                              // if (auction.buyNowEnabled && double.tryParse(auction.buyNowPrice) != null && double.tryParse(auction.buyNowPrice)! > 0) ...[
                               //   const SizedBox(height: 4),
                               //   Text(
                               //     'Buy Now: AED ${NumberFormat.decimalPattern().format(double.tryParse(auction.buyNowPrice))}',
@@ -186,8 +210,14 @@ class AuctionCard extends StatelessWidget {
                         const SizedBox(height: 10),
                         // Location/Bids Section
                         SizedBox(
-                          height: (!auction.isAuctionProduct || (title == "Similar Products" && !auction.isAuctionProduct)) ? 42 : 12,
-                          child: (!auction.isAuctionProduct || (title == "Similar Products" && !auction.isAuctionProduct))
+                          height: (!auction.isAuctionProduct ||
+                                  (title == "Similar Products" &&
+                                      !auction.isAuctionProduct))
+                              ? 42
+                              : 12,
+                          child: (!auction.isAuctionProduct ||
+                                  (title == "Similar Products" &&
+                                      !auction.isAuctionProduct))
                               ? Text.rich(
                                   TextSpan(
                                     children: [
@@ -231,15 +261,34 @@ class AuctionCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 9),
                         // Countdown Section
-                        if ((title != 'Expired Auctions' && title != 'Listed Products' && auction.isAuctionProduct) || 
-                            (title == 'Similar Products' && auction.isAuctionProduct)) 
-                          AuctionCountdown(
-                            startDate: auction.startDate,
-                            endDate: auction.endDate ?? auction.expiryDate,
-                            auctionId: auction.id.toString(),
-                            customPrefix: auction.status == 'ACTIVE' ? 'Ending in:' : 'Starting in:',
+                        if ((title != 'Expired Auctions' &&
+                                title != 'Listed Products' &&
+                                auction.isAuctionProduct) ||
+                            (title == 'Similar Products' &&
+                                auction.isAuctionProduct))
+                          Column(
+                            children: [
+                              AuctionCountdown(
+                                startDate: auction.startDate,
+                                endDate: auction.endDate ?? auction.expiryDate,
+                                auctionId: auction.id.toString(),
+                                customPrefix: auction.status == 'ACTIVE'
+                                    ? 'Ending in:'
+                                    : 'Starting in:',
+                              ),
+                              if (title == 'Active' ||
+                                  title == 'Scheduled' ||
+                                  title == 'Sold' ||
+                                  title == 'Pending' ||
+                                  title == 'Waiting for Payment' ||
+                                  title == 'Expired' ||
+                                  title == 'Cancelled')
+                                const SizedBox(height: 4),
+                            ],
                           ),
-                        if (!auction.isAuctionProduct || (title == "Similar Products" && !auction.isAuctionProduct)) ...[
+                        if (!auction.isAuctionProduct ||
+                            (title == "Similar Products" &&
+                                !auction.isAuctionProduct)) ...[
                           Text(
                             "Listed: ${timeago.format(auction.createdAt, locale: 'en_custom')}",
                             style: Theme.of(context)
@@ -271,15 +320,27 @@ class AuctionCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                        
                         // Auction Card Action Buttons
-                        if ((title != 'Listed Products' && title != 'Expired Auctions' && auction.isAuctionProduct) ||
-                            (title == 'Similar Products' && auction.isAuctionProduct)) ...[
-                          if (auction.isMyAuction && (title == 'Active' || title == 'Scheduled' || title == 'Drafts' || title == 'Sold' || title == 'Pending' || title == 'Waiting for Delivery' || title == 'Expired'))
+                        if ((title != 'Listed Products' &&
+                                title != 'Expired Auctions' &&
+                                auction.isAuctionProduct) ||
+                            (title == 'Similar Products' &&
+                                auction.isAuctionProduct)) ...[
+                          if (
+                              title == 'Active' ||
+                                  title == 'Scheduled' ||
+                                  title == 'Sold' ||
+                                  title == 'Pending' ||
+                                  title == 'Waiting for Payment' ||
+                                  title == 'Expired' ||
+                                  title == 'Cancelled')
                             auction.status == 'SOLD'
                                 ? ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: primaryColor,
-                                      minimumSize: const Size(double.infinity, 32),
+                                      minimumSize:
+                                          const Size(double.infinity, 32),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(6),
                                       ),
@@ -291,7 +352,7 @@ class AuctionCard extends StatelessWidget {
                                       'Buyer Contact Details',
                                       style: TextStyle(
                                         color: secondaryColor,
-                                        fontSize: 11,
+                                        fontSize: 12,
                                       ),
                                     ),
                                   )
@@ -303,13 +364,16 @@ class AuctionCard extends StatelessWidget {
                                             backgroundColor: primaryColor,
                                             minimumSize: const Size(0, 32),
                                             shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(6)),
+                                                borderRadius:
+                                                    BorderRadius.circular(6)),
                                           ),
                                           onPressed: () {
                                             // TODO: Implement Edit logic
                                           },
                                           child: const Text('Edit Auction',
-                                              style: TextStyle(color: secondaryColor, fontSize: 11)),
+                                              style: TextStyle(
+                                                  color: secondaryColor,
+                                                  fontSize: 11)),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
@@ -318,14 +382,18 @@ class AuctionCard extends StatelessWidget {
                                           style: ElevatedButton.styleFrom(
                                             minimumSize: const Size(0, 32),
                                             shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(6),
-                                                side: BorderSide(color: primaryColor)),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                side: BorderSide(
+                                                    color: primaryColor)),
                                           ),
                                           onPressed: () {
                                             // TODO: Implement Cancel logic
                                           },
                                           child: const Text('Cancel Auction',
-                                              style: TextStyle(color: primaryColor, fontSize: 11)),
+                                              style: TextStyle(
+                                                  color: primaryColor,
+                                                  fontSize: 11)),
                                         ),
                                       ),
                                     ],
@@ -339,7 +407,8 @@ class AuctionCard extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
-                              onPressed: () => _navigateToDetails(context, auction, user),
+                              onPressed: () =>
+                                  _navigateToDetails(context, auction, user),
                               child: const Text(
                                 'View Details',
                                 style: TextStyle(
@@ -348,7 +417,7 @@ class AuctionCard extends StatelessWidget {
                                 ),
                               ),
                             )
-                          else if (auction.buyNowEnabled)...[
+                          else if (auction.buyNowEnabled) ...[
                             Row(
                               children: [
                                 SizedBox(
@@ -404,8 +473,7 @@ class AuctionCard extends StatelessWidget {
                                 ),
                               ],
                             )
-                          ]
-                          else
+                          ] else
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 32),
@@ -459,12 +527,16 @@ class AuctionCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if ((title != 'Listed Products' && auction.isAuctionProduct) || 
-                            (title == 'Similar Products' && auction.isAuctionProduct))
+                    if ((title != 'Listed Products' &&
+                            auction.isAuctionProduct) ||
+                        (title == 'Similar Products' &&
+                            auction.isAuctionProduct))
                       if (!auction.isMyAuction) // Hide wishlist for my auctions
-                        _buildIconButton(context, FontAwesomeIcons.bookmark, auction),
+                        _buildIconButton(
+                            context, FontAwesomeIcons.bookmark, auction),
                     const SizedBox(width: 4),
-                    _buildIconButton(context, FontAwesomeIcons.shareFromSquare, auction),
+                    _buildIconButton(
+                        context, FontAwesomeIcons.shareFromSquare, auction),
                   ],
                 ),
               ),
@@ -524,13 +596,12 @@ class AuctionCard extends StatelessWidget {
         onTap: () async {
           if (icon == FontAwesomeIcons.bookmark) {
             if (!isLoggedIn) {
-                      AuthHelper.showAuthenticationRequiredMessage(context);
-                    } else {
-                      wishlistProvider.toggleWishlist(auction);
-                    }
+              AuthHelper.showAuthenticationRequiredMessage(context);
+            } else {
+              wishlistProvider.toggleWishlist(auction);
+            }
           } else if (icon == FontAwesomeIcons.shareFromSquare) {
-            final String itemUrl =
-                'https://alletre.com/items/${auction.id}';
+            final String itemUrl = 'https://alletre.com/items/${auction.id}';
             await Share.share(
               'Check out this ${title.toLowerCase()}: ${auction.title}\n'
               '${title == "Listed Products" ? "Price" : "Starting bid"}: AED ${title == "Listed Products" ? auction.productListingPrice : auction.startBidAmount}\n'
