@@ -137,15 +137,19 @@ class _AuctionsTabView extends StatelessWidget {
       'Pending': 'PENDING_OWNER_DEPOIST',
       'Waiting for Payment': 'WAITING_FOR_PAYMENT',
       'Expired': 'EXPIRED',
-      'Cancelled': ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN']
+      'Cancelled': [
+        'CANCELLED_BEFORE_EXP_DATE',
+        'CANCELLED_AFTER_EXP_DATE',
+        'CANCELLED_BY_ADMIN'
+      ]
     };
     final status = statusMap[type];
-    
+
     debugPrint('🔍 [MyAuctionsScreen] Tab selected: $type (Status: $status)');
-    
+
     // Log counts for all auction types
     final provider = Provider.of<AuctionProvider>(context, listen: false);
-    
+
     // Helper function to log auction statuses
     void logAuctionStatuses(List<AuctionItem> auctions, String type) {
       final myAuctions = auctions.where((a) => a.isMyAuction).toList();
@@ -153,19 +157,19 @@ class _AuctionsTabView extends StatelessWidget {
         debugPrint('   - $type: 0');
         return;
       }
-      
+
       // Group by status
       final statusCounts = <String, int>{};
       for (var auction in myAuctions) {
         statusCounts[auction.status] = (statusCounts[auction.status] ?? 0) + 1;
       }
-      
+
       debugPrint('   - $type (${myAuctions.length}):');
       statusCounts.forEach((status, count) {
         debugPrint('     • $status: $count');
       });
     }
-    
+
     debugPrint('   📊 My Auctions Counts:');
     logAuctionStatuses(provider.liveAuctions, 'Active');
     logAuctionStatuses(provider.upcomingAuctions, 'Scheduled');
@@ -173,36 +177,7 @@ class _AuctionsTabView extends StatelessWidget {
     logAuctionStatuses(provider.pendingAuctions, 'Pending');
     logAuctionStatuses(provider.waitingForPaymentAuctions, 'Waiting for Payment');
     logAuctionStatuses(provider.expiredAuctions, 'Expired');
-    logAuctionStatuses(provider.pendingAuctions, 'Cancelled');
-
-    // Fetch data when the widget is built based on the tab
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   final provider = Provider.of<AuctionProvider>(context, listen: false);
-
-    //   switch (type) {
-    //     case 'Sold':
-    //       if (!provider.isLoadingSold &&
-    //           provider.soldAuctions.isEmpty &&
-    //           provider.errorSold == null) {
-    //         await provider.getSoldAuctions();
-    //       }
-    //       break;
-    //     case 'Pending':
-    //       if (!provider.isLoadingPending &&
-    //           provider.pendingAuctions.isEmpty &&
-    //           provider.errorPending == null) {
-    //         await provider.getPendingAuctions();
-    //       }
-    //       break;
-    //     case 'Waiting for Payment':
-    //       if (!provider.isLoadingWaitingForPayment &&
-    //           provider.waitingForPaymentAuctions.isEmpty &&
-    //           provider.errorWaitingForPayment == null) {
-    //         await provider.getWaitingForPaymentAuctions();
-    //       }
-    //       break;
-    //   }
-    // });
+    logAuctionStatuses(provider.cancelledAuctions, 'Cancelled');
 
     return Consumer<AuctionProvider>(builder: (context, provider, _) {
       // Declare filtered list and loading state
@@ -244,6 +219,83 @@ class _AuctionsTabView extends StatelessWidget {
               .toList();
           break;
 
+         case 'Expired':
+  debugPrint('\n🔵 === EXPIRED AUCTIONS DEBUG ===');
+  debugPrint('🔵 Current state:');
+  debugPrint('🔵 - isLoadingExpired: ${provider.isLoadingExpired}');
+  debugPrint('🔵 - expiredAuctions count: ${provider.expiredAuctions.length}');
+  debugPrint('🔵 - errorExpired: ${provider.errorExpired}');
+  
+  // Log all auctions for inspection
+  if (provider.expiredAuctions.isNotEmpty) {
+    debugPrint('🔵 All expired auctions (${provider.expiredAuctions.length}):');
+    for (var i = 0; i < provider.expiredAuctions.length; i++) {
+      final auction = provider.expiredAuctions[i];
+      debugPrint('  ${i + 1}. ID: ${auction.id}, Status: ${auction.status}, Title: ${auction.title}');
+    }
+  } else {
+    debugPrint('🟡 No expired auctions in the list');
+  }
+
+  // Check if we need to fetch
+  final shouldFetch = !provider.isLoadingExpired && 
+                     provider.expiredAuctions.isEmpty && 
+                     provider.errorExpired == null;
+  
+  debugPrint('🔵 Should fetch expired auctions: $shouldFetch');
+  if (shouldFetch) {
+    debugPrint('🔄 Calling getExpiredMyAuctions()...');
+    // Don't await here to avoid blocking the UI
+    provider.getExpiredMyAuctions().then((_) {
+      debugPrint('✅ getExpiredMyAuctions completed');
+      debugPrint('   - New expiredAuctions count: ${provider.expiredAuctions.length}');
+      
+      if (provider.expiredAuctions.isNotEmpty) {
+        debugPrint('   First 3 items after fetch:');
+        for (var i = 0; i < provider.expiredAuctions.length && i < 3; i++) {
+          final auction = provider.expiredAuctions[i];
+          debugPrint('    ${i + 1}. ID: ${auction.id}, Status: ${auction.status}');
+        }
+      } else {
+        debugPrint('🟡 No items in expiredAuctions after fetch');
+      }
+    }).catchError((error) {
+      debugPrint('❌ Error in getExpiredMyAuctions: $error');
+    });
+  }
+
+  // Log any errors
+  if (provider.errorExpired != null) {
+    debugPrint('❌ Error loading expired auctions: ${provider.errorExpired}');
+  }
+
+  // Filter expired auctions - use case-insensitive comparison
+  debugPrint('\n🔵 Filtering expired auctions...');
+  filtered = provider.expiredAuctions
+      .where((a) {
+        final status = a.status.toUpperCase();
+        final isMatch = status == 'EXPIRED';
+        debugPrint('  🔍 Auction ${a.id}: Status=$status, Matches: $isMatch');
+        return isMatch;
+      })
+      .toList();
+  
+  debugPrint('\n🔵 Filtering complete:');
+  debugPrint('   - Total items before filter: ${provider.expiredAuctions.length}');
+  debugPrint('   - Items after filter: ${filtered.length}');
+  
+  if (filtered.isNotEmpty) {
+    debugPrint('   First filtered item:');
+    debugPrint('   - ID: ${filtered.first.id}');
+    debugPrint('   - Status: ${filtered.first.status}');
+    debugPrint('   - Title: ${filtered.first.title}');
+  } else {
+    debugPrint('🟡 No items matched the EXPIRED filter');
+  }
+  
+  debugPrint('🔵 === END EXPIRED AUCTIONS DEBUG ===\n');
+  break;
+
         case 'Sold':
           final mySoldAuctions = provider.soldAuctions;
           debugPrint('   My Sold auctions: ${mySoldAuctions.length}');
@@ -255,20 +307,24 @@ class _AuctionsTabView extends StatelessWidget {
           }
           // isLoading = provider.isLoadingSold;
           error = provider.errorSold;
-          filtered = provider.soldAuctions.where((a) => a.status.toUpperCase() == status).toList();
+          filtered = provider.soldAuctions
+              .where((a) => a.status.toUpperCase() == status)
+              .toList();
           break;
 
         case 'Pending':
           debugPrint('🔍 [MyAuctionsScreen] Pending tab selected');
-          debugPrint('   - Provider pendingAuctions count: ${provider.pendingAuctions.length}');
-          
+          debugPrint(
+              '   - Provider pendingAuctions count: ${provider.pendingAuctions.length}');
+
           // Log all pending auctions and their statuses
           debugPrint('   - All pending auctions in provider:');
           for (var i = 0; i < provider.pendingAuctions.length; i++) {
             final auction = provider.pendingAuctions[i];
-            debugPrint('     [$i] ID: ${auction.id}, Status: ${auction.status}');
+            debugPrint(
+                '     [$i] ID: ${auction.id}, Status: ${auction.status}');
           }
-          
+
           // Fetch if needed
           if (!provider.isLoadingPending &&
               provider.pendingAuctions.isEmpty &&
@@ -276,24 +332,26 @@ class _AuctionsTabView extends StatelessWidget {
             debugPrint('   - No pending auctions found, fetching...');
             provider.getPendingAuctions();
           }
-          
+
           error = provider.errorPending;
-          
+
           // Apply status check only (no need for isMyAuction check as API handles this)
           filtered = provider.pendingAuctions.where((a) {
             final matches = status is List<String>
                 ? status.contains(a.status.toUpperCase())
                 : a.status.toUpperCase() == status;
-            debugPrint('   - Auction ${a.id}: status=${a.status}, matches=$matches');
+            debugPrint(
+                '   - Auction ${a.id}: status=${a.status}, matches=$matches');
             return matches;
           }).toList();
-          
+
           debugPrint('   - Final filtered count: ${filtered.length}');
           break;
 
         case 'Waiting for Payment':
           final myWaitingAuctions = provider.waitingForPaymentAuctions;
-          debugPrint('   My Waiting for Payment auctions: ${myWaitingAuctions.length}');
+          debugPrint(
+              '   My Waiting for Payment auctions: ${myWaitingAuctions.length}');
           if (!provider.isLoadingWaitingForPayment &&
               provider.waitingForPaymentAuctions.isEmpty &&
               provider.errorWaitingForPayment == null) {
@@ -303,22 +361,6 @@ class _AuctionsTabView extends StatelessWidget {
           // isLoading = provider.isLoadingWaitingForPayment;
           error = provider.errorWaitingForPayment;
           filtered = provider.waitingForPaymentAuctions;
-          break;
-
-        case 'Expired':
-          final myExpiredAuctions = provider.expiredAuctions;
-          debugPrint('   My Expired auctions: ${myExpiredAuctions.length}');
-          if (!provider.isLoadingExpired &&
-              provider.expiredAuctions.isEmpty &&
-              provider.errorExpired == null) {
-            provider.getExpiredMyAuctions();
-            // return const Center(child: CircularProgressIndicator());
-          }
-          // isLoading = provider.isLoadingExpired;
-          error = provider.errorExpired;
-          filtered = provider.expiredAuctions
-              .where((a) => a.status.toUpperCase() == status)
-              .toList();
           break;
 
         case 'Cancelled':
@@ -346,8 +388,14 @@ class _AuctionsTabView extends StatelessWidget {
       // Calculate dimensions for the grid
       final screenWidth = MediaQuery.of(context).size.width;
       final cardWidth = (screenWidth - 32 - 12) / 2;
-      // Use smaller height for pending auctions, otherwise use default
-      final cardHeight = type.toLowerCase() == 'pending' ? 180 : 192;
+      // Adjust height based on auction type
+      final cardHeight = type.toLowerCase() == 'pending'
+          ? 182
+          : type.toLowerCase() == 'sold'
+              ? 178
+              : type.toLowerCase() == 'waiting for payment'
+                  ? 180
+                  : 192;
 
       Widget content;
 

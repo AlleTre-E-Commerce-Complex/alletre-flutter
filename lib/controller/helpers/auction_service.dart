@@ -1128,6 +1128,12 @@ class AuctionService {
 
   Future<List<AuctionItem>> fetchUserAuctionsByStatus(String status, {int page = 1, int perPage = 10}) async {
     try {
+      debugPrint('🔍 [AuctionService] fetchUserAuctionsByStatus called with status: $status');
+      
+      // Normalize the status to match API expectations
+      final normalizedStatus = status.trim().toUpperCase();
+      debugPrint('🔍 [AuctionService] Normalized status: $normalizedStatus');
+      
       // First try to get the token
       String? accessToken = await _getAccessToken();
       Map<String, String> headers = {
@@ -1138,22 +1144,26 @@ class AuctionService {
       // Add authorization header if we have a token
       if (accessToken != null) {
         headers['Authorization'] = 'Bearer $accessToken';
+      } else {
+        debugPrint('⚠️ [AuctionService] No access token available');
       }
 
       List<AuctionItem> allAuctions = [];
-
-      int userPage = 1;
+      int userPage = page;
       bool hasMoreUser = true;
 
       while (hasMoreUser) {
+        final uri = Uri.parse(
+            '${ApiEndpoints.baseUrl}/auctions/user/ownes?page=$userPage&perPage=$perPage&status=$normalizedStatus');
+            
+        debugPrint('🌐 [AuctionService] Fetching page $userPage from: $uri');
+        
         final userResponse = await http.get(
-          Uri.parse(
-              '${ApiEndpoints.baseUrl}/auctions/user/ownes?page=$userPage&perPage=$perPage&status=$status'),
+          uri,
           headers: headers,
         );
 
-        debugPrint(
-            'User Auctions Response Code: ${userResponse.statusCode} for page $userPage');
+        debugPrint('🔍 [AuctionService] Response Code: ${userResponse.statusCode} for page $userPage');
 
         if (userResponse.statusCode == 200) {
           final data = jsonDecode(userResponse.body);

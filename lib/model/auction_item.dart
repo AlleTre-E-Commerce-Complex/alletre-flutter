@@ -45,6 +45,7 @@ class AuctionItem {
   final String? returnPolicyDescription;
   final String? warrantyPolicyDescription;
   final bool isMyAuction;
+  final String? deliveryType;
 
   AuctionItem({
     required this.id,
@@ -86,6 +87,7 @@ class AuctionItem {
     this.returnPolicyDescription,
     this.warrantyPolicyDescription,
     required this.isMyAuction,
+    this.deliveryType,
   });
 
   // Add copyWith method for real-time updates
@@ -128,6 +130,7 @@ class AuctionItem {
     String? returnPolicyDescription,
     String? warrantyPolicyDescription,
     bool? isMyAuction,
+    String? deliveryType,
   }) {
     return AuctionItem(
       id: id ?? this.id,
@@ -171,6 +174,7 @@ class AuctionItem {
       warrantyPolicyDescription:
           warrantyPolicyDescription ?? this.warrantyPolicyDescription,
       isMyAuction: isMyAuction ?? this.isMyAuction,
+      deliveryType: deliveryType ?? this.deliveryType,
     );
   }
 
@@ -432,6 +436,7 @@ class AuctionItem {
         returnPolicyDescription: returnPolicyDescription,
         warrantyPolicyDescription: warrantyPolicyDescription,
         isMyAuction: json['isMyAuction'] as bool? ?? false,
+        deliveryType: json['deliveryType'] as String?,
       );
     } catch (e) {
       log('Error creating AuctionItem: $e');
@@ -550,6 +555,7 @@ class AuctionItem {
       'customFields': customFields?.fields,
       'product': product,
       'isMyAuction': isMyAuction,
+      'deliveryType': deliveryType,
     };
   }
 }

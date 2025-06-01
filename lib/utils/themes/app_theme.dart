@@ -13,7 +13,7 @@ String getDisplayStatus(String status) {
     case 'EXPIRED':
       return 'EXPIRED';
     case 'WAITING_FOR_PAYMENT':
-      return 'SOLD';
+      return 'WAITING FOR PAYMENT';
     case 'SOLD':
       return 'SOLD';
     case 'CANCELLED_BEFORE_EXP_DATE':
@@ -32,7 +32,7 @@ String getDisplayStatus(String status) {
 Color getStatusColor(String status) {
   switch (status) {
     case "WAITING_FOR_PAYMENT":
-      return errorColor;
+      return facebookColor;
     case "SOLD":
       return errorColor;
     case "EXPIRED":

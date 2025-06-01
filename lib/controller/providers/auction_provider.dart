@@ -97,7 +97,7 @@ class AuctionProvider with ChangeNotifier {
   bool get isLoadingCancelled => _isLoadingCancelled;
 
   String? get error => _error;
-  
+
   String? get errorPending => _errorPending;
   String? get errorWaitingForPayment => _errorWaitingForPayment;
   String? get errorCancelled => _errorCancelled;
@@ -307,6 +307,9 @@ class AuctionProvider with ChangeNotifier {
       case 'upcoming':
         _upcomingAuctions.add(newAuction);
         break;
+      case 'expired':
+        _expiredAuctions.add(newAuction);
+        break;
     }
 
     notifyListeners();
@@ -514,35 +517,64 @@ class AuctionProvider with ChangeNotifier {
   }
 
   Future<void> getExpiredMyAuctions() async {
-    if (_isLoadingExpired) return;
+    debugPrint('\n🔵 [getExpiredMyAuctions] Starting...');
+    
+    if (_isLoadingExpired) {
+      debugPrint('🟡 [getExpiredMyAuctions] Already loading, skipping...');
+      return;
+    }
 
     _isLoadingExpired = true;
     _errorExpired = null;
     notifyListeners();
 
     try {
-      debugPrint('🔄 [AuctionProvider] Fetching EXPIRED auctions...');
-      final status = 'EXPIRED';
+      debugPrint('🔵 [getExpiredMyAuctions] Fetching expired auctions...');
+      
+      // Use the exact status that matches the API's expected value
+      const status = 'EXPIRED';
+      debugPrint('🔵 [getExpiredMyAuctions] Using status: $status');
+      
+      final stopwatch = Stopwatch()..start();
       final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
-      _expiredAuctions = auctions
-          .where((auction) =>
-              auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE')
-          .toList();
-      debugPrint(
-          '✅ [AuctionProvider] Fetched ${auctions.length} EXPIRED auctions');
+      stopwatch.stop();
+      
+      debugPrint('🟢 [getExpiredMyAuctions] Fetched ${auctions.length} auctions in ${stopwatch.elapsedMilliseconds}ms');
+      
+      // Log the status of each auction for debugging
       if (auctions.isNotEmpty) {
-        debugPrint('   First auction status: ${auctions.first.status}');
+        debugPrint('🔵 [getExpiredMyAuctions] First ${auctions.length} auctions:');
+        for (var i = 0; i < auctions.length; i++) {
+          final auction = auctions[i];
+          debugPrint('  ${i + 1}. ID: ${auction.id}, Status: ${auction.status}, Title: ${auction.title}');
+        }
+      } else {
+        debugPrint('🟡 [getExpiredMyAuctions] No auctions found with status: $status');
       }
+      
+      _expiredAuctions = List<AuctionItem>.from(auctions); // Create a new list to ensure reactivity
+      debugPrint('🟢 [getExpiredMyAuctions] Updated _expiredAuctions with ${_expiredAuctions.length} items');
+      
+      // Verify the list after update
       if (_expiredAuctions.isEmpty) {
-        print('No valid expired auctions found');
+        debugPrint('🟠 [getExpiredMyAuctions] WARNING: _expiredAuctions is empty after update!');
+      } else {
+        debugPrint('🟢 [getExpiredMyAuctions] First item status: ${_expiredAuctions.first.status}');
       }
+      
     } catch (e, stackTrace) {
       _errorExpired = e.toString();
-      debugPrint('Error fetching expired auctions: $e');
-      print(stackTrace);
+      debugPrint('❌ [getExpiredMyAuctions] Error: $e');
+      debugPrint('❌ [getExpiredMyAuctions] Stack trace: $stackTrace');
     } finally {
       _isLoadingExpired = false;
       notifyListeners();
+      debugPrint('🔵 [getExpiredMyAuctions] Fetch completed. _expiredAuctions length: ${_expiredAuctions.length}');
+      
+      // Final verification
+      if (_expiredAuctions.isNotEmpty) {
+        debugPrint('🟢 [getExpiredMyAuctions] Final check - First item status: ${_expiredAuctions.first.status}');
+      }
     }
   }
 
@@ -554,20 +586,8 @@ class AuctionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      debugPrint('🔄 [AuctionProvider] Fetching EXPIRED auctions...');
       final auctions = await _auctionService.fetchExpiredAuctions();
-      _expiredAuctions = auctions
-          .where((auction) =>
-              auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE')
-          .toList();
-      debugPrint(
-          '✅ [AuctionProvider] Fetched ${auctions.length} EXPIRED auctions');
-      if (auctions.isNotEmpty) {
-        debugPrint('   First auction status: ${auctions.first.status}');
-      }
-      if (_expiredAuctions.isEmpty) {
-        print('No valid expired auctions found');
-      }
+      _expiredAuctions = auctions;
     } catch (e, stackTrace) {
       _errorExpired = e.toString();
       debugPrint('Error fetching expired auctions: $e');
@@ -587,8 +607,13 @@ class AuctionProvider with ChangeNotifier {
 
     try {
       debugPrint('🔄 [AuctionProvider] Fetching CANCELLED auctions...');
-      final status = ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN'];
-      final auctions = await _auctionService.fetchUserAuctionsByStatus(status as String);
+      final status = [
+        'CANCELLED_BEFORE_EXP_DATE',
+        'CANCELLED_AFTER_EXP_DATE',
+        'CANCELLED_BY_ADMIN'
+      ];
+      final auctions =
+          await _auctionService.fetchUserAuctionsByStatus(status as String);
       _cancelledAuctions = auctions;
       debugPrint(
           '✅ [AuctionProvider] Fetched ${auctions.length} CANCELLED auctions');

@@ -5,9 +5,9 @@ import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:alletre_app/utils/extras/search_highlight.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:provider/provider.dart';
@@ -166,21 +166,21 @@ class AuctionCard extends StatelessWidget {
                         ),
                         // Reduced spacing for Expired Auctions
                         const SizedBox(height: titleToBidSpacing),
-                        // Price
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            border:
-                                Border.all(color: onSecondaryColor, width: 1.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
+                        // Price and Delivery Type Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Price Container
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: onSecondaryColor, width: 1.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
                                 'AED ${(title == 'Listed Products' || (title == 'Similar Products' && !auction.isAuctionProduct)) ? NumberFormat.decimalPattern().format(double.tryParse(auction.productListingPrice) ?? 0.0) : NumberFormat.decimalPattern().format(double.tryParse(auction.currentBid))}',
                                 style: Theme.of(context)
                                     .textTheme
@@ -190,22 +190,40 @@ class AuctionCard extends StatelessWidget {
                                       fontSize: 10,
                                     ),
                               ),
-                              // if (auction.buyNowEnabled && double.tryParse(auction.buyNowPrice) != null && double.tryParse(auction.buyNowPrice)! > 0) ...[
-                              //   const SizedBox(height: 4),
-                              //   Text(
-                              //     'Buy Now: AED ${NumberFormat.decimalPattern().format(double.tryParse(auction.buyNowPrice))}',
-                              //     style: Theme.of(context)
-                              //         .textTheme
-                              //         .labelSmall!
-                              //         .copyWith(
-                              //           fontWeight: FontWeight.w600,
-                              //           fontSize: 10,
-                              //           color: primaryVariantColor,
-                              //         ),
-                              //   ),
-                              // ],
+                            ),
+                            // Show delivery type only on My Auctions page for sold items
+                            if (title == 'Sold' && auction.status == 'SOLD' && auction.deliveryType != null) ...[
+                              // Delivery Type Container
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: primaryColor,
+                                    width: 0.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 2,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  auction.deliveryType == 'PICKUP' ? 
+                                  'The buyer will pick up the item' : 
+                                  'The company will deliver the item',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: primaryVariantColor,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
                             ],
-                          ),
+                          ],
                         ),
                         const SizedBox(height: 10),
                         // Location/Bids Section
@@ -260,26 +278,37 @@ class AuctionCard extends StatelessWidget {
                                 ),
                         ),
                         const SizedBox(height: 9),
-                        // Countdown Section
-                        if ((title != 'Expired Auctions' &&
+                        // Show creation date for pending auctions
+                        if (auction.isAuctionProduct &&
+                            (title == 'Pending' ||
+                                auction.status == 'PENDING_OWNER_DEPOIST'))
+                          Text(
+                            'Created on: ${DateFormat('MMM d, y').format(auction.createdAt)}',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: primaryVariantColor,
+                                      fontSize: 10,
+                                    ),
+                          )
+                        else if (title != 'Expired Auctions' &&
                                 title != 'Listed Products' &&
-                                auction.isAuctionProduct) ||
+                                auction.isAuctionProduct ||
                             (title == 'Similar Products' &&
                                 auction.isAuctionProduct))
                           Column(
                             children: [
-                              AuctionCountdown(
-                                startDate: auction.startDate,
-                                endDate: auction.endDate ?? auction.expiryDate,
-                                auctionId: auction.id.toString(),
-                                customPrefix: auction.status == 'ACTIVE'
-                                    ? 'Ending in:'
-                                    : 'Starting in:',
-                              ),
+                              if (auction.status != 'SOLD')
+                                AuctionCountdown(
+                                  startDate: auction.startDate,
+                                  endDate: auction.endDate ?? auction.expiryDate,
+                                  auctionId: auction.id.toString(),
+                                  customPrefix: auction.status == 'ACTIVE'
+                                      ? 'Ending in:'
+                                      : 'Starting in:',
+                                ),
                               if (title == 'Active' ||
                                   title == 'Scheduled' ||
                                   title == 'Sold' ||
-                                  title == 'Pending' ||
                                   title == 'Waiting for Payment' ||
                                   title == 'Expired' ||
                                   title == 'Cancelled')
@@ -320,21 +349,20 @@ class AuctionCard extends StatelessWidget {
                             ),
                           ),
                         ],
-                        
+
                         // Auction Card Action Buttons
                         if ((title != 'Listed Products' &&
                                 title != 'Expired Auctions' &&
                                 auction.isAuctionProduct) ||
                             (title == 'Similar Products' &&
                                 auction.isAuctionProduct)) ...[
-                          if (
-                              title == 'Active' ||
-                                  title == 'Scheduled' ||
-                                  title == 'Sold' ||
-                                  title == 'Pending' ||
-                                  title == 'Waiting for Payment' ||
-                                  title == 'Expired' ||
-                                  title == 'Cancelled')
+                          if (title == 'Active' ||
+                              title == 'Scheduled' ||
+                              title == 'Sold' ||
+                              title == 'Pending' ||
+                              title == 'Waiting for Payment' ||
+                              title == 'Expired' ||
+                              title == 'Cancelled')
                             auction.status == 'SOLD'
                                 ? ElevatedButton(
                                     style: ElevatedButton.styleFrom(
@@ -368,12 +396,19 @@ class AuctionCard extends StatelessWidget {
                                                     BorderRadius.circular(6)),
                                           ),
                                           onPressed: () {
-                                            // TODO: Implement Edit logic
+                                            // TODO: Implement Edit/Complete Payment logic
                                           },
-                                          child: const Text('Edit Auction',
-                                              style: TextStyle(
-                                                  color: secondaryColor,
-                                                  fontSize: 11)),
+                                          child: Text(
+                                            auction.status ==
+                                                    'PENDING_OWNER_DEPOIST'
+                                                ? 'Pay Deposit'
+                                                : 'Edit Auction',
+                                            style: const TextStyle(
+                                              color: secondaryColor,
+                                              fontSize: 11,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
@@ -583,9 +618,16 @@ class AuctionCard extends StatelessWidget {
 
   Widget _buildIconButton(
       BuildContext context, IconData icon, AuctionItem auction) {
+    // Don't show wishlist icon on My Auctions page for any tab
+    final myAuctionsTabs = ['Active', 'Pending', 'Sold', 'Waiting for Payment', 'Expired', 'Cancelled'];
+    if (myAuctionsTabs.contains(title) && icon == FontAwesomeIcons.bookmark) {
+      return const SizedBox.shrink();
+    }
+    
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
     final wishlistProvider = Provider.of<WishlistProvider>(context);
     final isWishlisted = wishlistProvider.isWishlisted(auction.id);
+    
     return Container(
       decoration: BoxDecoration(
         color: buttonBgColor,
