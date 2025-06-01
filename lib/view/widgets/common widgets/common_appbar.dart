@@ -20,7 +20,7 @@ class CommonAppBar extends StatelessWidget {
         onPressed: () {
           userProvider.resetCheckboxes();
           Navigator.pop(context);
-        },
+                  },
       ),
       title: SizedBox(
         width: 210,

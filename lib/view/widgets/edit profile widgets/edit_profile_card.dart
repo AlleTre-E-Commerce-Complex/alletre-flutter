@@ -5,14 +5,14 @@ class EditProfileCard extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  final Widget actionButton;
+  final Widget? actionButton;
 
   const EditProfileCard({
     super.key,
     required this.label,
     required this.value,
     required this.icon,
-    required this.actionButton,
+    this.actionButton,
   });
 
   @override
@@ -49,14 +49,14 @@ class EditProfileCard extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .bodyLarge
-                            ?.copyWith(fontSize: 14),
+                            ?.copyWith(fontSize: 13),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 16),
-              actionButton,
+              if (actionButton != null) actionButton!,
             ],
           ),
         ),

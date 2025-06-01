@@ -1,19 +1,71 @@
+import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
 import 'package:flutter/material.dart';
 
-Color getStatusColor(String status) {
-    switch (status) {
-      case "WAITING_FOR_PAYMENT":
-        return  errorColor; // Material Green
-      case "EXPIRED":
-        return const Color(0xFF9E9E9E); // Material Grey
-      case "ACTIVE":
-        return activeColor; // Material Blue
-      case "IN_SCHEDULED":
-        return scheduledColor;
-      default:
-        return const Color(0xFF757575); // Default Grey
-    }
+final myRoute =
+    MaterialPageRoute(builder: (context) => const HomeScreenContent());
+
+String getDisplayStatus(String status) {
+  switch (status.toUpperCase()) {
+    case 'ACTIVE':
+      return 'ACTIVE';
+    case 'IN_SCHEDULED':
+      return 'SCHEDULED';
+    case 'EXPIRED':
+      return 'EXPIRED';
+    case 'WAITING_FOR_PAYMENT':
+      return 'SOLD';
+    case 'SOLD':
+      return 'SOLD';
+    case 'CANCELLED_BEFORE_EXP_DATE':
+      return 'CANCELLED';
+    case 'USED':
+      return 'USED';
+    case 'NEW':
+      return 'NEW';
+    case 'PENDING_OWNER_DEPOIST':
+      return 'PENDING';
+    default:
+      return 'Unknown';
   }
+}
+
+Color getStatusColor(String status) {
+  switch (status) {
+    case "WAITING_FOR_PAYMENT":
+      return errorColor;
+    case "SOLD":
+      return errorColor;
+    case "EXPIRED":
+      return expiredColor;
+    case "ACTIVE":
+      return activeColor;
+    case "IN_SCHEDULED":
+      return scheduledColor;
+    case "CANCELLED_BEFORE_EXP_DATE":
+      return primaryColor;
+    case "USED":
+      return avatarColor;
+    case "NEW":
+      return primaryColor;
+    default:
+      return avatarColor;
+  }
+}
+
+double getCardHeight(String title, {bool isAuctionProduct = false}) {
+  if (title == "Similar Products") {
+    return isAuctionProduct ? 337 : 333; // Use appropriate height based on item type
+  }
+  
+  switch (title) {
+    case "Live Auctions" || "Upcoming Auctions":
+      return 337; // Taller to accommodate the countdown and the buttons
+    case "Listed Products":
+      return 333; // Tall enough for location and view details button
+    default:
+      return 253; // For expired auctions
+  }
+}
 
 // Define color palette
 const Color onSecondaryColor = Color(0xFF000000);
@@ -25,10 +77,14 @@ const Color errorColor = Color(0xFFB91C1C);
 const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
 const Color selectedIndex = Color(0xFFCDAF89);
+const Color highlightColor = Colors.yellow;
 Color buttonBgColor = Colors.grey.shade200;
 Color borderColor = Colors.grey.shade300;
 Color placeholderColor = Colors.grey.shade100;
+Color textColor = Colors.grey[600]!;
+Color shimmerColor = Colors.grey.shade400;
 Color avatarColor = Colors.grey.shade600;
+Color expiredColor = Colors.grey.shade700;
 Color dividerColor = Colors.black54;
 const Color greyColor = Colors.grey;
 final overlayColor = Color.alphaBlend(
@@ -43,7 +99,8 @@ Color telegramColor = const Color(0xFF0088CC);
 Color whatsappColor = const Color(0xFF25D366);
 Color snapchatColor = const Color(0xFFFFCC00);
 
-const TextStyle radioTextStyle = TextStyle(fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500);
+const TextStyle radioTextStyle = TextStyle(
+    fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500);
 
 ThemeData customTheme() {
   return ThemeData(

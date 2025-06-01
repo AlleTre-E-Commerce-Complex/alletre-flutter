@@ -1,89 +1,111 @@
 import 'dart:async';
-import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
+import 'package:provider/provider.dart';
 
 class AuctionCountdown extends StatelessWidget {
   final DateTime startDate;
+  final DateTime endDate;
+  final TextStyle? textStyle;
+  final String? customPrefix;
+  final String auctionId;
 
-  const AuctionCountdown({super.key, required this.startDate});
+  const AuctionCountdown({
+    super.key,
+    required this.startDate,
+    required this.endDate,
+    required this.auctionId,
+    this.textStyle,
+    this.customPrefix,
+  });
 
-  Stream<String?> getRemainingTimeStream() async* {
+  Stream<Map<String, String>> getTimeStream() async* {
     while (true) {
-      final remainingTime = getRemainingTime();
-      yield remainingTime;
-      if (remainingTime == null) break; // Stop updating if expired
+      yield getFormattedTime();
       await Future.delayed(const Duration(seconds: 1));
     }
   }
 
-  String? getRemainingTime() {
+  Map<String, String> getFormattedTime() {
     final DateTime now = DateTime.now();
-    if (startDate.isBefore(now)) return null; // Hide if expired
 
-    final Duration difference = startDate.difference(now);
-    final int days = difference.inDays;
-    final int hours = difference.inHours % 24;
-    final int minutes = difference.inMinutes % 60;
-    final int seconds = difference.inSeconds % 60;
+    // If auction hasn't started yet and it's not LIVE, show time until start
+    if (now.isBefore(startDate) && customPrefix != 'Ending in:') {
+      final Duration difference = startDate.difference(now);
+      return formatDuration(difference, 'Starting in:');
+    }
 
-    return '$days days: $hours hrs: $minutes min: $seconds sec';
+    // // If auction has ended, return empty to let provider handle removal
+    if (now.isAfter(endDate)) {
+      return {'prefix': '', 'time': ''};
+    }
+
+    // If auction is live, show time until end
+    final Duration difference = endDate.difference(now);
+    return formatDuration(difference, customPrefix ?? 'Ending in:');
+  }
+
+  Map<String, String> formatDuration(Duration duration, String prefix) {
+    final int days = duration.inDays;
+    final int hours = duration.inHours % 24;
+    final int minutes = duration.inMinutes % 60;
+    final int seconds = duration.inSeconds % 60;
+
+    String timeValue;
+    if (days > 0) {
+      timeValue = '$days days: $hours hrs: $minutes mins';
+    } else if (hours > 0) {
+      timeValue = '$hours hrs: $minutes mins: $seconds sec';
+    } else if (minutes > 0) {
+      timeValue = '$minutes mins: $seconds sec';
+    } else {
+      timeValue = '$seconds sec';
+    }
+
+    return {'prefix': prefix, 'time': timeValue};
   }
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    
-    if (startDate.isAfter(now)) {
-      return StreamBuilder<String?>(
-        stream: getRemainingTimeStream(),
-        builder: (context, snapshot) {
-          final remainingTime = snapshot.data ?? getRemainingTime();
-          if (!snapshot.hasData || remainingTime == null) return const SizedBox();
-          
-          return RichText(
-            text: TextSpan(
-              text: 'Ending Time:\n',
-              style: const TextStyle(
-                color: primaryVariantColor,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-              children: [
-                TextSpan(
-                  text: remainingTime,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    }
-
-    
-    return StreamBuilder<String?>(
-      stream: getRemainingTimeStream(),
+    return StreamBuilder<Map<String, String>>(
+      stream: getTimeStream(),
+      initialData: getFormattedTime(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data == null) return const SizedBox(); // Hide if expired
+        // Handle auction ended
+        if (snapshot.hasData && snapshot.data!['time']!.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<AuctionProvider>().handleAuctionEnded(auctionId);
+          });
+          return const SizedBox();
+        }
+        if (!snapshot.hasData) return const SizedBox();
+        final data = snapshot.data!;
+        final prefix = data['prefix']!;
+        final timeValue = data['time']!;
+        // If auction has ended, show nothing
+        if (timeValue.isEmpty) {
+          return const SizedBox();
+        }
         return RichText(
-          textAlign: TextAlign.center,
           text: TextSpan(
-            text: 'Start Date:\n',
-            style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                  color: primaryVariantColor,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
             children: [
               TextSpan(
-                text: snapshot.data ?? getRemainingTime(),
-                style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.normal,
-                ),
+                text: '$prefix\n',
+                style: textStyle ?? Theme.of(context).textTheme.labelSmall!.copyWith(
+                          color: primaryVariantColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+              ),
+              TextSpan(
+                text: timeValue,
+                style: textStyle ??
+                    Theme.of(context).textTheme.labelSmall!.copyWith(
+                          color: primaryVariantColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
               ),
             ],
           ),

@@ -12,4 +12,15 @@ class UserModel {
     this.password = '',
     this.profileImagePath,
   });
+
+  factory UserModel.empty() {
+    return UserModel(
+      name: '',
+      email: '',
+      phoneNumber: '',
+      password: '',
+      profileImagePath: '',
+    );
+  }
+
 }

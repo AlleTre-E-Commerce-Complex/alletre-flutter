@@ -1,13 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
-import 'package:provider/provider.dart';
 
 Widget buildSuccessDialog(BuildContext context) {
   // Store the context in a variable that will be captured by the closure
   final navigatorContext = context;
-  
+
   Future.delayed(const Duration(seconds: 2), () {
     // Check if the context is still mounted before using Navigator
     if (navigatorContext.mounted) {
@@ -16,17 +15,23 @@ Widget buildSuccessDialog(BuildContext context) {
       // // Navigate to the desired screen
       // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreenContent()));
 
-       // Pop the dialog
+      // Pop the dialog
       Navigator.of(navigatorContext).pop();
-      
-      // Update the tab index to home (1)
-      Provider.of<TabIndexProvider>(navigatorContext, listen: false).updateIndex(1);
-      
-      // Pop everything until we reach the MainStack
-      Navigator.of(navigatorContext).popUntil((route) => route.isFirst);
-      
-      // Force rebuild of MainStack with new index
-      Provider.of<TabIndexProvider>(navigatorContext, listen: false).notifyListeners();
+
+      // // Update the tab index to home (1)
+      // Provider.of<TabIndexProvider>(navigatorContext, listen: false).updateIndex(1);
+
+      // // Pop everything until we reach the MainStack
+      // Navigator.of(navigatorContext).popUntil((route) => route.isFirst);
+
+      // // Force rebuild of MainStack with new index
+      // Provider.of<TabIndexProvider>(navigatorContext, listen: false).notifyListeners();
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const MainStack()),
+        (Route<dynamic> route) => false, // Removes all previous screens
+      );
     }
   });
 
@@ -58,7 +63,7 @@ Widget buildSuccessDialog(BuildContext context) {
             ),
             const SizedBox(height: 8),
             Text(
-              'Welcome back! You will be redirected to the home page.',
+              'Welcome back! You will be directed to the home page.',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
@@ -68,4 +73,3 @@ Widget buildSuccessDialog(BuildContext context) {
     ),
   );
 }
-

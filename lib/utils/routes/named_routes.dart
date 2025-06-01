@@ -1,4 +1,3 @@
-import 'package:alletre_app/view/screens/auction%20screen/auction_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
@@ -8,7 +7,6 @@ import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.d
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
 import 'package:alletre_app/view/screens/profile%20screen/profile_screen.dart';
 import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dart';
-import 'package:alletre_app/view/screens/search%20screen/search_screen.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/splash%20screen/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +22,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String productDetails = '/productDetails';
   static const String auctionDetails = '/auctionDetails';
-  static const String search = '/search';
+  // static const String search = '/search';
   static const String purchases = '/purchases';
   static const String bids = '/bids';
   static const String profile = '/profile';
@@ -43,9 +41,11 @@ class AppRoutes {
       signup: (context) => SignUpPage(),
       login: (context) => LoginPage(),
       home: (context) => const HomeScreenContent(),
+      // Note: These routes should not be used directly.
+      // Instead, use Navigator.push with the required product data
       productDetails: (context) => const ProductDetailsScreen(),
-      auctionDetails: (context) => const AuctionDetailsScreen(),
-      search: (context) => const SearchScreen(),
+      auctionDetails: (context) => throw Exception('AuctionDetailsScreen requires product data. Use Navigator.push instead.'),
+      // search: (context) => const SearchScreen(),
       purchases: (context) => const PurchaseScreen(),
       bids: (context) => const BidsScreen(),
       profile: (context) => const ProfileScreen(),

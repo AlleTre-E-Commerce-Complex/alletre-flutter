@@ -1,13 +1,10 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
+import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
-import 'package:alletre_app/controller/providers/login_state.dart';
-import 'package:alletre_app/utils/extras/common_navbar.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/chip_widget.dart';
 import '../../widgets/home widgets/auction_list_widget.dart';
-import '../../widgets/home widgets/bottom_navbar.dart';
 import '../../widgets/home widgets/carousel_banner_widget.dart';
 import '../../widgets/home widgets/create_auction_button.dart';
 import '../../widgets/home widgets/home_appbar.dart';
@@ -21,6 +18,8 @@ class HomeScreenContent extends StatefulWidget {
 }
 
 class _HomeScreenContentState extends State<HomeScreenContent> {
+  String searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -35,9 +34,16 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building HomeScreenContent');
-    final loginState = context.watch<LoggedInProvider>().isLoggedIn;
+    // print('Building HomeScreenContent');
+    // final loginState = context.watch<LoggedInProvider>().isLoggedIn;
     final auctionProvider = context.watch<AuctionProvider>();
+
+    Future<void> refreshHomePage() async {
+      await auctionProvider.getLiveAuctions();
+      await auctionProvider.getListedProducts();
+      await auctionProvider.getUpcomingAuctions();
+      await auctionProvider.getExpiredAuctions();
+    }
 
     // print('Live auctions count: ${auctionProvider.liveAuctions.length}');
     // print('Live auctions loading: ${auctionProvider.isLoadingLive}');
@@ -53,62 +59,75 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
 
     return Scaffold(
       appBar: const HomeAppbar(),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 9),
-            const SearchFieldWidget(isNavigable: true),
-            const SizedBox(height: 5),
-            const ChipWidget(),
-            const SizedBox(height: 15),
-            const CarouselBannerWidget(),
-            const SizedBox(height: 16),
-            AuctionListWidget(
-              title: 'Live Auctions',
-              subtitle: 'Live Deals, Real-Time Wins!',
-              auctions: auctionProvider.liveAuctions,
-              isLoading: auctionProvider.isLoadingLive,
-              error: auctionProvider.errorLive,
-            ),
-            AuctionListWidget(
-              title: 'Listed Products',
-              subtitle: 'Find and Reach the Product',
-              auctions: auctionProvider.listedProducts,
-              isLoading: auctionProvider.isLoadingListedProducts,
-              error: auctionProvider.errorListedProducts,
-            ),
-            AuctionListWidget(
-              title: 'Upcoming Auctions',
-              subtitle: 'Coming Soon: Get Ready to Bid!',
-              auctions: auctionProvider.isLoadingUpcoming
-                  ? []
-                  : auctionProvider.upcomingAuctions,
-            ),
-            AuctionListWidget(
-              title: 'Expired Auctions',
-              subtitle: 'The Best Deals You Missed',
-              auctions: auctionProvider.isLoadingExpired
-                  ? []
-                  : auctionProvider.expiredAuctions,
-            ),
-          ],
+      body: RefreshIndicator(
+        onRefresh: refreshHomePage,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 9),
+              SearchFieldWidget(
+                isNavigable: false,
+                onChanged: (value) {
+                  context.read<AuctionProvider>().searchItems(value);
+                },
+              ),
+              const SizedBox(height: 5),
+              const ChipWidget(),
+              const SizedBox(height: 15),
+              const CarouselBannerWidget(),
+              const SizedBox(height: 16),
+              AuctionListWidget(
+                user: UserModel.empty(),
+                title: 'Live Auctions',
+                subtitle: 'Live Deals, Real-Time Wins!',
+                auctions: auctionProvider.filteredLiveAuctions,
+                isLoading: auctionProvider.isLoadingLive,
+                error: auctionProvider.errorLive,
+                placeholder:
+                    'No live auctions at the moment.\nPlace your auction right away.',
+              ),
+              AuctionListWidget(
+                user: UserModel.empty(),
+                title: 'Listed Products',
+                subtitle: 'Find and Reach the Product',
+                auctions: auctionProvider.filteredListedProducts,
+                isLoading: auctionProvider.isLoadingListedProducts,
+                error: auctionProvider.errorListedProducts,
+                placeholder:
+                    'No products listed for sale.\nList your product here.',
+              ),
+              AuctionListWidget(
+                user: UserModel.empty(),
+                title: 'Upcoming Auctions',
+                subtitle: 'Coming Soon: Get Ready to Bid!',
+                auctions: auctionProvider.filteredUpcomingAuctions,
+                // auctions: auctionProvider.isLoadingUpcoming
+                //     ? []
+                //     : auctionProvider.filteredUpcomingAuctions,
+                isLoading: auctionProvider.isLoadingUpcoming,
+                error: auctionProvider.errorUpcoming,
+                placeholder: 'No upcoming auctions available.',
+              ),
+              AuctionListWidget(
+                user: UserModel.empty(),
+                title: 'Expired Auctions',
+                subtitle: 'The Best Deals You Missed',
+                auctions: auctionProvider.filteredExpiredAuctions,
+                // auctions: auctionProvider.isLoadingExpired
+                //     ? []
+                //     : auctionProvider.filteredExpiredAuctions,
+                isLoading: auctionProvider.isLoadingExpired,
+                error: auctionProvider.errorExpired,
+                placeholder: 'No expired auctions to display.',
+              ),
+              const SizedBox(height: 12)
+            ],
+          ),
         ),
       ),
       floatingActionButton: const CreateAuctionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).bottomAppBarTheme.color,
-        height: Theme.of(context).bottomAppBarTheme.height,
-        child: loginState
-            ? NavBarUtils.buildAuthenticatedNavBar(
-                context,
-                onTabChange: (index) {
-                  context.read<TabIndexProvider>().updateIndex(index);
-                },
-              )
-            : const BottomNavBar(),
-      ),
     );
   }
 }

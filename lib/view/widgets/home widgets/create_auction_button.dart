@@ -1,20 +1,21 @@
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:provider/provider.dart';
+import '../../../utils/auth_helper.dart';
+import '../../screens/auction screen/product_details_screen.dart';
 
 class CreateAuctionButton extends StatelessWidget {
   const CreateAuctionButton({super.key});
 
+  // Generate a unique hero tag for each instance
+  static int _tagCounter = 0;
+  static String _getUniqueHeroTag() => 'create_auction_fab_${_tagCounter++}';
+
   void _handleOptionSelected(BuildContext context, String option) {
     if (option == 'Create Auction') {
-      context
-          .read<TabIndexProvider>()
-          .updateIndex(19); // Navigate to Add Location Screen
-    } else if (option == 'List Products') {
-      context
-          .read<TabIndexProvider>()
-          .updateIndex(20); // Navigate to List Products
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen(title: 'Create Auction'))); 
+    } else if (option == 'List Product') {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen(title: 'List Product'))); 
     }
   }
 
@@ -28,51 +29,50 @@ class CreateAuctionButton extends StatelessWidget {
         height: 29,
         width: 86,
         child: Center(
-          child: PopupMenuButton<String>(
-            enabled: isLoggedIn,
-            onSelected: (value) => _handleOptionSelected(context, value),
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem<String>(
-                  value: 'Create Auction',
-                  child: Center(
-                    child: Text(
-                      'Create Auction',
-                    ),
-                  ),
+          child: FloatingActionButton.extended(
+            heroTag: _getUniqueHeroTag(), // Use unique hero tag
+            onPressed: () {
+              if (!isLoggedIn) {
+                AuthHelper.showAuthenticationRequiredMessage(context);
+                return;
+              }
+              // Show popup menu manually
+              final RenderBox button = context.findRenderObject() as RenderBox;
+              final Offset offset = button.localToGlobal(Offset.zero);
+              showMenu(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  offset.dx,
+                  offset.dy + 40, // 40 is the offset we defined
+                  offset.dx + button.size.width,
+                  offset.dy + button.size.height + 40,
                 ),
-                const PopupMenuItem<String>(
-                  value: 'List Products',
-                  child: Center(
-                    child: Text(
-                      'List Products',
-                    ),
+                items: [
+                  PopupMenuItem<String>(
+                    value: 'Create Auction',
+                    child: const Center(child: Text('Create Auction')),
+                    onTap: () => _handleOptionSelected(context, 'Create Auction'),
                   ),
-                ),
-              ];
+                  PopupMenuItem<String>(
+                    value: 'List Product',
+                    child: const Center(child: Text('List Product')),
+                    onTap: () => _handleOptionSelected(context, 'List Product'),
+                  ),
+                ],
+              );
             },
-            offset: const Offset(0, 40), // Position dropdown below the button
-            child: FloatingActionButton.extended(
-              onPressed: isLoggedIn
-                  ? null
-                  : null, // Disabled handling within PopupMenuButton
-              label: Text(
-                'Sell Now',
-                style: TextStyle(
-                  color: isLoggedIn
-                      ? Theme.of(context).primaryColor
-                      : const Color(0xFFFFFFFF).withAlpha(102),
-                ),
+            label: Text(
+              'Sell Now',
+              style: TextStyle(
+                color: Theme.of(context).primaryColor
               ),
-              backgroundColor: isLoggedIn
-                  ? Theme.of(context).splashColor
-                  : const Color(0xFFBDBDBD).withAlpha(62),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-              elevation: 0, // Remove elevation
-              disabledElevation: 0, // Remove disabled elevation
             ),
+            backgroundColor: Theme.of(context).splashColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+            elevation: 0, // Remove elevation
+            disabledElevation: 0, // Remove disabled elevation
           ),
         ),
       ),

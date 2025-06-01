@@ -16,6 +16,7 @@ class SwitchWithField extends StatelessWidget {
   final TextEditingController? startDateController;
   final TextEditingController? startTimeController;
   final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
 
   const SwitchWithField({
     super.key,
@@ -29,6 +30,7 @@ class SwitchWithField extends StatelessWidget {
     this.startDateController,
     this.startTimeController,
     this.keyboardType,
+    this.validator,
   });
 
   @override
@@ -105,13 +107,27 @@ class SwitchWithField extends StatelessWidget {
                       labelStyle: const TextStyle(fontSize: 14),
                       hintText: hintText,
                       hintStyle: const TextStyle(fontSize: 12),
+                      errorStyle: const TextStyle(color: errorColor, fontSize: 11, fontWeight: FontWeight.w500),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: errorColor),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: errorColor),
+                      ),
                     ),
                     validator: (value) {
-                      if (isActive && (value == null || value.isEmpty)) {
-                        return "This field is required.";
+                      if (isActive) {
+                        if (value == null || value.isEmpty) {
+                          return "This field is required.";
+                        }
+                        if (validator != null) {
+                          return validator!(value);
+                        }
                       }
                       return null;
                     },
@@ -165,31 +181,30 @@ class SwitchWithField extends StatelessWidget {
                             },
                           );
 
-                          if (selectedDate != null) {
-                            // Select Time
-                            TimeOfDay? selectedTime =
-                                await CustomTimePicker.showTimePickerDialog(
-                                    context);
-                            if (selectedTime != null) {
-                              // Combine Date and Time
-                              DateTime combinedDateTime = DateTime(
-                                selectedDate.year,
-                                selectedDate.month,
-                                selectedDate.day,
-                                selectedTime.hour,
-                                selectedTime.minute,
-                              );
+                          // Select Time
+                          TimeOfDay? selectedTime =
+                              await CustomTimePicker.showTimePickerDialog(
+                                  context);
+                          if (selectedTime != null) {
+                            // Combine Date and Time
+                            DateTime combinedDateTime = DateTime(
+                              selectedDate!.year,
+                              selectedDate.month,
+                              selectedDate.day,
+                              selectedTime.hour,
+                              selectedTime.minute,
+                            );
 
-                              // Format Date and Time
-                              // Format as single string with date and time
-                              final formattedDateTime =
-                                  DateFormat('yyyy-MM-dd, hh:mm a')
-                                      .format(combinedDateTime);
-                              startDateController?.text = formattedDateTime;
-                              // Store time separately if needed
-                              startTimeController?.text = DateFormat('hh:mm a')
-                                  .format(combinedDateTime);
-                            }
+                            // Convert to UTC for backend
+                            final utcDateTime = combinedDateTime.toUtc();
+                            
+                            // Store the ISO format for backend
+                            final isoString = utcDateTime.toIso8601String();
+                            startTimeController?.text = isoString;
+
+                            // Show user-friendly format in the field (dd-MM-yyyy)
+                            final displayFormat = DateFormat('dd-MM-yyyy, hh:mm a');
+                            startDateController?.text = displayFormat.format(combinedDateTime);
                           }
                         },
                       ),
@@ -204,7 +219,6 @@ class SwitchWithField extends StatelessWidget {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 5),
                 ],
               ],
             );

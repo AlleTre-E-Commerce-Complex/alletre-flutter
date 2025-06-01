@@ -1,22 +1,30 @@
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/validators/create_auction_validators.dart';
 import 'package:alletre_app/view/widgets/auction%20form%20widgets/switch_field.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../../widgets/common widgets/footer_elements_appbar.dart';
+import 'shipping_details_screen.dart';
 
 class AuctionDetailsScreen extends StatelessWidget {
-  const AuctionDetailsScreen({super.key});
+  final Map<String, dynamic> productData;
+  final List<String> imagePaths;
+
+  const AuctionDetailsScreen({
+    super.key, 
+    required this.productData,
+    required this.imagePaths,
+  });
 
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
+    // Controllers for auction-specific fields
     final priceController = TextEditingController();
     final condition = ValueNotifier<String?>(null);
     final selectedDuration = ValueNotifier<String?>(null);
     final scheduleBidSwitch = ValueNotifier<bool>(false);
-    final startDateController = TextEditingController();
-    final startTimeController = TextEditingController();
+    final startDateController = TextEditingController(); // For display format
+    final startTimeController = TextEditingController(); // For ISO format
     final buyNowSwitch = ValueNotifier<bool>(false);
     final buyNowController = TextEditingController();
     final returnPolicySwitch = ValueNotifier<bool>(false);
@@ -26,20 +34,8 @@ class AuctionDetailsScreen extends StatelessWidget {
     final isSubmitted = ValueNotifier<bool>(false);
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: secondaryColor),
-          onPressed: () {
-            context.read<TabIndexProvider>().updateIndex(19);
-          },
-        ),
-        title: const Text(
-          'Create Auction',
-          style: TextStyle(color: secondaryColor, fontSize: 18),
-        ),
-      ),
+      appBar: const NavbarElementsAppbar(
+          appBarTitle: 'Create Auction', showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
         child: Column(
@@ -192,7 +188,7 @@ class AuctionDetailsScreen extends StatelessWidget {
                                                           (index) =>
                                                               "${index + 1} hrs")
                                                       : List.generate(
-                                                          7,
+                                                          3,
                                                           (index) =>
                                                               "${index + 1} days"))
                                                   .map((duration) =>
@@ -234,7 +230,8 @@ class AuctionDetailsScreen extends StatelessWidget {
                                       switchNotifier: scheduleBidSwitch,
                                       isSchedulingEnabled: true,
                                       startDateController: startDateController,
-                                      startTimeController: startTimeController),
+                                      startTimeController: startTimeController,
+                                  ),
                                   const SizedBox(height: 8),
                                   const Align(
                                     alignment: Alignment.topLeft,
@@ -276,16 +273,25 @@ class AuctionDetailsScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 22),
                                   // Buy Now Logic
-                                  SwitchWithField(
-                                    label: 'Buy Now',
-                                    leadingText:
-                                        'Amount the user should pay\nto buy the item directly without auction',
-                                    switchNotifier: buyNowSwitch,
-                                    textController: buyNowController,
-                                    labelText: 'Purchase Price',
-                                    hintText: 'AED XXX',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(),
+                                  ValueListenableBuilder<bool>(
+                                    valueListenable: buyNowSwitch,
+                                    builder: (context, isBuyNowEnabled, child) {
+                                      return SwitchWithField(
+                                        label: 'Buy Now',
+                                        leadingText:
+                                            'Amount the user should pay\nto buy the item directly without auction\n(must be at least 30% more than start price)',
+                                        switchNotifier: buyNowSwitch,
+                                        textController: buyNowController,
+                                        labelText: 'Purchase Price',
+                                        hintText: 'AED XXX',
+                                        keyboardType:
+                                            const TextInputType.numberWithOptions(),
+                                        validator: isBuyNowEnabled
+                                            ? (value) => CreateAuctionValidation.validatePurchasePrice(
+                                                value, priceController.text)
+                                            : null,
+                                      );
+                                    },
                                   ),
                                   const SizedBox(height: 12),
                                   // Return Policy Logic
@@ -330,7 +336,7 @@ class AuctionDetailsScreen extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      context.read<TabIndexProvider>().updateIndex(10);
+                      Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(80, 33),
@@ -351,8 +357,69 @@ class AuctionDetailsScreen extends StatelessWidget {
                       isSubmitted.value = true;
                       final isValid = formKey.currentState!.validate();
 
+                      // Check if auction type is selected
+                      if (condition.value == null) {
+                        return;
+                      }
+
                       if (isValid) {
-                        context.read<TabIndexProvider>().updateIndex(18);
+                        // Collect form data
+                        final auctionData = {
+                          ...productData, // Keep the product data structure intact
+                          'startingPrice': double.tryParse(priceController.text)?.toString() ?? '0',
+                          'duration': selectedDuration.value ?? '1 DAYS', // Pass full duration string including unit
+                          'scheduleBid': scheduleBidSwitch.value,
+                          'startDate': startDateController.text,
+                          'startTime': startTimeController.text,
+                          'buyNowEnabled': buyNowSwitch.value,
+                          'buyNowPrice': double.tryParse(buyNowController.text)?.toString() ?? '0',
+                          'returnPolicy': returnPolicySwitch.value ? returnPolicyController.text.trim() : null,
+                          'warrantyPolicy': warrantyPolicySwitch.value ? warrantyPolicyController.text.trim() : null,
+                        };
+
+                        // Validate required fields
+                        final product = auctionData['product'] as Map<String, dynamic>;
+                        
+                        if (product['title']?.isEmpty ?? true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Title is required')),
+                          );
+                          return;
+                        }
+                        if (product['description']?.isEmpty ?? true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Description is required')),
+                          );
+                          return;
+                        }
+
+                        // Validate start date and time for scheduled auctions
+                        if (scheduleBidSwitch.value && (startTimeController.text.isEmpty || startDateController.text.isEmpty)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Start date and time are required for scheduled auctions')),
+                          );
+                          return;
+                        }
+
+                        // Debug log media files
+                        debugPrint('AuctionDetailsScreen - Media files before navigation:');
+                        debugPrint('Total files: ${imagePaths.length}');
+                        for (var i = 0; i < imagePaths.length; i++) {
+                          final path = imagePaths[i];
+                          final isVideo = path.toLowerCase().endsWith('.mp4') || path.toLowerCase().endsWith('.mov');
+                          debugPrint('  File $i: $path');
+                          debugPrint('    Type: ${isVideo ? 'Video' : 'Image'}');
+                        }
+
+                        Navigator.push(
+                          context, 
+                          MaterialPageRoute(
+                            builder: (context) => ShippingDetailsScreen(
+                              auctionData: auctionData,
+                              imagePaths: imagePaths, 
+                            )
+                          )
+                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(

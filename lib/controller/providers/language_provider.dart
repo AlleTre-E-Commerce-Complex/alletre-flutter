@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 
-class LanguageProvider with ChangeNotifier {
-  String _currentLanguage = 'EN';
+// class LanguageProvider with ChangeNotifier {
+//   String _currentLanguage = 'EN';
 
-  String get currentLanguage => _currentLanguage;
+//   String get currentLanguage => _currentLanguage;
 
-  void toggleLanguage() {
-    _currentLanguage = _currentLanguage == 'EN' ? 'AR' : 'EN';
-    notifyListeners();
-  }
-}
+//   void toggleLanguage() {
+//     _currentLanguage = _currentLanguage == 'EN' ? 'AR' : 'EN';
+//     notifyListeners();
+//   }
+// }

@@ -1,8 +1,6 @@
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
-import 'package:alletre_app/utils/extras/common_navbar.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class BidsScreen extends StatelessWidget {
   const BidsScreen({super.key});
@@ -10,7 +8,7 @@ class BidsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavbarElementsAppbar(title: 'Bids'),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Bids'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -18,7 +16,7 @@ class BidsScreen extends StatelessWidget {
             const Icon(
               Icons.gavel,
               size: 100,
-              color: Colors.grey,
+              color: greyColor,
             ),
             const SizedBox(height: 20),
             const Text(
@@ -34,16 +32,6 @@ class BidsScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).bottomAppBarTheme.color,
-        height: Theme.of(context).bottomAppBarTheme.height,
-        child: NavBarUtils.buildAuthenticatedNavBar(
-                context,
-                onTabChange: (index) {
-                  context.read<TabIndexProvider>().updateIndex(index);
-                },
-              )
       ),
     );
   }

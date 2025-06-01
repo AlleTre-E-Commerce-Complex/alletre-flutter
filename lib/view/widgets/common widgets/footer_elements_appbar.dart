@@ -2,11 +2,11 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class NavbarElementsAppbar extends StatelessWidget implements PreferredSizeWidget {
-  final String? title;
+  final String? appBarTitle;
   final bool showBackButton;
 
   const NavbarElementsAppbar({
-    this.title,
+    this.appBarTitle,
     this.showBackButton = false,
     super.key,
   });
@@ -23,10 +23,10 @@ class NavbarElementsAppbar extends StatelessWidget implements PreferredSizeWidge
             )
           : null,
       title: Text(
-        title!,
+        appBarTitle!,
         style: const TextStyle(
           color: secondaryColor,
-          fontSize: 20,
+          fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
       ),

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1043853491459-gqe7h7h4cg9omdsoaag5qm0pubu5lsru.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1043853491459-gqe7h7h4cg9omdsoaag5qm0pubu5lsru</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1043853491459-2ntuv0c6mp761tuk8f1hb78ilp746pg0.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD__JBXQY6br0wKBGFr1I65Rck2FeF05mI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1043853491459</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.alletreApp</string>
+	<key>PROJECT_ID</key>
+	<string>alletre-auctions</string>
+	<key>STORAGE_BUCKET</key>
+	<string>alletre-auctions.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1043853491459:ios:8bd70f2a36ca6fb7f6bd36</string>
+</dict>
+</plist>

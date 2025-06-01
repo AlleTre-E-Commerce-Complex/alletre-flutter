@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'package:alletre_app/utils/error/auth_error_handler.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class UserService {
-  final String baseUrl = 'https://www.alletre.com/api/auth';
+  final String baseUrl = 'http://192.168.0.158:3001/api/auth';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // API Response Handler
   Future<Map<String, dynamic>> handleApiResponse(http.Response response) async {
@@ -31,93 +34,86 @@ class UserService {
     }
   }
 
-  // Signup API
-  // Future<Map<String, dynamic>> signupService(String name, String email, String phoneNumber, String password) async {
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse('$baseUrl/sign-up'),
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Accept': 'application/json',
-  //       },
-  //       body: json.encode({
-  //         'userName': name,
-  //         'email': email,
-  //         'phone': phoneNumber,
-  //         'password': password,
-  //       }),
-  //     );
+  // Refresh token
+  Future<Map<String, dynamic>> refreshTokens() async {
+    try {
+      final refreshToken = await _storage.read(key: 'refresh_token');
+      debugPrint('Current refresh token: $refreshToken');
+      if (refreshToken == null) {
+        return {'success': false, 'message': 'No refresh token found'};
+      }
 
-  //     final Map<String, dynamic> data = json.decode(response.body);
+      final response = await http.post(
+        Uri.parse('$baseUrl/refresh-token'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $refreshToken',
+        },
+      );
 
-  //     if (response.statusCode >= 200 && response.statusCode < 300) {
-  //       if (data['data'] != null) {
-  //         final String accessToken = data['data']['accessToken'];
-  //         final String refreshToken = data['data']['refreshToken'];
-          
-  //         await _storage.write(key: 'accessToken', value: accessToken);
-  //         await _storage.write(key: 'refreshToken', value: refreshToken);
-          
-  //         return {'success': true, 'message': 'Signup successful'};
-  //       } else {
-  //         throw Exception('Invalid response format: missing data');
-  //       }
-  //     } else {
-  //       // Handle error message that could be either String or List
-  //       String errorMessage = '';
-  //       if (data['message'] is List) {
-  //         errorMessage = (data['message'] as List).join(', ');
-  //       } else if (data['message'] is String) {
-  //         errorMessage = data['message'];
-  //       } else {
-  //         errorMessage = 'An error occurred during signup';
-  //       }
-  //       return {
-  //         'success': false,
-  //         'message': errorMessage
-  //       };
-  //     }
-  //   } 
-  //   on FormatException {
-  //     return {'success': false, 'message': 'Invalid response format from server'};
-  //   } catch (e) {
-  //     return {'success': false, 'message': e.toString()};
-  //   }
-  // }
+      debugPrint('Refresh token response status: ${response.statusCode}');
+      debugPrint('Refresh token response body: ${response.body}');
 
-  Future<Map<String, dynamic>> signupService(String name, String email, String phoneNumber, String password) async {
-  try {
-    final response = await http.post(
-      Uri.parse('$baseUrl/sign-up'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: json.encode({
-        'userName': name,
-        'email': email.trim(),
-        'phone': phoneNumber,
-        'password': password,
-        // 'platform': 'mobile_app'
-      }),
-    );
+      final Map<String, dynamic> data = json.decode(response.body);
 
-    final Map<String, dynamic> data = json.decode(response.body);
-    
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return {
-        'success': true,
-        'message': 'Registration successful! Please check your email for verification instructions.',
-        'requiresVerification': true
-      };
+      if (response.statusCode == 200 && data['data'] != null) {
+        final String newAccessToken = data['data']['accessToken'];
+        final String newRefreshToken = data['data']['refreshToken'];
+
+        await _storage.write(key: 'access_token', value: newAccessToken);
+        await _storage.write(key: 'refresh_token', value: newRefreshToken);
+
+        return {
+          'success': true,
+          'data': {
+            'accessToken': newAccessToken,
+            'refreshToken': newRefreshToken,
+          }
+        };
+      }
+
+      return {'success': false, 'message': data['message'] ?? 'Failed to refresh tokens'};
+    } catch (e) {
+      debugPrint('Error refreshing tokens: $e');
+      return {'success': false, 'message': 'An error occurred while refreshing tokens'};
     }
-
-    return AuthErrorHandler.handleSignUpError(data);
-    
-  } catch (e) {
-    return AuthErrorHandler.handleSignUpError(e);
   }
-}
+
+  // Signup API
+  Future<Map<String, dynamic>> signupService(String name, String email, String phoneNumber, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/sign-up'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          'userName': name,
+          'email': email.trim(),
+          'phone': phoneNumber,
+          'password': password,
+          // 'platform': 'mobile_app'
+        }),
+      );
+
+      final Map<String, dynamic> data = json.decode(response.body);
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return {
+          'success': true,
+          'message': 'Registration successful! Please check your email for verification instructions.',
+          'requiresVerification': true
+        };
+      }
+
+      return AuthErrorHandler.handleSignUpError(data);
+      
+    } catch (e) {
+      return AuthErrorHandler.handleSignUpError(e);
+    }
+  }
 
   // Login API
   Future<Map<String, dynamic>> loginService(String email, String password) async {
@@ -144,8 +140,10 @@ class UserService {
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (data['data']?['accessToken'] != null) {
-          await _storage.write(key: 'accessToken', value: data['data']['accessToken']);
-          await _storage.write(key: 'refreshToken', value: data['data']['refreshToken']);
+          debugPrint('Storing tokens after login - Access: ${data['data']['accessToken']}');
+          debugPrint('Storing tokens after login - Refresh: ${data['data']['refreshToken']}');
+          await _storage.write(key: 'access_token', value: data['data']['accessToken']);
+          await _storage.write(key: 'refresh_token', value: data['data']['refreshToken']);
           return {'success': true, 'message': 'Login successful'};
         }
       }
@@ -160,56 +158,224 @@ class UserService {
     }
   }
 
-      // if (response.statusCode >= 200 && response.statusCode < 300) {
-      //   if (data['data'] != null) {
-      //     final String accessToken = data['data']['accessToken'];
-      //     final String refreshToken = data['data']['refreshToken'];
-          
-      //     await _storage.write(key: 'accessToken', value: accessToken);
-      //     await _storage.write(key: 'refreshToken', value: refreshToken);
-          
-      //     return {'success': true, 'message': 'Login successful'};
-      //   } 
-      //   else {
-      //     debugPrint('Missing token data in response: $data');
-      //     return {'success': false, 'message': 'Invalid server response: missing token data'};
-      //     // throw Exception('Invalid response format: missing data');
-      //   }
-      // } else {
-      //   String errorMessage = '';
-      //   if (data['message'] is List) {
-      //     errorMessage = (data['message'] as List).join(', ');
-      //   } else if (data['message'] is String) {
-      //     errorMessage = data['message'];
-      //   } else {
-      //     errorMessage = 'Server returned error status: ${response.statusCode}';
-      //   }
+  // Google Sign In with OAuth
+  Future<Map<String, dynamic>> signInWithGoogle() async {
+    try {
+      debugPrint('Starting Google sign-in...');
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        debugPrint('❌ Google sign-in cancelled by user');
+        return {'success': false, 'message': 'Sign in cancelled'};
+      }
+
+      debugPrint('✅ Google sign-in successful');
+      debugPrint('Getting Google authentication...');
+      
+      GoogleSignInAuthentication googleAuth;
+      try {
+        googleAuth = await googleUser.authentication;
+      } catch (e) {
+        debugPrint('❌ Error getting Google authentication: $e');
+        return {'success': false, 'message': 'Failed to get Google authentication'};
+      }
+      
+      // Get both tokens
+      final String? accessToken = googleAuth.accessToken;
+      final String? idToken = googleAuth.idToken;
+      
+      if (accessToken == null || idToken == null) {
+        debugPrint('❌ Failed to get Google tokens');
+        debugPrint('Access Token: ${accessToken != null ? 'present' : 'missing'}');
+        debugPrint('ID Token: ${idToken != null ? 'present' : 'missing'}');
+        return {'success': false, 'message': 'Failed to get authentication tokens'};
+      }
+
+      debugPrint('✅ Got Google tokens successfully');
+      debugPrint('🔑 Access Token length: ${accessToken.length}');
+      debugPrint('🎫 ID Token length: ${idToken.length}');
+
+      debugPrint('🔍 Starting token debug...');
+      try {
+        // Debug token format
+        final parts = idToken.split('.');
+        debugPrint('Token parts: ${parts.length}');
+        if (parts.length == 3) {
+          try {
+            debugPrint('Attempting to decode token header...');
+            final header = utf8.decode(base64Url.decode(base64Url.normalize(parts[0])));
+            debugPrint('Token header: $header');
+          } catch (e) {
+            debugPrint('❌ Error decoding token header: $e');
+          }
+        }
+
+        debugPrint('📤 Preparing OAuth request...');
+        debugPrint('Base URL: $baseUrl');
         
-      //   debugPrint('Login error: $errorMessage');
-      //   return {
-      //     'success': false,
-      //     'message': errorMessage
-      //   };
-      // }
-    // } on FormatException catch (e) {
-    //   debugPrint('Format error during login: $e');
-    //   return {'success': false, 'message': 'Invalid response format from server'};
-    // } on SocketException catch (e) {
-    //   debugPrint('Network error during login: $e');
-    //   return {'success': false, 'message': 'Network connection error. Please check your internet connection.'};
-    // } catch (e) {
-    //   debugPrint('Unexpected error during login: $e');
-    //   return {'success': false, 'message': 'An unexpected error occurred. Please try again.'};
-    // }
-  // }
+        Uri oAuthUrl;
+        try {
+          oAuthUrl = Uri.parse('$baseUrl/oAuth'); 
+          debugPrint('🌐 Parsed Request URL: $oAuthUrl');
+        } catch (e) {
+          debugPrint('❌ Error parsing URL: $e');
+          return {'success': false, 'message': 'Invalid server URL'};
+        }
+
+        debugPrint('Preparing request body...');
+        
+        final FirebaseAuth auth = FirebaseAuth.instance;
+    final User? currentUser = auth.currentUser;
+    
+    if (currentUser == null) {
+      return {'success': false, 'message': 'Failed to get Firebase user'};
+    }
+    
+    // Get Firebase ID token (has correct audience)
+    final String? firebaseIdToken = await currentUser.getIdToken();
+    
+    // Use Firebase ID token in your request
+    final requestBody = {
+      'accessToken': accessToken,
+      'idToken': firebaseIdToken, // Firebase token instead of Google token
+      'email': googleUser.email,
+      'displayName': googleUser.displayName,
+      'photoUrl': googleUser.photoUrl,
+      'provider': 'google',
+      'oAuthType': 'GOOGLE'
+    };
+
+        
+        // Pretty print request for debugging
+        const JsonEncoder encoder = JsonEncoder.withIndent('    ');
+        debugPrint('\n=== OAuth Request ===\n${encoder.convert(requestBody)}\n==================');
+        
+        debugPrint('🚀 Sending HTTP POST request...');
+        late final http.Response response;
+        try {
+          response = await http.post(
+            oAuthUrl,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Origin': 'https://www.alletre.com',
+              'Access-Control-Request-Method': 'POST',
+              'Access-Control-Request-Headers': 'Content-Type'
+            },
+            body: json.encode(requestBody),
+          );
+        } catch (e) {
+          debugPrint('❌ HTTP request failed: $e');
+          return {'success': false, 'message': 'Failed to connect to server'};
+        }
+
+        debugPrint('\n=== OAuth Response ===');
+        debugPrint('Status Code: ${response.statusCode}');
+        debugPrint('Headers: ${response.headers}');
+        debugPrint('Body: ${response.body}');
+        debugPrint('=====================\n');
+
+        Map<String, dynamic> data;
+        try {
+          data = json.decode(response.body);
+          debugPrint('✅ Successfully parsed JSON response');
+          
+          // Pretty print the full response
+          debugPrint('\n=== Parsed OAuth Response ===');
+          debugPrint(const JsonEncoder.withIndent('    ').convert(data));
+          debugPrint('=========================\n');
+          
+          debugPrint('=== Response Structure ===');
+          debugPrint('Success: ${data['success']}');
+          debugPrint('Has data: ${data['data'] != null}');
+          
+          if (data['success'] == true && data['data'] != null) {
+            final userData = data['data'] as Map<String, dynamic>;
+            final accessToken = userData['accessToken'];
+            final refreshToken = userData['refreshToken'];
+            
+            if (accessToken != null && refreshToken != null) {
+              // Store both tokens
+              await _storage.write(key: 'access_token', value: accessToken);
+              await _storage.write(key: 'refresh_token', value: refreshToken);
+              debugPrint('✅ Stored server tokens');
+              return {
+                'success': true,
+                'data': userData,
+                'message': 'Authentication successful'
+              };
+            }
+          }
+          
+          debugPrint('❌ OAuth failed: ${data['message'] ?? 'Unknown error'}');
+          return {'success': false, 'message': data['message'] ?? 'Authentication failed'};
+        } catch (e) {
+          debugPrint('❌ Error parsing response: $e');
+          return {
+            'success': false,
+            'message': 'Failed to parse server response'
+          };
+        }
+      } catch (e) {
+        debugPrint('OAuth error: $e');
+        return {'success': false, 'message': 'Authentication failed: $e'};
+      }
+    } catch (e) {
+      debugPrint('OAuth error: $e');
+      return {'success': false, 'message': 'Authentication failed: $e'};
+    }
+  }
+
+  // Get stored access token
+  Future<String?> getAccessToken() async {
+    return await _storage.read(key: 'access_token');
+  }
+
+  // Get stored refresh token
+  Future<String?> getRefreshToken() async {
+    return await _storage.read(key: 'refresh_token');
+  }
+
+  // Check stored tokens
+  Future<void> checkStoredTokens() async {
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
+    
+    debugPrint('=== Stored Tokens ===');
+    debugPrint('Access Token: ${accessToken ?? 'Not found'}');
+    debugPrint('Refresh Token: ${refreshToken ?? 'Not found'}');
+    debugPrint('===================');
+  }
 
   // Enhanced token validation method
   Future<bool> validateTokens() async {
     try {
-      final accessToken = await _storage.read(key: 'accessToken');
-      final refreshToken = await _storage.read(key: 'refreshToken');
+      final accessToken = await _storage.read(key: 'access_token');
+      final refreshToken = await _storage.read(key: 'refresh_token');
       
-      return accessToken != null && refreshToken != null;
+      if (accessToken == null || refreshToken == null) {
+        return false;
+      }
+
+      // Try to use the access token
+      final response = await http.get(
+        Uri.parse('$baseUrl/validate-token'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+
+      // If access token is invalid, try to refresh
+      if (response.statusCode == 401) {
+        final refreshResult = await refreshTokens();
+        return refreshResult['success'];
+      }
+
+      return false;
     } catch (e) {
       debugPrint('Error validating tokens: $e');
       return false;
@@ -218,8 +384,19 @@ class UserService {
 
   // Get stored tokens
   Future<Map<String, String?>> getTokens() async {
-    final accessToken = await _storage.read(key: 'accessToken');
-    final refreshToken = await _storage.read(key: 'refreshToken');
+    final accessToken = await _storage.read(key: 'access_token');
+    final refreshToken = await _storage.read(key: 'refresh_token');
+    
+    // If access token is missing but we have refresh token, try to refresh
+    if (accessToken == null && refreshToken != null) {
+      final refreshResult = await refreshTokens();
+      if (refreshResult['success']) {
+        return {
+          'accessToken': refreshResult['data']['accessToken'],
+          'refreshToken': refreshResult['data']['refreshToken'],
+        };
+      }
+    }
     
     return {
       'accessToken': accessToken,
@@ -227,9 +404,34 @@ class UserService {
     };
   }
 
+  // Check OAuth tokens
+  Future<Map<String, dynamic>> checkOAuthTokens() async {
+    try {
+      final accessToken = await _storage.read(key: 'access_token');
+      final refreshToken = await _storage.read(key: 'refresh_token');
+      
+      debugPrint('=== Stored OAuth Tokens ===');
+      debugPrint('🔐 Access Token: ${accessToken ?? 'Not found'}');
+      debugPrint('🔄 Refresh Token: ${refreshToken ?? 'Not found'}');
+      debugPrint('=========================');
+      
+      return {
+        'success': true,
+        'accessToken': accessToken,
+        'refreshToken': refreshToken
+      };
+    } catch (e) {
+      debugPrint('Error checking OAuth tokens: $e');
+      return {
+        'success': false,
+        'error': e.toString()
+      };
+    }
+  }
+
   // Logout
   Future<void> logout() async {
-    await _storage.delete(key: 'accessToken');
-    await _storage.delete(key: 'refreshToken');
+    await _storage.delete(key: 'access_token');
+    await _storage.delete(key: 'refresh_token');
   }
 }
