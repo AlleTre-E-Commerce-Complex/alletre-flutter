@@ -188,7 +188,7 @@ class SwitchWithField extends StatelessWidget {
                           if (selectedTime != null) {
                             // Combine Date and Time
                             DateTime combinedDateTime = DateTime(
-                              selectedDate.year,
+                              selectedDate!.year,
                               selectedDate.month,
                               selectedDate.day,
                               selectedTime.hour,
