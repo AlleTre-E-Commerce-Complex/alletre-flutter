@@ -13,7 +13,6 @@ class MyAuctionsScreen extends StatelessWidget {
     'Sold',
     'Pending',
     'Waiting for Payment',
-    'Expired',
     'Cancelled'
   ];
 
@@ -113,8 +112,6 @@ class MyAuctionsScreen extends StatelessWidget {
         return Icons.hourglass_bottom_rounded;
       case 'Waiting for Payment':
         return Icons.payment_rounded;
-      case 'Expired':
-        return Icons.free_cancellation_rounded;
       case 'Cancelled':
         return Icons.cancel_rounded;
       default:
@@ -136,7 +133,6 @@ class _AuctionsTabView extends StatelessWidget {
       'Sold': 'SOLD',
       'Pending': 'PENDING_OWNER_DEPOIST',
       'Waiting for Payment': 'WAITING_FOR_PAYMENT',
-      'Expired': 'EXPIRED',
       'Cancelled': [
         'CANCELLED_BEFORE_EXP_DATE',
         'CANCELLED_AFTER_EXP_DATE',
@@ -175,8 +171,8 @@ class _AuctionsTabView extends StatelessWidget {
     logAuctionStatuses(provider.upcomingAuctions, 'Scheduled');
     logAuctionStatuses(provider.soldAuctions, 'Sold');
     logAuctionStatuses(provider.pendingAuctions, 'Pending');
-    logAuctionStatuses(provider.waitingForPaymentAuctions, 'Waiting for Payment');
-    logAuctionStatuses(provider.expiredAuctions, 'Expired');
+    logAuctionStatuses(
+        provider.waitingForPaymentAuctions, 'Waiting for Payment');
     logAuctionStatuses(provider.cancelledAuctions, 'Cancelled');
 
     return Consumer<AuctionProvider>(builder: (context, provider, _) {
@@ -218,83 +214,6 @@ class _AuctionsTabView extends StatelessWidget {
               .where((a) => a.status.toUpperCase() == status)
               .toList();
           break;
-
-         case 'Expired':
-  debugPrint('\n🔵 === EXPIRED AUCTIONS DEBUG ===');
-  debugPrint('🔵 Current state:');
-  debugPrint('🔵 - isLoadingExpired: ${provider.isLoadingExpired}');
-  debugPrint('🔵 - expiredAuctions count: ${provider.expiredAuctions.length}');
-  debugPrint('🔵 - errorExpired: ${provider.errorExpired}');
-  
-  // Log all auctions for inspection
-  if (provider.expiredAuctions.isNotEmpty) {
-    debugPrint('🔵 All expired auctions (${provider.expiredAuctions.length}):');
-    for (var i = 0; i < provider.expiredAuctions.length; i++) {
-      final auction = provider.expiredAuctions[i];
-      debugPrint('  ${i + 1}. ID: ${auction.id}, Status: ${auction.status}, Title: ${auction.title}');
-    }
-  } else {
-    debugPrint('🟡 No expired auctions in the list');
-  }
-
-  // Check if we need to fetch
-  final shouldFetch = !provider.isLoadingExpired && 
-                     provider.expiredAuctions.isEmpty && 
-                     provider.errorExpired == null;
-  
-  debugPrint('🔵 Should fetch expired auctions: $shouldFetch');
-  if (shouldFetch) {
-    debugPrint('🔄 Calling getExpiredMyAuctions()...');
-    // Don't await here to avoid blocking the UI
-    provider.getExpiredMyAuctions().then((_) {
-      debugPrint('✅ getExpiredMyAuctions completed');
-      debugPrint('   - New expiredAuctions count: ${provider.expiredAuctions.length}');
-      
-      if (provider.expiredAuctions.isNotEmpty) {
-        debugPrint('   First 3 items after fetch:');
-        for (var i = 0; i < provider.expiredAuctions.length && i < 3; i++) {
-          final auction = provider.expiredAuctions[i];
-          debugPrint('    ${i + 1}. ID: ${auction.id}, Status: ${auction.status}');
-        }
-      } else {
-        debugPrint('🟡 No items in expiredAuctions after fetch');
-      }
-    }).catchError((error) {
-      debugPrint('❌ Error in getExpiredMyAuctions: $error');
-    });
-  }
-
-  // Log any errors
-  if (provider.errorExpired != null) {
-    debugPrint('❌ Error loading expired auctions: ${provider.errorExpired}');
-  }
-
-  // Filter expired auctions - use case-insensitive comparison
-  debugPrint('\n🔵 Filtering expired auctions...');
-  filtered = provider.expiredAuctions
-      .where((a) {
-        final status = a.status.toUpperCase();
-        final isMatch = status == 'EXPIRED';
-        debugPrint('  🔍 Auction ${a.id}: Status=$status, Matches: $isMatch');
-        return isMatch;
-      })
-      .toList();
-  
-  debugPrint('\n🔵 Filtering complete:');
-  debugPrint('   - Total items before filter: ${provider.expiredAuctions.length}');
-  debugPrint('   - Items after filter: ${filtered.length}');
-  
-  if (filtered.isNotEmpty) {
-    debugPrint('   First filtered item:');
-    debugPrint('   - ID: ${filtered.first.id}');
-    debugPrint('   - Status: ${filtered.first.status}');
-    debugPrint('   - Title: ${filtered.first.title}');
-  } else {
-    debugPrint('🟡 No items matched the EXPIRED filter');
-  }
-  
-  debugPrint('🔵 === END EXPIRED AUCTIONS DEBUG ===\n');
-  break;
 
         case 'Sold':
           final mySoldAuctions = provider.soldAuctions;
