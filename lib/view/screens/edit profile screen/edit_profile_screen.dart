@@ -605,23 +605,18 @@ class EditProfileScreen extends StatelessWidget {
                 //   onTap: () {},
                 // ),
                 // ),
-                Divider(height: 32, color: dividerColor, thickness: 0.5),
-                const EditProfileTitle(title: 'Settings'),
-                ListTile(
-                  leading: const Icon(Icons.lock),
-                  title: const Text('Change Password'),
-                  onTap: () {},
-                ),
-                ListTile(
-                  leading: const Icon(Icons.delete),
-                  title: const Text('Delete my account'),
-                  onTap: () {},
-                ),
-                ListTile(
-                  leading: const Icon(Icons.logout),
-                  title: const Text('Logout'),
-                  onTap: () {},
-                ),
+                // Divider(height: 32, color: dividerColor, thickness: 0.5),
+                // const EditProfileTitle(title: 'Settings'),
+                // ListTile(
+                //   leading: const Icon(Icons.delete),
+                //   title: const Text('Delete my account'),
+                //   onTap: () {},
+                // ),
+                // ListTile(
+                //   leading: const Icon(Icons.logout),
+                //   title: const Text('Logout'),
+                //   onTap: () {},
+                // ),
               ],
             ),
           );

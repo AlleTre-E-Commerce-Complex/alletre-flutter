@@ -379,16 +379,56 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _userService.logout(); // Added logout method to match UserService
+    try {
+      _isLoading = true;
+      notifyListeners();
+      
+      // Clear secure storage and sign out from services
+      await _userService.logout();
+      
+      // Reset all user-related state by creating a new empty instance
+      _user.name = '';
+      _user.email = '';
+      _user.phoneNumber = '';
+      _user.password = '';
+      _user.profileImagePath = null;
+      
+      _addresses.clear();
+      _defaultAddress = null;
+      _displayName = null;
+      _displayNumber = null;
+      _displayEmail = null;
+      _photoUrl = null;
+      _emailVerified = null;
+      _authMethod = 'custom';
+      _agreeToTerms = false;
+      _rememberPassword = false;
+      _lastValidationMessage = '';
+      
+      // Clear controllers
+      emailController.clear();
+      passwordController.clear();
+      
+      // Also handle Firebase logout if needed
+      await logoutFirebase();
+      
+      debugPrint('User provider state cleared after logout');
+    } catch (e) {
+      debugPrint('Error during user provider logout: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
-    // Also handle Firebase logout if needed
+  Future<void> logoutFirebase() async {
     if (_authMethod == 'google' || _authMethod == 'apple') {
       await FirebaseAuth.instance.signOut();
     }
 
     resetLoginForm();
     resetSignupForm();
-    _authMethod = 'custom';
     _displayName = null;
     _displayNumber = null;
     _displayEmail = null;

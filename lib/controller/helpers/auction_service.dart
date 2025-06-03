@@ -1128,11 +1128,8 @@ class AuctionService {
 
   Future<List<AuctionItem>> fetchUserAuctionsByStatus(String status, {int page = 1, int perPage = 10}) async {
     try {
-      debugPrint('🔍 [AuctionService] fetchUserAuctionsByStatus called with status: $status');
-      
       // Normalize the status to match API expectations
       final normalizedStatus = status.trim().toUpperCase();
-      debugPrint('🔍 [AuctionService] Normalized status: $normalizedStatus');
       
       // First try to get the token
       String? accessToken = await _getAccessToken();
@@ -1144,8 +1141,6 @@ class AuctionService {
       // Add authorization header if we have a token
       if (accessToken != null) {
         headers['Authorization'] = 'Bearer $accessToken';
-      } else {
-        debugPrint('⚠️ [AuctionService] No access token available');
       }
 
       List<AuctionItem> allAuctions = [];
@@ -1155,15 +1150,11 @@ class AuctionService {
       while (hasMoreUser) {
         final uri = Uri.parse(
             '${ApiEndpoints.baseUrl}/auctions/user/ownes?page=$userPage&perPage=$perPage&status=$normalizedStatus');
-            
-        debugPrint('🌐 [AuctionService] Fetching page $userPage from: $uri');
-        
+                    
         final userResponse = await http.get(
           uri,
           headers: headers,
         );
-
-        debugPrint('🔍 [AuctionService] Response Code: ${userResponse.statusCode} for page $userPage');
 
         if (userResponse.statusCode == 200) {
           final data = jsonDecode(userResponse.body);
@@ -1176,12 +1167,9 @@ class AuctionService {
             final totalPages = pagination['totalPages'] as int;
 
             allAuctions.addAll(items);
-            debugPrint(
-                'Successfully parsed ${items.length} user auctions for page $userPage');
 
             if (userPage >= totalPages) {
               hasMoreUser = false;
-              debugPrint('Reached last page of user auctions');
             } else {
               userPage++;
             }
@@ -1203,11 +1191,8 @@ class AuctionService {
         }
       }
 
-      debugPrint(
-          'Total user auctions fetched: ${allAuctions.length}');
       return allAuctions;
     } catch (e) {
-      debugPrint('Error fetching user auctions: $e');
       return [];
     }
   }
@@ -1249,7 +1234,6 @@ class AuctionService {
 
       return _parseAuctionsResponse(response);
     } catch (e) {
-      debugPrint('Error fetching sold auctions: $e');
       rethrow;
     }
   }
@@ -1275,8 +1259,6 @@ class AuctionService {
         headers: headers,
       );
 
-      debugPrint('Expired Auctions Response Code: ${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['data'] is List) {
@@ -1290,8 +1272,6 @@ class AuctionService {
                   auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE')
               .toList();
 
-          debugPrint(
-              'Successfully parsed ${validItems.length} expired auctions');
           return validItems;
         }
       } else if (response.statusCode == 401 && accessToken != null) {
@@ -1331,7 +1311,6 @@ class AuctionService {
 
       return [];
     } catch (e) {
-      debugPrint('Error fetching expired auctions: $e');
       return [];
     }
   }
@@ -1370,8 +1349,6 @@ class AuctionService {
           headers: headers,
         );
 
-        debugPrint('Drafts Response Code: ${response.statusCode} for page $page');
-
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
@@ -1383,11 +1360,9 @@ class AuctionService {
             final totalPages = pagination['totalPages'] as int;
 
             allItems.addAll(items);
-            debugPrint('Successfully parsed ${items.length} drafts for page $page');
 
             if (page >= totalPages) {
               hasMore = false;
-              debugPrint('Reached last page of drafts');
             } else {
               page++;
             }
@@ -1413,10 +1388,8 @@ class AuctionService {
         }
       }
 
-      debugPrint('Total drafts fetched: ${allItems.length}');
       return allItems;
     } catch (e) {
-      debugPrint('Error fetching drafts: $e');
       return [];
     }
   }
@@ -1462,7 +1435,6 @@ class AuctionService {
 
       return false;
     } catch (e) {
-      debugPrint('Error deleting draft: $e');
       return false;
     }
   }
@@ -1474,21 +1446,11 @@ class AuctionService {
         throw Exception('Not authenticated');
       }
 
-      debugPrint('🔍 AuctionService.submitBid Debug:');
-      debugPrint('🔍 Received bid amount: $bidAmount');
-      debugPrint('🔍 Auction ID: $auctionId');
-      debugPrint('🔍 Access Token: ${accessToken.substring(0, 10)}...');
-      
       final requestBody = jsonEncode({
         'bidAmount': bidAmount,
       });
-      debugPrint('🔍 Request Body (JSON): $requestBody');
 
       final url = '${ApiEndpoints.baseUrl}${ApiEndpoints.userAuctionDetails(auctionId)}/submit-bid';
-      debugPrint('🔍 Request URL: $url');
-      debugPrint('🔍 Request Headers:');
-      debugPrint('  - Content-Type: application/json');
-      debugPrint('  - Authorization: Bearer ${accessToken.substring(0, 10)}...');
 
       final response = await http.post(
         Uri.parse(url),
@@ -1499,28 +1461,16 @@ class AuctionService {
         body: requestBody,
       );
 
-      debugPrint('🔍 Response Status Code: ${response.statusCode}');
-      debugPrint('🔍 Response Headers: ${response.headers}');
-      debugPrint('🔍 Response Body: ${response.body}');
-
       if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body);
-        debugPrint('🔍 Error Response Details:');
-        debugPrint('  - Status Code: ${response.statusCode}');
-        debugPrint('  - Error Body: $error');
         
         final errorMessage = error['message'] ?? error['error'] ?? 'Failed to submit bid';
-        debugPrint('🔍 Extracted Error Message: $errorMessage');
         throw Exception(errorMessage);
       }
 
       final responseData = jsonDecode(response.body);
-      debugPrint('🔍 Successful Response Data: $responseData');
       return responseData;
     } catch (e) {
-      debugPrint('🔍 Bid Submission Error:');
-      debugPrint('  - Error Type: ${e.runtimeType}');
-      debugPrint('  - Error Message: $e');
       rethrow;
     }
   }
@@ -1544,12 +1494,6 @@ class AuctionService {
       });
 
       final url = '${ApiEndpoints.baseUrl}${ApiEndpoints.userAuctionDetails(auctionId)}/bidder-deposit';
-      print('🔍 Deposit Payment Request:');
-      print('  - URL: $url');
-      print('  - Headers:');
-      print('    * Content-Type: application/json');
-      print('    * Authorization: Bearer ${accessToken.substring(0, 20)}...');
-      print('  - Body: $requestBody');
 
       final response = await http.post(
         Uri.parse(url),
@@ -1560,18 +1504,9 @@ class AuctionService {
         body: requestBody,
       );
 
-      print('🔍 Deposit Payment Response:');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Headers: ${response.headers}');
-      print('  - Body: ${response.body}');
-
       if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body);
         final errorMessage = error['message'] ?? error['error'] ?? 'Failed to process deposit';
-        print('🔍 Deposit Payment Error:');
-        print('  - Status Code: ${response.statusCode}');
-        print('  - Error Message: $errorMessage');
-        print('  - Full Error: $error');
         throw Exception(errorMessage);
       }
 

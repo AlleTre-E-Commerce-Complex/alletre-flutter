@@ -1,9 +1,11 @@
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/common_appbar.dart';
 import 'package:alletre_app/view/widgets/login%20widgets/login_buttons.dart';
 import 'package:alletre_app/view/widgets/login%20widgets/login_form_fields.dart';
 import 'package:alletre_app/view/widgets/login%20widgets/login_title.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -44,22 +46,27 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 24),
                     LoginFormFields(formKey: formKey),
                     const SizedBox(height: 24),
-                    LoginButtons(
-                      formKey: formKey,
-                      onLoginSuccess: () {
-                        if (fromAuctionCreation) {
-                          // If we came from auction creation, go back there
-                          Navigator.pop(context);
-                        } else {
-                          // Otherwise go to home screen
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MainStack(),
-                            ),
-                            (Route<dynamic> route) => false,
-                          );
-                        }
+                    Consumer<TabIndexProvider>(
+                      builder: (context, tabIndexProvider, _) {
+                        return LoginButtons(
+                          formKey: formKey,
+                          onLoginSuccess: () {
+                            if (fromAuctionCreation) {
+                              // If we came from auction creation, go back there
+                              Navigator.pop(context);
+                            } else {
+                              // Reset tab index to 0 (Home) and go to home screen
+                              tabIndexProvider.updateIndex(0);
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const MainStack(),
+                                ),
+                                (Route<dynamic> route) => false,
+                              );
+                            }
+                          },
+                        );
                       },
                     ),
                   ],

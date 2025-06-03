@@ -2,6 +2,7 @@ import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/navbar_utils.dart';
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
+import 'package:alletre_app/view/screens/draft%20screen/draft_screen.dart';
 import 'package:alletre_app/view/screens/item_details/item_details.dart';
 import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
@@ -11,6 +12,7 @@ import 'package:alletre_app/view/screens/contact%20screen/contact_screen.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/edit_profile_screen.dart';
 import 'package:alletre_app/view/screens/faqs%20screen/faqs_screen.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
+import 'package:alletre_app/view/screens/my_auctions_screen.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
 import 'package:alletre_app/view/screens/settings%20screen/settings_screen.dart';
@@ -21,8 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
-import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dart';
-import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/profile%20screen/profile_screen.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import '../../view/widgets/home widgets/bottom_navbar.dart';
@@ -52,13 +52,13 @@ class MainStack extends StatelessWidget {
     switch (index) {
       case 0: // Home
         return const HomeScreenContent();
-      case 1: // Purchases
-        return const PurchaseScreen();
-      case 2: // Bids
-        return const BidsScreen();
+      case 1: // Drafts
+        return DraftsPage(user: UserModel.empty());
+      case 2: // My Auctions
+        return const MyAuctionsScreen();
       case 3: // Profile
         return const ProfileScreen();
-      // Other screens that can be navigated to from these main screens
+      // Other screens that can be navigated to from the main screens
       case 4:
         return const FaqScreen();
       case 5:

@@ -456,9 +456,26 @@ class UserService {
     }
   }
 
-  // Logout
+  // Logout - Clear all authentication data
   Future<void> logout() async {
-    await _storage.delete(key: 'access_token');
-    await _storage.delete(key: 'refresh_token');
+    try {
+      // Clear all secure storage tokens
+      await _storage.deleteAll();
+      
+      // Sign out from Firebase if signed in
+      try {
+        await FirebaseAuth.instance.signOut();
+      } catch (e) {
+        debugPrint('Error signing out from Firebase: $e');
+      }
+      
+      // Clear any HTTP client state if needed
+      // client.close(); // Uncomment if you have an HTTP client that needs to be closed
+      
+      debugPrint('Successfully logged out and cleared all auth data');
+    } catch (e) {
+      debugPrint('Error during logout: $e');
+      rethrow; // Re-throw to handle in the caller
+    }
   }
 }

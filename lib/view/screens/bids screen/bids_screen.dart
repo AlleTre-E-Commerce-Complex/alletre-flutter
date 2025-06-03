@@ -21,14 +21,7 @@ class BidsScreen extends StatelessWidget {
             const SizedBox(height: 20),
             const Text(
               'No active bids!',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Add functionality to browse auctions or listings
-              },
-              child: const Text('Browse Auctions'),
+              style: TextStyle(fontSize: 18, color: greyColor),
             ),
           ],
         ),

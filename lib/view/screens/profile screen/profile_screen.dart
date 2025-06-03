@@ -1,4 +1,6 @@
 import 'package:alletre_app/controller/providers/share_provider.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
@@ -8,12 +10,9 @@ import 'package:alletre_app/view/widgets/profile%20widgets/user_profile_card.dar
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import '../draft screen/draft_screen.dart';
 import '../edit profile screen/edit_profile_screen.dart';
+import '../login screen/login_page.dart';
 import '../faqs screen/faqs_screen.dart';
-import '../settings screen/settings_screen.dart';
-import '../wishlist screen/wishlist_screen.dart';
-import '../my_auctions_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? title;
@@ -62,63 +61,63 @@ class ProfileScreen extends StatelessWidget {
                         builder: (context) => const EditProfileScreen()));
               },
             ),
-            const SizedBox(height: 4),
-            const ProfileSectionTitle(title: 'Shopping'),
-            ProfileListTile(
-              icon: Icons.bookmark_outline,
-              title: 'Wishlist',
-              subtitle: 'Save and track your favorite items',
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => WishlistScreen(
-                            title: title ?? '', user: UserModel.empty())));
-              },
-            ),
-            ProfileListTile(
-              icon: Icons.sell_outlined,
-              title: 'My Auctions',
-              subtitle: 'Manage your auction listings',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MyAuctionsScreen(),
-                  ),
-                );
-              },
-            ),
-            ProfileListTile(
-              icon: Icons.gavel,
-              title: 'My Bids',
-              subtitle: 'Check the status of your bids',
-              onTap: () {},
-            ),
-            ProfileListTile(
-              icon: Icons.inventory_2_outlined,
-              title: 'My Products',
-              subtitle: 'Manage your selling items',
-              onTap: () {},
-            ),
-            ProfileListTile(
-              icon: Icons.shopping_cart_outlined,
-              title: 'My Purchases',
-              subtitle: 'View order history and details',
-              onTap: () {},
-            ),
-            ProfileListTile(
-              icon: Icons.drafts_outlined,
-              title: 'My Drafts',
-              subtitle: 'View your drafted items',
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DraftsPage(user: user)));
-              },
-            ),
-            Divider(color: dividerColor, thickness: 0.5),
+            // const SizedBox(height: 4),
+            // const ProfileSectionTitle(title: 'Shopping'),
+            // ProfileListTile(
+            //   icon: Icons.bookmark_outline,
+            //   title: 'Wishlist',
+            //   subtitle: 'Save and track your favorite items',
+            //   onTap: () {
+            //     Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //             builder: (context) => WishlistScreen(
+            //                 title: title ?? '', user: UserModel.empty())));
+            //   },
+            // ),
+            // ProfileListTile(
+            //   icon: Icons.sell_outlined,
+            //   title: 'My Auctions',
+            //   subtitle: 'Manage your auction listings',
+            //   onTap: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const MyAuctionsScreen(),
+            //       ),
+            //     );
+            //   },
+            // ),
+            // ProfileListTile(
+            //   icon: Icons.gavel,
+            //   title: 'My Bids',
+            //   subtitle: 'Check the status of your bids',
+            //   onTap: () {},
+            // ),
+            // ProfileListTile(
+            //   icon: Icons.inventory_2_outlined,
+            //   title: 'My Products',
+            //   subtitle: 'Manage your selling items',
+            //   onTap: () {},
+            // ),
+            // ProfileListTile(
+            //   icon: Icons.shopping_cart_outlined,
+            //   title: 'My Purchases',
+            //   subtitle: 'View order history and details',
+            //   onTap: () {},
+            // ),
+            // ProfileListTile(
+            //   icon: Icons.drafts_outlined,
+            //   title: 'My Drafts',
+            //   subtitle: 'View your drafted items',
+            //   onTap: () {
+            //     Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //           builder: (context) => DraftsPage(user: user)));
+            //   },
+            // ),
+            // Divider(color: dividerColor, thickness: 0.5),
             const ProfileSectionTitle(title: 'About'),
             ProfileListTile(
               icon: Icons.policy,
@@ -145,6 +144,18 @@ class ProfileScreen extends StatelessWidget {
                 context.read<ShareProvider>().shareApp(context);
               },
             ),
+            ProfileListTile(
+              icon: Icons.logout,
+              title: 'Logout',
+              subtitle: 'Logout from your account',
+              onTap: () => _showLogoutConfirmation(context),
+            ),
+            ProfileListTile(
+              icon: Icons.delete,
+              title: 'Delete Account',
+              subtitle: 'Delete your account',
+              onTap: () {},
+            ),
             // ProfileListTile(
             //   icon: Icons.call,
             //   title: 'Contact us',
@@ -153,21 +164,85 @@ class ProfileScreen extends StatelessWidget {
             //     context.read<TabIndexProvider>().updateIndex(16);
             //   },
             // ),
-            ProfileListTile(
-              icon: Icons.settings,
-              title: 'Settings',
-              subtitle: 'View more settings',
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SettingsScreen()));
-              },
-            ),
+            // ProfileListTile(
+            //   icon: Icons.settings,
+            //   title: 'Settings',
+            //   subtitle: 'View more settings',
+            //   onTap: () {
+            //     Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //             builder: (context) => const SettingsScreen()));
+            //   },
+            // ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _showLogoutConfirmation(BuildContext context) async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('LOGOUT'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout != true) return;
+
+    if (!context.mounted) return;
+
+    final scaffold = ScaffoldMessenger.of(context);
+    try {
+
+      // Perform logout
+      await context.read<UserProvider>().logout();
+
+      // Navigate to login page and reset navigation stack
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+        
+        // Show success message
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Successfully logged out')),
+            backgroundColor: activeColor,
+          ),
+        );
+      }
+
+      // Reset tab index to 0 (Home) before logging out
+      if (context.mounted) {
+        final tabIndexProvider = context.read<TabIndexProvider>();
+        tabIndexProvider.updateIndex(0);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Logout failed: ${e.toString()}')),
+            backgroundColor: errorColor,
+          ),
+        );
+      }
+    }
   }
 
   // Widget _buildQuickActionTile({
