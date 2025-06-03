@@ -11,10 +11,10 @@ class SettingsSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleSmall
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 18)
       ),
     );
   }

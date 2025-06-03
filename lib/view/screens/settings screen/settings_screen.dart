@@ -1,15 +1,15 @@
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
-import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/contact%20screen/contact_screen.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
-import 'package:alletre_app/view/widgets/settings%20widgets/settings_list_tile.dart';
+import 'package:alletre_app/view/widgets/profile%20widgets/profile_list_tile.dart';
 import 'package:alletre_app/view/widgets/settings%20widgets/settings_section_title.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
-import '../contact screen/contact_screen.dart';
-import '../user terms screen/user_terms.dart';
+import 'package:provider/provider.dart';
+import '../faqs screen/faqs_screen.dart';
+import '../login screen/login_page.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -19,42 +19,68 @@ class SettingsScreen extends StatelessWidget {
     return 'Version ${packageInfo.version}';
   }
 
-  Future<void> _showLogoutDialog(BuildContext context) async {
-    // Show dialog
-    showDialog(
+  Future<void> _showLogoutConfirmation(BuildContext context) async {
+    final shouldLogout = await showDialog<bool>(
       context: context,
-      barrierDismissible:
-          false, // Prevents dismissing the dialog by tapping outside
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout',
-              style: TextStyle(fontWeight: FontWeight.w500)),
-          content: const Text('Do you want to logout?',
-              style: TextStyle(
-                  color: onSecondaryColor, fontWeight: FontWeight.w500)),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel', style: TextStyle(fontSize: 12)),
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            TextButton(
-              onPressed: () {
-                // Log out the user
-                context.read<LoggedInProvider>().logOut();
-                // Navigate using TabIndexProvider
-                context
-                    .read<TabIndexProvider>()
-                    .updateIndex(2); // Index for LoginPage
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Logout', style: TextStyle(fontSize: 12)),
-            ),
-          ],
-        );
-      },
+            child: const Text('LOGOUT'),
+          ),
+        ],
+      ),
     );
+
+    if (shouldLogout != true) return;
+
+    if (!context.mounted) return;
+
+    final scaffold = ScaffoldMessenger.of(context);
+
+    try {
+      // Perform logout
+      await context.read<UserProvider>().logout();
+
+      // Navigate to login page and reset navigation stack
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+        
+        // Show success message
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Successfully logged out')),
+            backgroundColor: activeColor,
+          ),
+        );
+      }
+
+      // Reset tab index to 0 (Home) before logging out
+      if (context.mounted) {
+        final tabIndexProvider = context.read<TabIndexProvider>();
+        tabIndexProvider.updateIndex(0);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Logout failed: ${e.toString()}')),
+            backgroundColor: errorColor,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -67,45 +93,45 @@ class SettingsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SettingsSectionTitle(title: 'General'),
-            SettingsListTile(
-              title: 'Theme',
-              subtitle: 'Use the theme set in your device settings',
-              onTap: () {},
+            ProfileListTile(
+              icon: Icons.question_mark_rounded,
+              title: 'FAQs',
+              subtitle: 'Know more about the services',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FaqScreen(),
+                  ),
+                );
+              },
             ),
-            SettingsListTile(
-              title: 'Country',
-              subtitle: 'United Arab Emirates',
-              onTap: () {},
-            ),
-            SettingsListTile(
-              title: 'Clear search history',
-              onTap: () {},
-            ),
-            Divider(color: dividerColor, thickness: 0.5),
-            const SettingsSectionTitle(title: 'Support'),
-            SettingsListTile(
+            ProfileListTile(
+              icon: Icons.call,
               title: 'Contact us',
+              subtitle: 'Reach out for help',
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactUsScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ContactUsScreen(),
+                  ),
+                );
               },
             ),
-            SettingsListTile(
-              title: 'Terms and Conditions',
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsAndConditions()));
-              },
-            ),
-            Divider(color: dividerColor, thickness: 0.5),
-            const SettingsSectionTitle(title: 'About'),
-            SettingsListTile(
-              title: 'Delete account',
-              onTap: () {},
-            ),
-            SettingsListTile(
+            const SizedBox(height: 5),
+            SettingsSectionTitle(title: 'Account'),
+            ProfileListTile(
+              icon: Icons.logout,
               title: 'Logout',
-              onTap: () {
-                _showLogoutDialog(context); // logout confirmation dialog
-              },
+              subtitle: 'Logout from your account',
+              onTap: () => _showLogoutConfirmation(context),
+            ),
+            ProfileListTile(
+              icon: Icons.delete,
+              title: 'Delete Account',
+              subtitle: 'Delete your account',
+              onTap: () {},
             ),
             const SizedBox(height: 20),
             FutureBuilder<String>(
@@ -131,7 +157,7 @@ class SettingsScreen extends StatelessWidget {
                       snapshot.data!,
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey,
+                            color: greyColor,
                             fontSize: 13,
                           ),
                     ),
@@ -139,7 +165,7 @@ class SettingsScreen extends StatelessWidget {
                 }
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
           ],
         ),
       ),

@@ -24,8 +24,8 @@ class BottomNavBarUtils {
           currentIndex: tabIndex,
           onTap: onTabChange,
           type: BottomNavigationBarType.fixed,
-          selectedLabelStyle: TextStyle(fontSize: 11),
-          unselectedLabelStyle: TextStyle(fontSize: 11),
+          // selectedLabelStyle: TextStyle(fontSize: 11),
+          // unselectedLabelStyle: TextStyle(fontSize: 11),
           selectedItemColor: selectedIndex,
           unselectedItemColor: secondaryColor,
           // backgroundColor: Colors.transparent,
@@ -36,12 +36,12 @@ class BottomNavBarUtils {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.drafts),
-              label: 'Drafts',
+              icon: Icon(Icons.shopping_cart),
+              label: 'Purchases',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.gavel),
-              label: 'My Auctions',
+              label: 'My Bids',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
