@@ -22,42 +22,93 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _showLogoutConfirmation(BuildContext context) async {
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('CANCEL'),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.logout_sharp,
+                color: greyColor,
+                size: 64,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Confirm Logout?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 19,
+                  color: onSecondaryColor,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Yes',
+                          style: TextStyle(color: secondaryColor, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: secondaryColor,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: primaryColor,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'No',
+                          style: TextStyle(color: primaryColor, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('LOGOUT'),
-          ),
-        ],
+        ),
       ),
     );
 
     if (shouldLogout != true) return;
-
     if (!context.mounted) return;
 
     final scaffold = ScaffoldMessenger.of(context);
 
     try {
-      // Perform logout
       await context.read<UserProvider>().logout();
 
-      // Navigate to login page and reset navigation stack
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => LoginPage()),
         );
-        
-        // Show success message
+
         scaffold.showSnackBar(
           SnackBar(
             content: Center(child: Text('Successfully logged out')),
@@ -66,7 +117,6 @@ class SettingsScreen extends StatelessWidget {
         );
       }
 
-      // Reset tab index to 0 (Home) before logging out
       if (context.mounted) {
         final tabIndexProvider = context.read<TabIndexProvider>();
         tabIndexProvider.updateIndex(0);
@@ -83,10 +133,125 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _showDeleteAccountConfirmation(BuildContext context) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.logout_sharp,
+                color: greyColor,
+                size: 64,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Confirm Delete?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 19,
+                  color: onSecondaryColor,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Yes',
+                          style: TextStyle(color: secondaryColor, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: secondaryColor,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: primaryColor,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'No',
+                          style: TextStyle(color: primaryColor, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (shouldDelete != true) return;
+    if (!context.mounted) return;
+
+    final scaffold = ScaffoldMessenger.of(context);
+
+    try {
+      await context.read<UserProvider>().logout();
+
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Your account has been deleted')),
+            backgroundColor: activeColor,
+          ),
+        );
+      }
+
+      if (context.mounted) {
+        final tabIndexProvider = context.read<TabIndexProvider>();
+        tabIndexProvider.updateIndex(0);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Failed to delete account: ${e.toString()}')),
+            backgroundColor: errorColor,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavbarElementsAppbar(appBarTitle: 'Settings', showBackButton: true),
+      appBar: const NavbarElementsAppbar(
+          appBarTitle: 'Settings', showBackButton: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 12),
         child: Column(
@@ -131,7 +296,7 @@ class SettingsScreen extends StatelessWidget {
               icon: Icons.delete,
               title: 'Delete Account',
               subtitle: 'Delete your account',
-              onTap: () {},
+              onTap: () => _showDeleteAccountConfirmation(context),
             ),
             const SizedBox(height: 20),
             FutureBuilder<String>(
