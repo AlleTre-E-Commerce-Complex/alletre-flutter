@@ -1,6 +1,5 @@
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
-import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/my_auctions_screen.dart';
 import 'package:alletre_app/view/screens/settings%20screen/settings_screen.dart';
 import 'package:alletre_app/view/screens/user%20terms%20screen/user_terms.dart';
