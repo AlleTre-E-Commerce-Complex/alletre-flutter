@@ -1,6 +1,7 @@
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/view/screens/my_auctions_screen.dart';
+import 'package:alletre_app/view/screens/privacy%20policy%20screen/privacy_policy_screen.dart';
 import 'package:alletre_app/view/screens/settings%20screen/settings_screen.dart';
 import 'package:alletre_app/view/screens/user%20terms%20screen/user_terms.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
@@ -123,7 +124,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'Privacy Policy',
               subtitle: 'Know how we protect your data',
               onTap: () {
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => const FaqScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()));
               },
             ),
             ProfileListTile(

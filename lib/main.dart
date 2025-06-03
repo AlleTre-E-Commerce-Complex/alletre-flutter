@@ -1,8 +1,11 @@
 // ignore_for_file: avoid_print
-
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'app.dart';
 import 'utils/extras/custom_timeago_messages.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -43,6 +46,17 @@ void main() async {
 
   print('⭐ main(): Setting timeago locale messages...');
   timeago.setLocaleMessages('en_custom', CustomTimeagoMessages());
+  
+  // Initialize WebView platform
+  print('⭐ main(): Initializing WebView platform...');
+  if (WebViewPlatform.instance == null) {
+    if (Platform.isAndroid) {
+      WebViewPlatform.instance = AndroidWebViewPlatform();
+    } else if (Platform.isIOS) {
+      WebViewPlatform.instance = WebKitWebViewPlatform();
+    }
+  }
+  
   print('⭐ main(): Running app...');
   runApp(const MyApp());
 }
