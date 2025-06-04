@@ -1,12 +1,13 @@
 class ApiEndpoints {
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
 
   // Auction endpoints
   static const String auctions = '/auctions';
   static const String productListing = '/auctions/product-listing';
 
   // Draft auction details endpoint
-  static String userAuctionDetails(String auctionId) => '/auctions/user/$auctionId';
+  static String userAuctionDetails(String auctionId) =>
+      '/auctions/user/$auctionId';
 
   // Category endpoints
   static const String categories = '/categories/all';
@@ -19,5 +20,6 @@ class ApiEndpoints {
   // Wishlist endpoints
   static const String saveToWishlist = '/watch-lists/save';
   static const String getSavedWishlist = '/watch-lists/saved';
-  static String unSaveFromWishlist(int auctionId) => '/watch-lists/un-save?auctionId=$auctionId';
+  static String unSaveFromWishlist(int auctionId) =>
+      '/watch-lists/un-save?auctionId=$auctionId';
 }

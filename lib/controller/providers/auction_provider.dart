@@ -52,6 +52,9 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> _pendingAuctions = [];
   List<AuctionItem> _waitingForPaymentAuctions = [];
   List<AuctionItem> _cancelledAuctions = [];
+  List<AuctionItem> _inProgressProducts = [];
+  List<AuctionItem> _outOfStockProducts = [];
+  List<AuctionItem> _soldOutProducts = [];
   final bool _isLoading = false;
   String? _error;
 
@@ -64,6 +67,9 @@ class AuctionProvider with ChangeNotifier {
   bool _isLoadingPending = false;
   bool _isLoadingWaitingForPayment = false;
   bool _isLoadingCancelled = false;
+  bool _isLoadingInProgress = false;
+  bool _isLoadingOutOfStock = false;
+  bool _isLoadingSoldOut = false;
   bool _isCreatingAuction = false;
   bool _isListingProduct = false;
 
@@ -76,6 +82,9 @@ class AuctionProvider with ChangeNotifier {
   String? _errorPending;
   String? _errorWaitingForPayment;
   String? _errorCancelled;
+  String? _errorInProgress;
+  String? _errorOutOfStock;
+  String? _errorSoldOut;
   String? _createAuctionError;
   String? _listProductError;
 
@@ -88,6 +97,9 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> get pendingAuctions => _pendingAuctions;
   List<AuctionItem> get waitingForPaymentAuctions => _waitingForPaymentAuctions;
   List<AuctionItem> get cancelledAuctions => _cancelledAuctions;
+  List<AuctionItem> get inProgressProducts => _inProgressProducts;
+  List<AuctionItem> get outOfStockProducts => _outOfStockProducts;
+  List<AuctionItem> get soldOutProducts => _soldOutProducts;
 
   bool get isLoading => _isLoading;
   bool get isCreatingAuction => _isCreatingAuction;
@@ -95,12 +107,18 @@ class AuctionProvider with ChangeNotifier {
   bool get isLoadingPending => _isLoadingPending;
   bool get isLoadingWaitingForPayment => _isLoadingWaitingForPayment;
   bool get isLoadingCancelled => _isLoadingCancelled;
+  bool get isLoadingInProgress => _isLoadingInProgress;
+  bool get isLoadingOutOfStock => _isLoadingOutOfStock;
+  bool get isLoadingSoldOut => _isLoadingSoldOut;
 
   String? get error => _error;
 
   String? get errorPending => _errorPending;
   String? get errorWaitingForPayment => _errorWaitingForPayment;
   String? get errorCancelled => _errorCancelled;
+  String? get errorInProgress => _errorInProgress;
+  String? get errorOutOfStock => _errorOutOfStock;
+  String? get errorSoldOut => _errorSoldOut;
   String? get createAuctionError => _createAuctionError;
   String? get listProductError => _listProductError;
 
@@ -838,6 +856,82 @@ class AuctionProvider with ChangeNotifier {
       debugPrint('Error fetching waiting for payment auctions: $e');
     } finally {
       _isLoadingWaitingForPayment = false;
+      notifyListeners();
+    }
+  }
+
+  //My Products Status
+  Future<void> getInProgressProducts() async {
+    try {
+      _isLoadingInProgress = true;
+      _errorInProgress = null;
+      notifyListeners();
+
+      debugPrint('🔄 [AuctionProvider] Fetching IN_PROGRESS products...');
+      final status = 'IN_PROGRESS';
+      final products = await _auctionService.fetchUserProductsByStatus(status);
+      _inProgressProducts = products;
+      debugPrint(
+          '✅ [AuctionProvider] Fetched ${products.length} IN_PROGRESS products');
+      if (products.isNotEmpty) {
+        debugPrint('   First product status: ${products.first.status}');
+      }
+    } catch (e) {
+      _errorInProgress =
+          'Failed to load in progress products: $e';
+      debugPrint('Error fetching in progress products: $e');
+    } finally {
+      _isLoadingInProgress = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getOutOfStockProducts() async {
+    try {
+      _isLoadingOutOfStock = true;
+      _errorOutOfStock = null;
+      notifyListeners();
+
+      debugPrint('🔄 [AuctionProvider] Fetching OUT_OF_STOCK products...');
+      final status = 'OUT_OF_STOCK';
+      final products = await _auctionService.fetchUserProductsByStatus(status);
+      _outOfStockProducts = products;
+      debugPrint(
+          '✅ [AuctionProvider] Fetched ${products.length} OUT_OF_STOCK products');
+      if (products.isNotEmpty) {
+        debugPrint('   First product status: ${products.first.status}');
+      }
+    } catch (e) {
+      _errorOutOfStock =
+          'Failed to load out of stock products: $e';
+      debugPrint('Error fetching out of stock products: $e');
+    } finally {
+      _isLoadingOutOfStock = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getSoldOutProducts() async {
+    try {
+      _isLoadingSoldOut = true;
+      _errorSoldOut = null;
+      notifyListeners();
+
+      debugPrint('🔄 [AuctionProvider] Fetching SOLD_OUT products...');
+      final status = 'SOLD_OUT';
+      final products = await _auctionService.fetchUserProductsByStatus(status);
+      _soldOutProducts = products;
+      debugPrint(
+          '✅ [AuctionProvider] Fetched ${products.length} SOLD_OUT products');
+      if (products.isNotEmpty) {
+        debugPrint('   First product status: ${products.first.status}');
+      }
+    } catch (e) {
+      _errorSoldOut =
+          'Failed to load sold out products: $e';
+      debugPrint('Error fetching sold out products: $e');
+    } finally {
+      _isLoadingSoldOut = false;
       notifyListeners();
     }
   }

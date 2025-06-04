@@ -1,10 +1,10 @@
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controller/providers/auction_provider.dart';
-import '../widgets/auction card widgets/auction_card.dart';
-import '../../model/user_model.dart';
-import '../../model/auction_item.dart';
+import '../../../controller/providers/auction_provider.dart';
+import '../../widgets/auction card widgets/auction_card.dart';
+import '../../../model/user_model.dart';
+import '../../../model/auction_item.dart';
 
 class MyAuctionsScreen extends StatelessWidget {
   static const List<String> _auctionTypes = [
@@ -90,7 +90,7 @@ class MyAuctionsScreen extends StatelessWidget {
               child: ValueListenableBuilder<String>(
                 valueListenable: _selectedType,
                 builder: (context, selected, _) {
-                  return _AuctionsTabView(type: selected);
+                  return AuctionsTabView(type: selected);
                 },
               ),
             ),
@@ -120,9 +120,9 @@ class MyAuctionsScreen extends StatelessWidget {
   }
 }
 
-class _AuctionsTabView extends StatelessWidget {
+class AuctionsTabView extends StatelessWidget {
   final String type;
-  const _AuctionsTabView({required this.type});
+  const AuctionsTabView({super.key, required this.type});
 
   @override
   Widget build(BuildContext context) {

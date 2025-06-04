@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../model/bank_account.dart';
 
 class BankAccountService {
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
   static const storage = FlutterSecureStorage();
 
   static Future<List<BankAccount>> getAccountData() async {
@@ -32,11 +32,12 @@ class BankAccountService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         debugPrint('Response data: $responseData');
-        
+
         final List<dynamic> data = responseData['accountData'] ?? [];
         debugPrint('Bank accounts data: $data');
-        
-        final accounts = data.map((json) => BankAccount.fromJson(json)).toList();
+
+        final accounts =
+            data.map((json) => BankAccount.fromJson(json)).toList();
         debugPrint('Parsed ${accounts.length} bank accounts');
         return accounts;
       } else {

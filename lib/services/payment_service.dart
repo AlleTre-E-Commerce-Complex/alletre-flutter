@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
 class PaymentService {
-
   static Future<Map<String, dynamic>> buyNowAuction({
     required int auctionId,
     required double amount,
@@ -28,14 +27,16 @@ class PaymentService {
         }),
       );
 
-      debugPrint('buyNowAuction response status: [32m${response.statusCode}[0m');
+      debugPrint(
+          'buyNowAuction response status: [32m${response.statusCode}[0m');
       debugPrint('buyNowAuction response body: ${response.body}');
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body);
         final errorMessage = error['message'];
         if (errorMessage is Map) {
-          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? 'Buy Now failed');
+          throw Exception(
+              errorMessage['en'] ?? errorMessage['ar'] ?? 'Buy Now failed');
         }
         throw Exception(errorMessage ?? 'Buy Now failed');
       }
@@ -73,14 +74,17 @@ class PaymentService {
         }),
       );
 
-      debugPrint('buyNowAuctionThroughWallet response status: [32m${response.statusCode}[0m');
+      debugPrint(
+          'buyNowAuctionThroughWallet response status: [32m${response.statusCode}[0m');
       debugPrint('buyNowAuctionThroughWallet response body: ${response.body}');
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body);
         final errorMessage = error['message'];
         if (errorMessage is Map) {
-          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? 'Buy Now (wallet) failed');
+          throw Exception(errorMessage['en'] ??
+              errorMessage['ar'] ??
+              'Buy Now (wallet) failed');
         }
         throw Exception(errorMessage ?? 'Buy Now (wallet) failed');
       }
@@ -95,11 +99,13 @@ class PaymentService {
     }
   }
 
-  static final ValueNotifier<bool> isLoadingPayment = ValueNotifier<bool>(false);
-  static final ValueNotifier<String?> paymentError = ValueNotifier<String?>(null);
+  static final ValueNotifier<bool> isLoadingPayment =
+      ValueNotifier<bool>(false);
+  static final ValueNotifier<String?> paymentError =
+      ValueNotifier<String?>(null);
 
   // Base URL for API endpoints
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
 
   // Seller deposit payment methods
   static Future<Map<String, dynamic>> payForAuction({
@@ -116,11 +122,11 @@ class PaymentService {
     try {
       // Step 1: Create payment intent on server
       debugPrint('⭐️⭐️Creating payment intent with data: ${jsonEncode({
-        'auctionId': auctionId,
-        'amount': amount,
-        'paymentType': paymentType,
-        'currency': currency,
-      })}');
+            'auctionId': auctionId,
+            'amount': amount,
+            'paymentType': paymentType,
+            'currency': currency,
+          })}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/auctions/user/pay'),
@@ -144,7 +150,8 @@ class PaymentService {
         final error = jsonDecode(response.body);
         final errorMessage = error['message'];
         if (errorMessage is Map) {
-          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? '⭐️⭐️Payment failed');
+          throw Exception(
+              errorMessage['en'] ?? errorMessage['ar'] ?? '⭐️⭐️Payment failed');
         }
         throw Exception(errorMessage ?? '⭐️⭐️Payment failed');
       }
@@ -158,7 +165,9 @@ class PaymentService {
       debugPrint('⭐️⭐️Got client secret from server: $clientSecret');
 
       // Step 2: If using card payment, confirm with Stripe
-      if (paymentType == 'card' && cardDetails != null && cardDetails.complete) {
+      if (paymentType == 'card' &&
+          cardDetails != null &&
+          cardDetails.complete) {
         try {
           debugPrint('🌏🌏Confirming payment with Stripe...');
           // Confirm the payment with the card
@@ -240,11 +249,11 @@ class PaymentService {
     try {
       // Step 1: Create payment intent on server
       debugPrint('Creating payment intent with data: ${jsonEncode({
-        'auctionId': auctionId,
-        'amount': amount,
-        'bidAmount': bidAmount,
-        'currency': currency,
-      })}');
+            'auctionId': auctionId,
+            'amount': amount,
+            'bidAmount': bidAmount,
+            'currency': currency,
+          })}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/auctions/user/$auctionId/bidder-deposit'),
@@ -268,7 +277,9 @@ class PaymentService {
         final error = jsonDecode(response.body);
         final errorMessage = error['message'];
         if (errorMessage is Map) {
-          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? 'Bidder deposit payment failed');
+          throw Exception(errorMessage['en'] ??
+              errorMessage['ar'] ??
+              'Bidder deposit payment failed');
         }
         throw Exception(errorMessage ?? 'Bidder deposit payment failed');
       }
@@ -365,10 +376,10 @@ class PaymentService {
     try {
       // Step 1: Create payment intent on server
       debugPrint('Creating payment intent with data: ${jsonEncode({
-        'auctionId': auctionId,
-        'amount': amount,
-        'currency': currency,
-      })}');
+            'auctionId': auctionId,
+            'amount': amount,
+            'currency': currency,
+          })}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/auctions/user/$auctionId/bidder-purchase'),
@@ -391,7 +402,9 @@ class PaymentService {
         final error = jsonDecode(response.body);
         final errorMessage = error['message'];
         if (errorMessage is Map) {
-          throw Exception(errorMessage['en'] ?? errorMessage['ar'] ?? 'Auction purchase payment failed');
+          throw Exception(errorMessage['en'] ??
+              errorMessage['ar'] ??
+              'Auction purchase payment failed');
         }
         throw Exception(errorMessage ?? 'Auction purchase payment failed');
       }

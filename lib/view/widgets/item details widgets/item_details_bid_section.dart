@@ -6,6 +6,7 @@ import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:alletre_app/utils/deposit_calculator.dart';
 import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
+import 'package:alletre_app/view/screens/my%20products%20screen/my_products.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
@@ -326,7 +327,13 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // TODO: Implement change status functionality
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const MyProductsScreen(),
+                                ),
+                              );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,

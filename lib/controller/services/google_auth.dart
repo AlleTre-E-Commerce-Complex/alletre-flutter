@@ -13,7 +13,8 @@ class GoogleAuthService {
       'email',
       'profile',
     ],
-    serverClientId: '1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com',
+    serverClientId:
+        '1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com',
   );
   final FirebaseAuth _googleAuth = FirebaseAuth.instance;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -22,13 +23,13 @@ class GoogleAuthService {
     return await _storage.read(key: 'access_token');
   }
 
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
       debugPrint('Starting Google sign-in...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser == null) {
         debugPrint('❌ Google sign-in cancelled by user');
         return null;
@@ -36,15 +37,16 @@ class GoogleAuthService {
 
       debugPrint('✅ Google sign-in successful');
       debugPrint('Getting Google authentication...');
-      
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       final userCredential = await _googleAuth.signInWithCredential(credential);
-      
+
       if (userCredential.user != null) {
         // Start token refresh service
         TokenRefreshService().startTokenRefresh();
@@ -80,8 +82,9 @@ class GoogleAuthService {
           // If backend OAuth fails, sign out from Firebase
           await FirebaseAuth.instance.signOut();
           await _googleSignIn.signOut();
-          
-          final error = jsonDecode(response.body)['message'] ?? 'Failed to authenticate';
+
+          final error =
+              jsonDecode(response.body)['message'] ?? 'Failed to authenticate';
           throw Exception(error);
         }
 
@@ -90,7 +93,8 @@ class GoogleAuthService {
         if (responseData['success'] && responseData['data'] != null) {
           final data = responseData['data'];
           await _storage.write(key: 'access_token', value: data['accessToken']);
-          await _storage.write(key: 'refresh_token', value: data['refreshToken']);
+          await _storage.write(
+              key: 'refresh_token', value: data['refreshToken']);
           debugPrint('✅ Backend tokens stored successfully');
         }
 

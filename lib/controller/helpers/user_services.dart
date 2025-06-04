@@ -8,7 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:alletre_app/controller/services/token_refresh_service.dart';
 
 class UserService {
-  final String baseUrl = 'http://192.168.0.158:3001/api/auth';
+  final String baseUrl = 'https://www.alletre.com/api/auth';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -20,7 +20,10 @@ class UserService {
       if (data['data'] != null) {
         return {'success': true, 'data': data['data']};
       } else {
-        return {'success': false, 'message': 'Invalid response format: missing data'};
+        return {
+          'success': false,
+          'message': 'Invalid response format: missing data'
+        };
       }
     } else {
       String errorMessage = '';
@@ -58,7 +61,8 @@ class UserService {
 
       final Map<String, dynamic> data = json.decode(response.body);
 
-      if ((response.statusCode == 200 || response.statusCode == 201) && data['data'] != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          data['data'] != null) {
         final String newAccessToken = data['data']['accessToken'];
         final String newRefreshToken = data['data']['refreshToken'];
 
@@ -74,15 +78,22 @@ class UserService {
         };
       }
 
-      return {'success': false, 'message': data['message'] ?? 'Failed to refresh tokens'};
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Failed to refresh tokens'
+      };
     } catch (e) {
       debugPrint('Error refreshing tokens: $e');
-      return {'success': false, 'message': 'An error occurred while refreshing tokens'};
+      return {
+        'success': false,
+        'message': 'An error occurred while refreshing tokens'
+      };
     }
   }
 
   // Signup API
-  Future<Map<String, dynamic>> signupService(String name, String email, String phoneNumber, String password) async {
+  Future<Map<String, dynamic>> signupService(
+      String name, String email, String phoneNumber, String password) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/sign-up'),
@@ -100,24 +111,25 @@ class UserService {
       );
 
       final Map<String, dynamic> data = json.decode(response.body);
-      
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return {
           'success': true,
-          'message': 'Registration successful! Please check your email for verification instructions.',
+          'message':
+              'Registration successful! Please check your email for verification instructions.',
           'requiresVerification': true
         };
       }
 
       return AuthErrorHandler.handleSignUpError(data);
-      
     } catch (e) {
       return AuthErrorHandler.handleSignUpError(e);
     }
   }
 
   // Login API
-  Future<Map<String, dynamic>> loginService(String email, String password) async {
+  Future<Map<String, dynamic>> loginService(
+      String email, String password) async {
     try {
       // Log request data for debugging (remove in production)
       debugPrint('Login attempt for email: $email');
@@ -141,14 +153,18 @@ class UserService {
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (data['data']?['accessToken'] != null) {
-          debugPrint('Storing tokens after login - Access: ${data['data']['accessToken']}');
-          debugPrint('Storing tokens after login - Refresh: ${data['data']['refreshToken']}');
-          await _storage.write(key: 'access_token', value: data['data']['accessToken']);
-          await _storage.write(key: 'refresh_token', value: data['data']['refreshToken']);
-          
+          debugPrint(
+              'Storing tokens after login - Access: ${data['data']['accessToken']}');
+          debugPrint(
+              'Storing tokens after login - Refresh: ${data['data']['refreshToken']}');
+          await _storage.write(
+              key: 'access_token', value: data['data']['accessToken']);
+          await _storage.write(
+              key: 'refresh_token', value: data['data']['refreshToken']);
+
           // Start token refresh service
           TokenRefreshService().startTokenRefresh();
-          
+
           return {'success': true, 'message': 'Login successful'};
         }
       }
@@ -157,7 +173,6 @@ class UserService {
         ...data,
         'statusCode': response.statusCode,
       });
-      
     } catch (e) {
       return AuthErrorHandler.handleSignInError(e);
     }
@@ -168,7 +183,7 @@ class UserService {
     try {
       debugPrint('Starting Google sign-in...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser == null) {
         debugPrint('❌ Google sign-in cancelled by user');
         return {'success': false, 'message': 'Sign in cancelled'};
@@ -176,24 +191,31 @@ class UserService {
 
       debugPrint('✅ Google sign-in successful');
       debugPrint('Getting Google authentication...');
-      
+
       GoogleSignInAuthentication googleAuth;
       try {
         googleAuth = await googleUser.authentication;
       } catch (e) {
         debugPrint('❌ Error getting Google authentication: $e');
-        return {'success': false, 'message': 'Failed to get Google authentication'};
+        return {
+          'success': false,
+          'message': 'Failed to get Google authentication'
+        };
       }
-      
+
       // Get both tokens
       final String? accessToken = googleAuth.accessToken;
       final String? idToken = googleAuth.idToken;
-      
+
       if (accessToken == null || idToken == null) {
         debugPrint('❌ Failed to get Google tokens');
-        debugPrint('Access Token: ${accessToken != null ? 'present' : 'missing'}');
+        debugPrint(
+            'Access Token: ${accessToken != null ? 'present' : 'missing'}');
         debugPrint('ID Token: ${idToken != null ? 'present' : 'missing'}');
-        return {'success': false, 'message': 'Failed to get authentication tokens'};
+        return {
+          'success': false,
+          'message': 'Failed to get authentication tokens'
+        };
       }
 
       debugPrint('✅ Got Google tokens successfully');
@@ -208,7 +230,8 @@ class UserService {
         if (parts.length == 3) {
           try {
             debugPrint('Attempting to decode token header...');
-            final header = utf8.decode(base64Url.decode(base64Url.normalize(parts[0])));
+            final header =
+                utf8.decode(base64Url.decode(base64Url.normalize(parts[0])));
             debugPrint('Token header: $header');
           } catch (e) {
             debugPrint('❌ Error decoding token header: $e');
@@ -217,10 +240,10 @@ class UserService {
 
         debugPrint('📤 Preparing OAuth request...');
         debugPrint('Base URL: $baseUrl');
-        
+
         Uri oAuthUrl;
         try {
-          oAuthUrl = Uri.parse('$baseUrl/oAuth'); 
+          oAuthUrl = Uri.parse('$baseUrl/oAuth');
           debugPrint('🌐 Parsed Request URL: $oAuthUrl');
         } catch (e) {
           debugPrint('❌ Error parsing URL: $e');
@@ -228,33 +251,33 @@ class UserService {
         }
 
         debugPrint('Preparing request body...');
-        
-        final FirebaseAuth auth = FirebaseAuth.instance;
-    final User? currentUser = auth.currentUser;
-    
-    if (currentUser == null) {
-      return {'success': false, 'message': 'Failed to get Firebase user'};
-    }
-    
-    // Get Firebase ID token (has correct audience)
-    final String? firebaseIdToken = await currentUser.getIdToken();
-    
-    // Use Firebase ID token in your request
-    final requestBody = {
-      'accessToken': accessToken,
-      'idToken': firebaseIdToken, // Firebase token instead of Google token
-      'email': googleUser.email,
-      'displayName': googleUser.displayName,
-      'photoUrl': googleUser.photoUrl,
-      'provider': 'google',
-      'oAuthType': 'GOOGLE'
-    };
 
-        
+        final FirebaseAuth auth = FirebaseAuth.instance;
+        final User? currentUser = auth.currentUser;
+
+        if (currentUser == null) {
+          return {'success': false, 'message': 'Failed to get Firebase user'};
+        }
+
+        // Get Firebase ID token (has correct audience)
+        final String? firebaseIdToken = await currentUser.getIdToken();
+
+        // Use Firebase ID token in your request
+        final requestBody = {
+          'accessToken': accessToken,
+          'idToken': firebaseIdToken, // Firebase token instead of Google token
+          'email': googleUser.email,
+          'displayName': googleUser.displayName,
+          'photoUrl': googleUser.photoUrl,
+          'provider': 'google',
+          'oAuthType': 'GOOGLE'
+        };
+
         // Pretty print request for debugging
         const JsonEncoder encoder = JsonEncoder.withIndent('    ');
-        debugPrint('\n=== OAuth Request ===\n${encoder.convert(requestBody)}\n==================');
-        
+        debugPrint(
+            '\n=== OAuth Request ===\n${encoder.convert(requestBody)}\n==================');
+
         debugPrint('🚀 Sending HTTP POST request...');
         late final http.Response response;
         try {
@@ -284,21 +307,21 @@ class UserService {
         try {
           data = json.decode(response.body);
           debugPrint('✅ Successfully parsed JSON response');
-          
+
           // Pretty print the full response
           debugPrint('\n=== Parsed OAuth Response ===');
           debugPrint(const JsonEncoder.withIndent('    ').convert(data));
           debugPrint('=========================\n');
-          
+
           debugPrint('=== Response Structure ===');
           debugPrint('Success: ${data['success']}');
           debugPrint('Has data: ${data['data'] != null}');
-          
+
           if (data['success'] == true && data['data'] != null) {
             final userData = data['data'] as Map<String, dynamic>;
             final accessToken = userData['accessToken'];
             final refreshToken = userData['refreshToken'];
-            
+
             if (accessToken != null && refreshToken != null) {
               // Store both tokens
               await _storage.write(key: 'access_token', value: accessToken);
@@ -311,9 +334,12 @@ class UserService {
               };
             }
           }
-          
+
           debugPrint('❌ OAuth failed: ${data['message'] ?? 'Unknown error'}');
-          return {'success': false, 'message': data['message'] ?? 'Authentication failed'};
+          return {
+            'success': false,
+            'message': data['message'] ?? 'Authentication failed'
+          };
         } catch (e) {
           debugPrint('❌ Error parsing response: $e');
           return {
@@ -345,7 +371,7 @@ class UserService {
   Future<void> checkStoredTokens() async {
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
-    
+
     debugPrint('=== Stored Tokens ===');
     debugPrint('Access Token: ${accessToken ?? 'Not found'}');
     debugPrint('Refresh Token: ${refreshToken ?? 'Not found'}');
@@ -357,7 +383,7 @@ class UserService {
     try {
       final accessToken = await _storage.read(key: 'access_token');
       final refreshToken = await _storage.read(key: 'refresh_token');
-      
+
       if (accessToken == null || refreshToken == null) {
         return false;
       }
@@ -391,7 +417,7 @@ class UserService {
   Future<Map<String, String?>> getTokens() async {
     final accessToken = await _storage.read(key: 'access_token');
     final refreshToken = await _storage.read(key: 'refresh_token');
-    
+
     // If access token is missing but we have refresh token, try to refresh
     if (accessToken == null && refreshToken != null) {
       final refreshResult = await refreshTokens();
@@ -402,7 +428,7 @@ class UserService {
         };
       }
     }
-    
+
     return {
       'accessToken': accessToken,
       'refreshToken': refreshToken,
@@ -414,12 +440,12 @@ class UserService {
     try {
       final accessToken = await _storage.read(key: 'access_token');
       final refreshToken = await _storage.read(key: 'refresh_token');
-      
+
       debugPrint('=== Stored OAuth Tokens ===');
       debugPrint('🔐 Access Token: ${accessToken ?? 'Not found'}');
       debugPrint('🔄 Refresh Token: ${refreshToken ?? 'Not found'}');
       debugPrint('=========================');
-      
+
       return {
         'success': true,
         'accessToken': accessToken,
@@ -427,10 +453,7 @@ class UserService {
       };
     } catch (e) {
       debugPrint('Error checking OAuth tokens: $e');
-      return {
-        'success': false,
-        'error': e.toString()
-      };
+      return {'success': false, 'error': e.toString()};
     }
   }
 
@@ -443,7 +466,8 @@ class UserService {
         return {'success': false, 'message': 'Not authenticated'};
       }
       final response = await http.post(
-        Uri.parse('http://192.168.0.158:3001/api/users/locations/$locationId/make-default'),
+        Uri.parse(
+            'https://www.alletre.com/api/users/locations/$locationId/make-default'),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
@@ -461,17 +485,17 @@ class UserService {
     try {
       // Clear all secure storage tokens
       await _storage.deleteAll();
-      
+
       // Sign out from Firebase if signed in
       try {
         await FirebaseAuth.instance.signOut();
       } catch (e) {
         debugPrint('Error signing out from Firebase: $e');
       }
-      
+
       // Clear any HTTP client state if needed
       // client.close(); // Uncomment if you have an HTTP client that needs to be closed
-      
+
       debugPrint('Successfully logged out and cleared all auth data');
     } catch (e) {
       debugPrint('Error during logout: $e');

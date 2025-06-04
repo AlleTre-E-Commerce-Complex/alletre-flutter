@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuctionDetailsService {
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
 
-  static Future<Map<String, dynamic>?> getAuctionDetails(String auctionId) async {
+  static Future<Map<String, dynamic>?> getAuctionDetails(
+      String auctionId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/auctions/user/$auctionId/details'),
     );
@@ -18,7 +19,8 @@ class AuctionDetailsService {
   }
 
   // New: Fetch draft auction details for editing
-  static Future<Map<String, dynamic>> getDraftAuctionDetails(String auctionId) async {
+  static Future<Map<String, dynamic>> getDraftAuctionDetails(
+      String auctionId) async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/auctions/user/$auctionId'),
@@ -27,7 +29,8 @@ class AuctionDetailsService {
       if (response.statusCode == 200) {
         return data;
       } else {
-        throw Exception('Failed to fetch draft auction details: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch draft auction details: ${response.statusCode}');
       }
     } catch (e) {
       rethrow;

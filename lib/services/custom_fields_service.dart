@@ -6,7 +6,7 @@ import 'package:alletre_app/model/custom_field_model.dart';
 import 'package:flutter/foundation.dart';
 
 class CustomFieldsService {
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
 
   // Get all system fields
   static Future<CategoryFields> getSystemFields() async {
@@ -24,7 +24,8 @@ class CustomFieldsService {
         if (data['success'] == true && data['data'] != null) {
           final List<Map<String, dynamic>> fields = [];
           if (data['data'] is List) {
-            print('DEBUG: Processing direct list of ${data['data'].length} fields');
+            print(
+                'DEBUG: Processing direct list of ${data['data'].length} fields');
             fields.addAll(List<Map<String, dynamic>>.from(data['data']));
           } else if (data['data'] is Map) {
             print('DEBUG: Processing map of fields');
@@ -42,7 +43,7 @@ class CustomFieldsService {
           return categoryFields;
         }
       }
-      
+
       print('❌ Failed to fetch system fields');
       throw Exception('Failed to fetch system fields');
     } catch (e) {
@@ -52,7 +53,8 @@ class CustomFieldsService {
   }
 
   // Get custom fields by category ID
-  static Future<CategoryFields> getCustomFieldsByCategory(String categoryId) async {
+  static Future<CategoryFields> getCustomFieldsByCategory(
+      String categoryId) async {
     print('🔄 Fetching custom fields for category: $categoryId');
     try {
       final response = await http.get(
@@ -69,7 +71,8 @@ class CustomFieldsService {
 
           // Process array custom fields
           if (fieldsData['arrayCustomFields'] != null) {
-            final arrayFields = fieldsData['arrayCustomFields'] as List<dynamic>;
+            final arrayFields =
+                fieldsData['arrayCustomFields'] as List<dynamic>;
             for (var field in arrayFields) {
               final fieldMap = field as Map<String, dynamic>;
               fields.add({
@@ -82,7 +85,8 @@ class CustomFieldsService {
 
           // Process regular custom fields
           if (fieldsData['regularCustomFields'] != null) {
-            final regularFields = fieldsData['regularCustomFields'] as List<dynamic>;
+            final regularFields =
+                fieldsData['regularCustomFields'] as List<dynamic>;
             for (var field in regularFields) {
               final fieldMap = field as Map<String, dynamic>;
               String type = fieldMap['type'] ?? 'text';
@@ -134,11 +138,13 @@ class CustomFieldsService {
   }
 
   // Get custom fields by subcategory ID
-  static Future<CategoryFields> getCustomFieldsBySubcategory(String subCategoryId) async {
+  static Future<CategoryFields> getCustomFieldsBySubcategory(
+      String subCategoryId) async {
     print('🔄 Fetching custom fields for subcategory: $subCategoryId');
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/categories/custom-fields?subCategoryId=$subCategoryId'),
+        Uri.parse(
+            '$baseUrl/categories/custom-fields?subCategoryId=$subCategoryId'),
       );
 
       print('📥 Response status code: ${response.statusCode}');
@@ -151,7 +157,8 @@ class CustomFieldsService {
 
           // Process array custom fields
           if (fieldsData['arrayCustomFields'] != null) {
-            final arrayFields = fieldsData['arrayCustomFields'] as List<dynamic>;
+            final arrayFields =
+                fieldsData['arrayCustomFields'] as List<dynamic>;
             for (var field in arrayFields) {
               final fieldMap = field as Map<String, dynamic>;
               fields.add({
@@ -164,7 +171,8 @@ class CustomFieldsService {
 
           // Process regular custom fields
           if (fieldsData['regularCustomFields'] != null) {
-            final regularFields = fieldsData['regularCustomFields'] as List<dynamic>;
+            final regularFields =
+                fieldsData['regularCustomFields'] as List<dynamic>;
             for (var field in regularFields) {
               final fieldMap = field as Map<String, dynamic>;
               String type = fieldMap['type'] ?? 'text';
@@ -203,7 +211,9 @@ class CustomFieldsService {
 
           // Always add 'brand' field for Home Appliances (subCategoryId == 1 or 16-20) if not present
           final brandSubcategoryIds = ['1', '16', '17', '18', '19', '20'];
-          if (brandSubcategoryIds.contains(subCategoryId) && !fields.any((f) => (f['key'] == 'brand' || f['resKey'] == 'brand'))) {
+          if (brandSubcategoryIds.contains(subCategoryId) &&
+              !fields.any(
+                  (f) => (f['key'] == 'brand' || f['resKey'] == 'brand'))) {
             fields.add({
               'id': -1,
               'subCategoryId': int.tryParse(subCategoryId) ?? -1,
@@ -222,7 +232,7 @@ class CustomFieldsService {
           return categoryFields;
         }
       }
-      
+
       print('❌ Failed to fetch custom fields');
       throw Exception('Failed to fetch custom fields');
     } catch (e) {
@@ -232,7 +242,8 @@ class CustomFieldsService {
   }
 
   // Get auction details
-  static Future<Map<String, dynamic>?> getAuctionDetails(String auctionId) async {
+  static Future<Map<String, dynamic>?> getAuctionDetails(
+      String auctionId) async {
     // print('🔄 Fetching auction details: $auctionId');
     try {
       final response = await http.get(
@@ -248,7 +259,7 @@ class CustomFieldsService {
           return data['data'] as Map<String, dynamic>;
         }
       }
-      
+
       print('❌ Failed to fetch auction details');
       return null;
     } catch (e) {
@@ -259,7 +270,8 @@ class CustomFieldsService {
   }
 
   // Get listed product details
-  static Future<Map<String, dynamic>?> getListedProductDetails(String productId) async {
+  static Future<Map<String, dynamic>?> getListedProductDetails(
+      String productId) async {
     // print('🔄 Fetching listed product details: $productId');
     try {
       // Don't try to fetch details if productId is 0 or null
@@ -281,7 +293,7 @@ class CustomFieldsService {
           return data['data'] as Map<String, dynamic>;
         }
       }
-      
+
       print('❌ Failed to fetch listed product details');
       return null;
     } catch (e) {

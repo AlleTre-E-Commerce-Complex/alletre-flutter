@@ -1197,6 +1197,77 @@ class AuctionService {
     }
   }
 
+  Future<List<AuctionItem>> fetchUserProductsByStatus(String status, {int page = 1, int perPage = 10}) async {
+    try {
+      // Normalize the status to match API expectations
+      final normalizedStatus = status.trim().toUpperCase();
+      
+      // First try to get the token
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      // Add authorization header if we have a token
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
+
+      List<AuctionItem> allAuctions = [];
+      int userPage = page;
+      bool hasMoreUser = true;
+
+      while (hasMoreUser) {
+        final uri = Uri.parse(
+            '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?page=$userPage&perPage=$perPage&status=$normalizedStatus');
+                    
+        final userResponse = await http.get(
+          uri,
+          headers: headers,
+        );
+
+        if (userResponse.statusCode == 200) {
+          final data = jsonDecode(userResponse.body);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List)
+                .map((item) => AuctionItem.fromJson(item))
+                .toList();
+
+            final pagination = data['pagination'] as Map<String, dynamic>;
+            final totalPages = pagination['totalPages'] as int;
+
+            allAuctions.addAll(items);
+
+            if (userPage >= totalPages) {
+              hasMoreUser = false;
+            } else {
+              userPage++;
+            }
+          } else {
+            hasMoreUser = false;
+          }
+        } else if (userResponse.statusCode == 401 && accessToken != null) {
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            continue;
+          } else {
+            hasMoreUser = false;
+          }
+        } else {
+          hasMoreUser = false;
+        }
+      }
+
+      return allAuctions;
+    } catch (e) {
+      return [];
+    }
+  }
+
   Future<List<AuctionItem>> fetchSoldAuctions() async {
     try {
       final accessToken = await _getAccessToken();

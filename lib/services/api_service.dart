@@ -10,7 +10,7 @@ import '../view/screens/login screen/login_page.dart';
 
 class ApiService {
   static final Dio _dio = Dio();
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
   static const _storage = FlutterSecureStorage();
 
   static Future<String?> _getToken() async {
@@ -25,7 +25,11 @@ class ApiService {
         onError: (DioException e, ErrorInterceptorHandler handler) async {
           final isJwtExpired = (e.response?.statusCode == 401 ||
               (e.response?.data is Map &&
-                  (e.response?.data['message']?.toString().toLowerCase().contains('jwt expired') ?? false)));
+                  (e.response?.data['message']
+                          ?.toString()
+                          .toLowerCase()
+                          .contains('jwt expired') ??
+                      false)));
           if (isJwtExpired) {
             // Try to refresh token
             final refreshResult = await UserService().refreshTokens();

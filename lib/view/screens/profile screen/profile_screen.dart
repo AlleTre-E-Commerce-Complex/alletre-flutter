@@ -1,6 +1,7 @@
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
-import 'package:alletre_app/view/screens/my_auctions_screen.dart';
+import 'package:alletre_app/view/screens/my%20auctions%20screen/my_auctions_screen.dart';
+import 'package:alletre_app/view/screens/my%20products%20screen/my_products.dart';
 import 'package:alletre_app/view/screens/privacy%20policy%20screen/privacy_policy_screen.dart';
 import 'package:alletre_app/view/screens/settings%20screen/settings_screen.dart';
 import 'package:alletre_app/view/screens/user%20terms%20screen/user_terms.dart';
@@ -99,7 +100,14 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.inventory_2_outlined,
               title: 'My Products',
               subtitle: 'Manage your selling items',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyProductsScreen(),
+                  ),
+                );
+              },
             ),
             // ProfileListTile(
             //   icon: Icons.shopping_cart_outlined,

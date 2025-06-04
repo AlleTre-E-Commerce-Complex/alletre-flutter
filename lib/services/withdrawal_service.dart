@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 
 class WithdrawalService {
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
   static const storage = FlutterSecureStorage();
 
   static Future<void> submitWithdrawalRequest({
@@ -28,15 +28,17 @@ class WithdrawalService {
 
     debugPrint('Withdrawal response status: ${response.statusCode}');
     debugPrint('Withdrawal response body: ${response.body}');
-    
+
     final responseData = json.decode(response.body);
-    
+
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception(responseData['message'] ?? 'Failed to submit withdrawal request');
+      throw Exception(
+          responseData['message'] ?? 'Failed to submit withdrawal request');
     }
 
     if (responseData['success'] == false) {
-      throw Exception(responseData['message'] ?? 'Failed to submit withdrawal request');
+      throw Exception(
+          responseData['message'] ?? 'Failed to submit withdrawal request');
     }
   }
 }
