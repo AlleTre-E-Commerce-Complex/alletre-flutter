@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../model/bank_account.dart';
 
 class BankAccountService {
-  static const String baseUrl = 'https://www.alletre.com/api';
+  static const String baseUrl = 'http://192.168.132.182:3001/api';
   static const storage = FlutterSecureStorage();
 
   static Future<List<BankAccount>> getAccountData() async {

@@ -23,7 +23,7 @@ class GoogleAuthService {
     return await _storage.read(key: 'access_token');
   }
 
-  static const String baseUrl = 'https://www.alletre.com/api';
+  static const String baseUrl = 'http://192.168.132.182:3001/api';
 
   Future<UserCredential?> signInWithGoogle() async {
     try {

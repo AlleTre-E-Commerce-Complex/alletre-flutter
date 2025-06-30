@@ -48,3 +48,6 @@ app.*.map.json
 jdk-11.0.2.jdk/Contents/Home/lib/src.zip
 jdk-11.0.2.jdk/Contents/Home/lib/modules
 jdk-11.tar.gz
+
+# FVM Version Cache
+.fvm/

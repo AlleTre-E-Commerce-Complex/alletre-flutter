@@ -10,7 +10,7 @@ import '../view/screens/login screen/login_page.dart';
 
 class ApiService {
   static final Dio _dio = Dio();
-  static const String baseUrl = 'https://www.alletre.com/api';
+  static const String baseUrl = 'http://192.168.132.182:3001/api';
   static const _storage = FlutterSecureStorage();
 
   static Future<String?> _getToken() async {

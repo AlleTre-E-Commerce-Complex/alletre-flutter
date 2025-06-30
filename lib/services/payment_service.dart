@@ -105,7 +105,7 @@ class PaymentService {
       ValueNotifier<String?>(null);
 
   // Base URL for API endpoints
-  static const String baseUrl = 'https://www.alletre.com/api';
+  static const String baseUrl = 'http://192.168.132.182:3001/api';
 
   // Seller deposit payment methods
   static Future<Map<String, dynamic>> payForAuction({
