@@ -1482,7 +1482,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                   ?['categoryId'] ??
                               widget.auctionData['categoryId'] ??
                               'No Category';
-                  if (categoryId != null) {
+                  if (categoryId != null && categoryId != "No Category") {
                     final name = CategoryService.getCategoryName(
                         int.parse(categoryId.toString()));
                     return name.isNotEmpty ? name : 'Unknown';
