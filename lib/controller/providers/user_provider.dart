@@ -349,19 +349,22 @@ class UserProvider with ChangeNotifier {
         await userAuthService.setAuthMethod('custom');
 
         if (_rememberPassword) {
+          var _pass = await _storage.read(key: 'saved_password');
+          debugPrint(_pass);
           // Save credentials if remember password is checked
           await _storage.write(key: 'saved_email', value: email);
           await _storage.write(key: 'saved_password', value: password);
         }
 
         // Validate tokens after successful login
-        final hasValidTokens = await _userService.validateTokens();
-        if (!hasValidTokens) {
-          return {
-            'success': false,
-            'message': 'Login failed: Unable to store authentication tokens'
-          };
-        }
+        // commented out because there is not such endpoint for validating access_token
+        // final hasValidTokens = await _userService.validateTokens();
+        // if (!hasValidTokens) {
+        //   return {
+        //     'success': false,
+        //     'message': 'Login failed: Unable to store authentication tokens'
+        //   };
+        // }
 
         resetLoginForm(); // form reset on successful login
       }

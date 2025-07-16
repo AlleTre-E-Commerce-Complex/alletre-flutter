@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "alletre",
+      "request": "launch",
+      "type": "dart",
+      "preLaunchTask": "uninstall-app"
+    },
+    {
+      "name": "alletre (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "preLaunchTask": "uninstall-app"
+    },
+    {
+      "name": "alletre (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "preLaunchTask": "uninstall-app"
+    }
+  ]
+}

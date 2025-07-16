@@ -10,6 +10,7 @@ import 'package:alletre_app/controller/providers/focus_state_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
+import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:app_links/app_links.dart';
@@ -36,30 +37,30 @@ class MyApp extends StatelessWidget {
         return LoginPage();
       }
 
-      // Then check authentication status
-      // final userAuthService = UserAuthService();
-      // final isAuthenticated = await userAuthService.isAuthenticated();
-      // final hasCompletedOnboarding =
-      //     await userAuthService.hasCompletedOnboarding();
+      //// Then check authentication status
+      final userAuthService = UserAuthService();
+      final isAuthenticated = await userAuthService.isAuthenticated();
+      final hasCompletedOnboarding =
+          await userAuthService.hasCompletedOnboarding();
 
-      // if (isAuthenticated) {
-      //   // User is authenticated, go straight to home via MainStack
-      //   Provider.of<LoggedInProvider>(navigatorKey.currentContext!,
-      //           listen: false)
-      //       .logIn();
-      //   Provider.of<TabIndexProvider>(navigatorKey.currentContext!,
-      //           listen: false)
-      //       .updateIndex(0); // Home tab
-      //   return const MainStack();
-      // } 
-      // else if (hasCompletedOnboarding) {
-      //   // User has seen onboarding but is not logged in, go to login
-      //   return LoginPage();
-      // } 
-      // else {
-      //   // New user, show onboarding
-      //   return const SplashScreen();
-      // }
+      if (isAuthenticated) {
+        // User is authenticated, go straight to home via MainStack
+        Provider.of<LoggedInProvider>(navigatorKey.currentContext!,
+                listen: false)
+            .logIn();
+        Provider.of<TabIndexProvider>(navigatorKey.currentContext!,
+                listen: false)
+            .updateIndex(0); // Home tab
+        return const MainStack();
+      } 
+      else if (hasCompletedOnboarding) {
+        // User has seen onboarding but is not logged in, go to login
+        return LoginPage();
+      } 
+      else {
+        // New user, show onboarding
+        return const SplashScreen();
+      }
     } catch (e) {
       debugPrint('Error handling deep link: $e');
     }

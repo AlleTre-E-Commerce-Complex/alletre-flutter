@@ -8,7 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:alletre_app/controller/services/token_refresh_service.dart';
 
 class UserService {
-  final String baseUrl = 'http://192.168.1.14:3001/api/auth';
+  final String baseUrl = 'http://192.168.1.6:3001/api/auth';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -286,7 +286,7 @@ class UserService {
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
-              'Origin': 'http://192.168.1.14:3001',
+              'Origin': 'http://192.168.1.6:3001',
               'Access-Control-Request-Method': 'POST',
               'Access-Control-Request-Headers': 'Content-Type'
             },
@@ -467,7 +467,7 @@ class UserService {
       }
       final response = await http.post(
         Uri.parse(
-            'http://192.168.1.14:3001/api/users/locations/$locationId/make-default'),
+            'http://192.168.1.6:3001/api/users/locations/$locationId/make-default'),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
