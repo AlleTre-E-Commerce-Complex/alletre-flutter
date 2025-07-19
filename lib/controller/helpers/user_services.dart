@@ -20,10 +20,7 @@ class UserService {
       if (data['data'] != null) {
         return {'success': true, 'data': data['data']};
       } else {
-        return {
-          'success': false,
-          'message': 'Invalid response format: missing data'
-        };
+        return {'success': false, 'message': 'Invalid response format: missing data'};
       }
     } else {
       String errorMessage = '';
@@ -61,8 +58,7 @@ class UserService {
 
       final Map<String, dynamic> data = json.decode(response.body);
 
-      if ((response.statusCode == 200 || response.statusCode == 201) &&
-          data['data'] != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) && data['data'] != null) {
         final String newAccessToken = data['data']['accessToken'];
         final String newRefreshToken = data['data']['refreshToken'];
 
@@ -78,22 +74,15 @@ class UserService {
         };
       }
 
-      return {
-        'success': false,
-        'message': data['message'] ?? 'Failed to refresh tokens'
-      };
+      return {'success': false, 'message': data['message'] ?? 'Failed to refresh tokens'};
     } catch (e) {
       debugPrint('Error refreshing tokens: $e');
-      return {
-        'success': false,
-        'message': 'An error occurred while refreshing tokens'
-      };
+      return {'success': false, 'message': 'An error occurred while refreshing tokens'};
     }
   }
 
   // Signup API
-  Future<Map<String, dynamic>> signupService(
-      String name, String email, String phoneNumber, String password) async {
+  Future<Map<String, dynamic>> signupService(String name, String email, String phoneNumber, String password) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/sign-up'),
@@ -113,12 +102,7 @@ class UserService {
       final Map<String, dynamic> data = json.decode(response.body);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return {
-          'success': true,
-          'message':
-              'Registration successful! Please check your email for verification instructions.',
-          'requiresVerification': true
-        };
+        return {'success': true, 'message': 'Registration successful! Please check your email for verification instructions.', 'requiresVerification': true};
       }
 
       return AuthErrorHandler.handleSignUpError(data);
@@ -128,8 +112,7 @@ class UserService {
   }
 
   // Login API
-  Future<Map<String, dynamic>> loginService(
-      String email, String password) async {
+  Future<Map<String, dynamic>> loginService(String email, String password) async {
     try {
       // Log request data for debugging (remove in production)
       debugPrint('Login attempt for email: $email');
@@ -153,19 +136,15 @@ class UserService {
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (data['data']?['accessToken'] != null) {
-          debugPrint(
-              'Storing tokens after login - Access: ${data['data']['accessToken']}');
-          debugPrint(
-              'Storing tokens after login - Refresh: ${data['data']['refreshToken']}');
-          await _storage.write(
-              key: 'access_token', value: data['data']['accessToken']);
-          await _storage.write(
-              key: 'refresh_token', value: data['data']['refreshToken']);
+          debugPrint('Storing tokens after login - Access: ${data['data']['accessToken']}');
+          debugPrint('Storing tokens after login - Refresh: ${data['data']['refreshToken']}');
+          await _storage.write(key: 'access_token', value: data['data']['accessToken']);
+          await _storage.write(key: 'refresh_token', value: data['data']['refreshToken']);
 
           // Start token refresh service
           TokenRefreshService().startTokenRefresh();
 
-          return {'success': true, 'message': 'Login successful'};
+          return {'success': true, 'message': 'Login successful', 'data': data};
         }
       }
 
@@ -197,10 +176,7 @@ class UserService {
         googleAuth = await googleUser.authentication;
       } catch (e) {
         debugPrint('❌ Error getting Google authentication: $e');
-        return {
-          'success': false,
-          'message': 'Failed to get Google authentication'
-        };
+        return {'success': false, 'message': 'Failed to get Google authentication'};
       }
 
       // Get both tokens
@@ -209,13 +185,9 @@ class UserService {
 
       if (accessToken == null || idToken == null) {
         debugPrint('❌ Failed to get Google tokens');
-        debugPrint(
-            'Access Token: ${accessToken != null ? 'present' : 'missing'}');
+        debugPrint('Access Token: ${accessToken != null ? 'present' : 'missing'}');
         debugPrint('ID Token: ${idToken != null ? 'present' : 'missing'}');
-        return {
-          'success': false,
-          'message': 'Failed to get authentication tokens'
-        };
+        return {'success': false, 'message': 'Failed to get authentication tokens'};
       }
 
       debugPrint('✅ Got Google tokens successfully');
@@ -230,8 +202,7 @@ class UserService {
         if (parts.length == 3) {
           try {
             debugPrint('Attempting to decode token header...');
-            final header =
-                utf8.decode(base64Url.decode(base64Url.normalize(parts[0])));
+            final header = utf8.decode(base64Url.decode(base64Url.normalize(parts[0])));
             debugPrint('Token header: $header');
           } catch (e) {
             debugPrint('❌ Error decoding token header: $e');
@@ -275,21 +246,14 @@ class UserService {
 
         // Pretty print request for debugging
         const JsonEncoder encoder = JsonEncoder.withIndent('    ');
-        debugPrint(
-            '\n=== OAuth Request ===\n${encoder.convert(requestBody)}\n==================');
+        debugPrint('\n=== OAuth Request ===\n${encoder.convert(requestBody)}\n==================');
 
         debugPrint('🚀 Sending HTTP POST request...');
         late final http.Response response;
         try {
           response = await http.post(
             oAuthUrl,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Origin': 'http://192.168.1.6:3001',
-              'Access-Control-Request-Method': 'POST',
-              'Access-Control-Request-Headers': 'Content-Type'
-            },
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Origin': 'http://192.168.1.6:3001', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'Content-Type'},
             body: json.encode(requestBody),
           );
         } catch (e) {
@@ -327,25 +291,15 @@ class UserService {
               await _storage.write(key: 'access_token', value: accessToken);
               await _storage.write(key: 'refresh_token', value: refreshToken);
               debugPrint('✅ Stored server tokens');
-              return {
-                'success': true,
-                'data': userData,
-                'message': 'Authentication successful'
-              };
+              return {'success': true, 'data': userData, 'message': 'Authentication successful'};
             }
           }
 
           debugPrint('❌ OAuth failed: ${data['message'] ?? 'Unknown error'}');
-          return {
-            'success': false,
-            'message': data['message'] ?? 'Authentication failed'
-          };
+          return {'success': false, 'message': data['message'] ?? 'Authentication failed'};
         } catch (e) {
           debugPrint('❌ Error parsing response: $e');
-          return {
-            'success': false,
-            'message': 'Failed to parse server response'
-          };
+          return {'success': false, 'message': 'Failed to parse server response'};
         }
       } catch (e) {
         debugPrint('OAuth error: $e');
@@ -386,27 +340,30 @@ class UserService {
 
       if (accessToken == null || refreshToken == null) {
         return false;
-      }
-
-      // Try to use the access token
-      final response = await http.get(
-        Uri.parse('$baseUrl/validate-token'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
+      } else {
         return true;
       }
 
-      // If access token is invalid, try to refresh
-      if (response.statusCode == 401) {
-        final refreshResult = await refreshTokens();
-        return refreshResult['success'];
-      }
+      // Try to use the access token
+      // final response = await http.get(
+      //   Uri.parse('$baseUrl/validate-token'),
+      //   headers: {
+      //     'Authorization': 'Bearer $accessToken',
+      //   },
+      // );
 
-      return false;
+      // if (response.statusCode == 200) {
+      //   return true;
+      // }
+
+      // // If access token is invalid, try to refresh
+      // if (response.statusCode == 401) {
+      //   final refreshResult = await refreshTokens();
+      //   return refreshResult['success'];
+      // }
+
+      // final refreshResult = await refreshTokens();
+      // return refreshResult['success'];
     } catch (e) {
       debugPrint('Error validating tokens: $e');
       return false;
@@ -446,11 +403,7 @@ class UserService {
       debugPrint('🔄 Refresh Token: ${refreshToken ?? 'Not found'}');
       debugPrint('=========================');
 
-      return {
-        'success': true,
-        'accessToken': accessToken,
-        'refreshToken': refreshToken
-      };
+      return {'success': true, 'accessToken': accessToken, 'refreshToken': refreshToken};
     } catch (e) {
       debugPrint('Error checking OAuth tokens: $e');
       return {'success': false, 'error': e.toString()};
@@ -466,8 +419,7 @@ class UserService {
         return {'success': false, 'message': 'Not authenticated'};
       }
       final response = await http.post(
-        Uri.parse(
-            'http://192.168.1.6:3001/api/users/locations/$locationId/make-default'),
+        Uri.parse('http://192.168.1.6:3001/api/users/locations/$locationId/make-default'),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',

@@ -1,4 +1,6 @@
 import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/navbar_utils.dart';
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
@@ -20,6 +22,7 @@ import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categories_screen.dart';
 import 'package:alletre_app/view/screens/user%20terms%20screen/user_terms.dart';
 import 'package:flutter/material.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
@@ -82,7 +85,7 @@ class MainStack extends StatelessWidget {
       case 14:
         return const AddLocationScreen();
       case 15:
-        // return const ListProductsScreen();
+      // return const ListProductsScreen();
       case 16:
         return const PaymentDetailsScreen(auctionData: {'message': 'Please create an auction first'});
       // Auth screens
@@ -112,6 +115,20 @@ class MainStack extends StatelessWidget {
           Future.microtask(() {
             tabIndexProvider.updateIndex(18); // Login page index
           });
+        } else if (isLoggedIn) {
+          final userProvider = context.read<UserProvider>();
+          final userAuthService = UserAuthService();
+          if ((userProvider.displayEmail.isEmpty || userProvider.displayEmail.trim() == 'Add Email') && isLoggedIn) {
+            userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
+              userProvider.setName(data['userName']);
+              userProvider.setEmail(data['email']);
+              
+              PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
+                userProvider.setPhoneNumber(val);
+              });
+
+            });
+          }
         }
 
         return Scaffold(
@@ -126,11 +143,11 @@ class MainStack extends StatelessWidget {
             ),
           ),
           bottomNavigationBar: isLoggedIn
-                  ? BottomNavBarUtils.buildAuthenticatedNavBar(
-                      context,
-                      onTabChange: (index) => tabIndexProvider.updateIndex(index),
-                    )
-                  : const BottomNavBar(),
+              ? BottomNavBarUtils.buildAuthenticatedNavBar(
+                  context,
+                  onTabChange: (index) => tabIndexProvider.updateIndex(index),
+                )
+              : const BottomNavBar(),
         );
       },
     );

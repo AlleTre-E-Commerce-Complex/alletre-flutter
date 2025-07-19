@@ -1,3 +1,4 @@
+import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/controller/providers/auction_image_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/auction_details_provider.dart';
@@ -11,11 +12,14 @@ import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
+import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'controller/providers/login_state.dart';
 import 'view/screens/login screen/login_page.dart';
@@ -31,33 +35,26 @@ class MyApp extends StatelessWidget {
       final appLinks = AppLinks();
       final initialUri = await appLinks.getInitialLink();
 
-      if (initialUri != null &&
-          initialUri.scheme == 'alletre' &&
-          initialUri.path == 'login') {
+      if (initialUri != null && initialUri.scheme == 'alletre' && initialUri.path == 'login') {
         return LoginPage();
       }
 
       //// Then check authentication status
       final userAuthService = UserAuthService();
       final isAuthenticated = await userAuthService.isAuthenticated();
-      final hasCompletedOnboarding =
-          await userAuthService.hasCompletedOnboarding();
+      final hasCompletedOnboarding = await userAuthService.hasCompletedOnboarding();
 
       if (isAuthenticated) {
-        // User is authenticated, go straight to home via MainStack
-        Provider.of<LoggedInProvider>(navigatorKey.currentContext!,
-                listen: false)
-            .logIn();
-        Provider.of<TabIndexProvider>(navigatorKey.currentContext!,
-                listen: false)
-            .updateIndex(0); // Home tab
+        // User is authenticated, go straight to home via MainStack        
+        Provider.of<LoggedInProvider>(navigatorKey.currentContext!, listen: false).logIn();
+        Provider.of<TabIndexProvider>(navigatorKey.currentContext!, listen: false).updateIndex(0); // Home tab
         return const MainStack();
-      } 
-      else if (hasCompletedOnboarding) {
+      } else if (hasCompletedOnboarding) {
         // User has seen onboarding but is not logged in, go to login
         return LoginPage();
-      } 
-      else {
+      } else if (!hasCompletedOnboarding) {
+        return OnboardingPages();
+      } else {
         // New user, show onboarding
         return const SplashScreen();
       }
@@ -79,8 +76,7 @@ class MyApp extends StatelessWidget {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => UserProvider()),
-          ChangeNotifierProvider(
-              create: (context) => AuctionProvider()..initializeSocket()),
+          ChangeNotifierProvider(create: (context) => AuctionProvider()..initializeSocket()),
           ChangeNotifierProvider(create: (context) => AuctionDetailsProvider()),
           ChangeNotifierProvider(create: (context) => CategoryState()),
           ChangeNotifierProvider(create: (_) => FocusStateNotifier()),
@@ -96,7 +92,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           navigatorKey: navigatorKey,
           title: 'Alletre',
-          theme: customTheme(),  
+          theme: customTheme(),
           debugShowCheckedModeBanner: false,
           home: FutureBuilder<Widget>(
             future: getInitialScreen(),

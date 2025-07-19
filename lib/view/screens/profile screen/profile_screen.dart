@@ -1,4 +1,7 @@
+import 'package:alletre_app/app.dart';
 import 'package:alletre_app/controller/providers/share_provider.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/view/screens/my%20auctions%20screen/my_auctions_screen.dart';
 import 'package:alletre_app/view/screens/my%20products%20screen/my_products.dart';
@@ -57,10 +60,7 @@ class ProfileScreen extends StatelessWidget {
               user: user,
               buttonText: "Edit Profile",
               onButtonPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const EditProfileScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfileScreen()));
               },
             ),
             const SizedBox(height: 4),
@@ -70,11 +70,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'Wishlist',
               subtitle: 'Save and track your favorite items',
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => WishlistScreen(
-                            title: title ?? '', user: UserModel.empty())));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => WishlistScreen(title: title ?? '', user: UserModel.empty())));
               },
             ),
             ProfileListTile(
@@ -120,10 +116,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'My Drafts',
               subtitle: 'View your drafted items',
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DraftsPage(user: user)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => DraftsPage(user: user)));
               },
             ),
             const ProfileSectionTitle(title: 'About'),
@@ -140,10 +133,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'Terms and Conditions',
               subtitle: 'Know the company terms',
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const TermsAndConditions()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsAndConditions()));
               },
             ),
             // ProfileListTile(
@@ -168,10 +158,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'Settings',
               subtitle: 'View more settings',
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SettingsScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
               },
             ),
             const SizedBox(height: 10),

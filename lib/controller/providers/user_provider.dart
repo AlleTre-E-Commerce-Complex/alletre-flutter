@@ -49,9 +49,7 @@ class UserProvider with ChangeNotifier {
     if (_displayNumber != null && _displayNumber!.isNotEmpty) {
       return _displayNumber!;
     }
-    return _user.phoneNumber.isNotEmpty
-        ? _user.phoneNumber
-        : 'Add Phone Number';
+    return _user.phoneNumber.isNotEmpty ? _user.phoneNumber : 'Add Phone Number';
   }
 
   String get displayEmail {
@@ -126,8 +124,7 @@ class UserProvider with ChangeNotifier {
 
   // Validation for login credentials
   bool validateLoginCredentials() {
-    return emailController.text.isNotEmpty &&
-        passwordController.text.isNotEmpty;
+    return emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
   }
 
   // Checkbox handlers
@@ -218,15 +215,10 @@ class UserProvider with ChangeNotifier {
   }
 
   bool validateSignupForm() {
-    bool isValid = _user.name.isNotEmpty &&
-        _user.email.isNotEmpty &&
-        _user.phoneNumber.isNotEmpty &&
-        _user.password.isNotEmpty &&
-        _agreeToTerms;
+    bool isValid = _user.name.isNotEmpty && _user.email.isNotEmpty && _user.phoneNumber.isNotEmpty && _user.password.isNotEmpty && _agreeToTerms;
 
     if (!isValid) {
-      String emptyFieldsMessage = FormValidators.getEmptyFieldsMessage(
-          _user.name, _user.email, _user.phoneNumber, _user.password);
+      String emptyFieldsMessage = FormValidators.getEmptyFieldsMessage(_user.name, _user.email, _user.phoneNumber, _user.password);
 
       if (!_agreeToTerms) {
         if (emptyFieldsMessage.isNotEmpty) {
@@ -244,10 +236,7 @@ class UserProvider with ChangeNotifier {
 
   Future<Map<String, dynamic>> signup() async {
     if (!validateSignupForm()) {
-      return {
-        'success': false,
-        'message': 'Please fill in all required fields and agree to terms'
-      };
+      return {'success': false, 'message': 'Please fill in all required fields and agree to terms'};
     }
 
     setLoading(true);
@@ -297,15 +286,13 @@ class UserProvider with ChangeNotifier {
       _displayNumber = firebaseUser.phoneNumber;
       _displayEmail = firebaseUser.email;
       // OAuth providers (Google, Apple) have pre-verified emails
-      _emailVerified = (method == 'google' || method == 'apple')
-          ? true
-          : firebaseUser.emailVerified;
+      _emailVerified = (method == 'google' || method == 'apple') ? true : firebaseUser.emailVerified;
       _photoUrl = firebaseUser.photoURL;
 
       // Debug: Print tokens
       final idToken = await firebaseUser.getIdToken();
       debugPrint('Firebase ID Token: $idToken');
-      
+
       // Get refresh token from secure storage
       final refreshToken = await _storage.read(key: 'refresh_token');
       debugPrint('Current refresh token: $refreshToken');
@@ -320,10 +307,7 @@ class UserProvider with ChangeNotifier {
 
   Future<Map<String, dynamic>> login() async {
     if (!validateLoginForm()) {
-      return {
-        'success': false,
-        'message': 'Please enter both email and password'
-      };
+      return {'success': false, 'message': 'Please enter both email and password'};
     }
 
     setLoading(true);
@@ -348,13 +332,13 @@ class UserProvider with ChangeNotifier {
         final userAuthService = UserAuthService();
         await userAuthService.setAuthMethod('custom');
 
-        if (_rememberPassword) {
-          var _pass = await _storage.read(key: 'saved_password');
-          debugPrint(_pass);
-          // Save credentials if remember password is checked
-          await _storage.write(key: 'saved_email', value: email);
-          await _storage.write(key: 'saved_password', value: password);
-        }
+        // if (_rememberPassword) {
+        var _pass = await _storage.read(key: 'saved_password');
+        debugPrint(_pass);
+        // Save credentials if remember password is checked
+        await _storage.write(key: 'saved_email', value: email);
+        await _storage.write(key: 'saved_password', value: password);
+        // }
 
         // Validate tokens after successful login
         // commented out because there is not such endpoint for validating access_token
@@ -372,10 +356,7 @@ class UserProvider with ChangeNotifier {
       return result;
     } catch (e) {
       debugPrint('Error in login process: $e');
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred during login'
-      };
+      return {'success': false, 'message': 'An unexpected error occurred during login'};
     } finally {
       setLoading(false);
     }
@@ -385,17 +366,17 @@ class UserProvider with ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      
+
       // Clear secure storage and sign out from services
       await _userService.logout();
-      
+
       // Reset all user-related state by creating a new empty instance
       _user.name = '';
       _user.email = '';
       _user.phoneNumber = '';
       _user.password = '';
       _user.profileImagePath = null;
-      
+
       _addresses.clear();
       _defaultAddress = null;
       _displayName = null;
@@ -407,14 +388,14 @@ class UserProvider with ChangeNotifier {
       _agreeToTerms = false;
       _rememberPassword = false;
       _lastValidationMessage = '';
-      
+
       // Clear controllers
       emailController.clear();
       passwordController.clear();
-      
+
       // Also handle Firebase logout if needed
       await logoutFirebase();
-      
+
       debugPrint('User provider state cleared after logout');
     } catch (e) {
       debugPrint('Error during user provider logout: $e');
@@ -441,8 +422,7 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<Map<String, String?>> getTokens() async {
-    return await _userService
-        .getTokens(); // Added getTokens to match UserService
+    return await _userService.getTokens(); // Added getTokens to match UserService
   }
 
   void resetLoginForm() {

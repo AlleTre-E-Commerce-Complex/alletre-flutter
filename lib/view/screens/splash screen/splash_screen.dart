@@ -26,9 +26,9 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     
     // Update the tab index to show the home screen
-    Provider.of<TabIndexProvider>(context, listen: false).updateIndex(19);
+    // Provider.of<TabIndexProvider>(context, listen: false).updateIndex(19);
 
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const OnboardingPages()));
+    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const OnboardingPages()));
   }
 
   @override
