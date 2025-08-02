@@ -25,10 +25,18 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     super.initState();
     // API calls happen after the widget is built, using Future.microtask.
     Future.microtask(() async {
-      await context.read<AuctionProvider>().getLiveAuctions();
-      await context.read<AuctionProvider>().getListedProducts();
-      await context.read<AuctionProvider>().getUpcomingAuctions();
-      await context.read<AuctionProvider>().getExpiredAuctions();
+      if (mounted) {
+        await context.read<AuctionProvider>().getLiveAuctions();
+      }
+      if (mounted) {
+        await context.read<AuctionProvider>().getListedProducts();
+      }
+      if (mounted) {
+        await context.read<AuctionProvider>().getUpcomingAuctions();
+      }
+      if (mounted) {
+        await context.read<AuctionProvider>().getExpiredAuctions();
+      }
     });
   }
 
@@ -85,8 +93,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 auctions: auctionProvider.filteredLiveAuctions,
                 isLoading: auctionProvider.isLoadingLive,
                 error: auctionProvider.errorLive,
-                placeholder:
-                    'No live auctions at the moment.\nPlace your auction right away.',
+                placeholder: 'No live auctions at the moment.\nPlace your auction right away.',
               ),
               AuctionListWidget(
                 user: UserModel.empty(),
@@ -95,8 +102,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 auctions: auctionProvider.filteredListedProducts,
                 isLoading: auctionProvider.isLoadingListedProducts,
                 error: auctionProvider.errorListedProducts,
-                placeholder:
-                    'No products listed for sale.\nList your product here.',
+                placeholder: 'No products listed for sale.\nList your product here.',
               ),
               AuctionListWidget(
                 user: UserModel.empty(),

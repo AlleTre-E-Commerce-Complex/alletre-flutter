@@ -87,15 +87,19 @@ class UserAuthService {
     }
   }
 
-  Future<Map<String,dynamic>> fetchUserInfoForAlreadyLoggedInUser() async {
+  Future<Map<String, dynamic>> fetchUserInfoForAlreadyLoggedInUser() async {
     var email = await _storage.read(key: 'saved_email');
     var password = await _storage.read(key: 'saved_password');
-    var _resp = await _userService.loginService(email!, password!);
-    if (_resp['success'] == true) {
-      return _resp['data']['data'];
+    if (email != null) {
+      var _resp = await _userService.loginService(email!, password!);
+      if (_resp['success'] == true) {
+        return _resp['data']['data'];
+      } else {
+        debugPrint('⚠️ Unable to load logged user data for user : $email');
+        return {'success': false, 'message': 'error'};
+      }
     } else {
-      debugPrint('⚠️ Unable to load logged user data for user : $email');
-      return {'success':false,'message':'error'};
+      return {'success': false, 'message': 'error : email not provided'};
     }
   }
 }
