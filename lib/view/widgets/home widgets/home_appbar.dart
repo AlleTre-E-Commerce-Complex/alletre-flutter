@@ -18,14 +18,14 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 56,
       backgroundColor: Theme.of(context).primaryColor,
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Logo
           SvgPicture.asset(
             AppImages.header,
             fit: BoxFit.contain,
           ),
-          const SizedBox(width: 105),
+          // const SizedBox(width: 105),
           // Language Text
           // GestureDetector(
           //   onTap: () {

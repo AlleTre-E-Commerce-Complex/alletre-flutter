@@ -105,7 +105,7 @@ class PaymentService {
       ValueNotifier<String?>(null);
 
   // Base URL for API endpoints
-  static const String baseUrl = 'http://10.120.234.182:3001/api';
+  static const String baseUrl = 'http://10.213.255.182:3001/api';
 
   // Seller deposit payment methods
   static Future<Map<String, dynamic>> payForAuction({

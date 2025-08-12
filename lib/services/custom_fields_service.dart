@@ -6,7 +6,7 @@ import 'package:alletre_app/model/custom_field_model.dart';
 import 'package:flutter/foundation.dart';
 
 class CustomFieldsService {
-  static const String baseUrl = 'http://10.120.234.182:3001/api';
+  static const String baseUrl = 'http://10.213.255.182:3001/api';
 
   // Get all system fields
   static Future<CategoryFields> getSystemFields() async {

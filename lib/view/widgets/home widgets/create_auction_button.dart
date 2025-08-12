@@ -17,17 +17,9 @@ class CreateAuctionButton extends StatelessWidget {
 
   void _handleOptionSelected(BuildContext context, String option) {
     if (option == 'Create Auction') {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const ProductDetailsScreen(title: 'Create Auction')));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen(title: 'Create Auction')));
     } else if (option == 'List Product') {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const ProductDetailsScreen(title: 'List Product')));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDetailsScreen(title: 'List Product')));
     }
   }
 
@@ -35,65 +27,56 @@ class CreateAuctionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 4, bottom: 58),
-      child: SizedBox(
-        height: 29,
-        width: 86,
-        child: Center(
-          child: FloatingActionButton.extended(
-            heroTag: _getUniqueHeroTag(), // Use unique hero tag
-            onPressed: () async {
-              if (!isLoggedIn) {
-                AuthHelper.showAuthenticationRequiredMessage(context);
-                return;
-              }
-              // Address check before auction creation
-              final addresses = await AddressService.fetchAddresses();
-              if (addresses.isEmpty) {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AddLocationScreen()),
-                );
-                return;
-              }
-              // Show popup menu manually
-              final RenderBox button = context.findRenderObject() as RenderBox;
-              final Offset offset = button.localToGlobal(Offset.zero);
-              showMenu(
-                context: context,
-                position: RelativeRect.fromLTRB(
-                  offset.dx,
-                  offset.dy + 40, // 40 is the offset we defined
-                  offset.dx + button.size.width,
-                  offset.dy + button.size.height + 40,
-                ),
-                items: [
-                  PopupMenuItem<String>(
-                    value: 'Create Auction',
-                    child: const Center(child: Text('Create Auction')),
-                    onTap: () =>
-                        _handleOptionSelected(context, 'Create Auction'),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'List Product',
-                    child: const Center(child: Text('List Product')),
-                    onTap: () => _handleOptionSelected(context, 'List Product'),
-                  ),
-                ],
-              );
-            },
-            label: Text(
-              'Sell Now',
-              style: TextStyle(color: Theme.of(context).primaryColor),
-            ),
-            backgroundColor: Theme.of(context).splashColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-            elevation: 0, // Remove elevation
-            disabledElevation: 0, // Remove disabled elevation
+    return FloatingActionButton(
+      heroTag: _getUniqueHeroTag(),
+      onPressed: () async {
+        if (!isLoggedIn) {
+          AuthHelper.showAuthenticationRequiredMessage(context);
+          return;
+        }
+
+        final addresses = await AddressService.fetchAddresses();
+        if (addresses.isEmpty) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AddLocationScreen()),
+          );
+          return;
+        }
+
+        showMenu(
+          context: context,
+          position: RelativeRect.fromLTRB(
+            MediaQuery.of(context).size.width / 2 - 100, // center horizontally
+            MediaQuery.of(context).size.height - 200,    // position above nav
+            MediaQuery.of(context).size.width / 2 + 100,
+            0,
           ),
-        ),
+          items: [
+            PopupMenuItem<String>(
+              value: 'Create Auction',
+              child: const Text('Create Auction', textAlign: TextAlign.center),
+              onTap: () => _handleOptionSelected(context, 'Create Auction'),
+            ),
+            PopupMenuItem<String>(
+              value: 'List Product',
+              child: const Text('List Product', textAlign: TextAlign.center),
+              onTap: () => _handleOptionSelected(context, 'List Product'),
+            ),
+          ],
+        );
+      },
+      backgroundColor: Theme.of(context).primaryColorLight, // OLX-style bright color
+      shape: const CircleBorder(),
+      elevation: 6,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.add, size: 28, color: Colors.white),
+          Text(
+            'Sell',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ],
       ),
     );
   }

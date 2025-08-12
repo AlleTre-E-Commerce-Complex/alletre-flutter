@@ -21,6 +21,7 @@ import 'package:alletre_app/view/screens/settings%20screen/settings_screen.dart'
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categories_screen.dart';
 import 'package:alletre_app/view/screens/user%20terms%20screen/user_terms.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/create_auction_button.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
@@ -122,11 +123,10 @@ class MainStack extends StatelessWidget {
             userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
               userProvider.setName(data['userName']);
               userProvider.setEmail(data['email']);
-              
+
               PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
                 userProvider.setPhoneNumber(val);
               });
-
             });
           }
         }
@@ -142,6 +142,8 @@ class MainStack extends StatelessWidget {
               ),
             ),
           ),
+          floatingActionButton: isLoggedIn ? const CreateAuctionButton() : null,
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: isLoggedIn
               ? BottomNavBarUtils.buildAuthenticatedNavBar(
                   context,
