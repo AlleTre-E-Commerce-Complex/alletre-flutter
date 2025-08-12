@@ -365,10 +365,6 @@ class UserProvider with ChangeNotifier {
   Future<void> logout() async {
     try {
       _isLoading = true;
-      notifyListeners();
-
-      // Clear secure storage and sign out from services
-      await _userService.logout();
 
       // Reset all user-related state by creating a new empty instance
       _user.name = '';
@@ -392,6 +388,11 @@ class UserProvider with ChangeNotifier {
       // Clear controllers
       emailController.clear();
       passwordController.clear();
+
+      notifyListeners();
+
+      // Clear secure storage and sign out from services
+      await _userService.logout();
 
       // Also handle Firebase logout if needed
       await logoutFirebase();
@@ -429,6 +430,9 @@ class UserProvider with ChangeNotifier {
     emailController.clear();
     passwordController.clear();
     _rememberPassword = false;
+    _displayEmail = null;
+    _user.email = "";
+    _user.password = "";
     notifyListeners();
   }
 

@@ -1,3 +1,4 @@
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -103,6 +104,7 @@ class SettingsScreen extends StatelessWidget {
 
     try {
       await context.read<UserProvider>().logout();
+      Provider.of<LoggedInProvider>(context, listen: false).logOut();
 
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
