@@ -23,7 +23,7 @@ class GoogleAuthService {
     return await _storage.read(key: 'access_token');
   }
 
-  static const String baseUrl = 'http://10.213.255.182:3001/api';
+  static const String baseUrl = 'http://10.30.151.182:3001/api';
 
   Future<UserCredential?> signInWithGoogle() async {
     try {

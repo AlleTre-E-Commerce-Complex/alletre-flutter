@@ -2,6 +2,7 @@ import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:alletre_app/utils/images/images.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/notification_screen/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -49,8 +50,9 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
               if (!isLoggedIn) {
                 AuthHelper.showAuthenticationRequiredMessage(context);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Notifications Clicked!')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationsScreen()),
                 );
               }
             },

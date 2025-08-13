@@ -6,7 +6,7 @@ class ShareProvider with ChangeNotifier {
   Future<void> shareApp(BuildContext context) async {
     try {
       const String shareMessage = 
-          "Check out this amazing bidding app! Download now: http://10.213.255.182:3001";
+          "Check out this amazing bidding app! Download now: http://10.30.151.182:3001";
       
       await Share.share(
         shareMessage,

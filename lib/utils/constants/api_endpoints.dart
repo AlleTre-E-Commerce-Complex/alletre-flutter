@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static const String baseUrl = 'http://10.213.255.182:3001/api';
+  static const String baseUrl = 'http://10.30.151.182:3001/api';
 
   // Auction endpoints
   static const String auctions = '/auctions';
