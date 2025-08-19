@@ -71,4 +71,45 @@ class NotificationService {
     }
     return notifications;
   }
+  Future<Map<String,dynamic>> markAsRead() async {    
+    Map<String,dynamic> resp={};
+    try {
+      String? accessToken = await _getAccessToken();
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      };
+      final url = Uri.parse('${ApiEndpoints.baseUrl}/notifications/mark-as-read');
+      var response = await http.put(url, headers: headers);
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+      if (response.statusCode == 401) {
+        debugPrint('401 Unauthorized. Attempting token refresh...');
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          headers['Authorization'] = 'Bearer $accessToken';
+          debugPrint('Retrying POST with refreshed token...');
+          response = await http.put(url, headers: headers);
+          debugPrint('Retry Response Status: ${response.statusCode}');
+          debugPrint('Retry Response Body: ${response.body}');
+        } else {
+          debugPrint('Token refresh failed.');
+        }
+      }
+      resp = json.decode(response.body);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('--- markAsRead DEBUG END: SUCCESS ---');
+        
+      } else {
+        debugPrint('--- markAsRead DEBUG END: FAILURE ---');
+        debugPrint(response.body);
+      }
+    } catch (e, stack) {
+      debugPrint('Exception: $e');
+      debugPrint('Stack Trace: $stack');
+    }
+    return resp;
+  }
 }
