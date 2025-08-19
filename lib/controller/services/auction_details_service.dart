@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuctionDetailsService {
-  static const String baseUrl = 'http://10.30.151.182:3001/api';
+  static const String baseUrl = 'http://10.57.140.182:3001/api';
 
   static Future<Map<String, dynamic>?> getAuctionDetails(
       String auctionId) async {

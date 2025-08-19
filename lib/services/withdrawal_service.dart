@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 
 class WithdrawalService {
-  static const String baseUrl = 'http://10.30.151.182:3001/api';
+  static const String baseUrl = 'http://10.57.140.182:3001/api';
   static const storage = FlutterSecureStorage();
 
   static Future<void> submitWithdrawalRequest({

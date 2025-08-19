@@ -3,6 +3,7 @@ import 'package:alletre_app/controller/providers/auction_image_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/auction_details_provider.dart';
 import 'package:alletre_app/controller/providers/contact_provider.dart';
+import 'package:alletre_app/controller/providers/notification_provider.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
       final hasCompletedOnboarding = await userAuthService.hasCompletedOnboarding();
 
       if (isAuthenticated) {
-        // User is authenticated, go straight to home via MainStack        
+        // User is authenticated, go straight to home via MainStack
         Provider.of<LoggedInProvider>(navigatorKey.currentContext!, listen: false).logIn();
         Provider.of<TabIndexProvider>(navigatorKey.currentContext!, listen: false).updateIndex(0); // Home tab
         return const MainStack();

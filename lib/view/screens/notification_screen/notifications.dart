@@ -1,6 +1,9 @@
+import 'package:alletre_app/controller/helpers/date_formatter_helper.dart';
+import 'package:alletre_app/controller/providers/notification_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -16,41 +19,80 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const NavbarElementsAppbar(
-        appBarTitle: 'Notifications',
-        showBackButton: true,
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: notifications.length,
-        itemBuilder: (context, index) {
-          final item = notifications[index];
-          return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+    return ChangeNotifierProvider(
+      create: (_) => NotificationProvider()..fetchNotifications(),
+      child: Consumer<NotificationProvider>(
+        builder: (context, provider, child) {
+          return Scaffold(
+            appBar: const NavbarElementsAppbar(
+              appBarTitle: 'Notifications',
+              showBackButton: true,
             ),
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: item['iconColor'].withOpacity(0.1),
-                child: Icon(item['icon'], color: item['iconColor']),
-              ),
-              title: Text(
-                item['title'],
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              subtitle: Text(
-                item['subtitle'],
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              trailing: Text(
-                item['time'],
-                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
+            body: provider.notifications.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.notifications_off_outlined,
+                          size: 100,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'No Notifications Yet!',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'When you place bids or when auctions you follow are updated, you’ll see them here.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),                        
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: provider.notifications.length,
+                    itemBuilder: (context, index) {
+                      final item = provider.notifications[index];
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 1,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: item.iconColor.withOpacity(0.1),
+                            child: Icon(item.icon, color: item.iconColor),
+                          ),
+                          title: Text(
+                            item.productTitle,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          subtitle: Text(
+                            item.message,
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          trailing: Text(
+                            DateFormatter.getVerboseDateTimeRepresentation(dateTime: item.createdAt),
+                            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                      );
+                    },
+                  ),
           );
         },
       ),
