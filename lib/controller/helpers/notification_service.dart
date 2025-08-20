@@ -38,8 +38,8 @@ class NotificationService {
       var response = await http.get(url, headers: headers);
       debugPrint('Response Status: ${response.statusCode}');
       debugPrint('Response Body: ${response.body}');
-      if (response.statusCode == 401) {
-        debugPrint('401 Unauthorized. Attempting token refresh...');
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        debugPrint('${response.statusCode} Unauthorized. Attempting token refresh...');
         final userService = UserService();
         final refreshResult = await userService.refreshTokens();
         if (refreshResult['success']) {

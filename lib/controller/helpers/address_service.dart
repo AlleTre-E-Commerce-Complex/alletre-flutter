@@ -1,9 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/model/country.dart';
 import 'package:alletre_app/model/state.dart';
 import 'package:csc_picker_plus/csc_picker_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
@@ -56,6 +58,26 @@ class AddressService {
       },
       body: body,
     );
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      debugPrint('${response.statusCode} Unauthorized. Attempting token refresh...');
+      final userService = UserService();
+      final refreshResult = await userService.refreshTokens();
+      if (refreshResult['success']) {
+        var accessToken = refreshResult['data']['accessToken'];
+        final response = await http.post(
+          url,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: body,
+        );
+        debugPrint('Retry Response Status: ${response.statusCode}');
+        debugPrint('Retry Response Body: ${response.body}');
+      } else {
+        debugPrint('Token refresh failed.');
+      }
+    }
     print('[DEBUG] AddressService.addAddress status: ${response.statusCode}');
     print('[DEBUG] AddressService.addAddress response: ${response.body}');
     return response.statusCode == 201 || response.statusCode == 200;
@@ -79,6 +101,26 @@ class AddressService {
       },
       body: body,
     );
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      debugPrint('${response.statusCode} Unauthorized. Attempting token refresh...');
+      final userService = UserService();
+      final refreshResult = await userService.refreshTokens();
+      if (refreshResult['success']) {
+        var accessToken = refreshResult['data']['accessToken'];
+        final response = await http.put(
+          url,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: body,
+        );
+        debugPrint('Retry Response Status: ${response.statusCode}');
+        debugPrint('Retry Response Body: ${response.body}');
+      } else {
+        debugPrint('Token refresh failed.');
+      }
+    }
     return response.statusCode == 200 || response.statusCode == 201;
   }
 

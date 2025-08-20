@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
-import 'package:alletre_app/utils/location_maps.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/add_address_screen.dart';
 import 'package:csc_picker_plus/csc_picker_plus.dart';
@@ -152,53 +151,17 @@ class AddLocationScreen extends StatelessWidget {
                         currentState: initialCity,
                         onCountryChanged: (country) {
                           // UAE is always countryId 1
+                          final regex = RegExp(r'[\u{1F1E6}-\u{1F1FF}]+', unicode: true);
+                          country = country.replaceAll(regex, '').trim();
                           int countryId = locationProvider.lsCountries.singleWhere((elem) => ((elem.nameEn == country) || (elem.nameAr == country))).id;
-                          locationProvider.updateCountry(country, id: countryId);
                           locationProvider.fetchStates(countryId);
+                          locationProvider.updateCountry(country, id: countryId);
                         },
                         onStateChanged: (state) {
-                          
-                          // print('Picker state: $state');
-                          // int? stateId;
-                          // String normalizedState = (state ?? '')
-                          //     .trim()
-                          //     .toLowerCase()
-                          //     .replaceAll('emirate', '')
-                          //     .replaceAll('-', ' ')
-                          //     .replaceAll(RegExp(r'\s+'), ' ')
-                          //     .replaceAll('umm al quwain', 'umm al quwain')
-                          //     .replaceAll('ras al khaimah', 'ras al khaimah')
-                          //     .replaceAll('abu dhabi', 'abu dhabi')
-                          //     .replaceAll('ajman', 'ajman')
-                          //     .replaceAll('dubai', 'dubai')
-                          //     .replaceAll('fujairah', 'fujairah')
-                          //     .replaceAll('sharjah', 'sharjah')
-                          //     .trim();
-
-                          // cityIdToName.forEach((id, name) {
-                          //   String backendName = name
-                          //       .trim()
-                          //       .toLowerCase()
-                          //       .replaceAll('-', ' ')
-                          //       .replaceAll(RegExp(r'\s+'), ' ')
-                          //       .replaceAll('umm al quwain', 'umm al quwain')
-                          //       .replaceAll('ras al khaimah', 'ras al khaimah')
-                          //       .replaceAll('abu dhabi', 'abu dhabi')
-                          //       .replaceAll('ajman', 'ajman')
-                          //       .replaceAll('dubai', 'dubai')
-                          //       .replaceAll('fujairah', 'fujairah')
-                          //       .replaceAll('sharjah', 'sharjah')
-                          //       .trim();
-                          //   if (backendName == normalizedState) {
-                          //     stateId = id;
-                          //   }
-                          // });
-                          // print('Normalized state: "$normalizedState"');
-                          // print('Matched stateId (cityId): $stateId for state "$state"');
-                          // if (stateId == null) {
-                          //   print('WARNING: Could not match "$state" to any cityId. Check cityIdToName map!');
-                          // }
-                          // locationProvider.updateState(state, id: stateId);
+                          if (state != null) {
+                            int stateId = locationProvider.lsStates.singleWhere((elem) => ((elem.nameEn == state) || (elem.nameAr == state))).id;
+                            locationProvider.updateState(state, id: stateId);
+                          }
                         },
                         onCityChanged: (city) {
                           print('Picker city (ignored for backend): $city');

@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:io';
+import 'package:alletre_app/controller/helpers/address_service.dart';
 import 'package:alletre_app/controller/helpers/image_picker_helper.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
@@ -61,31 +62,6 @@ class EditProfileScreen extends StatelessWidget {
       return [];
     }
 
-    // Store address in backend
-    Future<bool> postUserAddress(Map<String, dynamic> location) async {
-      const storage = FlutterSecureStorage();
-      final token = await storage.read(key: 'access_token');
-      final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations');
-      final body = json.encode({
-        'address': location['address'],
-        'addressLabel': location['addressLabel'] ?? location['address'],
-        'countryId': location['countryId'],
-        'cityId': location['cityId'],
-        'phone': location['phone'] ?? '',
-      });
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      );
-      debugPrint('POST address status: \u001b[33m${response.statusCode}\u001b[0m');
-      debugPrint('POST address raw body: \u001b[36m${response.body}\u001b[0m');
-      return response.statusCode == 201 || response.statusCode == 200;
-    }
-
     // --- Add helper function for making default address ---
     Future<bool> makeDefaultAddressOnBackend(String locationId) async {
       const storage = FlutterSecureStorage();
@@ -101,32 +77,7 @@ class EditProfileScreen extends StatelessWidget {
       debugPrint('Make Default API status: \u001b[33m${response.statusCode}\u001b[0m');
       debugPrint('Make Default API raw body: \u001b[36m${response.body}\u001b[0m');
       return response.statusCode == 200 || response.statusCode == 201;
-    }
-
-    Future<bool> updateUserAddress(String locationId, Map<String, dynamic> updatedAddress) async {
-      const storage = FlutterSecureStorage();
-      final token = await storage.read(key: 'access_token');
-      final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId');
-      final body = json.encode({
-        'address': updatedAddress['address'],
-        'addressLabel': updatedAddress['addressLabel'] ?? updatedAddress['address'],
-        'countryId': (updatedAddress['countryId'] is Map) ? updatedAddress['countryId']['id'] ?? updatedAddress['countryId']['nameEn'] : updatedAddress['countryId'],
-        'cityId': (updatedAddress['cityId'] is Map) ? updatedAddress['cityId']['id'] ?? updatedAddress['cityId']['nameEn'] : updatedAddress['cityId'],
-        'phone': updatedAddress['phone'] ?? '',
-        // Add other fields as needed
-      });
-      final response = await http.put(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      );
-      debugPrint('PUT address status: [33m${response.statusCode}[0m');
-      debugPrint('PUT address raw body: [36m${response.body}[0m');
-      return response.statusCode == 200 || response.statusCode == 201;
-    }
+    }    
 
     return Scaffold(
       appBar: const NavbarElementsAppbar(appBarTitle: 'Edit Profile', showBackButton: true),
@@ -331,7 +282,7 @@ class EditProfileScreen extends StatelessWidget {
                                                 if (editedAddress != null) {
                                                   final mergedAddress = <String, dynamic>{...realAddress, ...editedAddress};
                                                   final locationId = mergedAddress['id'].toString();
-                                                  final success = await updateUserAddress(locationId, mergedAddress);
+                                                  final success = await AddressService.updateAddress(locationId, mergedAddress);
                                                   if (success) {
                                                     ScaffoldMessenger.of(scaffoldContext).showSnackBar(
                                                       const SnackBar(
@@ -426,7 +377,7 @@ class EditProfileScreen extends StatelessWidget {
                                             userProvider.addAddress(selectedLocation);
                                             addressRefreshKey.value++;
 
-                                            final success = await postUserAddress(selectedLocation);
+                                            final success = await AddressService.addAddress(selectedLocation);
                                             if (success) {
                                               ScaffoldMessenger.of(scaffoldContext).showSnackBar(
                                                 const SnackBar(
