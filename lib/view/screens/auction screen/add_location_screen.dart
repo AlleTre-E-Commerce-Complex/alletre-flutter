@@ -43,9 +43,7 @@ class AddLocationScreen extends StatelessWidget {
     PhoneNumber? parsedPhoneNumber;
 
     // Address value notifier for reactive updates
-    final addressValueNotifier = ValueNotifier<String>(
-      existingAddress?['address'] ?? initialAddressMap?['address'] ?? ''
-    );
+    final addressValueNotifier = ValueNotifier<String>(existingAddress?['address'] ?? initialAddressMap?['address'] ?? '');
 
     // --- Ensure initial phone number is validated if pre-filled ---
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -126,8 +124,7 @@ class AddLocationScreen extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text:
-                        '\nIn order to complete the procedure, we need to get access to your location.\nYou can manage it later.',
+                    text: '\nIn order to complete the procedure, we need to get access to your location.\nYou can manage it later.',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -143,99 +140,91 @@ class AddLocationScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Consumer<LocationProvider>(
-                    builder: (context, locationProvider, child) =>
-                        CSCPickerPlus(
-                      layout: Layout.vertical,
-                      flagState: CountryFlag.ENABLE,
-                      currentCountry: initialCountry,
-                      showCities: false,
-                      currentState: initialCity,
-                      onCountryChanged: (country) {
-                        print('Picker country: $country');
-                        // UAE is always countryId 1
-                        locationProvider.updateCountry(country, id: 1);
-                      },
-                      onStateChanged: (state) {
-                        print('Picker state: $state');
-                        int? stateId;
-                        String normalizedState = (state ?? '')
-                            .trim()
-                            .toLowerCase()
-                            .replaceAll('emirate', '')
-                            .replaceAll('-', ' ')
-                            .replaceAll(RegExp(r'\s+'), ' ')
-                            .replaceAll('umm al quwain', 'umm al quwain')
-                            .replaceAll('ras al khaimah', 'ras al khaimah')
-                            .replaceAll('abu dhabi', 'abu dhabi')
-                            .replaceAll('ajman', 'ajman')
-                            .replaceAll('dubai', 'dubai')
-                            .replaceAll('fujairah', 'fujairah')
-                            .replaceAll('sharjah', 'sharjah')
-                            .trim();
+                    builder: (context, locationProvider, child) {
+                      if (locationProvider.lsCscCountries.isEmpty) {
+                        locationProvider.fetchCountries();
+                      }
+                      return CSCPickerPlus(
+                        layout: Layout.vertical,
+                        flagState: CountryFlag.ENABLE,
+                        currentCountry: initialCountry,
+                        showCities: false,
+                        currentState: initialCity,
+                        onCountryChanged: (country) {
+                          // UAE is always countryId 1
+                          int countryId = locationProvider.lsCountries.singleWhere((elem) => ((elem.nameEn == country) || (elem.nameAr == country))).id;
+                          locationProvider.updateCountry(country, id: countryId);
+                          locationProvider.fetchStates(countryId);
+                        },
+                        onStateChanged: (state) {
+                          
+                          // print('Picker state: $state');
+                          // int? stateId;
+                          // String normalizedState = (state ?? '')
+                          //     .trim()
+                          //     .toLowerCase()
+                          //     .replaceAll('emirate', '')
+                          //     .replaceAll('-', ' ')
+                          //     .replaceAll(RegExp(r'\s+'), ' ')
+                          //     .replaceAll('umm al quwain', 'umm al quwain')
+                          //     .replaceAll('ras al khaimah', 'ras al khaimah')
+                          //     .replaceAll('abu dhabi', 'abu dhabi')
+                          //     .replaceAll('ajman', 'ajman')
+                          //     .replaceAll('dubai', 'dubai')
+                          //     .replaceAll('fujairah', 'fujairah')
+                          //     .replaceAll('sharjah', 'sharjah')
+                          //     .trim();
 
-                        cityIdToName.forEach((id, name) {
-                          String backendName = name
-                              .trim()
-                              .toLowerCase()
-                              .replaceAll('-', ' ')
-                              .replaceAll(RegExp(r'\s+'), ' ')
-                              .replaceAll('umm al quwain', 'umm al quwain')
-                              .replaceAll('ras al khaimah', 'ras al khaimah')
-                              .replaceAll('abu dhabi', 'abu dhabi')
-                              .replaceAll('ajman', 'ajman')
-                              .replaceAll('dubai', 'dubai')
-                              .replaceAll('fujairah', 'fujairah')
-                              .replaceAll('sharjah', 'sharjah')
-                              .trim();
-                          if (backendName == normalizedState) {
-                            stateId = id;
-                          }
-                        });
-                        print('Normalized state: "$normalizedState"');
-                        print(
-                            'Matched stateId (cityId): $stateId for state "$state"');
-                        if (stateId == null) {
-                          print(
-                              'WARNING: Could not match "$state" to any cityId. Check cityIdToName map!');
-                        }
-                        locationProvider.updateState(state, id: stateId);
-                      },
-                      onCityChanged: (city) {
-                        print('Picker city (ignored for backend): $city');
-                      },
-                      countryFilter: const [CscCountry.United_Arab_Emirates],
-                      countryDropdownLabel: "Select Country",
-                      stateDropdownLabel: "Select State",
-                      cityDropdownLabel: "Select City",
-                      dropdownDecoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(5)),
-                        border: Border.all(color: Colors.grey.shade400),
-                      ),
-                      disabledDropdownDecoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(5)),
-                        color: Colors.grey.shade300,
-                        border: Border.all(color: Colors.grey.shade400),
-                      ),
-                      selectedItemStyle: const TextStyle(
-                          color: onSecondaryColor,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500),
-                      dropdownHeadingStyle: const TextStyle(
-                          color: onSecondaryColor,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                      dropdownItemStyle: const TextStyle(
-                          color: onSecondaryColor,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500),
-                    ),
+                          // cityIdToName.forEach((id, name) {
+                          //   String backendName = name
+                          //       .trim()
+                          //       .toLowerCase()
+                          //       .replaceAll('-', ' ')
+                          //       .replaceAll(RegExp(r'\s+'), ' ')
+                          //       .replaceAll('umm al quwain', 'umm al quwain')
+                          //       .replaceAll('ras al khaimah', 'ras al khaimah')
+                          //       .replaceAll('abu dhabi', 'abu dhabi')
+                          //       .replaceAll('ajman', 'ajman')
+                          //       .replaceAll('dubai', 'dubai')
+                          //       .replaceAll('fujairah', 'fujairah')
+                          //       .replaceAll('sharjah', 'sharjah')
+                          //       .trim();
+                          //   if (backendName == normalizedState) {
+                          //     stateId = id;
+                          //   }
+                          // });
+                          // print('Normalized state: "$normalizedState"');
+                          // print('Matched stateId (cityId): $stateId for state "$state"');
+                          // if (stateId == null) {
+                          //   print('WARNING: Could not match "$state" to any cityId. Check cityIdToName map!');
+                          // }
+                          // locationProvider.updateState(state, id: stateId);
+                        },
+                        onCityChanged: (city) {
+                          print('Picker city (ignored for backend): $city');
+                        },
+                        countryFilter: locationProvider.lsCscCountries,
+                        countryDropdownLabel: "Select Country",
+                        stateDropdownLabel: "Select State",
+                        cityDropdownLabel: "Select City",
+                        dropdownDecoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(5)),
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        disabledDropdownDecoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(5)),
+                          color: Colors.grey.shade300,
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        selectedItemStyle: const TextStyle(color: onSecondaryColor, fontSize: 15, fontWeight: FontWeight.w500),
+                        dropdownHeadingStyle: const TextStyle(color: onSecondaryColor, fontSize: 15, fontWeight: FontWeight.bold),
+                        dropdownItemStyle: const TextStyle(color: onSecondaryColor, fontSize: 15, fontWeight: FontWeight.w500),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   Consumer<UserProvider>(
-                    builder: (context, provider, child) =>
-                        InternationalPhoneNumberInput(
+                    builder: (context, provider, child) => InternationalPhoneNumberInput(
                       onInputChanged: (PhoneNumber number) {
                         provider.setPhoneNumber(number);
                         parsedPhoneNumber = number;
@@ -357,13 +346,10 @@ class AddLocationScreen extends StatelessWidget {
                           selectedMap = selectedLocation;
                         } else {
                           // Unexpected type, fallback
-                          selectedMap = {
-                            'address': selectedLocation.toString()
-                          };
+                          selectedMap = {'address': selectedLocation.toString()};
                         }
                         // If editing, preserve the id
-                        if (editingAddressMap != null &&
-                            editingAddressMap?['id'] != null) {
+                        if (editingAddressMap != null && editingAddressMap?['id'] != null) {
                           selectedMap['id'] = editingAddressMap?['id'];
                         }
                         // --- Ensure we merge the map result into editingAddressMap ---
@@ -377,8 +363,7 @@ class AddLocationScreen extends StatelessWidget {
                         editingAddressMap?['phone'] = phoneController.text.trim();
                         final userProvider = context.read<UserProvider>();
                         if (editingAddressMap != null) {
-                          userProvider.editAddress(
-                              editingAddressMap!, selectedMap);
+                          userProvider.editAddress(editingAddressMap!, selectedMap);
                         } else {
                           userProvider.addAddress(selectedMap);
                         }
@@ -395,17 +380,13 @@ class AddLocationScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              editingAddressMap != null
-                                  ? Icons.edit
-                                  : Icons.add,
+                              Icons.search,
                               color: onSecondaryColor,
                               size: 22,
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              editingAddressMap != null
-                                  ? 'Edit Address'
-                                  : 'Add Address',
+                              'Search Map',
                               style: const TextStyle(
                                 color: onSecondaryColor,
                                 fontWeight: FontWeight.w500,
@@ -440,9 +421,7 @@ class AddLocationScreen extends StatelessWidget {
                       const SizedBox(width: 16),
                       ElevatedButton(
                         onPressed: () async {
-                          final address = userProvider.addresses.isNotEmpty
-                              ? userProvider.addresses.last['address'] ?? ''
-                              : (editingAddressMap?['address'] ?? '');
+                          final address = userProvider.addresses.isNotEmpty ? userProvider.addresses.last['address'] ?? '' : (editingAddressMap?['address'] ?? '');
                           final addressLabel = addressLabelController.text.trim();
                           final countryId = locationProvider.countryId;
                           final cityId = locationProvider.stateId;

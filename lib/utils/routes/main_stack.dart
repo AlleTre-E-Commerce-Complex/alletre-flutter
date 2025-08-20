@@ -121,12 +121,14 @@ class MainStack extends StatelessWidget {
           final userAuthService = UserAuthService();
           if ((userProvider.displayEmail.isEmpty || userProvider.displayEmail.trim() == 'Add Email') && isLoggedIn) {
             userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
-              userProvider.setName(data['userName']);
-              userProvider.setEmail(data['email']);
+              if (data.containsKey('id') == true) {
+                userProvider.setName(data['userName']);
+                userProvider.setEmail(data['email']);
 
-              PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
-                userProvider.setPhoneNumber(val);
-              });
+                PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
+                  userProvider.setPhoneNumber(val);
+                });
+              }
             });
           }
         }

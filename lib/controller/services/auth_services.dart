@@ -18,6 +18,10 @@ class UserAuthService {
     if (firebaseUser != null) {
       return true;
     }
+    var email = await _storage.read(key: 'saved_email');
+    if (email == null) {
+      return false;
+    }
 
     // Then check for our API tokens
     return await _userService.validateTokens();
@@ -91,7 +95,7 @@ class UserAuthService {
     var email = await _storage.read(key: 'saved_email');
     var password = await _storage.read(key: 'saved_password');
     if (email != null) {
-      var _resp = await _userService.loginService(email!, password!);
+      var _resp = await _userService.loginService(email, password!);
       if (_resp['success'] == true) {
         return _resp['data']['data'];
       } else {

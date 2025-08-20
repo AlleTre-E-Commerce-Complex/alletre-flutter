@@ -1,6 +1,9 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'package:alletre_app/model/country.dart';
+import 'package:alletre_app/model/state.dart';
+import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
@@ -103,5 +106,46 @@ class AddressService {
       },
     );
     return response.statusCode == 200 || response.statusCode == 201;
+  }
+
+  Future<List<CountryModel>> getCountries() async {
+    List<CountryModel> resp = [];
+    final token = await _getToken();
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/regions/countries');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      for (var country in json.decode(response.body)['data']) {
+        var arrText = country['nameEn'].toString().replaceAll(' ', '_');
+        var cscCountry = CscCountry.values.singleWhere((e) => e.name == arrText);
+        var model = CountryModel(id: country['id'], nameAr: country['nameAr'], nameEn: country['nameEn'], currency: country['currency'], cscCountry: cscCountry);
+        resp.add(model);
+      }
+    }
+    return resp;
+  }
+
+  Future<List<StateModel>> getStates(int countryId) async {
+    List<StateModel> resp = [];
+    final token = await _getToken();
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/regions/cities?countryId=$countryId');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      for (var state in json.decode(response.body)['data']) {
+        resp.add(StateModel(id: state['id'], nameAr: state['nameAr'], nameEn: state['nameEn'], countryId: state['countryId']));
+      }
+    }
+    return resp;
   }
 }
