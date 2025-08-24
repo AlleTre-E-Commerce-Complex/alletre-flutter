@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 
 class PaymentSuccessDialog {
-  static void show(BuildContext context) {
+  static void show(BuildContext context, bool isMyAuction) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -34,8 +34,8 @@ class PaymentSuccessDialog {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Your deposit has been successfully transferred and your auction is active now',
+                Text(
+                  'Your deposit has been successfully transferred and your ${isMyAuction ? 'auction' : 'bid'} is active now',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: greyColor),
                 ),

@@ -40,8 +40,7 @@ class CardFormWidget extends StatefulWidget {
   State<CardFormWidget> createState() => _CardFormWidgetState();
 }
 
-class _CardFormWidgetState extends State<CardFormWidget>
-    with AutomaticKeepAliveClientMixin {
+class _CardFormWidgetState extends State<CardFormWidget> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -91,11 +90,10 @@ class PaymentDetailsScreen extends StatefulWidget {
 
 class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   final formKey = GlobalKey<FormState>();
-  final selectedPaymentMethod =
-      ValueNotifier<PaymentMethod>(PaymentMethod.card);
+  final selectedPaymentMethod = ValueNotifier<PaymentMethod>(PaymentMethod.card);
   late final CardFormEditController cardController;
   final UserService _userService = UserService();
-  int? depositAmount;
+  double? depositAmount;
   bool isLoading = false;
   bool showWalletPayment = false;
   bool showStripePayment = true;
@@ -104,8 +102,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   Future<String?> _getValidToken() async {
     try {
       // Get the current access token
-      final token =
-          await const FlutterSecureStorage().read(key: 'access_token');
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
       if (token == null) {
         debugPrint('No access token found, attempting refresh');
         final refreshResult = await _userService.refreshTokens();
@@ -132,12 +129,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   void _calculateDepositAmount() {
     try {
       final auctionData = widget.auctionData;
-      final startBidAmount =
-          double.tryParse(auctionData['startBidAmount']?.toString() ?? '0') ??
-              0;
-      final latestBidAmount =
-          double.tryParse(auctionData['currentBid']?.toString() ?? '0') ??
-              startBidAmount;
+      final startBidAmount = double.tryParse(auctionData['startBidAmount']?.toString() ?? '0') ?? 0;
+      final latestBidAmount = double.tryParse(auctionData['currentBid']?.toString() ?? '0') ?? startBidAmount;
       final category = auctionData['category'];
 
       if (category == null) {
@@ -153,7 +146,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       );
 
       setState(() {
-        depositAmount = deposit.toInt();
+        depositAmount = deposit.toDouble();
         debugPrint('✅ Calculated deposit amount: $depositAmount');
       });
     } catch (e) {
@@ -225,11 +218,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       debugPrint('🔍 Using auction ID: $auctionId');
 
       // Log the payment details being sent
-      final paymentData = {
-        'auctionId': auctionId,
-        'amount': depositAmount,
-        'type': 'SELLER_DEPOSIT'
-      };
+      final paymentData = {'auctionId': auctionId, 'amount': depositAmount, 'type': 'SELLER_DEPOSIT'};
       debugPrint('🔍 Sending payment data: ${jsonEncode(paymentData)}');
 
       // Parse the DateTime before making the API call to help with timing
@@ -237,29 +226,29 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       debugPrint('🔍 Parsed DateTime: $requestTime');
 
       // Try all possible endpoint variants to determine which one works
+      var _url = '${ApiService.baseUrl}/auctions/user/walletPay';
+      bool isMyAuction = widget.auctionData['details']['isMyAuction'] ?? false;
+      if (!isMyAuction) {
+        _url = '${ApiService.baseUrl}/auctions/user/bidder-walletDeposit';
+      }
       try {
         // Attempt with endpoint variant 1
-        debugPrint('🔍 Attempting API call to: /auctions/user/walletPay');
+        debugPrint('🔍 Attempting API call to: $_url');
         final response = await ApiService.post(
-          '/auctions/user/walletPay',
-          data: {
-            'auctionId': auctionId,
-            'amount': depositAmount,
-            'bidAmount': depositAmount
-          },
+          _url,
+          data: {'auctionId': auctionId, 'amount': depositAmount, 'bidAmount': widget.auctionData['details']['amount']},
         );
 
         _handleSuccessResponse(response);
       } on DioException catch (e) {
-        debugPrint(
-            '🔍 First endpoint failed with status: ${e.response?.statusCode}');
+        debugPrint('🔍 First endpoint failed with status: ${e.response?.statusCode}');
         debugPrint('🔍 Error response: ${e.response?.data}');
 
         if (e.response?.statusCode == 404) {
           // Try second variant with hyphen if first fails with 404
-          debugPrint('🔍 Attempting API call to: /auctions/user/walletPay');
+          debugPrint('🔍 Attempting API call to: $_url');
           final response = await ApiService.post(
-            '/auctions/user/walletPay',
+            _url,
             data: {'auctionId': auctionId, 'amount': depositAmount},
           );
 
@@ -275,8 +264,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       final errorData = e.response?.data;
       final requestOptions = e.requestOptions;
 
-      debugPrint(
-          '🔍 Wallet payment error: DioException [${e.type}]: ${e.message}');
+      debugPrint('🔍 Wallet payment error: DioException [${e.type}]: ${e.message}');
       debugPrint('🔍 Status code: $statusCode');
       debugPrint('🔍 Method: ${requestOptions.method}');
       debugPrint('🔍 URL: ${requestOptions.uri}');
@@ -325,7 +313,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     if (response.data['success']) {
       // Navigate to success screen or refresh current screen
       if (mounted) {
-        PaymentSuccessDialog.show(context);
+        PaymentSuccessDialog.show(context, widget.auctionData.containsKey('details') ? widget.auctionData['details']['isMyAuction'] : false);
       }
     } else {
       throw Exception(response.data['message'] ?? 'Payment failed');
@@ -379,9 +367,9 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMyAuction = widget.auctionData.containsKey('details') ? widget.auctionData['details']['isMyAuction'] : false;
     return Scaffold(
-      appBar: const NavbarElementsAppbar(
-          appBarTitle: 'Publish Auction', showBackButton: true),
+      appBar: NavbarElementsAppbar(appBarTitle: isMyAuction ? 'Publish Auction' : 'Publish Bid', showBackButton: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -399,12 +387,9 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
             ),
             const Divider(thickness: 1, color: primaryColor),
             const SizedBox(height: 8),
-            const Text(
-              'In order to complete publishing your auction successfully, please pay the auction fee and start receiving bids immediately.',
-              style: TextStyle(
-                  color: onSecondaryColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500),
+            Text(
+              'In order to complete publishing your ${isMyAuction ? 'auction' : 'bid'} successfully, please pay the ${isMyAuction ? 'auction' : 'bid'} fee and ${isMyAuction ? 'start receiving bids immediately.' : 'submit your bid'}',
+              style: TextStyle(color: onSecondaryColor, fontSize: 13, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 18),
 
@@ -412,13 +397,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
             _buildDebitCard(context),
             const SizedBox(height: 22),
 
-            const Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Payment Method',
-                    style: TextStyle(
-                        color: onSecondaryColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600))),
+            const Align(alignment: Alignment.centerLeft, child: Text('Payment Method', style: TextStyle(color: onSecondaryColor, fontSize: 14, fontWeight: FontWeight.w600))),
             const SizedBox(height: 10),
 
             // Payment Method Selection
@@ -431,15 +410,13 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                       title: const Text('Credit/Debit Card'),
                       value: PaymentMethod.card,
                       groupValue: method,
-                      onChanged: (value) =>
-                          selectedPaymentMethod.value = value!,
+                      onChanged: (value) => selectedPaymentMethod.value = value!,
                     ),
                     RadioListTile<PaymentMethod>(
                       title: const Text('Wallet'),
                       value: PaymentMethod.wallet,
                       groupValue: method,
-                      onChanged: (value) =>
-                          selectedPaymentMethod.value = value!,
+                      onChanged: (value) => selectedPaymentMethod.value = value!,
                     ),
                   ],
                 );
@@ -462,8 +439,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                       )
                     : Container(
                         key: const ValueKey('wallet_form'),
-                        padding: const EdgeInsets.only(
-                            left: 16, right: 16, top: 22, bottom: 22),
+                        padding: const EdgeInsets.only(left: 16, right: 16, top: 22, bottom: 22),
                         decoration: BoxDecoration(
                           color: borderColor,
                           borderRadius: BorderRadius.circular(12),
@@ -484,16 +460,14 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                               children: [
                                 OutlinedButton(
                                   onPressed: () {
-                                    _handlePaymentMethodChange(
-                                        PaymentMethod.wallet);
+                                    _handlePaymentMethodChange(PaymentMethod.wallet);
                                   },
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(color: primaryColor),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
                                   ),
                                   child: const Text(
                                     'Cancel',
@@ -513,9 +487,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                       final cardFee = ((acceptedAmount + auctionFee) * 0.03) + 4;
                                       totalAmount = double.parse((acceptedAmount + auctionFee + cardFee).toStringAsFixed(2));
                                     }
-                                    final hasBalance = isBuyNow
-                                        ? (walletBalance ?? 0) >= totalAmount
-                                        : (walletBalance ?? 0) >= (depositAmount ?? 0);
+                                    final hasBalance = isBuyNow ? (walletBalance ?? 0) >= totalAmount : (walletBalance ?? 0) >= (depositAmount ?? 0);
                                     if (isLoading || !hasBalance) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
@@ -589,15 +561,11 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                   },
 
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: ((walletBalance ?? 0) <
-                                            (depositAmount ?? 0))
-                                        ? greyColor
-                                        : primaryColor,
+                                    backgroundColor: ((walletBalance ?? 0) < (depositAmount ?? 0)) ? greyColor : primaryColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
                                   ),
                                   child: isLoading
                                       ? const SizedBox(
@@ -605,9 +573,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                           height: 20,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                    secondaryColor),
+                                            valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
                                           ),
                                         )
                                       : Text(
@@ -622,7 +588,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                               return 'Pay AED ${NumberFormat("#,##0.00").format(totalAmount)}';
                                             }
                                             // For newly created auctions, calculate deposit based on category
-                                            if (widget.auctionData['isDeposit'] == null && widget.auctionData['data'] != null) {
+                                            if (widget.auctionData['details']['isDeposit'] == null && widget.auctionData['details'] != null) {
                                               final categoryId = widget.auctionData['data']['product']?['categoryId'];
                                               if (categoryId != null) {
                                                 final depositAmount = CategoryService.getSellerDepositAmount(int.parse(categoryId.toString()));
@@ -631,19 +597,16 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                               }
                                             }
                                             // For existing deposits, use the provided amount
-                                            final depositAmount = widget.auctionData['isDeposit'] == true
-                                                ? widget.auctionData['depositAmount']?.toString()
-                                                : widget.auctionData['data']?['depositAmount']?.toString() ?? widget.auctionData['depositAmount']?.toString();
+                                            final depositAmount =
+                                                widget.auctionData['details']['isDeposit'] == true ? widget.auctionData['details']['depositAmount']?.toString() : widget.auctionData['details']?['depositAmount']?.toString() ?? widget.auctionData['details']['depositAmount']?.toString();
                                             debugPrint('🔍 Deposit Amount for Pay Button: $depositAmount');
                                             final formattedAmount = NumberFormat("#,##0").format(double.tryParse(depositAmount ?? '0')?.round() ?? 0);
+                                            this.depositAmount = double.parse(depositAmount ?? '0');
                                             return 'Pay AED $formattedAmount';
                                           }(),
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            color: ((walletBalance ?? 0) <
-                                                    (depositAmount ?? 0))
-                                                ? Colors.grey[300]
-                                                : secondaryColor,
+                                            color: ((walletBalance ?? 0) < (depositAmount ?? 0)) ? Colors.grey[300] : secondaryColor,
                                           ),
                                         ),
                                 ),
@@ -675,14 +638,11 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                             : () async {
                                 try {
                                   // Check if user is logged in
-                                  final userProvider =
-                                      Provider.of<UserProvider>(context,
-                                          listen: false);
+                                  final userProvider = Provider.of<UserProvider>(context, listen: false);
                                   if (!userProvider.isLoggedIn) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text(
-                                            'Please login to continue with the payment'),
+                                        content: Text('Please login to continue with the payment'),
                                         backgroundColor: errorColor,
                                       ),
                                     );
@@ -694,8 +654,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                   if (token == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content:
-                                            Text('Unable to get a valid token'),
+                                        content: Text('Unable to get a valid token'),
                                         backgroundColor: errorColor,
                                       ),
                                     );
@@ -703,56 +662,35 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                   }
 
                                   // Safely get categoryId with null checking
-                                  final categoryId = (widget
-                                                  .auctionData['auction'] !=
-                                              null &&
-                                          widget.auctionData['details'] != null)
-                                      ? widget.auctionData['auction'].categoryId
-                                      : widget.auctionData['categoryId'] ??
-                                          widget.auctionData['data']?['product']
-                                              ?['categoryId'];
+                                  final categoryId = (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) ? widget.auctionData['auction'].categoryId : widget.auctionData['categoryId'] ?? widget.auctionData['data']?['product']?['categoryId'];
 
                                   if (categoryId == null) {
                                     throw Exception('Category ID not found');
                                   }
 
                                   // Debug log
-                                  print(
-                                      'Category ID: $categoryId (${categoryId.runtimeType})');
+                                  print('Category ID: $categoryId (${categoryId.runtimeType})');
 
                                   // Safely parse to int with error handling
                                   int parsedCategoryId;
                                   try {
-                                    parsedCategoryId =
-                                        int.parse(categoryId.toString());
-                                    print(
-                                        'Parsed category ID: $parsedCategoryId');
+                                    parsedCategoryId = int.parse(categoryId.toString());
+                                    print('Parsed category ID: $parsedCategoryId');
                                   } catch (e) {
                                     print('Error parsing categoryId: $e');
-                                    throw Exception(
-                                        'Invalid category ID format');
+                                    throw Exception('Invalid category ID format');
                                   }
 
                                   // Get deposit amount with null checking
-                                  final depositAmount =
-                                      CategoryService.getSellerDepositAmount(
-                                          parsedCategoryId);
-                                  print(
-                                      'Deposit amount from service: $depositAmount (${depositAmount.runtimeType})');
+                                  final depositAmount = CategoryService.getSellerDepositAmount(parsedCategoryId);
+                                  print('Deposit amount from service: $depositAmount (${depositAmount.runtimeType})');
 
                                   if (depositAmount.isEmpty) {
-                                    throw Exception(
-                                        'Invalid deposit amount for category');
+                                    throw Exception('Invalid deposit amount for category');
                                   }
 
                                   // Safely get auctionId with null checking
-                                  final auctionId =
-                                      (widget.auctionData['auction'] != null &&
-                                              widget.auctionData['details'] !=
-                                                  null)
-                                          ? widget.auctionData['auction'].id
-                                          : widget.auctionData['id'] ??
-                                              widget.auctionData['data']?['id'];
+                                  final auctionId = (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) ? widget.auctionData['auction'].id : widget.auctionData['id'] ?? widget.auctionData['data']?['id'];
                                   if (auctionId == null) {
                                     throw Exception('Invalid auction ID');
                                   }
@@ -763,8 +701,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                     amount = double.parse(depositAmount);
                                   } catch (e) {
                                     print('Error parsing deposit amount: $e');
-                                    throw Exception(
-                                        'Invalid deposit amount format');
+                                    throw Exception('Invalid deposit amount format');
                                   }
 
                                   // --- Handle Buy Now flow: use TOTAL amount ---
@@ -779,10 +716,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                     print('💳 [BUY NOW] Using TOTAL for payment: $amount (accepted: $acceptedAmount, fee: $auctionFee, cardFee: $cardFee)');
                                   }
 
-                                  if (selectedPaymentMethod.value ==
-                                      PaymentMethod.wallet) {
-                                    if (widget.auctionData['isMyAuction'] ==
-                                        true) {
+                                  if (selectedPaymentMethod.value == PaymentMethod.wallet) {
+                                    if (widget.auctionData['isMyAuction'] == true) {
                                       // Seller payment
                                       await PaymentService.walletPayForAuction(
                                         auctionId: auctionId,
@@ -791,21 +726,16 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                       );
                                     } else {
                                       // Bidder payment - safely get bid amount
-                                      final bidAmountStr = widget
-                                              .auctionData['amount']
-                                              ?.toString() ??
-                                          '0';
+                                      final bidAmountStr = widget.auctionData['amount']?.toString() ?? '0';
                                       double bidAmount;
                                       try {
                                         bidAmount = double.parse(bidAmountStr);
                                       } catch (e) {
                                         print('Error parsing bid amount: $e');
-                                        bidAmount =
-                                            0; // Default to 0 if parsing fails
+                                        bidAmount = 0; // Default to 0 if parsing fails
                                       }
 
-                                      await PaymentService
-                                          .walletPayDepositByBidder(
+                                      await PaymentService.walletPayDepositByBidder(
                                         auctionId: auctionId,
                                         amount: amount,
                                         bidAmount: bidAmount,
@@ -814,17 +744,15 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                     }
 
                                     if (!context.mounted) return;
-                                    PaymentSuccessDialog.show(context);
+                                    PaymentSuccessDialog.show(context, widget.auctionData.containsKey('details') ? widget.auctionData['details']['isMyAuction'] : false);
                                     return;
                                   } else {
                                     // Get card details
                                     final cardDetails = cardController.details;
                                     if (!cardDetails.complete) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
-                                          content: Text(
-                                              'Please fill in all card details correctly'),
+                                          content: Text('Please fill in all card details correctly'),
                                           backgroundColor: errorColor,
                                         ),
                                       );
@@ -836,21 +764,12 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                       print('🔍 [CARD PAYMENT ATTEMPT]');
                                       print('  - auctionId: $auctionId');
                                       print('  - amount: $amount');
-                                      print(
-                                          '  - token: ${token.substring(0, 20)}...');
-                                      print(
-                                          '  - cardDetails.complete: ${cardDetails.complete}');
-                                      final isMyAuction = widget
-                                                  .auctionData['data']
-                                              ?['isMyAuction'] ??
-                                          widget.auctionData['isMyAuction'] ??
-                                          false;
-                                      print(
-                                          '  - isMyAuction (data?): ${widget.auctionData['data']?['isMyAuction']}');
-                                      print(
-                                          '  - isMyAuction (top?): ${widget.auctionData['isMyAuction']}');
-                                      print(
-                                          '  - isMyAuction (final): $isMyAuction');
+                                      print('  - token: ${token.substring(0, 20)}...');
+                                      print('  - cardDetails.complete: ${cardDetails.complete}');
+                                      final isMyAuction = widget.auctionData['data']?['isMyAuction'] ?? widget.auctionData['isMyAuction'] ?? false;
+                                      print('  - isMyAuction (data?): ${widget.auctionData['data']?['isMyAuction']}');
+                                      print('  - isMyAuction (top?): ${widget.auctionData['isMyAuction']}');
+                                      print('  - isMyAuction (final): $isMyAuction');
                                       if (isMyAuction == true) {
                                         print('🔍 Seller payment branch');
                                         await PaymentService.payForAuction(
@@ -863,29 +782,20 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                         );
                                       } else {
                                         // Detect Buy Now flow
-                                        final isBuyNow =
-                                            widget.auctionData['auction'] !=
-                                                    null &&
-                                                widget.auctionData['details'] !=
-                                                    null;
+                                        final isBuyNow = widget.auctionData['auction'] != null && widget.auctionData['details'] != null;
                                         if (isBuyNow) {
                                           print('🔍 Buy Now payment branch');
                                           print('  - auctionId: $auctionId');
                                           print('  - amount: $amount');
                                           print('  - currency: AED');
-                                          print(
-                                              '  - token: ${token.substring(0, 8)}...');
+                                          print('  - token: ${token.substring(0, 8)}...');
                                           // ignore: unnecessary_null_comparison
-                                          print(
-                                              '  - cardDetails: ${cardDetails != null ? cardDetails.toString() : 'null'}');
-                                          print(
-                                              '  - auctionData before payment: ${widget.auctionData}');
+                                          print('  - cardDetails: ${cardDetails != null ? cardDetails.toString() : 'null'}');
+                                          print('  - auctionData before payment: ${widget.auctionData}');
 
                                           Map<String, dynamic>? buyNowResponse;
                                           try {
-                                            buyNowResponse =
-                                                await PaymentService
-                                                    .buyNowAuction(
+                                            buyNowResponse = await PaymentService.buyNowAuction(
                                               auctionId: auctionId,
                                               amount: amount,
                                               currency: 'AED',
@@ -937,25 +847,21 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                             }
                                           } catch (e, stack) {
                                             print('❌ [BUY NOW PAYMENT ERROR]');
-                                            print(
-                                                '  - Error Type: [31m${e.runtimeType}[0m');
+                                            print('  - Error Type: [31m${e.runtimeType}[0m');
                                             print('  - Error Message: $e');
                                             print('  - Stack Trace: $stack');
                                             rethrow;
                                           }
-                                          print(
-                                              '  - auctionData after payment: ${widget.auctionData}');
+                                          print('  - auctionData after payment: ${widget.auctionData}');
                                         }
                                       }
                                     } catch (e, stack) {
                                       print('❌ [CARD PAYMENT ERROR]');
-                                      print(
-                                          '  - Error Type: [31m${e.runtimeType}[0m');
+                                      print('  - Error Type: [31m${e.runtimeType}[0m');
                                       print('  - Error Message: $e');
                                       print('  - Stack Trace: $stack');
                                       if (!context.mounted) return;
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             'Payment failed [${e.runtimeType}]: ${e.toString()}\nSee logs for details.',
@@ -969,14 +875,12 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 
                                   // Log successful payment details
                                   print('🎉🎉 Payment Successful!');
-                                  print(
-                                      '🎉🎉 Amount Paid: AED ${NumberFormat("#,##0.00").format(amount)}');
+                                  print('🎉🎉 Amount Paid: AED ${NumberFormat("#,##0.00").format(amount)}');
 
                                   if (!context.mounted) return;
-                                  PaymentSuccessDialog.show(context);
+                                  PaymentSuccessDialog.show(context, widget.auctionData.containsKey('details') ? widget.auctionData['details']['isMyAuction'] : false);
                                 } catch (e) {
-                                  print(
-                                      'Error in payment process: ${e.toString()}');
+                                  print('Error in payment process: ${e.toString()}');
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -994,8 +898,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                         ),
                         child: Text(
                           isLoading ? "Processing..." : "Pay & Submit",
-                          style: const TextStyle(
-                              color: secondaryColor, fontSize: 14),
+                          style: const TextStyle(color: secondaryColor, fontSize: 14),
                         ),
                       ),
                     );
@@ -1074,36 +977,29 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                             String? imagePath;
 
                             // Buy Now flow: get image from auction.imageLinks
-                            if (widget.auctionData['auction'] != null &&
-                                widget.auctionData['details'] != null) {
-                              final imageLinks =
-                                  widget.auctionData['auction'].imageLinks;
+                            if (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) {
+                              final imageLinks = widget.auctionData['auction'].imageLinks;
                               if (imageLinks != null && imageLinks.isNotEmpty) {
                                 imagePath = imageLinks[0];
                               }
-                            } else if (widget.auctionData['isDeposit'] ==
-                                true) {
+                            } else if (widget.auctionData['isDeposit'] == true) {
                               imagePath = widget.auctionData['images']?[0];
                             } else {
-                              imagePath = widget.auctionData['data']?['product']
-                                      ?['images']?[0] ??
-                                  widget.auctionData['images']?[0];
+                              imagePath = widget.auctionData['data']?['product']?['images']?[0] ?? widget.auctionData['images']?[0];
                             }
 
                             debugPrint('🔍 Image Path: $imagePath');
 
                             if (imagePath != null) {
                               // For Buy Now flow, always use Image.network for imageLinks
-                              if (widget.auctionData['auction'] != null &&
-                                  widget.auctionData['details'] != null) {
+                              if (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) {
                                 return Image.network(
                                   imagePath,
                                   width: 112,
                                   height: 106,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
-                                    debugPrint(
-                                        '❌ Error loading network image: $error');
+                                    debugPrint('❌ Error loading network image: $error');
                                     return SvgPicture.asset(
                                       'assets/images/properties_category.svg',
                                       width: 112,
@@ -1112,16 +1008,14 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                     );
                                   },
                                 );
-                              } else if (widget.auctionData['isDeposit'] ==
-                                  true) {
+                              } else if (widget.auctionData['isDeposit'] == true) {
                                 return Image.network(
                                   imagePath,
                                   width: 112,
                                   height: 106,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
-                                    debugPrint(
-                                        '❌ Error loading network image: $error');
+                                    debugPrint('❌ Error loading network image: $error');
                                     return SvgPicture.asset(
                                       'assets/images/properties_category.svg',
                                       width: 112,
@@ -1137,8 +1031,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                   height: 106,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
-                                    debugPrint(
-                                        '❌ Error loading file image: $error');
+                                    debugPrint('❌ Error loading file image: $error');
                                     return SvgPicture.asset(
                                       'assets/images/properties_category.svg',
                                       width: 112,
@@ -1163,37 +1056,24 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                           top: 0,
                           left: 0,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                             decoration: BoxDecoration(
-                              color: getStatusColor(widget
-                                          .auctionData['isDeposit'] ==
-                                      true
+                              color: getStatusColor(widget.auctionData['isDeposit'] == true
                                   ? widget.auctionData['status']
-                                  : (widget.auctionData['auction'] != null &&
-                                          widget.auctionData['details'] != null)
-                                      ? (widget.auctionData['auction'].status ??
-                                          'Unknown')
-                                      : widget.auctionData['data']?['product']
-                                              ?['status'] ??
-                                          'Unknown'),
+                                  : (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
+                                      ? (widget.auctionData['auction'].status ?? 'Unknown')
+                                      : widget.auctionData['data']?['product']?['status'] ?? 'Unknown'),
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(6),
                                 bottomRight: Radius.circular(6),
                               ),
                             ),
                             child: Text(
-                              getDisplayStatus(widget
-                                          .auctionData['isDeposit'] ==
-                                      true
+                              getDisplayStatus(widget.auctionData['isDeposit'] == true
                                   ? widget.auctionData['status']
-                                  : (widget.auctionData['auction'] != null &&
-                                          widget.auctionData['details'] != null)
-                                      ? (widget.auctionData['auction'].status ??
-                                          'Unknown')
-                                      : widget.auctionData['data']?['product']
-                                              ?['status'] ??
-                                          'Unknown'),
+                                  : (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
+                                      ? (widget.auctionData['auction'].status ?? 'Unknown')
+                                      : widget.auctionData['data']?['product']?['status'] ?? 'Unknown'),
                               style: const TextStyle(
                                 fontSize: 6.4,
                                 color: secondaryColor,
@@ -1217,34 +1097,20 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                         Text(
                           widget.auctionData['isDeposit'] == true
                               ? widget.auctionData['title'] ?? 'No Title'
-                              : (widget.auctionData['auction'] != null &&
-                                      widget.auctionData['details'] != null)
-                                  ? (widget.auctionData['auction'].title ??
-                                      'No Title')
-                                  : widget.auctionData['data']?['product']
-                                          ?['title'] ??
-                                      'Title not found',
-                          style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: onSecondaryColor),
+                              : (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
+                                  ? (widget.auctionData['auction'].title ?? 'No Title')
+                                  : widget.auctionData['data']?['product']?['title'] ?? 'Title not found',
+                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: onSecondaryColor),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 7),
                         Text(
                           widget.auctionData['isDeposit'] == true
-                              ? widget.auctionData['description'] ??
-                                  'No Description'
-                              : (widget.auctionData['auction'] != null &&
-                                      widget.auctionData['details'] != null)
-                                  ? (widget
-                                          .auctionData['auction'].description ??
-                                      'No Description')
-                                  : widget.auctionData['data']?['product']
-                                          ?['description'] ??
-                                      widget.auctionData['description'] ??
-                                      'No Description',
+                              ? widget.auctionData['description'] ?? 'No Description'
+                              : (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
+                                  ? (widget.auctionData['auction'].description ?? 'No Description')
+                                  : widget.auctionData['data']?['product']?['description'] ?? widget.auctionData['description'] ?? 'No Description',
                           style: const TextStyle(
                             color: onSecondaryColor,
                             fontWeight: FontWeight.w500,
@@ -1289,32 +1155,22 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                             // Access expiry date from the nested data structure
                             // Print the full structure for debugging
                             // debugPrint('🔍 [DEBUG] auctionData: \\n${const JsonEncoder.withIndent('  ').convert(widget.auctionData)}');
-                            final endTime = widget.auctionData['isDeposit'] ==
-                                    true
-                                ? (widget.auctionData['endTime'] ??
-                                    widget.auctionData['expiryDate'])
-                                : (widget.auctionData['auction'] != null &&
-                                        widget.auctionData['details'] != null)
-                                    ? (widget.auctionData['auction']
-                                            .expiryDate ??
-                                        widget.auctionData['auction'].endDate)
-                                    : (widget.auctionData['data']?['endTime'] ??
-                                        widget.auctionData['endTime']);
+                            final endTime = widget.auctionData['isDeposit'] == true
+                                ? (widget.auctionData['endTime'] ?? widget.auctionData['expiryDate'])
+                                : (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
+                                    ? (widget.auctionData['auction'].expiryDate ?? widget.auctionData['auction'].endDate)
+                                    : (widget.auctionData['data']?['endTime'] ?? widget.auctionData['endTime']);
 
                             debugPrint('🔍 Raw end date: $endTime');
 
                             if (endTime != null) {
                               try {
                                 // Parse the date string if it's a string
-                                final dateTime = endTime is String
-                                    ? DateTime.parse(endTime)
-                                    : endTime;
+                                final dateTime = endTime is String ? DateTime.parse(endTime) : endTime;
 
                                 // Format the DateTime object
-                                final formattedDate =
-                                    DateFormat('dd-MM-yyyy').format(dateTime);
-                                final formattedTime =
-                                    DateFormat('hh:mm a').format(dateTime);
+                                final formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+                                final formattedTime = DateFormat('hh:mm a').format(dateTime);
                                 debugPrint('🔍 Formatted date: $formattedDate');
                                 debugPrint('🔍 Formatted time: $formattedTime');
                                 return '$formattedDate  |  $formattedTime';
@@ -1332,35 +1188,21 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                         ),
                         Container(
                           margin: const EdgeInsets.only(top: 6),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                           decoration: BoxDecoration(
-                            color: getStatusColor(widget
-                                        .auctionData['isDeposit'] ==
-                                    true
+                            color: getStatusColor(widget.auctionData['isDeposit'] == true
                                 ? widget.auctionData['usageStatus'] ?? 'Unknown'
-                                : (widget.auctionData['auction'] != null &&
-                                        widget.auctionData['details'] != null)
-                                    ? (widget.auctionData['auction']
-                                            .usageStatus ??
-                                        'Unknown')
-                                    : widget.auctionData['data']?['product']
-                                            ?['usageStatus'] ??
-                                        'Unknown'),
+                                : (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
+                                    ? (widget.auctionData['auction'].usageStatus ?? 'Unknown')
+                                    : widget.auctionData['data']?['product']?['usageStatus'] ?? 'Unknown'),
                             borderRadius: BorderRadius.circular(3),
                           ),
                           child: Text(
-                            getDisplayStatus(widget.auctionData['isDeposit'] ==
-                                    true
+                            getDisplayStatus(widget.auctionData['isDeposit'] == true
                                 ? widget.auctionData['usageStatus'] ?? 'Unknown'
-                                : (widget.auctionData['auction'] != null &&
-                                        widget.auctionData['details'] != null)
-                                    ? (widget.auctionData['auction']
-                                            .usageStatus ??
-                                        'Unknown')
-                                    : widget.auctionData['data']?['product']
-                                            ?['usageStatus'] ??
-                                        'Unknown'),
+                                : (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
+                                    ? (widget.auctionData['auction'].usageStatus ?? 'Unknown')
+                                    : widget.auctionData['data']?['product']?['usageStatus'] ?? 'Unknown'),
                             style: const TextStyle(
                               color: secondaryColor,
                               fontSize: 6.4,
@@ -1381,10 +1223,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                (widget.auctionData['auction'] != null &&
-                        widget.auctionData['details'] != null)
-                    ? 'Purchase Price'
-                    : 'Security Deposit',
+                (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) ? 'Purchase Price' : 'Security Deposit',
                 style: const TextStyle(
                   color: onSecondaryColor,
                   fontSize: 12,
@@ -1394,48 +1233,33 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
               Text(
                 () {
                   debugPrint('🔍 Auction Data: ${widget.auctionData}');
-                  debugPrint(
-                      '🔍 Is Deposit: ${widget.auctionData['isDeposit']}');
+                  debugPrint('🔍 Is Deposit: ${widget.auctionData['isDeposit']}');
                   debugPrint('🔍 Data Object: ${widget.auctionData['data']}');
 
                   // Buy Now flow: use acceptedAmount from details
-                  if (widget.auctionData['auction'] != null &&
-                      widget.auctionData['details'] != null) {
-                    final acceptedAmount = widget.auctionData['details']
-                                ['acceptedAmount']
-                            ?.toString() ??
-                        '0';
+                  if (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) {
+                    final acceptedAmount = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
                     final parsedAmount = double.tryParse(acceptedAmount) ?? 0;
-                    final formattedAmount = NumberFormat("#,##0.00")
-                        .format(parsedAmount);
+                    final formattedAmount = NumberFormat("#,##0.00").format(parsedAmount);
                     return 'AED $formattedAmount';
                   }
 
                   // For newly created auctions, calculate deposit based on category
-                  if (widget.auctionData['isDeposit'] == null &&
-                      widget.auctionData['data'] != null) {
-                    final categoryId =
-                        widget.auctionData['data']['product']?['categoryId'];
+                  if (widget.auctionData['isDeposit'] == null && widget.auctionData['data'] != null) {
+                    final categoryId = widget.auctionData['data']['product']?['categoryId'];
                     if (categoryId != null) {
-                      final depositAmount =
-                          CategoryService.getSellerDepositAmount(
-                              int.parse(categoryId.toString()));
+                      final depositAmount = CategoryService.getSellerDepositAmount(int.parse(categoryId.toString()));
                       debugPrint('🔍 Calculated Deposit Amount: $depositAmount');
                       return 'AED ${NumberFormat("#,##0.00").format(double.tryParse(depositAmount) ?? 0)}';
                     }
                   }
 
                   // For existing deposits, use the provided amount
-                  final depositAmount = widget.auctionData['isDeposit'] == true
-                      ? widget.auctionData['depositAmount']?.toString()
-                      : widget.auctionData['data']?['depositAmount']
-                              ?.toString() ??
-                          widget.auctionData['depositAmount']?.toString();
+                  final depositAmount = widget.auctionData['isDeposit'] == true ? widget.auctionData['depositAmount']?.toString() : widget.auctionData['data']?['depositAmount']?.toString() ?? widget.auctionData['depositAmount']?.toString();
 
                   debugPrint('🔍 Deposit Amount: $depositAmount');
 
-                  final formattedAmount = NumberFormat("#,##0.00").format(
-                      double.tryParse(depositAmount ?? '0') ?? 0);
+                  final formattedAmount = NumberFormat("#,##0.00").format(double.tryParse(depositAmount ?? '0') ?? 0);
 
                   return 'AED $formattedAmount';
                 }(),
@@ -1447,8 +1271,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
               ),
             ],
           ),
-          if (!(widget.auctionData['auction'] != null &&
-              widget.auctionData['details'] != null))
+          if (!(widget.auctionData['auction'] != null && widget.auctionData['details'] != null))
             Text(
               '(refunded after auction completion)',
               style: TextStyle(
@@ -1474,17 +1297,11 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                 () {
                   final categoryId = widget.auctionData['isDeposit'] == true
                       ? widget.auctionData['categoryId'] ?? 'No Category'
-                      : (widget.auctionData['auction'] != null &&
-                              widget.auctionData['details'] != null)
-                          ? (widget.auctionData['auction'].categoryId ??
-                              'No Category')
-                          : widget.auctionData['data']?['product']
-                                  ?['categoryId'] ??
-                              widget.auctionData['categoryId'] ??
-                              'No Category';
+                      : (widget.auctionData['auction'] != null && widget.auctionData['details'] != null)
+                          ? (widget.auctionData['auction'].categoryId ?? 'No Category')
+                          : widget.auctionData['data']?['product']?['categoryId'] ?? widget.auctionData['categoryId'] ?? 'No Category';
                   if (categoryId != null && categoryId != "No Category") {
-                    final name = CategoryService.getCategoryName(
-                        int.parse(categoryId.toString()));
+                    final name = CategoryService.getCategoryName(int.parse(categoryId.toString()));
                     return name.isNotEmpty ? name : 'Unknown';
                   }
                   return 'Unknown';
@@ -1502,10 +1319,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                (widget.auctionData['auction'] != null &&
-                        widget.auctionData['details'] != null)
-                    ? 'Auction Fee'
-                    : 'Auction Starting Price',
+                (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) ? 'Auction Fee' : 'Auction Starting Price',
                 style: const TextStyle(
                   color: onSecondaryColor,
                   fontSize: 12,
@@ -1514,17 +1328,11 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
               Builder(
                 builder: (context) {
                   // Buy Now flow: Auction Fee = purchase price / 200
-                  if (widget.auctionData['auction'] != null &&
-                      widget.auctionData['details'] != null) {
-                    final acceptedAmountStr = widget.auctionData['details']
-                                ['acceptedAmount']
-                            ?.toString() ??
-                        '0';
-                    final acceptedAmount =
-                        double.tryParse(acceptedAmountStr) ?? 0;
+                  if (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) {
+                    final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
+                    final acceptedAmount = double.tryParse(acceptedAmountStr) ?? 0;
                     final auctionFee = acceptedAmount / 200;
-                    final formattedFee =
-                        NumberFormat("#,##0.00").format(auctionFee);
+                    final formattedFee = NumberFormat("#,##0.00").format(auctionFee);
                     return Text(
                       'AED $formattedFee',
                       style: const TextStyle(
@@ -1535,11 +1343,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                   }
                   // Other flows: show auction starting price as before
                   final startingPrice = int.tryParse(
-                        widget.auctionData['isDeposit'] == true
-                            ? widget.auctionData['startBidAmount'].toString()
-                            : widget.auctionData['data']?['startBidAmount']
-                                    ?.toString() ??
-                                '0',
+                        widget.auctionData['isDeposit'] == true ? widget.auctionData['startBidAmount'].toString() : widget.auctionData['data']?['startBidAmount']?.toString() ?? '0',
                       ) ??
                       0;
                   return Text(
@@ -1556,8 +1360,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
           const SizedBox(height: 22),
 
           // Show total only for Buy Now flow
-          if (widget.auctionData['auction'] != null &&
-              widget.auctionData['details'] != null) ...[
+          if (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1571,10 +1374,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                 ),
                 Builder(
                   builder: (context) {
-                    final acceptedAmountStr = widget.auctionData['details']
-                                ['acceptedAmount']
-                            ?.toString() ??
-                        '0';
+                    final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
                     final acceptedAmount = double.tryParse(acceptedAmountStr) ?? 0;
                     final auctionFee = acceptedAmount / 200;
                     final cardFee = ((acceptedAmount + auctionFee) * 0.03) + 4;
@@ -1605,10 +1405,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                 ),
                 Builder(
                   builder: (context) {
-                    final acceptedAmountStr = widget.auctionData['details']
-                                ['acceptedAmount']
-                            ?.toString() ??
-                        '0';
+                    final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
                     final acceptedAmount = double.tryParse(acceptedAmountStr) ?? 0;
                     final auctionFee = acceptedAmount / 200;
                     final cardFee = ((acceptedAmount + auctionFee) * 0.03) + 4;
@@ -1647,10 +1444,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const FaqScreen()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FaqScreen()));
                 },
                 child: const Text(
                   'FAQs',

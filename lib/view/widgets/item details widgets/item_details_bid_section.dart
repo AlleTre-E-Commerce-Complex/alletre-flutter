@@ -100,16 +100,12 @@ class DepositConfirmationDialog extends StatelessWidget {
                 children: [
                   const TextSpan(text: 'You are about to place a bid of '),
                   TextSpan(
-                    text:
-                        'AED ${NumberFormat.decimalPattern().format(bidAmount)}',
+                    text: 'AED ${NumberFormat.decimalPattern().format(bidAmount)}',
                     style: const TextStyle(color: primaryColor),
                   ),
-                  const TextSpan(
-                      text:
-                          '. Please note that you will need to pay an amount of '),
+                  const TextSpan(text: '. Please note that you will need to pay an amount of '),
                   TextSpan(
-                    text:
-                        'AED ${NumberFormat.decimalPattern().format(depositAmount)}',
+                    text: 'AED ${NumberFormat.decimalPattern().format(depositAmount)}',
                     style: TextStyle(color: snapchatColor),
                   ),
                   const TextSpan(text: ' as one-time deposit for the auction.'),
@@ -156,8 +152,7 @@ class DepositConfirmationDialog extends StatelessWidget {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(secondaryColor),
+                              valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
                             ),
                           )
                         : Text(
@@ -189,14 +184,10 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
   void initState() {
     super.initState();
     final auction = context.read<AuctionProvider>().getAuctionById(widget.item.id) ?? widget.item;
-    minimumBid = auction.currentBid.isEmpty
-        ? auction.startBidAmount
-        : auction.currentBid;
+    minimumBid = auction.currentBid.isEmpty ? auction.startBidAmount : auction.currentBid;
     bidAmount = ValueNotifier<String>(minimumBid);
     _optimisticCurrentBid = null; // Ensure reset on init
-    _bidController = TextEditingController(
-        text:
-            'AED ${NumberFormat.decimalPattern().format(double.parse(minimumBid))}');
+    _bidController = TextEditingController(text: 'AED ${NumberFormat.decimalPattern().format(double.parse(minimumBid))}');
 
     bidAmount.addListener(_updateController);
     _calculateDeposit();
@@ -219,8 +210,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
         final categoryId = auction.product?['categoryId'];
 
         try {
-          final url =
-              '${ApiEndpoints.baseUrl}/categories/getParticularCatergory?categoryId=$categoryId';
+          final url = '${ApiEndpoints.baseUrl}/categories/getParticularCatergory?categoryId=$categoryId';
 
           final response = await http.get(
             Uri.parse(url),
@@ -258,10 +248,8 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       debugPrint('  - Name: ${category['nameEn']}');
       debugPrint('  - Fixed Deposit: ${category['bidderDepositFixedAmount']}');
       debugPrint('  - Luxury Amount: ${category['luxuaryAmount']}');
-      debugPrint(
-          '  - Luxury Percentage: ${category['percentageOfLuxuarySD_forBidder']}');
-      debugPrint(
-          '  - Min Luxury Deposit: ${category['minimumLuxuarySD_forBidder']}');
+      debugPrint('  - Luxury Percentage: ${category['percentageOfLuxuarySD_forBidder']}');
+      debugPrint('  - Min Luxury Deposit: ${category['minimumLuxuarySD_forBidder']}');
 
       _calculatedDeposit = DepositCalculator.calculateSecurityDeposit(
         startBidAmount: startBidAmount,
@@ -283,8 +271,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
   }
 
   void _updateController() {
-    final formattedValue =
-        'AED ${NumberFormat.decimalPattern().format(double.parse(bidAmount.value))}';
+    final formattedValue = 'AED ${NumberFormat.decimalPattern().format(double.parse(bidAmount.value))}';
     if (_bidController.text != formattedValue) {
       _bidController.text = formattedValue;
     }
@@ -311,8 +298,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
     final robustCurrentBid = auctionProvider.getCurrentBidForAuction(auction.id, auction.currentBid);
     _optimisticCurrentBid = double.tryParse(robustCurrentBid);
 
-    if (!auction.isAuctionProduct ||
-        (widget.title == "Similar Products" && !auction.isAuctionProduct)) {
+    if (!auction.isAuctionProduct || (widget.title == "Similar Products" && !auction.isAuctionProduct)) {
       return Column(
         children: [
           const SizedBox(height: 10),
@@ -328,12 +314,11 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const MyProductsScreen(),
-                                ),
-                              );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MyProductsScreen(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,
@@ -344,10 +329,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                           ),
                           child: Text(
                             'Change Status',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(color: secondaryColor, fontSize: 12),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: secondaryColor, fontSize: 12),
                           ),
                         ),
                       ),
@@ -367,10 +349,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                           ),
                           child: Text(
                             'Convert to Auction',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(color: primaryColor, fontSize: 12),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 12),
                           ),
                         ),
                       ),
@@ -384,24 +363,15 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                final message = Uri.encodeComponent(
-                                    "Hello, I would like to inquire about your product listed on Alletre.");
-                                final whatsappUrl =
-                                    "https://wa.me/${widget.item.phone}?text=$message";
+                                final message = Uri.encodeComponent("Hello, I would like to inquire about your product listed on Alletre.");
+                                final whatsappUrl = "https://wa.me/${widget.item.phone}?text=$message";
                                 launchUrl(Uri.parse(whatsappUrl));
                               },
-                              icon: const Icon(FontAwesomeIcons.whatsapp,
-                                  color: secondaryColor),
-                              label: Text('Chat',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                          color: secondaryColor, fontSize: 16)),
+                              icon: const Icon(FontAwesomeIcons.whatsapp, color: secondaryColor),
+                              label: Text('Chat', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: secondaryColor, fontSize: 16)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primaryColor,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6),
                                 ),
@@ -426,21 +396,17 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                                           children: [
                                             const Text(
                                               'Contact Number',
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold),
+                                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                             ),
                                             const SizedBox(height: 16),
                                             Text(
                                               'You can connect on',
-                                              style: TextStyle(
-                                                  color: expiredColor),
+                                              style: TextStyle(color: expiredColor),
                                             ),
                                             Text(
                                               widget.item.phone,
                                               style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .primaryColor,
+                                                color: Theme.of(context).primaryColor,
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 15,
                                               ),
@@ -449,49 +415,29 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                                             RichText(
                                               textAlign: TextAlign.center,
                                               text: TextSpan(
-                                                style: TextStyle(
-                                                    color: textColor,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontStyle:
-                                                        FontStyle.italic),
+                                                style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),
                                                 children: const [
-                                                  TextSpan(
-                                                      text:
-                                                          "Don't forget to mention "),
+                                                  TextSpan(text: "Don't forget to mention "),
                                                   TextSpan(
                                                     text: "Alletre",
-                                                    style: TextStyle(
-                                                        color: primaryColor,
-                                                        fontStyle:
-                                                            FontStyle.italic),
+                                                    style: TextStyle(color: primaryColor, fontStyle: FontStyle.italic),
                                                   ),
-                                                  TextSpan(
-                                                      text: " when you call"),
+                                                  TextSpan(text: " when you call"),
                                                 ],
                                               ),
                                             ),
                                             const SizedBox(height: 20),
                                             Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                              mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
                                                 TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        secondaryColor,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 16),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              6),
-                                                      side: const BorderSide(
-                                                          color: primaryColor),
+                                                  onPressed: () => Navigator.pop(context),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: secondaryColor,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(6),
+                                                      side: const BorderSide(color: primaryColor),
                                                     ),
                                                   ),
                                                   child: const Text('Close'),
@@ -499,28 +445,17 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                                                 const SizedBox(width: 10),
                                                 ElevatedButton(
                                                   onPressed: () {
-                                                    final url =
-                                                        'tel:${widget.item.phone}';
+                                                    final url = 'tel:${widget.item.phone}';
                                                     launchUrl(Uri.parse(url));
                                                   },
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        primaryColor,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 16),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              6),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: primaryColor,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(6),
                                                     ),
                                                   ),
-                                                  child: const Text('Call Now',
-                                                      style: TextStyle(
-                                                          color:
-                                                              secondaryColor)),
+                                                  child: const Text('Call Now', style: TextStyle(color: secondaryColor)),
                                                 ),
                                               ],
                                             ),
@@ -532,16 +467,10 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                                 );
                               },
                               icon: const Icon(Icons.call, color: primaryColor),
-                              label: Text('Call',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                          color: primaryColor, fontSize: 16)),
+                              label: Text('Call', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontSize: 16)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: secondaryColor,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6),
                                   side: const BorderSide(color: primaryColor),
@@ -554,11 +483,9 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                     : ElevatedButton(
                         onPressed: () {
                           if (!isLoggedIn) {
-                            AuthHelper.showAuthenticationRequiredMessage(
-                                context);
+                            AuthHelper.showAuthenticationRequiredMessage(context);
                           } else {
-                            contactProvider
-                                .toggleContactButtons(widget.item.id);
+                            contactProvider.toggleContactButtons(widget.item.id);
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -570,10 +497,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                         ),
                         child: Text(
                           'View Contact Details',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(color: secondaryColor, fontSize: 16),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: secondaryColor, fontSize: 16),
                         ),
                       );
               },
@@ -597,20 +521,16 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
               ValueListenableBuilder<String>(
                 valueListenable: bidAmount,
                 builder: (context, value, child) {
-                  final bool canDecrease =
-                      double.parse(value) > double.parse(auction.currentBid.isEmpty ? auction.startBidAmount : auction.currentBid);
+                  final bool canDecrease = double.parse(value) > double.parse(auction.currentBid.isEmpty ? auction.startBidAmount : auction.currentBid);
                   return Container(
                     height: 30,
                     width: 30,
                     decoration: BoxDecoration(
-                      color: canDecrease
-                          ? primaryColor
-                          : primaryColor.withAlpha(128),
+                      color: canDecrease ? primaryColor : primaryColor.withAlpha(128),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.remove,
-                          color: secondaryColor, size: 15),
+                      icon: const Icon(Icons.remove, color: secondaryColor, size: 15),
                       onPressed: canDecrease
                           ? () {
                               final currentValue = double.parse(value);
@@ -624,13 +544,9 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
               Expanded(
                 child: TextField(
                   controller: _bidController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: onSecondaryColor,
-                      fontSize: 15),
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600, color: onSecondaryColor, fontSize: 15),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -639,8 +555,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                   ),
                   onChanged: (newValue) {
                     // Remove 'AED ' prefix and any commas
-                    final cleanValue =
-                        newValue.replaceAll('AED ', '').replaceAll(',', '');
+                    final cleanValue = newValue.replaceAll('AED ', '').replaceAll(',', '');
                     if (cleanValue.isNotEmpty) {
                       final numericValue = double.tryParse(cleanValue);
                       if (numericValue != null) {
@@ -661,8 +576,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.add,
-                          color: secondaryColor, size: 15),
+                      icon: const Icon(Icons.add, color: secondaryColor, size: 15),
                       onPressed: () {
                         final currentValue = double.parse(value);
                         bidAmount.value = (currentValue + 50).toString();
@@ -697,10 +611,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
                   )
                 : Text(
                     'Submit Bid',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(color: secondaryColor, fontSize: 16),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: secondaryColor, fontSize: 16),
                   ),
           ),
         ),
@@ -772,8 +683,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       return false;
     } catch (e) {
       print('🔍 Error checking deposit status via submit-bid: $e');
-      print(
-          '[DEBUG] _checkDepositStatus encountered an error, returning false.');
+      print('[DEBUG] _checkDepositStatus encountered an error, returning false.');
       return false;
     }
   }
@@ -799,7 +709,9 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
           backgroundColor: errorColor,
         ),
       );
-      setState(() { _isSubmitting = false; });
+      setState(() {
+        _isSubmitting = false;
+      });
       return;
     }
 
@@ -817,9 +729,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       // Show deposit dialog if:
       // - first time bidder (non-cars), or
       // - cars: user has never bid >= 5000 and now bids >= 5000
-      final shouldShowDepositDialog =
-        (isFirstTime && categoryName != 'cars') ||
-        (categoryName == 'cars' && userHighestBid < 5000 && enteredBid >= 5000);
+      final shouldShowDepositDialog = (isFirstTime && categoryName != 'cars') || (categoryName == 'cars' && userHighestBid < 5000 && enteredBid >= 5000);
       if (shouldShowDepositDialog) {
         print('[DEBUG] User is first-time bidder. Showing deposit dialog.');
         if (mounted) {
@@ -863,7 +773,9 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
               backgroundColor: errorColor,
             ),
           );
-          setState(() { _isSubmitting = false; });
+          setState(() {
+            _isSubmitting = false;
+          });
           return;
         }
 
@@ -873,7 +785,9 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
           final refreshResult = await userService.refreshTokens();
           if (refreshResult['success'] != true) {
             // Auth error
-            setState(() { _isSubmitting = false; });
+            setState(() {
+              _isSubmitting = false;
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Center(child: Text('Authentication error. Please login again.'))),
             );
@@ -909,14 +823,18 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
               const SnackBar(content: Center(child: Text('Bid placed successfully')), backgroundColor: activeColor),
             );
           } else {
-            setState(() { _isSubmitting = false; });
+            setState(() {
+              _isSubmitting = false;
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Center(child: Text('Bid failed. Please try again.')), backgroundColor: errorColor),
             );
           }
         } catch (e) {
           // Network or other error
-          setState(() { _isSubmitting = false; });
+          setState(() {
+            _isSubmitting = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Center(child: Text('Network error. Please try again.')), backgroundColor: errorColor),
           );
@@ -986,8 +904,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
       print('  - Start Bid: ${auction.startBidAmount}');
       print('  - Calculated Deposit: $_calculatedDeposit');
 
-      await _auctionService.processBidderDeposit(
-          auction.id.toString(), submittedBidAmount);
+      await _auctionService.processBidderDeposit(auction.id.toString(), submittedBidAmount);
 
       if (mounted) {
         print('🔍 Passing data to PaymentDetailsScreen:');
@@ -1001,32 +918,35 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
           MaterialPageRoute(
             builder: (context) => PaymentDetailsScreen(
               auctionData: {
-                'id': widget.item.id,
-                'amount': submittedBidAmount,
-                'isDeposit': true,
-                'product': widget.item.product,
-                'currentBid': widget.item.currentBid,
-                'startBidAmount': widget.item.startBidAmount,
-                'status': widget.item.status,
-                'usageStatus': widget.item.usageStatus,
-                'title': widget.item.title,
-                'description': widget.item.description,
-                'category': widget.item.product?['category'],
-                'subCategory': widget.item.product?['subCategory'],
-                'images': widget.item.imageLinks,
-                'user': widget.item.product?['user'],
-                'createdAt': widget.item.createdAt,
-                'expiryDate': widget.item.expiryDate,
-                'isAuctionProduct': widget.item.isAuctionProduct,
-                'bids': widget.item.bids,
-                'depositAmount': _calculatedDeposit,
-                'isDepositPaid': widget.item.isDepositPaid,
-                'buyNowEnabled': widget.item.buyNowEnabled,
-                'buyNowPrice': widget.item.buyNowPrice,
-                'categoryId': widget.item.categoryId,
-                'subCategoryId': widget.item.subCategoryId,
-                'categoryName': widget.item.categoryName,
-                'subCategoryName': widget.item.subCategoryName,
+                'details': {
+                  'id': widget.item.id,
+                  'amount': submittedBidAmount,
+                  'isDeposit': true,
+                  'product': widget.item.product,
+                  'currentBid': widget.item.currentBid,
+                  'startBidAmount': widget.item.startBidAmount,
+                  'status': widget.item.status,
+                  'usageStatus': widget.item.usageStatus,
+                  'title': widget.item.title,
+                  'description': widget.item.description,
+                  'category': widget.item.product?['category'],
+                  'subCategory': widget.item.product?['subCategory'],
+                  'images': widget.item.imageLinks,
+                  'user': widget.item.product?['user'],
+                  'createdAt': widget.item.createdAt,
+                  'expiryDate': widget.item.expiryDate,
+                  'isAuctionProduct': widget.item.isAuctionProduct,
+                  'bids': widget.item.bids,
+                  'depositAmount': _calculatedDeposit,
+                  'isDepositPaid': widget.item.isDepositPaid,
+                  'buyNowEnabled': widget.item.buyNowEnabled,
+                  'buyNowPrice': widget.item.buyNowPrice,
+                  'categoryId': widget.item.categoryId,
+                  'subCategoryId': widget.item.subCategoryId,
+                  'categoryName': widget.item.categoryName,
+                  'subCategoryName': widget.item.subCategoryName,
+                  'isMyAuction': widget.item.isMyAuction,
+                }
               },
             ),
           ),

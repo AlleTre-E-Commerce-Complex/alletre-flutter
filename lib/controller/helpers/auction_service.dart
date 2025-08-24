@@ -103,7 +103,6 @@ class AuctionService {
     }
   }
 
-
   Future<String?> _getAccessToken() async {
     try {
       // Get server-issued access token
@@ -177,34 +176,21 @@ class AuctionService {
         'type': auctionData['scheduleBid'] == true ? 'SCHEDULED' : 'ON_TIME',
         'durationUnit': auctionData['durationUnit'].toString().toUpperCase(),
         // Set duration field based on durationUnit
-        'durationInDays':
-            auctionData['durationUnit'].toString().toUpperCase() == 'DAYS'
-                ? int.parse(auctionData['duration'].toString())
-                : null,
-        'durationInHours':
-            auctionData['durationUnit'].toString().toUpperCase() == 'HOURS'
-                ? int.parse(auctionData['duration'].toString())
-                : null,
-        'startBidAmount':
-            double.parse(auctionData['startBidAmount'].toString()),
+        'durationInDays': auctionData['durationUnit'].toString().toUpperCase() == 'DAYS' ? int.parse(auctionData['duration'].toString()) : null,
+        'durationInHours': auctionData['durationUnit'].toString().toUpperCase() == 'HOURS' ? int.parse(auctionData['duration'].toString()) : null,
+        'startBidAmount': double.parse(auctionData['startBidAmount'].toString()),
         'startDate': auctionData['startDate'],
         'endDate': auctionData['endDate'],
         'scheduleBid': auctionData['scheduleBid'] ?? false,
         'buyNowEnabled': auctionData['buyNowEnabled'] ?? false,
-        'buyNowPrice':
-            double.parse(auctionData['buyNowPrice']?.toString() ?? '0'),
+        'buyNowPrice': double.parse(auctionData['buyNowPrice']?.toString() ?? '0'),
         'locationId': locationId,
       };
 
       // Handle shipping details
       if (auctionData['shippingDetails'] != null) {
         final shippingDetails = auctionData['shippingDetails'];
-        requestBody['shippingDetails'] = {
-          'country': shippingDetails['country'],
-          'city': shippingDetails['city'],
-          'address': shippingDetails['address'],
-          'phone': shippingDetails['phone']
-        };
+        requestBody['shippingDetails'] = {'country': shippingDetails['country'], 'city': shippingDetails['city'], 'address': shippingDetails['address'], 'phone': shippingDetails['phone']};
       }
 
       // Handle product data
@@ -220,43 +206,32 @@ class AuctionService {
 
         // Convert numeric fields
         if (cleanProduct['categoryId'] != null) {
-          cleanProduct['categoryId'] =
-              int.parse(cleanProduct['categoryId'].toString());
+          cleanProduct['categoryId'] = int.parse(cleanProduct['categoryId'].toString());
         }
         if (cleanProduct['subCategoryId'] != null) {
-          cleanProduct['subCategoryId'] =
-              int.parse(cleanProduct['subCategoryId'].toString());
+          cleanProduct['subCategoryId'] = int.parse(cleanProduct['subCategoryId'].toString());
         }
         if (cleanProduct['quantity'] != null) {
-          cleanProduct['quantity'] =
-              int.parse(cleanProduct['quantity'].toString());
+          cleanProduct['quantity'] = int.parse(cleanProduct['quantity'].toString());
         }
         if (cleanProduct['screenSize'] != null) {
-          cleanProduct['screenSize'] =
-              double.parse(cleanProduct['screenSize'].toString());
+          cleanProduct['screenSize'] = double.parse(cleanProduct['screenSize'].toString());
         }
         if (cleanProduct['releaseYear'] != null) {
-          cleanProduct['releaseYear'] =
-              int.parse(cleanProduct['releaseYear'].toString());
+          cleanProduct['releaseYear'] = int.parse(cleanProduct['releaseYear'].toString());
         }
         if (cleanProduct['ramSize'] != null) {
-          cleanProduct['ramSize'] =
-              int.parse(cleanProduct['ramSize'].toString());
+          cleanProduct['ramSize'] = int.parse(cleanProduct['ramSize'].toString());
         }
         if (cleanProduct['memory'] != null) {
-          cleanProduct['memory'] =
-              int.parse(cleanProduct['memory'].toString());
+          cleanProduct['memory'] = int.parse(cleanProduct['memory'].toString());
         }
         if (cleanProduct['age'] != null) {
-          cleanProduct['age'] =
-              int.parse(cleanProduct['age'].toString());
+          cleanProduct['age'] = int.parse(cleanProduct['age'].toString());
         }
 
         // Validate required fields
-        if (!cleanProduct.containsKey('title') ||
-            !cleanProduct.containsKey('description') ||
-            !cleanProduct.containsKey('categoryId') ||
-            !cleanProduct.containsKey('subCategoryId')) {
+        if (!cleanProduct.containsKey('title') || !cleanProduct.containsKey('description') || !cleanProduct.containsKey('categoryId') || !cleanProduct.containsKey('subCategoryId')) {
           throw Exception('Product data missing required fields');
         }
 
@@ -275,26 +250,21 @@ class AuctionService {
 
       // Add appropriate duration field based on duration unit
       if (requestBody['durationInDays'] != null) {
-        request.fields['durationInDays'] =
-            requestBody['durationInDays'].toString();
+        request.fields['durationInDays'] = requestBody['durationInDays'].toString();
       }
       if (requestBody['durationInHours'] != null) {
-        request.fields['durationInHours'] =
-            requestBody['durationInHours'].toString();
+        request.fields['durationInHours'] = requestBody['durationInHours'].toString();
       }
-      request.fields['startBidAmount'] =
-          requestBody['startBidAmount'].toString();
+      request.fields['startBidAmount'] = requestBody['startBidAmount'].toString();
       request.fields['locationId'] = locationId.toString();
       if (requestBody['buyNowEnabled'] == true) {
         request.fields['isBuyNowAllowed'] = 'YES';
-        request.fields['acceptedAmount'] =
-            requestBody['buyNowPrice'].toString();
+        request.fields['acceptedAmount'] = requestBody['buyNowPrice'].toString();
       }
 
       // Handle start date
       String startDateStr;
-      if (requestBody['scheduleBid'] == true &&
-          auctionData['startDate'] != null) {
+      if (requestBody['scheduleBid'] == true && auctionData['startDate'] != null) {
         // Use the provided start date as is (it's already in UTC)
         startDateStr = auctionData['startDate'];
       } else {
@@ -306,12 +276,8 @@ class AuctionService {
       final startDate = DateTime.parse(startDateStr);
 
       // Calculate end date based on duration
-      final duration =
-          requestBody['durationInHours'] ?? requestBody['durationInDays'];
-      final endDate =
-          requestBody['durationUnit'].toString().toUpperCase() == 'HOURS'
-              ? startDate.add(Duration(hours: duration))
-              : startDate.add(Duration(days: duration));
+      final duration = requestBody['durationInHours'] ?? requestBody['durationInDays'];
+      final endDate = requestBody['durationUnit'].toString().toUpperCase() == 'HOURS' ? startDate.add(Duration(hours: duration)) : startDate.add(Duration(days: duration));
 
       request.fields['startDate'] = startDateStr;
       request.fields['endDate'] = endDate.toIso8601String();
@@ -351,19 +317,9 @@ class AuctionService {
       debugPrint('Adding ${images.length} media files...');
 
       // Separate images and videos
-      final imageFiles = images
-          .where((file) =>
-              file.path.toLowerCase().endsWith('.jpg') ||
-              file.path.toLowerCase().endsWith('.jpeg') ||
-              file.path.toLowerCase().endsWith('.png'))
-          .toList();
+      final imageFiles = images.where((file) => file.path.toLowerCase().endsWith('.jpg') || file.path.toLowerCase().endsWith('.jpeg') || file.path.toLowerCase().endsWith('.png')).toList();
 
-      final videoFiles = images
-          .where((file) =>
-              file.path.toLowerCase().endsWith('.mp4') ||
-              file.path.toLowerCase().endsWith('.mov') ||
-              file.path.toLowerCase().endsWith('.avi'))
-          .toList();
+      final videoFiles = images.where((file) => file.path.toLowerCase().endsWith('.mp4') || file.path.toLowerCase().endsWith('.mov') || file.path.toLowerCase().endsWith('.avi')).toList();
 
       // Validate image count
       if (imageFiles.length < 3 || imageFiles.length > 5) {
@@ -379,8 +335,7 @@ class AuctionService {
         // Determine MIME type based on file extension
         final mimeType = filename.toLowerCase().endsWith('.png')
             ? 'image/png'
-            : filename.toLowerCase().endsWith('.jpg') ||
-                    filename.toLowerCase().endsWith('.jpeg')
+            : filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg')
                 ? 'image/jpeg'
                 : 'image/jpeg'; // default to jpeg
 
@@ -532,12 +487,7 @@ class AuctionService {
       // Handle shipping details
       if (auctionData['shippingDetails'] != null) {
         final shippingDetails = auctionData['shippingDetails'];
-        requestBody['shippingDetails'] = {
-          'country': shippingDetails['country'],
-          'city': shippingDetails['city'],
-          'address': shippingDetails['address'],
-          'phone': shippingDetails['phone']
-        };
+        requestBody['shippingDetails'] = {'country': shippingDetails['country'], 'city': shippingDetails['city'], 'address': shippingDetails['address'], 'phone': shippingDetails['phone']};
       }
 
       // Handle product data
@@ -553,35 +503,26 @@ class AuctionService {
 
         // Convert numeric fields
         if (cleanProduct['categoryId'] != null) {
-          cleanProduct['categoryId'] =
-              int.parse(cleanProduct['categoryId'].toString());
+          cleanProduct['categoryId'] = int.parse(cleanProduct['categoryId'].toString());
         }
         if (cleanProduct['subCategoryId'] != null) {
-          cleanProduct['subCategoryId'] =
-              int.parse(cleanProduct['subCategoryId'].toString());
+          cleanProduct['subCategoryId'] = int.parse(cleanProduct['subCategoryId'].toString());
         }
         if (cleanProduct['quantity'] != null) {
-          cleanProduct['quantity'] =
-              int.parse(cleanProduct['quantity'].toString());
+          cleanProduct['quantity'] = int.parse(cleanProduct['quantity'].toString());
         }
         if (cleanProduct['screenSize'] != null) {
-          cleanProduct['screenSize'] =
-              double.parse(cleanProduct['screenSize'].toString());
+          cleanProduct['screenSize'] = double.parse(cleanProduct['screenSize'].toString());
         }
         if (cleanProduct['releaseYear'] != null) {
-          cleanProduct['releaseYear'] =
-              int.parse(cleanProduct['releaseYear'].toString());
+          cleanProduct['releaseYear'] = int.parse(cleanProduct['releaseYear'].toString());
         }
         if (cleanProduct['ramSize'] != null) {
-          cleanProduct['ramSize'] =
-              int.parse(cleanProduct['ramSize'].toString());
+          cleanProduct['ramSize'] = int.parse(cleanProduct['ramSize'].toString());
         }
 
         // Validate required fields
-        if (!cleanProduct.containsKey('title') ||
-            !cleanProduct.containsKey('description') ||
-            !cleanProduct.containsKey('categoryId') ||
-            !cleanProduct.containsKey('subCategoryId')) {
+        if (!cleanProduct.containsKey('title') || !cleanProduct.containsKey('description') || !cleanProduct.containsKey('categoryId') || !cleanProduct.containsKey('subCategoryId')) {
           throw Exception('Product data missing required fields');
         }
 
@@ -626,19 +567,9 @@ class AuctionService {
       debugPrint('Adding ${images.length} media files...');
 
       // Separate images and videos
-      final imageFiles = images
-          .where((file) =>
-              file.path.toLowerCase().endsWith('.jpg') ||
-              file.path.toLowerCase().endsWith('.jpeg') ||
-              file.path.toLowerCase().endsWith('.png'))
-          .toList();
+      final imageFiles = images.where((file) => file.path.toLowerCase().endsWith('.jpg') || file.path.toLowerCase().endsWith('.jpeg') || file.path.toLowerCase().endsWith('.png')).toList();
 
-      final videoFiles = images
-          .where((file) =>
-              file.path.toLowerCase().endsWith('.mp4') ||
-              file.path.toLowerCase().endsWith('.mov') ||
-              file.path.toLowerCase().endsWith('.avi'))
-          .toList();
+      final videoFiles = images.where((file) => file.path.toLowerCase().endsWith('.mp4') || file.path.toLowerCase().endsWith('.mov') || file.path.toLowerCase().endsWith('.avi')).toList();
 
       // Validate image count
       if (imageFiles.length < 3 || imageFiles.length > 5) {
@@ -654,8 +585,7 @@ class AuctionService {
         // Determine MIME type based on file extension
         final mimeType = filename.toLowerCase().endsWith('.png')
             ? 'image/png'
-            : filename.toLowerCase().endsWith('.jpg') ||
-                    filename.toLowerCase().endsWith('.jpeg')
+            : filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg')
                 ? 'image/jpeg'
                 : 'image/jpeg'; // default to jpeg
 
@@ -812,9 +742,7 @@ class AuctionService {
             await http.MultipartFile.fromPath(
               isVideo ? 'videos' : 'images',
               file.path,
-              contentType: isVideo
-                  ? MediaType('video', 'mp4')
-                  : MediaType('image', 'jpeg'),
+              contentType: isVideo ? MediaType('video', 'mp4') : MediaType('image', 'jpeg'),
             ),
           );
         }
@@ -869,10 +797,7 @@ class AuctionService {
     try {
       // First try to get the token
       String? accessToken = await _getAccessToken();
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      Map<String, String> headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
 
       // Add authorization header if we have a token
       if (accessToken != null) {
@@ -889,22 +814,18 @@ class AuctionService {
           headers: headers,
         );
 
-        debugPrint(
-            'Live Auctions Response Code: ${response.statusCode} for page $page');
+        debugPrint('Live Auctions Response Code: ${response.statusCode} for page $page');
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List)
-                .map((item) => AuctionItem.fromJson(item))
-                .toList();
+            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
 
             allItems.addAll(items);
-            debugPrint(
-                'Successfully parsed ${items.length} live auctions for page $page');
+            debugPrint('Successfully parsed ${items.length} live auctions for page $page');
 
             if (page >= totalPages) {
               hasMore = false;
@@ -942,10 +863,7 @@ class AuctionService {
 
   Future<List<AuctionItem>> fetchListedProducts() async {
     try {
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      Map<String, String> headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
 
       List<AuctionItem> allItems = [];
       int page = 1;
@@ -953,27 +871,22 @@ class AuctionService {
 
       while (hasMore) {
         final response = await http.get(
-          Uri.parse(
-              '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?page=$page'),
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?page=$page'),
           headers: headers,
         );
 
-        debugPrint(
-            'Listed Products Response Code: ${response.statusCode} for page $page');
+        debugPrint('Listed Products Response Code: ${response.statusCode} for page $page');
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List)
-                .map((item) => AuctionItem.fromJson(item))
-                .toList();
+            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
 
             allItems.addAll(items);
-            debugPrint(
-                'Successfully parsed ${items.length} listed products for page $page');
+            debugPrint('Successfully parsed ${items.length} listed products for page $page');
 
             if (page >= totalPages) {
               hasMore = false;
@@ -1001,10 +914,7 @@ class AuctionService {
     try {
       // First try to get the token
       String? accessToken = await _getAccessToken();
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      Map<String, String> headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
 
       // Add authorization header if we have a token
       if (accessToken != null) {
@@ -1019,27 +929,22 @@ class AuctionService {
 
       while (hasMore) {
         final response = await http.get(
-          Uri.parse(
-              '${ApiEndpoints.baseUrl}/auctions/user/up-comming?page=$page'),
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/up-comming?page=$page'),
           headers: headers,
         );
 
-        debugPrint(
-            'Upcoming Auctions Response Code: ${response.statusCode} for page $page');
+        debugPrint('Upcoming Auctions Response Code: ${response.statusCode} for page $page');
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List)
-                .map((item) => AuctionItem.fromJson(item))
-                .toList();
+            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
 
             allAuctions.addAll(items);
-            debugPrint(
-                'Successfully parsed ${items.length} upcoming auctions for page $page');
+            debugPrint('Successfully parsed ${items.length} upcoming auctions for page $page');
 
             if (page >= totalPages) {
               hasMore = false;
@@ -1071,27 +976,22 @@ class AuctionService {
 
       while (hasMoreScheduled) {
         final scheduledResponse = await http.get(
-          Uri.parse(
-              '${ApiEndpoints.baseUrl}/auctions/user/scheduled?page=$scheduledPage'),
+          Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/scheduled?page=$scheduledPage'),
           headers: headers,
         );
 
-        debugPrint(
-            'Scheduled Auctions Response Code: ${scheduledResponse.statusCode} for page $scheduledPage');
+        debugPrint('Scheduled Auctions Response Code: ${scheduledResponse.statusCode} for page $scheduledPage');
 
         if (scheduledResponse.statusCode == 200) {
           final data = jsonDecode(scheduledResponse.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List)
-                .map((item) => AuctionItem.fromJson(item))
-                .toList();
+            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
 
             allAuctions.addAll(items);
-            debugPrint(
-                'Successfully parsed ${items.length} scheduled auctions for page $scheduledPage');
+            debugPrint('Successfully parsed ${items.length} scheduled auctions for page $scheduledPage');
 
             if (scheduledPage >= totalPages) {
               hasMoreScheduled = false;
@@ -1117,8 +1017,7 @@ class AuctionService {
         }
       }
 
-      debugPrint(
-          'Total upcoming and scheduled auctions fetched: ${allAuctions.length}');
+      debugPrint('Total upcoming and scheduled auctions fetched: ${allAuctions.length}');
       return allAuctions;
     } catch (e) {
       debugPrint('Error fetching upcoming auctions: $e');
@@ -1130,13 +1029,10 @@ class AuctionService {
     try {
       // Normalize the status to match API expectations
       final normalizedStatus = status.trim().toUpperCase();
-      
+
       // First try to get the token
       String? accessToken = await _getAccessToken();
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      Map<String, String> headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
 
       // Add authorization header if we have a token
       if (accessToken != null) {
@@ -1148,9 +1044,8 @@ class AuctionService {
       bool hasMoreUser = true;
 
       while (hasMoreUser) {
-        final uri = Uri.parse(
-            '${ApiEndpoints.baseUrl}/auctions/user/ownes?page=$userPage&perPage=$perPage&status=$normalizedStatus');
-                    
+        final uri = Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/ownes?page=$userPage&perPage=$perPage&status=$normalizedStatus');
+
         final userResponse = await http.get(
           uri,
           headers: headers,
@@ -1159,9 +1054,7 @@ class AuctionService {
         if (userResponse.statusCode == 200) {
           final data = jsonDecode(userResponse.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List)
-                .map((item) => AuctionItem.fromJson(item))
-                .toList();
+            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
@@ -1201,13 +1094,10 @@ class AuctionService {
     try {
       // Normalize the status to match API expectations
       final normalizedStatus = status.trim().toUpperCase();
-      
+
       // First try to get the token
       String? accessToken = await _getAccessToken();
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      Map<String, String> headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
 
       // Add authorization header if we have a token
       if (accessToken != null) {
@@ -1219,9 +1109,8 @@ class AuctionService {
       bool hasMoreUser = true;
 
       while (hasMoreUser) {
-        final uri = Uri.parse(
-            '${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?page=$userPage&perPage=$perPage&status=$normalizedStatus');
-                    
+        final uri = Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/getAllListed-products?page=$userPage&perPage=$perPage&status=$normalizedStatus');
+
         final userResponse = await http.get(
           uri,
           headers: headers,
@@ -1230,9 +1119,7 @@ class AuctionService {
         if (userResponse.statusCode == 200) {
           final data = jsonDecode(userResponse.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List)
-                .map((item) => AuctionItem.fromJson(item))
-                .toList();
+            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
@@ -1313,10 +1200,7 @@ class AuctionService {
     try {
       // First try to get the token
       String? accessToken = await _getAccessToken();
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      Map<String, String> headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
 
       // Add authorization header if we have a token
       if (accessToken != null) {
@@ -1325,23 +1209,17 @@ class AuctionService {
 
       // Only fetch first page with 10 items
       final response = await http.get(
-        Uri.parse(
-            '${ApiEndpoints.baseUrl}/auctions/user/expired-auctions?page=1&limit=10'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions?page=1&limit=10'),
         headers: headers,
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['data'] is List) {
-          final items = (data['data'] as List)
-              .map((item) => AuctionItem.fromJson(item))
-              .toList();
+          final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
           // Filter out cancelled auctions
-          final validItems = items
-              .where((auction) =>
-                  auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE')
-              .toList();
+          final validItems = items.where((auction) => auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE').toList();
 
           return validItems;
         }
@@ -1352,27 +1230,16 @@ class AuctionService {
         if (refreshResult['success']) {
           accessToken = refreshResult['data']['accessToken'];
           final retryResponse = await http.get(
-            Uri.parse(
-                '${ApiEndpoints.baseUrl}/auctions/user/expired-auctions?page=1&limit=10'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
+            Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/expired-auctions?page=1&limit=10'),
+            headers: {'Authorization': 'Bearer $accessToken', 'Accept': 'application/json', 'Content-Type': 'application/json'},
           );
 
           if (retryResponse.statusCode == 200) {
             final data = jsonDecode(retryResponse.body);
             if (data['success'] == true && data['data'] is List) {
-              final items = (data['data'] as List)
-                  .map((item) => AuctionItem.fromJson(item))
-                  .toList();
+              final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
-              final validItems = items
-                  .where((auction) =>
-                      auction.status.toUpperCase() !=
-                      'CANCELLED_BEFORE_EXP_DATE')
-                  .toList();
+              final validItems = items.where((auction) => auction.status.toUpperCase() != 'CANCELLED_BEFORE_EXP_DATE').toList();
 
               return validItems;
             }
@@ -1400,10 +1267,7 @@ class AuctionService {
     try {
       // First try to get the token
       String? accessToken = await _getAccessToken();
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      Map<String, String> headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
 
       // Add authorization header if we have a token
       if (accessToken != null) {
@@ -1423,9 +1287,7 @@ class AuctionService {
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List)
-                .map((item) => AuctionItem.fromJson(item))
-                .toList();
+            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
@@ -1468,10 +1330,7 @@ class AuctionService {
   Future<bool> deleteDraft(String auctionId) async {
     try {
       String? accessToken = await _getAccessToken();
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      Map<String, String> headers = {'Accept': 'application/json', 'Content-Type': 'application/json'};
 
       if (accessToken != null) {
         headers['Authorization'] = 'Bearer $accessToken';
@@ -1494,11 +1353,7 @@ class AuctionService {
           accessToken = refreshResult['data']['accessToken'];
           final retryResponse = await http.delete(
             Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.userAuctionDetails(auctionId)}'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
+            headers: {'Authorization': 'Bearer $accessToken', 'Accept': 'application/json', 'Content-Type': 'application/json'},
           );
           return retryResponse.statusCode == 200;
         }
@@ -1534,7 +1389,7 @@ class AuctionService {
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body);
-        
+
         final errorMessage = error['message'] ?? error['error'] ?? 'Failed to submit bid';
         throw Exception(errorMessage);
       }
@@ -1566,53 +1421,112 @@ class AuctionService {
 
       final url = '${ApiEndpoints.baseUrl}${ApiEndpoints.userAuctionDetails(auctionId)}/bidder-deposit';
 
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
+      try {
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $accessToken',
+          },
+          body: requestBody,
+        );
+
+        if (response.statusCode != 200 && response.statusCode != 201) {
+          final error = jsonDecode(response.body);
+          final errorMessage = error['message'] ?? error['error'] ?? 'Failed to process deposit';
+          throw Exception(errorMessage);
+        }
+
+        print('🔍 Detailed Debugging:');
+        print('  - Access Token: $accessToken');
+        print('  - Request Body: $requestBody');
+        print('  - Request Headers: ${{
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
-        },
-        body: requestBody,
-      );
+        }}');
+        print('  - Response Status Code: ${response.statusCode}');
+        print('  - Response Headers: ${response.headers}');
+        print('  - Response Body: ${response.body}');
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          print('✅ Deposit Payment Success!');
+          return jsonDecode(response.body) as Map<String, dynamic>;
+        } else {
+          print('❌ Deposit Payment Error:');
+          print('  - Status Code: ${response.statusCode}');
+          print('  - Headers: ${response.headers}');
+          print('  - Body: ${response.body}');
+          try {
+            final errorJson = jsonDecode(response.body);
+            print('  - Backend Error Fields:');
+            print('    * statusCode: ${errorJson['statusCode']}');
+            print('    * message: ${errorJson['message']}');
+            if (errorJson['error'] != null) print('    * error: ${errorJson['error']}');
+            if (errorJson['stack'] != null) print('    * stack: ${errorJson['stack']}');
+            String errorDetails = 'Deposit payment failed [${response.statusCode}]: ${errorJson['message']}';
+            if (errorJson['error'] != null) errorDetails += ' (${errorJson['error']})';
+            if (errorJson['stack'] != null) errorDetails += '\nBackend stack: ${errorJson['stack']}';
+            throw Exception(errorDetails);
+          } catch (jsonErr) {
+            print('  - Could not parse backend error JSON: $jsonErr');
+            throw Exception('Deposit payment failed [${response.statusCode}]: ${response.body}');
+          }
+        }
+      } catch (err) {
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          final response = await http.post(
+            Uri.parse(url),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: requestBody,
+          );
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        final error = jsonDecode(response.body);
-        final errorMessage = error['message'] ?? error['error'] ?? 'Failed to process deposit';
-        throw Exception(errorMessage);
-      }
+          if (response.statusCode != 200 && response.statusCode != 201) {
+            final error = jsonDecode(response.body);
+            final errorMessage = error['message'] ?? error['error'] ?? 'Failed to process deposit';
+            throw Exception(errorMessage);
+          }
 
-      print('🔍 Detailed Debugging:');
-      print('  - Access Token: $accessToken');
-      print('  - Request Body: $requestBody');
-      print('  - Request Headers: ${{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      }}');
-      print('  - Response Status Code: ${response.statusCode}');
-      print('  - Response Headers: ${response.headers}');
-      print('  - Response Body: ${response.body}');
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print('✅ Deposit Payment Success!');
-        return jsonDecode(response.body) as Map<String, dynamic>;
-      } else {
-        print('❌ Deposit Payment Error:');
-        print('  - Status Code: ${response.statusCode}');
-        print('  - Headers: ${response.headers}');
-        print('  - Body: ${response.body}');
-        try {
-          final errorJson = jsonDecode(response.body);
-          print('  - Backend Error Fields:');
-          print('    * statusCode: ${errorJson['statusCode']}');
-          print('    * message: ${errorJson['message']}');
-          if (errorJson['error'] != null) print('    * error: ${errorJson['error']}');
-          if (errorJson['stack'] != null) print('    * stack: ${errorJson['stack']}');
-          String errorDetails = 'Deposit payment failed [${response.statusCode}]: ${errorJson['message']}';
-          if (errorJson['error'] != null) errorDetails += ' (${errorJson['error']})';
-          if (errorJson['stack'] != null) errorDetails += '\nBackend stack: ${errorJson['stack']}';
-          throw Exception(errorDetails);
-        } catch (jsonErr) {
-          print('  - Could not parse backend error JSON: $jsonErr');
-          throw Exception('Deposit payment failed [${response.statusCode}]: ${response.body}');
+          print('🔍 Detailed Debugging:');
+          print('  - Access Token: $accessToken');
+          print('  - Request Body: $requestBody');
+          print('  - Request Headers: ${{
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $accessToken',
+          }}');
+          print('  - Response Status Code: ${response.statusCode}');
+          print('  - Response Headers: ${response.headers}');
+          print('  - Response Body: ${response.body}');
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            print('✅ Deposit Payment Success!');
+            return jsonDecode(response.body) as Map<String, dynamic>;
+          } else {
+            print('❌ Deposit Payment Error:');
+            print('  - Status Code: ${response.statusCode}');
+            print('  - Headers: ${response.headers}');
+            print('  - Body: ${response.body}');
+            try {
+              final errorJson = jsonDecode(response.body);
+              print('  - Backend Error Fields:');
+              print('    * statusCode: ${errorJson['statusCode']}');
+              print('    * message: ${errorJson['message']}');
+              if (errorJson['error'] != null) print('    * error: ${errorJson['error']}');
+              if (errorJson['stack'] != null) print('    * stack: ${errorJson['stack']}');
+              String errorDetails = 'Deposit payment failed [${response.statusCode}]: ${errorJson['message']}';
+              if (errorJson['error'] != null) errorDetails += ' (${errorJson['error']})';
+              if (errorJson['stack'] != null) errorDetails += '\nBackend stack: ${errorJson['stack']}';
+              throw Exception(errorDetails);
+            } catch (jsonErr) {
+              print('  - Could not parse backend error JSON: $jsonErr');
+              throw Exception('Deposit payment failed [${response.statusCode}]: ${response.body}');
+            }
+          }
+        } else {
+          rethrow;
         }
       }
     } catch (e, stack) {
