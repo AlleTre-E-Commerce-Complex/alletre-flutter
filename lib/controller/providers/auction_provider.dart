@@ -55,6 +55,7 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> _inProgressProducts = [];
   List<AuctionItem> _outOfStockProducts = [];
   List<AuctionItem> _soldOutProducts = [];
+  List<AuctionItem> _joinedAuctions = [];
   final bool _isLoading = false;
   String? _error;
 
@@ -100,6 +101,7 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> get inProgressProducts => _inProgressProducts;
   List<AuctionItem> get outOfStockProducts => _outOfStockProducts;
   List<AuctionItem> get soldOutProducts => _soldOutProducts;
+  List<AuctionItem> get joinedAuctions => _joinedAuctions;
 
   bool get isLoading => _isLoading;
   bool get isCreatingAuction => _isCreatingAuction;
@@ -124,30 +126,20 @@ class AuctionProvider with ChangeNotifier {
 
   List<AuctionItem> getSimilarProducts(AuctionItem currentItem) {
     // Combine all available products
-    final allProducts = [
-      ..._listedProducts,
-      ..._liveAuctions,
-      ..._upcomingAuctions
-    ];
+    final allProducts = [..._listedProducts, ..._liveAuctions, ..._upcomingAuctions];
 
     // Get all products from the same category
-    final sameCategory = allProducts
-        .where((item) =>
-            item.id != currentItem.id &&
-            item.categoryId == currentItem.categoryId)
-        .toList();
+    final sameCategory = allProducts.where((item) => item.id != currentItem.id && item.categoryId == currentItem.categoryId).toList();
 
     // If current item is an auction, only show similar auctions
     if (currentItem.isAuctionProduct) {
-      final similarAuctions =
-          sameCategory.where((item) => item.isAuctionProduct).take(10).toList();
+      final similarAuctions = sameCategory.where((item) => item.isAuctionProduct).take(10).toList();
 
       return similarAuctions;
     }
 
     // If current item is a listed product, only show similar listed products
-    final similarProducts =
-        sameCategory.where((item) => !item.isAuctionProduct).take(10).toList();
+    final similarProducts = sameCategory.where((item) => !item.isAuctionProduct).take(10).toList();
 
     return similarProducts;
   }
@@ -216,11 +208,9 @@ class AuctionProvider with ChangeNotifier {
     final int totalBids = data['totalBids'] ?? 0;
 
     void updateList(List<AuctionItem> list) {
-      final index =
-          list.indexWhere((item) => item.id.toString() == auctionIdStr);
+      final index = list.indexWhere((item) => item.id.toString() == auctionIdStr);
       if (index != -1) {
-        double? optimisticBid =
-            auctionId != null ? _pendingOptimisticBids[auctionId] : null;
+        double? optimisticBid = auctionId != null ? _pendingOptimisticBids[auctionId] : null;
         // If there's a pending optimistic bid, only accept backend if it matches or exceeds
         if (optimisticBid != null) {
           if (newBid >= optimisticBid) {
@@ -264,15 +254,9 @@ class AuctionProvider with ChangeNotifier {
 
   void _updateAuctionStatus(String auctionId, Map<String, dynamic> statusData) {
     // Remove from old status list and add to new status list
-    final auction = [
-      ..._liveAuctions,
-      ..._listedProducts,
-      ..._upcomingAuctions,
-      ..._expiredAuctions
-    ].firstWhere(
+    final auction = [..._liveAuctions, ..._listedProducts, ..._upcomingAuctions, ..._expiredAuctions].firstWhere(
       (item) => item.id.toString() == auctionId,
-      orElse: () =>
-          AuctionItem.fromJson(statusData), // Create a new item if not found
+      orElse: () => AuctionItem.fromJson(statusData), // Create a new item if not found
     );
 
     // // Parse dates in UTC
@@ -283,9 +267,7 @@ class AuctionProvider with ChangeNotifier {
 
     final updatedAuction = auction.copyWith(
       status: statusData['status'],
-      expiryDate: statusData['expiryDate'] != null
-          ? DateTime.parse(statusData['expiryDate'])
-          : null,
+      expiryDate: statusData['expiryDate'] != null ? DateTime.parse(statusData['expiryDate']) : null,
     );
 
     // Remove from all lists
@@ -341,7 +323,7 @@ class AuctionProvider with ChangeNotifier {
     _expiredAuctions.removeWhere((item) => item.id.toString() == auctionId);
     _soldAuctions.removeWhere((item) => item.id.toString() == auctionId);
 
-    notifyListeners();
+    // notifyListeners();
   }
 
   bool get isLoadingLive => _isLoadingLive;
@@ -370,35 +352,20 @@ class AuctionProvider with ChangeNotifier {
   void searchItems(String query) {
     _searchQuery = query.toLowerCase();
 
-    _filteredLiveAuctions = _liveAuctions
-        .where((item) => item.title.toLowerCase().contains(_searchQuery))
-        .toList();
-    _filteredListedProducts = _listedProducts
-        .where((item) => item.title.toLowerCase().contains(_searchQuery))
-        .toList();
-    _filteredUpcomingAuctions = _upcomingAuctions
-        .where((item) => item.title.toLowerCase().contains(_searchQuery))
-        .toList();
-    _filteredExpiredAuctions = _expiredAuctions
-        .where((item) => item.title.toLowerCase().contains(_searchQuery))
-        .toList();
-    _filteredSoldAuctions = _soldAuctions
-        .where((item) => item.title.toLowerCase().contains(_searchQuery))
-        .toList();
+    _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredUpcomingAuctions = _upcomingAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredExpiredAuctions = _expiredAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredSoldAuctions = _soldAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
 
     notifyListeners();
   }
 
-  List<AuctionItem> get filteredLiveAuctions =>
-      _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
-  List<AuctionItem> get filteredListedProducts =>
-      _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
-  List<AuctionItem> get filteredUpcomingAuctions =>
-      _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
-  List<AuctionItem> get filteredExpiredAuctions =>
-      _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
-  List<AuctionItem> get filteredSoldAuctions =>
-      _searchQuery.isEmpty ? _soldAuctions : _filteredSoldAuctions;
+  List<AuctionItem> get filteredLiveAuctions => _searchQuery.isEmpty ? _liveAuctions : _filteredLiveAuctions;
+  List<AuctionItem> get filteredListedProducts => _searchQuery.isEmpty ? _listedProducts : _filteredListedProducts;
+  List<AuctionItem> get filteredUpcomingAuctions => _searchQuery.isEmpty ? _upcomingAuctions : _filteredUpcomingAuctions;
+  List<AuctionItem> get filteredExpiredAuctions => _searchQuery.isEmpty ? _expiredAuctions : _filteredExpiredAuctions;
+  List<AuctionItem> get filteredSoldAuctions => _searchQuery.isEmpty ? _soldAuctions : _filteredSoldAuctions;
 
   Future<bool> placeBid(String auctionId, double amount) async {
     return await _socketService.placeBid(auctionId, amount);
@@ -425,6 +392,7 @@ class AuctionProvider with ChangeNotifier {
       final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
       // print('Received ${auctions.length} live auctions from service');
       _liveMyAuctions = auctions;
+      _isLoadingMyLive = true;
       // print('Updated live auctions in provider');
     } catch (e, stackTrace) {
       // print('Error in getLiveAuctions:');
@@ -432,7 +400,7 @@ class AuctionProvider with ChangeNotifier {
       print(stackTrace);
       _errorMyLive = e.toString();
     } finally {
-      _isLoadingMyLive = false;
+      _isLoadingMyLive = true;
       // print('Notifying listeners about live auctions update');
       notifyListeners();
     }
@@ -536,7 +504,7 @@ class AuctionProvider with ChangeNotifier {
 
   Future<void> getExpiredMyAuctions() async {
     debugPrint('\n🔵 [getExpiredMyAuctions] Starting...');
-    
+
     if (_isLoadingExpired) {
       debugPrint('🟡 [getExpiredMyAuctions] Already loading, skipping...');
       return;
@@ -548,17 +516,17 @@ class AuctionProvider with ChangeNotifier {
 
     try {
       debugPrint('🔵 [getExpiredMyAuctions] Fetching expired auctions...');
-      
+
       // Use the exact status that matches the API's expected value
       const status = 'EXPIRED';
       debugPrint('🔵 [getExpiredMyAuctions] Using status: $status');
-      
+
       final stopwatch = Stopwatch()..start();
       final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
       stopwatch.stop();
-      
+
       debugPrint('🟢 [getExpiredMyAuctions] Fetched ${auctions.length} auctions in ${stopwatch.elapsedMilliseconds}ms');
-      
+
       // Log the status of each auction for debugging
       if (auctions.isNotEmpty) {
         debugPrint('🔵 [getExpiredMyAuctions] First ${auctions.length} auctions:');
@@ -569,17 +537,16 @@ class AuctionProvider with ChangeNotifier {
       } else {
         debugPrint('🟡 [getExpiredMyAuctions] No auctions found with status: $status');
       }
-      
+
       _expiredAuctions = List<AuctionItem>.from(auctions); // Create a new list to ensure reactivity
       debugPrint('🟢 [getExpiredMyAuctions] Updated _expiredAuctions with ${_expiredAuctions.length} items');
-      
+
       // Verify the list after update
       if (_expiredAuctions.isEmpty) {
         debugPrint('🟠 [getExpiredMyAuctions] WARNING: _expiredAuctions is empty after update!');
       } else {
         debugPrint('🟢 [getExpiredMyAuctions] First item status: ${_expiredAuctions.first.status}');
       }
-      
     } catch (e, stackTrace) {
       _errorExpired = e.toString();
       debugPrint('❌ [getExpiredMyAuctions] Error: $e');
@@ -588,7 +555,7 @@ class AuctionProvider with ChangeNotifier {
       _isLoadingExpired = false;
       notifyListeners();
       debugPrint('🔵 [getExpiredMyAuctions] Fetch completed. _expiredAuctions length: ${_expiredAuctions.length}');
-      
+
       // Final verification
       if (_expiredAuctions.isNotEmpty) {
         debugPrint('🟢 [getExpiredMyAuctions] Final check - First item status: ${_expiredAuctions.first.status}');
@@ -625,16 +592,10 @@ class AuctionProvider with ChangeNotifier {
 
     try {
       debugPrint('🔄 [AuctionProvider] Fetching CANCELLED auctions...');
-      final status = [
-        'CANCELLED_BEFORE_EXP_DATE',
-        'CANCELLED_AFTER_EXP_DATE',
-        'CANCELLED_BY_ADMIN'
-      ];
-      final auctions =
-          await _auctionService.fetchUserAuctionsByStatus(status as String);
+      final status = ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN'];
+      final auctions = await _auctionService.fetchUserAuctionsByStatus(status as String);
       _cancelledAuctions = auctions;
-      debugPrint(
-          '✅ [AuctionProvider] Fetched ${auctions.length} CANCELLED auctions');
+      debugPrint('✅ [AuctionProvider] Fetched ${auctions.length} CANCELLED auctions');
       if (auctions.isNotEmpty) {
         debugPrint('   First auction status: ${auctions.first.status}');
       }
@@ -664,8 +625,7 @@ class AuctionProvider with ChangeNotifier {
       final List<File> images = imagePaths.map((path) => File(path)).toList();
 
       // Make sure the product field exists and is a proper object
-      if (!auctionData.containsKey('product') ||
-          auctionData['product'] is! Map<String, dynamic>) {
+      if (!auctionData.containsKey('product') || auctionData['product'] is! Map<String, dynamic>) {
         throw Exception('Product data must be a non-empty object');
       }
 
@@ -705,8 +665,7 @@ class AuctionProvider with ChangeNotifier {
       final List<File> images = imagePaths.map((path) => File(path)).toList();
 
       // Make sure the product field exists and is a proper object
-      if (!auctionData.containsKey('product') ||
-          auctionData['product'] is! Map<String, dynamic>) {
+      if (!auctionData.containsKey('product') || auctionData['product'] is! Map<String, dynamic>) {
         throw Exception('Product data must be a non-empty object');
       }
 
@@ -724,8 +683,7 @@ class AuctionProvider with ChangeNotifier {
           final data = response['data'] ?? {};
           // Use the shippingDetails you just submitted
           final shippingDetails = auctionData['shippingDetails'] ?? {};
-          final itemLocation =
-              AuctionItem.createLocationFromApp(shippingDetails);
+          final itemLocation = AuctionItem.createLocationFromApp(shippingDetails);
           // Compose a new AuctionItem (fallback to fromJson, then override itemLocation)
           AuctionItem newItem = AuctionItem.fromJson({
             ...data,
@@ -766,8 +724,7 @@ class AuctionProvider with ChangeNotifier {
       final status = 'SOLD';
       final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
       _soldAuctions = auctions;
-      debugPrint(
-          '✅ [AuctionProvider] Fetched ${auctions.length} SOLD auctions');
+      debugPrint('✅ [AuctionProvider] Fetched ${auctions.length} SOLD auctions');
       if (auctions.isNotEmpty) {
         debugPrint('   First auction status: ${auctions.first.status}');
       }
@@ -783,8 +740,7 @@ class AuctionProvider with ChangeNotifier {
 
   Future<void> getPendingAuctions() async {
     if (_isLoadingPending) {
-      debugPrint(
-          '⚠️ [AuctionProvider] Already loading pending auctions, skipping...');
+      debugPrint('⚠️ [AuctionProvider] Already loading pending auctions, skipping...');
       return;
     }
 
@@ -796,13 +752,11 @@ class AuctionProvider with ChangeNotifier {
 
     try {
       final status = 'PENDING_OWNER_DEPOIST';
-      debugPrint(
-          '📡 [AuctionProvider] Calling fetchUserAuctionsByStatus with status: $status');
+      debugPrint('📡 [AuctionProvider] Calling fetchUserAuctionsByStatus with status: $status');
 
       final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
 
-      debugPrint(
-          '✅ [AuctionProvider] Received ${auctions.length} pending auctions');
+      debugPrint('✅ [AuctionProvider] Received ${auctions.length} pending auctions');
       if (auctions.isNotEmpty) {
         debugPrint('   First auction details:');
         debugPrint('   - ID: ${auctions.first.id}');
@@ -813,8 +767,7 @@ class AuctionProvider with ChangeNotifier {
       }
 
       _pendingAuctions = auctions;
-      debugPrint(
-          '📊 [AuctionProvider] Updated _pendingAuctions with ${_pendingAuctions.length} items');
+      debugPrint('📊 [AuctionProvider] Updated _pendingAuctions with ${_pendingAuctions.length} items');
     } catch (e, stackTrace) {
       _errorPending = e.toString();
       debugPrint('❌ [AuctionProvider] Error fetching pending auctions: $e');
@@ -824,8 +777,7 @@ class AuctionProvider with ChangeNotifier {
       notifyListeners();
 
       // Debug: Check the final state after update
-      debugPrint(
-          '🏁 [AuctionProvider] Final _pendingAuctions count: ${_pendingAuctions.length}');
+      debugPrint('🏁 [AuctionProvider] Final _pendingAuctions count: ${_pendingAuctions.length}');
       if (_pendingAuctions.isNotEmpty) {
         debugPrint('   First auction in final list:');
         debugPrint('   - ID: ${_pendingAuctions.first.id}');
@@ -840,19 +792,16 @@ class AuctionProvider with ChangeNotifier {
       _errorWaitingForPayment = null;
       notifyListeners();
 
-      debugPrint(
-          '🔄 [AuctionProvider] Fetching WAITING_FOR_PAYMENT auctions...');
+      debugPrint('🔄 [AuctionProvider] Fetching WAITING_FOR_PAYMENT auctions...');
       final status = 'WAITING_FOR_PAYMENT';
       final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
       _waitingForPaymentAuctions = auctions;
-      debugPrint(
-          '✅ [AuctionProvider] Fetched ${auctions.length} WAITING_FOR_PAYMENT auctions');
+      debugPrint('✅ [AuctionProvider] Fetched ${auctions.length} WAITING_FOR_PAYMENT auctions');
       if (auctions.isNotEmpty) {
         debugPrint('   First auction status: ${auctions.first.status}');
       }
     } catch (e) {
-      _errorWaitingForPayment =
-          'Failed to load waiting for payment auctions: $e';
+      _errorWaitingForPayment = 'Failed to load waiting for payment auctions: $e';
       debugPrint('Error fetching waiting for payment auctions: $e');
     } finally {
       _isLoadingWaitingForPayment = false;
@@ -871,14 +820,12 @@ class AuctionProvider with ChangeNotifier {
       final status = 'IN_PROGRESS';
       final products = await _auctionService.fetchUserProductsByStatus(status);
       _inProgressProducts = products;
-      debugPrint(
-          '✅ [AuctionProvider] Fetched ${products.length} IN_PROGRESS products');
+      debugPrint('✅ [AuctionProvider] Fetched ${products.length} IN_PROGRESS products');
       if (products.isNotEmpty) {
         debugPrint('   First product status: ${products.first.status}');
       }
     } catch (e) {
-      _errorInProgress =
-          'Failed to load in progress products: $e';
+      _errorInProgress = 'Failed to load in progress products: $e';
       debugPrint('Error fetching in progress products: $e');
     } finally {
       _isLoadingInProgress = false;
@@ -896,14 +843,12 @@ class AuctionProvider with ChangeNotifier {
       final status = 'OUT_OF_STOCK';
       final products = await _auctionService.fetchUserProductsByStatus(status);
       _outOfStockProducts = products;
-      debugPrint(
-          '✅ [AuctionProvider] Fetched ${products.length} OUT_OF_STOCK products');
+      debugPrint('✅ [AuctionProvider] Fetched ${products.length} OUT_OF_STOCK products');
       if (products.isNotEmpty) {
         debugPrint('   First product status: ${products.first.status}');
       }
     } catch (e) {
-      _errorOutOfStock =
-          'Failed to load out of stock products: $e';
+      _errorOutOfStock = 'Failed to load out of stock products: $e';
       debugPrint('Error fetching out of stock products: $e');
     } finally {
       _isLoadingOutOfStock = false;
@@ -921,18 +866,32 @@ class AuctionProvider with ChangeNotifier {
       final status = 'SOLD_OUT';
       final products = await _auctionService.fetchUserProductsByStatus(status);
       _soldOutProducts = products;
-      debugPrint(
-          '✅ [AuctionProvider] Fetched ${products.length} SOLD_OUT products');
+      debugPrint('✅ [AuctionProvider] Fetched ${products.length} SOLD_OUT products');
       if (products.isNotEmpty) {
         debugPrint('   First product status: ${products.first.status}');
       }
     } catch (e) {
-      _errorSoldOut =
-          'Failed to load sold out products: $e';
+      _errorSoldOut = 'Failed to load sold out products: $e';
       debugPrint('Error fetching sold out products: $e');
     } finally {
       _isLoadingSoldOut = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> getJoinedAuctions(String status) async {
+    try {
+      // print('Starting to fetch live auctions...');
+      final auctions = await _auctionService.fetchJoinedAuctions(status);
+      // print('Received ${auctions.length} live auctions from service');
+      _joinedAuctions = auctions;
+      // print('Updated live auctions in provider');
+    } catch (e, stackTrace) {
+      // print('Error in getLiveAuctions:');
+      print(e);
+      print(stackTrace);
+    } finally {
+      // print('Notifying listeners about live auctions update');
     }
   }
 

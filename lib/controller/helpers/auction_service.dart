@@ -1542,4 +1542,74 @@ class AuctionService {
       rethrow;
     }
   }
+
+  // Implement other auction methods
+  Future<List<AuctionItem>> fetchJoinedAuctions(String status) async {
+    try {
+      // First try to get the token
+      String? accessToken = await _getAccessToken();
+      var headers = {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer $accessToken'};
+
+      List<AuctionItem> allItems = [];
+      int page = 1;
+      bool hasMore = true;
+
+      while (hasMore) {
+        var request = http.Request('GET', Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/joined-auctions?status=$status&page=$page'));
+        request.body = json.encode({});
+        request.headers.addAll(headers);
+
+        http.StreamedResponse response = await request.send();
+
+        debugPrint('Joined Auctions Response Code: ${response.statusCode} for page $page');
+        if (response.statusCode == 200) {
+          final apiResp = await response.stream.bytesToString();
+          var data = jsonDecode(apiResp);
+          if (data['success'] == true && data['data'] is List) {
+            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item['auction'])).toList();
+
+            final pagination = data['pagination'] as Map<String, dynamic>;
+            final totalPages = pagination['totalPages'] as int;
+
+            allItems.addAll(items);
+            debugPrint('Successfully parsed ${items.length} live auctions for page $page');
+
+            if (page >= totalPages) {
+              hasMore = false;
+              debugPrint('Reached last page of live auctions');
+            } else {
+              page++;
+            }
+          } else {
+            hasMore = false;
+          }
+        } else {
+          print(response.reasonPhrase);
+        }
+
+        if (response.statusCode == 401 && accessToken != null) {
+          // Only try token refresh if we had a token and got 401
+          final userService = UserService();
+          final refreshResult = await userService.refreshTokens();
+          if (refreshResult['success']) {
+            accessToken = refreshResult['data']['accessToken'];
+            headers['Authorization'] = 'Bearer $accessToken';
+            // Continue with the same page
+            continue;
+          } else {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      debugPrint('Total live auctions fetched: ${allItems.length}');
+
+      return allItems;
+    } catch (e) {
+      debugPrint('Error fetching live auctions: $e');
+      return [];
+    }
+  }
 }

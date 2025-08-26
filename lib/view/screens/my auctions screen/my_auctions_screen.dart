@@ -7,17 +7,9 @@ import '../../../model/user_model.dart';
 import '../../../model/auction_item.dart';
 
 class MyAuctionsScreen extends StatelessWidget {
-  static const List<String> _auctionTypes = [
-    'Active',
-    'Scheduled',
-    'Sold',
-    'Pending',
-    'Waiting for Payment',
-    'Cancelled'
-  ];
+  static const List<String> _auctionTypes = ['Active', 'Scheduled', 'Sold', 'Pending', 'Waiting for Payment', 'Cancelled'];
 
-  static final ValueNotifier<String> _selectedType =
-      ValueNotifier<String>(_auctionTypes[0]);
+  static final ValueNotifier<String> _selectedType = ValueNotifier<String>(_auctionTypes[0]);
 
   const MyAuctionsScreen({super.key});
 
@@ -51,8 +43,7 @@ class MyAuctionsScreen extends StatelessWidget {
                       return DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: selected,
-                          icon: Icon(Icons.keyboard_arrow_down_rounded,
-                              color: primaryColor, size: 22),
+                          icon: Icon(Icons.keyboard_arrow_down_rounded, color: primaryColor, size: 22),
                           isExpanded: true,
                           dropdownColor: Theme.of(context).cardColor,
                           borderRadius: borderRadius,
@@ -66,11 +57,9 @@ class MyAuctionsScreen extends StatelessWidget {
                                     value: type,
                                     child: Row(
                                       children: [
-                                        Icon(_auctionTypeIcon(type),
-                                            color: primaryColor, size: 16),
+                                        Icon(_auctionTypeIcon(type), color: primaryColor, size: 16),
                                         const SizedBox(width: 5),
-                                        Text(type,
-                                            style: TextStyle(fontSize: 14)),
+                                        Text(type, style: TextStyle(fontSize: 14)),
                                       ],
                                     ),
                                   ))
@@ -133,11 +122,7 @@ class AuctionsTabView extends StatelessWidget {
       'Sold': 'SOLD',
       'Pending': 'PENDING_OWNER_DEPOIST',
       'Waiting for Payment': 'WAITING_FOR_PAYMENT',
-      'Cancelled': [
-        'CANCELLED_BEFORE_EXP_DATE',
-        'CANCELLED_AFTER_EXP_DATE',
-        'CANCELLED_BY_ADMIN'
-      ]
+      'Cancelled': ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN']
     };
     final status = statusMap[type];
 
@@ -171,8 +156,7 @@ class AuctionsTabView extends StatelessWidget {
     logAuctionStatuses(provider.upcomingAuctions, 'Scheduled');
     logAuctionStatuses(provider.soldAuctions, 'Sold');
     logAuctionStatuses(provider.pendingAuctions, 'Pending');
-    logAuctionStatuses(
-        provider.waitingForPaymentAuctions, 'Waiting for Payment');
+    logAuctionStatuses(provider.waitingForPaymentAuctions, 'Waiting for Payment');
     logAuctionStatuses(provider.cancelledAuctions, 'Cancelled');
 
     return Consumer<AuctionProvider>(builder: (context, provider, _) {
@@ -185,69 +169,53 @@ class AuctionsTabView extends StatelessWidget {
         case 'Active':
           // final myActiveAuctions = provider.liveAuctions;
           // debugPrint('   My Active auctions: ${myActiveAuctions.length}');
-          if (!provider.isLoadingMyLive &&
-              provider.liveMyAuctions.isEmpty &&
-              provider.errorMyLive == null) {
+          if (!provider.isLoadingMyLive && provider.liveMyAuctions.isEmpty && provider.errorMyLive == null) {
             // Initiate the fetch but don't wait for it
-            provider.getLiveMyAuctions();
+            Future.delayed(const Duration(seconds: 0), () => provider.getLiveMyAuctions());
             // return const Center(child: CircularProgressIndicator());
           }
           // isLoading = provider.isLoadingLive;
           error = provider.errorMyLive;
-          filtered = provider.liveMyAuctions
-              .where((a) => a.status.toUpperCase() == status)
-              .toList();
+          filtered = provider.liveMyAuctions.where((a) => a.status.toUpperCase() == status).toList();
           break;
 
         case 'Scheduled':
           final myScheduledAuctions = provider.upcomingAuctions;
           debugPrint('   My Scheduled auctions: ${myScheduledAuctions.length}');
-          if (!provider.isLoadingUpcoming &&
-              provider.upcomingAuctions.isEmpty &&
-              provider.errorUpcoming == null) {
+          if (!provider.isLoadingUpcoming && provider.upcomingAuctions.isEmpty && provider.errorUpcoming == null) {
             provider.getUpcomingMyAuctions();
             // return const Center(child: CircularProgressIndicator());
           }
           // isLoading = provider.isLoadingUpcoming;
           error = provider.errorUpcoming;
-          filtered = provider.upcomingAuctions
-              .where((a) => a.status.toUpperCase() == status)
-              .toList();
+          filtered = provider.upcomingAuctions.where((a) => a.status.toUpperCase() == status).toList();
           break;
 
         case 'Sold':
           final mySoldAuctions = provider.soldAuctions;
           debugPrint('   My Sold auctions: ${mySoldAuctions.length}');
-          if (!provider.isLoadingSold &&
-              provider.soldAuctions.isEmpty &&
-              provider.errorSold == null) {
+          if (!provider.isLoadingSold && provider.soldAuctions.isEmpty && provider.errorSold == null) {
             provider.getSoldAuctions();
             // return const Center(child: CircularProgressIndicator());
           }
           // isLoading = provider.isLoadingSold;
           error = provider.errorSold;
-          filtered = provider.soldAuctions
-              .where((a) => a.status.toUpperCase() == status)
-              .toList();
+          filtered = provider.soldAuctions.where((a) => a.status.toUpperCase() == status).toList();
           break;
 
         case 'Pending':
           debugPrint('🔍 [MyAuctionsScreen] Pending tab selected');
-          debugPrint(
-              '   - Provider pendingAuctions count: ${provider.pendingAuctions.length}');
+          debugPrint('   - Provider pendingAuctions count: ${provider.pendingAuctions.length}');
 
           // Log all pending auctions and their statuses
           debugPrint('   - All pending auctions in provider:');
           for (var i = 0; i < provider.pendingAuctions.length; i++) {
             final auction = provider.pendingAuctions[i];
-            debugPrint(
-                '     [$i] ID: ${auction.id}, Status: ${auction.status}');
+            debugPrint('     [$i] ID: ${auction.id}, Status: ${auction.status}');
           }
 
           // Fetch if needed
-          if (!provider.isLoadingPending &&
-              provider.pendingAuctions.isEmpty &&
-              provider.errorPending == null) {
+          if (!provider.isLoadingPending && provider.pendingAuctions.isEmpty && provider.errorPending == null) {
             debugPrint('   - No pending auctions found, fetching...');
             provider.getPendingAuctions();
           }
@@ -256,11 +224,8 @@ class AuctionsTabView extends StatelessWidget {
 
           // Apply status check only (no need for isMyAuction check as API handles this)
           filtered = provider.pendingAuctions.where((a) {
-            final matches = status is List<String>
-                ? status.contains(a.status.toUpperCase())
-                : a.status.toUpperCase() == status;
-            debugPrint(
-                '   - Auction ${a.id}: status=${a.status}, matches=$matches');
+            final matches = status is List<String> ? status.contains(a.status.toUpperCase()) : a.status.toUpperCase() == status;
+            debugPrint('   - Auction ${a.id}: status=${a.status}, matches=$matches');
             return matches;
           }).toList();
 
@@ -269,11 +234,8 @@ class AuctionsTabView extends StatelessWidget {
 
         case 'Waiting for Payment':
           final myWaitingAuctions = provider.waitingForPaymentAuctions;
-          debugPrint(
-              '   My Waiting for Payment auctions: ${myWaitingAuctions.length}');
-          if (!provider.isLoadingWaitingForPayment &&
-              provider.waitingForPaymentAuctions.isEmpty &&
-              provider.errorWaitingForPayment == null) {
+          debugPrint('   My Waiting for Payment auctions: ${myWaitingAuctions.length}');
+          if (!provider.isLoadingWaitingForPayment && provider.waitingForPaymentAuctions.isEmpty && provider.errorWaitingForPayment == null) {
             provider.getWaitingForPaymentAuctions();
             // return const Center(child: CircularProgressIndicator());
           }
@@ -285,17 +247,13 @@ class AuctionsTabView extends StatelessWidget {
         case 'Cancelled':
           final myCancelledAuctions = provider.cancelledAuctions;
           debugPrint('   My Cancelled auctions: ${myCancelledAuctions.length}');
-          if (!provider.isLoadingCancelled &&
-              provider.cancelledAuctions.isEmpty &&
-              provider.errorCancelled == null) {
+          if (!provider.isLoadingCancelled && provider.cancelledAuctions.isEmpty && provider.errorCancelled == null) {
             provider.getCancelledAuctions();
             // return const Center(child: CircularProgressIndicator());
           }
           // isLoading = provider.isLoadingPending;
           error = provider.errorCancelled;
-          filtered = provider.cancelledAuctions
-              .where((a) => a.status.toUpperCase() == status)
-              .toList();
+          filtered = provider.cancelledAuctions.where((a) => a.status.toUpperCase() == status).toList();
           break;
       }
 
