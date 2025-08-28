@@ -198,7 +198,10 @@ class BidsScreen extends StatelessWidget {
                                           ],
                                         ),
                                         const SizedBox(height: 4),
-                                        Text("Your BID: ${auction.currentBid} AED", style: const TextStyle(color: Colors.black26)),
+                                        Row(children: [
+                                          Text("Your BID : ", style: const TextStyle(color: Colors.grey)),
+                                          Text("${auction.currentBid} AED", style: const TextStyle(color: activeColor))
+                                        ],),
                                         Row(
                                           children: [
                                             Text(
