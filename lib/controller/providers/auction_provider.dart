@@ -879,7 +879,7 @@ class AuctionProvider with ChangeNotifier {
     }
   }
 
-  Future<void> getJoinedAuctions(String status) async {
+  Future<void> getJoinedAuctions({String status = 'IN_PROGRESS', bool shouldNotify = false}) async {
     try {
       // print('Starting to fetch live auctions...');
       final auctions = await _auctionService.fetchJoinedAuctions(status);
@@ -891,6 +891,9 @@ class AuctionProvider with ChangeNotifier {
       print(e);
       print(stackTrace);
     } finally {
+      if (shouldNotify) {
+        notifyListeners();
+      }
       // print('Notifying listeners about live auctions update');
     }
   }
