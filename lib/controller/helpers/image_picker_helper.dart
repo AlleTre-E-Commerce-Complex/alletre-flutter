@@ -11,13 +11,24 @@ Future<File?> pickMediaFromGallery({bool isImage = true}) async {
   } else {
     pickedFile = await picker.pickVideo(source: ImageSource.gallery);
   }
-  return pickedFile != null ? File(pickedFile.path) : null;
+  if (pickedFile != null) {
+    String? fileExtension = pickedFile!.path.split('.').last.toLowerCase();
+    List<String> excludedExtensions = ['jpg', 'jpeg', 'png']; // Add extensions to exclude
+
+    if (!excludedExtensions.contains(fileExtension)) {
+      // Handle the case where an excluded extension is picked
+      // e.g., show a SnackBar or AlertDialog to the user
+      throw Exception('Selected file type ($fileExtension) is not allowed.');
+    }
+    return File(pickedFile.path);
+  }
+  return null;
 }
 
 Future<void> pickMultipleMedia(ValueNotifier<List<File>> media) async {
   try {
     final ImagePicker picker = ImagePicker();
-    
+
     // Show dialog to choose between image and video
     final mediaType = await showDialog<String>(
       context: MyApp.navigatorKey.currentContext!,
@@ -47,12 +58,26 @@ Future<void> pickMultipleMedia(ValueNotifier<List<File>> media) async {
       final List<XFile> pickedFiles = await picker.pickMultiImage(imageQuality: 80);
       if (pickedFiles.isNotEmpty) {
         final List<File> newFiles = [];
-        
+
         // Check file sizes and add valid files
         for (var pickedFile in pickedFiles) {
+          String? fileExtension = pickedFile.path.split('.').last.toLowerCase();
+          List<String> excludedExtensions = ['jpg', 'jpeg', 'png']; // Add extensions to exclude
+
+          if (!excludedExtensions.contains(fileExtension)) {
+            // Handle the case where an excluded extension is picked
+            // e.g., show a SnackBar or AlertDialog to the user
+            ScaffoldMessenger.of(MyApp.navigatorKey.currentContext!).showSnackBar(
+              SnackBar(
+                content: Text('Selected file type ($fileExtension) is not allowed.'),
+                backgroundColor: Colors.orangeAccent,
+              ),
+            );
+            return;
+          }
           final file = File(pickedFile.path);
           final fileSizeInMB = await file.length() / (1024 * 1024); // Convert to MB
-          
+
           if (fileSizeInMB <= 50) {
             newFiles.add(file);
           } else {
@@ -71,7 +96,7 @@ Future<void> pickMultipleMedia(ValueNotifier<List<File>> media) async {
             );
           }
         }
-        
+
         // Calculate how many more files we can add
         final remainingSlots = 50 - media.value.length;
         if (remainingSlots > 0) {
@@ -82,11 +107,8 @@ Future<void> pickMultipleMedia(ValueNotifier<List<File>> media) async {
       }
     } else {
       // Check if we already have a video
-      final hasVideo = media.value.any((file) => 
-        file.path.toLowerCase().endsWith('.mp4') || 
-        file.path.toLowerCase().endsWith('.mov')
-      );
-      
+      final hasVideo = media.value.any((file) => file.path.toLowerCase().endsWith('.mp4') || file.path.toLowerCase().endsWith('.mov'));
+
       if (hasVideo) {
         await showDialog(
           context: MyApp.navigatorKey.currentContext!,
@@ -108,11 +130,11 @@ Future<void> pickMultipleMedia(ValueNotifier<List<File>> media) async {
         source: ImageSource.gallery,
         maxDuration: const Duration(minutes: 5),
       );
-      
+
       if (pickedFile != null && media.value.length < 50) {
         final file = File(pickedFile.path);
         final fileSizeInMB = await file.length() / (1024 * 1024); // Convert to MB
-        
+
         if (fileSizeInMB <= 50) {
           media.value = [...media.value, file];
         } else {

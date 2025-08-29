@@ -26,8 +26,7 @@ import 'package:path/path.dart' as path;
 class ProductDetailsScreen extends StatelessWidget {
   final String title;
   final AuctionItem? draftAuction;
-  const ProductDetailsScreen(
-      {super.key, this.title = 'Create Auction', this.draftAuction});
+  const ProductDetailsScreen({super.key, this.title = 'Create Auction', this.draftAuction});
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +41,10 @@ class ProductDetailsScreen extends StatelessWidget {
     final descriptionController = TextEditingController();
     final condition = ValueNotifier<String?>(null);
     final media = ValueNotifier<List<File>>([]);
-    final coverPhotoIndex =
-        ValueNotifier<int?>(null); // Track selected cover photo
+    final coverPhotoIndex = ValueNotifier<int?>(null); // Track selected cover photo
 
     // Dynamic Custom Fields State
-    final ValueNotifier<List<CustomField>> dynamicCustomFields =
-        ValueNotifier([]);
+    final ValueNotifier<List<CustomField>> dynamicCustomFields = ValueNotifier([]);
     final customFieldControllers = <String, TextEditingController>{};
     final customFieldDropdownValues = <String, ValueNotifier<String?>>{};
 
@@ -87,8 +84,7 @@ class ProductDetailsScreen extends StatelessWidget {
     }
 
     // Helper to extract custom fields from product map based on dynamic field keys
-    Map<String, dynamic> extractCustomFieldsFromProduct(
-        Map<String, dynamic> product, List<CustomField> dynamicFields) {
+    Map<String, dynamic> extractCustomFieldsFromProduct(Map<String, dynamic> product, List<CustomField> dynamicFields) {
       final Map<String, dynamic> result = {};
       for (final field in dynamicFields) {
         if (product.containsKey(field.key)) {
@@ -99,21 +95,13 @@ class ProductDetailsScreen extends StatelessWidget {
     }
 
     // Fetch fields dynamically when category/subcategory changes
-    Future<void> fetchAndSetupCustomFields(
-        {int? categoryId,
-        int? subCategoryId,
-        Map<String, dynamic>? prefillFields,
-        Map<String, dynamic>? product}) async {
+    Future<void> fetchAndSetupCustomFields({int? categoryId, int? subCategoryId, Map<String, dynamic>? prefillFields, Map<String, dynamic>? product}) async {
       List<CustomField> fields = [];
       if (subCategoryId != null) {
-        final categoryFields =
-            await CustomFieldsService.getCustomFieldsBySubcategory(
-                subCategoryId.toString());
+        final categoryFields = await CustomFieldsService.getCustomFieldsBySubcategory(subCategoryId.toString());
         fields = categoryFields.fields;
       } else if (categoryId != null) {
-        final categoryFields =
-            await CustomFieldsService.getCustomFieldsByCategory(
-                categoryId.toString());
+        final categoryFields = await CustomFieldsService.getCustomFieldsByCategory(categoryId.toString());
         fields = categoryFields.fields;
       }
       dynamicCustomFields.value = fields;
@@ -153,8 +141,8 @@ class ProductDetailsScreen extends StatelessWidget {
         debugPrint('--- Custom Field Prefill Debug ---');
         prefillFields.forEach((key, value) {
           debugPrint('key: $key, value: $value, '
-            'controller: \'${customFieldControllers[key]?.text}\', '
-            'dropdown: \'${customFieldDropdownValues[key]?.value}\'');
+              'controller: \'${customFieldControllers[key]?.text}\', '
+              'dropdown: \'${customFieldDropdownValues[key]?.value}\'');
         });
       }
       // Debug: Print all controllers and dropdowns after setup
@@ -216,8 +204,7 @@ class ProductDetailsScreen extends StatelessWidget {
             subCategoryId: draftAuction!.subCategoryId,
             prefillFields: draftAuction!.customFields is Map<String, dynamic>
                 ? draftAuction!.customFields as Map<String, dynamic>
-                : (draftAuction!.customFields is String &&
-                        draftAuction!.customFields != null)
+                : (draftAuction!.customFields is String && draftAuction!.customFields != null)
                     ? parseDartMapString(draftAuction!.customFields as String)
                     : null,
             product: draftAuction!.product,
@@ -243,8 +230,7 @@ class ProductDetailsScreen extends StatelessWidget {
       }
 
       // Validate media section separately since it's async
-      final mediaError =
-          await CreateAuctionValidation.validateMediaSection(media.value);
+      final mediaError = await CreateAuctionValidation.validateMediaSection(media.value);
       if (mediaError != null) {
         showError(context, mediaError);
         return false;
@@ -292,20 +278,14 @@ class ProductDetailsScreen extends StatelessWidget {
                     const Center(
                       child: Text(
                         "Product Details",
-                        style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: onSecondaryColor),
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: onSecondaryColor),
                       ),
                     ),
                     const Divider(thickness: 1, color: primaryColor),
                     const SizedBox(height: 10),
                     const Text(
                       "Item Details",
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: onSecondaryColor),
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: onSecondaryColor),
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
@@ -385,8 +365,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           }).toList(),
                           onChanged: (value) {
                             categoryController.value = value;
-                            subCategoryController.value =
-                                null; // Reset subcategory
+                            subCategoryController.value = null; // Reset subcategory
 
                             // Clear the custom field controllers when category changes
                             customFieldControllers.forEach((key, controller) {
@@ -396,9 +375,7 @@ class ProductDetailsScreen extends StatelessWidget {
                             customFieldDropdownValues.clear();
 
                             // Fetch custom fields for the selected category
-                            fetchAndSetupCustomFields(
-                                categoryId:
-                                    CategoryData.getCategoryId(value ?? ''));
+                            fetchAndSetupCustomFields(categoryId: CategoryData.getCategoryId(value ?? ''));
                           },
                           validator: CreateAuctionValidation.validateCategory,
                         );
@@ -408,10 +385,8 @@ class ProductDetailsScreen extends StatelessWidget {
                     ValueListenableBuilder<String?>(
                       valueListenable: categoryController,
                       builder: (context, selectedCategory, child) {
-                        if (selectedCategory == null ||
-                            selectedCategory == 'Cars') {
-                          return const SizedBox
-                              .shrink(); // No subcategory dropdown if category not selected
+                        if (selectedCategory == null) {
+                          return const SizedBox.shrink(); // No subcategory dropdown if category not selected
                         }
 
                         return ValueListenableBuilder<String?>(
@@ -426,21 +401,17 @@ class ProductDetailsScreen extends StatelessWidget {
                                 ),
                                 errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide:
-                                      const BorderSide(color: errorColor),
+                                  borderSide: const BorderSide(color: errorColor),
                                 ),
                                 focusedErrorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide:
-                                      const BorderSide(color: errorColor),
+                                  borderSide: const BorderSide(color: errorColor),
                                 ),
                               ),
                               value: selectedSubCategory,
                               // ignore: unnecessary_null_comparison
                               items: selectedCategory != null
-                                  ? CategoryData.getSubCategories(
-                                          selectedCategory)
-                                      .map((subcategory) {
+                                  ? CategoryData.getSubCategories(selectedCategory).map((subcategory) {
                                       return DropdownMenuItem(
                                         value: subcategory,
                                         child: Text(
@@ -457,13 +428,9 @@ class ProductDetailsScreen extends StatelessWidget {
                               onChanged: (value) {
                                 subCategoryController.value = value;
                                 // Fetch custom fields for the selected subcategory
-                                fetchAndSetupCustomFields(
-                                    subCategoryId:
-                                        CategoryData.getSubCategoryId(
-                                            selectedCategory, value ?? ''));
+                                fetchAndSetupCustomFields(subCategoryId: CategoryData.getSubCategoryId(selectedCategory, value ?? ''));
                               },
-                              validator:
-                                  CreateAuctionValidation.validateSubCategory,
+                              validator: CreateAuctionValidation.validateSubCategory,
                             );
                           },
                         );
@@ -486,74 +453,50 @@ class ProductDetailsScreen extends StatelessWidget {
                         return GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  childAspectRatio:
-                                      4.5, // Adjust for field height
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 4.5, // Adjust for field height
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12),
                           itemCount: fields.length,
                           itemBuilder: (context, index) {
                             final field = fields[index];
                             if (field.type == 'dropdown') {
                               return ValueListenableBuilder<String?>(
-                                valueListenable:
-                                    customFieldDropdownValues[field.key]!,
+                                valueListenable: customFieldDropdownValues[field.key]!,
                                 builder: (context, value, child) {
                                   return DropdownButtonFormField<String>(
                                     value: value,
                                     decoration: InputDecoration(
-                                      labelText: field.labelEn.isNotEmpty
-                                          ? field.labelEn
-                                          : field.key,
-                                      labelStyle: const TextStyle(
-                                          fontSize: 12), // smaller label
+                                      labelText: field.labelEn.isNotEmpty ? field.labelEn : field.key,
+                                      labelStyle: const TextStyle(fontSize: 12), // smaller label
                                     ),
                                     items: field.options
                                         ?.map((option) => DropdownMenuItem(
                                               value: option,
-                                              child: Text(option,
-                                                  style: const TextStyle(
-                                                      fontSize:
-                                                          12)), // smaller dropdown text
+                                              child: Text(option, style: const TextStyle(fontSize: 12)), // smaller dropdown text
                                             ))
                                         .toList(),
                                     onChanged: (newValue) {
-                                      customFieldDropdownValues[field.key]!
-                                          .value = newValue;
+                                      customFieldDropdownValues[field.key]!.value = newValue;
                                     },
-                                    validator: field.isRequired
-                                        ? (v) => v == null ? 'Required' : null
-                                        : null,
+                                    validator: field.isRequired ? (v) => v == null ? 'Required' : null : null,
                                   );
                                 },
                               );
                             } else {
-                              final controller =
-                                  customFieldControllers[field.key]!;
+                              final controller = customFieldControllers[field.key]!;
                               return TextFormField(
                                 controller: controller,
                                 decoration: InputDecoration(
-                                  labelText: field.labelEn.isNotEmpty
-                                      ? field.labelEn
-                                      : field.key,
-                                  labelStyle: const TextStyle(
-                                      fontSize: 12), // smaller label
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 8, horizontal: 12),
+                                  labelText: field.labelEn.isNotEmpty ? field.labelEn : field.key,
+                                  labelStyle: const TextStyle(fontSize: 12), // smaller label
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                                 ),
-                                style: const TextStyle(
-                                    fontSize: 12), // smaller input text
+                                style: const TextStyle(fontSize: 12), // smaller input text
                                 showCursor: false,
-                                keyboardType: field.type == 'number'
-                                    ? TextInputType.number
-                                    : TextInputType.text,
-                                validator: field.isRequired
-                                    ? (v) => (v == null || v.isEmpty)
-                                        ? 'Required'
-                                        : null
-                                    : null,
+                                keyboardType: field.type == 'number' ? TextInputType.number : TextInputType.text,
+                                validator: field.isRequired ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
                               );
                             }
                           },
@@ -592,16 +535,11 @@ class ProductDetailsScreen extends StatelessWidget {
                     RichText(
                       text: const TextSpan(
                         text: 'Add Media\n',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: onSecondaryColor),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: onSecondaryColor),
                         children: [
                           TextSpan(
-                            text:
-                                '(You can upload upto 50 images & 1 video [max 50MB])',
-                            style: TextStyle(
-                                color: greyColor, fontWeight: FontWeight.w500),
+                            text: '(You can upload upto 50 images & 1 video [max 50MB])',
+                            style: TextStyle(color: greyColor, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
@@ -611,10 +549,8 @@ class ProductDetailsScreen extends StatelessWidget {
                       valueListenable: media,
                       builder: (context, mediaList, child) {
                         // Set the first image as the cover image if no cover photo is set
-                        if (coverPhotoIndex.value == null &&
-                            mediaList.isNotEmpty) {
-                          coverPhotoIndex.value =
-                              0; // Default to the first image as cover photo
+                        if (coverPhotoIndex.value == null && mediaList.isNotEmpty) {
+                          coverPhotoIndex.value = 0; // Default to the first image as cover photo
                         }
 
                         return Column(
@@ -623,8 +559,7 @@ class ProductDetailsScreen extends StatelessWidget {
                             GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 3,
                                 crossAxisSpacing: 10,
                                 mainAxisSpacing: 10,
@@ -634,22 +569,10 @@ class ProductDetailsScreen extends StatelessWidget {
                                   ? 5 // Initial count
                                   : mediaList.length >= 50
                                       ? 50 // Max limit
-                                      : mediaList.length +
-                                          1, // Current count + 1 empty slot
+                                      : mediaList.length + 1, // Current count + 1 empty slot
                               itemBuilder: (context, index) {
                                 // Generate a reordered media list with the cover photo (if set) first
-                                final reorderedMediaList = coverPhotoIndex
-                                                .value !=
-                                            null &&
-                                        coverPhotoIndex.value! <
-                                            mediaList.length
-                                    ? [
-                                        mediaList[coverPhotoIndex.value!],
-                                        ...mediaList.where((file) =>
-                                            file !=
-                                            mediaList[coverPhotoIndex.value!])
-                                      ]
-                                    : mediaList;
+                                final reorderedMediaList = coverPhotoIndex.value != null && coverPhotoIndex.value! < mediaList.length ? [mediaList[coverPhotoIndex.value!], ...mediaList.where((file) => file != mediaList[coverPhotoIndex.value!])] : mediaList;
 
                                 // Check if this is an existing media item
                                 if (index < reorderedMediaList.length) {
@@ -658,17 +581,12 @@ class ProductDetailsScreen extends StatelessWidget {
                                       GestureDetector(
                                         onTap: () async {
                                           // Open media gallery when image is tapped
-                                          final File? newMedia =
-                                              await pickMediaFromGallery();
+                                          final File? newMedia = await pickMediaFromGallery();
                                           if (newMedia != null) {
-                                            final updatedMedia =
-                                                List<File>.from(mediaList);
+                                            final updatedMedia = List<File>.from(mediaList);
                                             // Replace the correct item in the original list
-                                            final originalIndex =
-                                                mediaList.indexOf(
-                                                    reorderedMediaList[index]);
-                                            updatedMedia[originalIndex] =
-                                                newMedia;
+                                            final originalIndex = mediaList.indexOf(reorderedMediaList[index]);
+                                            updatedMedia[originalIndex] = newMedia;
                                             media.value = updatedMedia;
                                           }
                                         },
@@ -680,10 +598,8 @@ class ProductDetailsScreen extends StatelessWidget {
                                             borderRadius: BorderRadius.circular(10),
                                           ),
                                           child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: _buildMediaWidget(
-                                                reorderedMediaList[index]),
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: _buildMediaWidget(reorderedMediaList[index]),
                                           ),
                                         ),
                                       ),
@@ -697,19 +613,13 @@ class ProductDetailsScreen extends StatelessWidget {
                                             size: 16,
                                           ),
                                           onPressed: () {
-                                            final updatedMedia =
-                                                List<File>.from(mediaList);
+                                            final updatedMedia = List<File>.from(mediaList);
                                             // Remove the correct item from the original list
-                                            final originalIndex =
-                                                mediaList.indexOf(
-                                                    reorderedMediaList[index]);
-                                            updatedMedia
-                                                .removeAt(originalIndex);
+                                            final originalIndex = mediaList.indexOf(reorderedMediaList[index]);
+                                            updatedMedia.removeAt(originalIndex);
                                             media.value = updatedMedia;
-                                            if (coverPhotoIndex.value ==
-                                                originalIndex) {
-                                              coverPhotoIndex.value =
-                                                  null; // Reset cover photo
+                                            if (coverPhotoIndex.value == originalIndex) {
+                                              coverPhotoIndex.value = null; // Reset cover photo
                                             }
                                           },
                                         ),
@@ -720,57 +630,34 @@ class ProductDetailsScreen extends StatelessWidget {
                                         right: 0,
                                         child: ValueListenableBuilder<int?>(
                                           valueListenable: coverPhotoIndex,
-                                          builder: (context, selectedCoverIndex,
-                                              child) {
+                                          builder: (context, selectedCoverIndex, child) {
                                             return GestureDetector(
                                               onTap: () {
                                                 coverPhotoIndex.value = index;
 
                                                 // Reorder the media list to display the cover photo first
-                                                final File selectedCover =
-                                                    mediaList[index];
-                                                final updatedMedia = [
-                                                      selectedCover
-                                                    ] +
-                                                    mediaList
-                                                        .where((file) =>
-                                                            file !=
-                                                            selectedCover)
-                                                        .toList();
+                                                final File selectedCover = mediaList[index];
+                                                final updatedMedia = [selectedCover] + mediaList.where((file) => file != selectedCover).toList();
                                                 media.value = updatedMedia;
 
-                                                coverPhotoIndex.value =
-                                                    0; // Reset the index
+                                                coverPhotoIndex.value = 0; // Reset the index
                                               },
                                               child: Container(
                                                 decoration: BoxDecoration(
-                                                  color: selectedCoverIndex ==
-                                                          index
-                                                      ? primaryColor.withAlpha(
-                                                          (0.7 * 255).toInt())
-                                                      : Colors.black.withAlpha(
-                                                          (0.5 * 255).toInt()),
-                                                  borderRadius:
-                                                      const BorderRadius.only(
-                                                    bottomLeft:
-                                                        Radius.circular(10),
-                                                    bottomRight:
-                                                        Radius.circular(10),
+                                                  color: selectedCoverIndex == index ? primaryColor.withAlpha((0.7 * 255).toInt()) : Colors.black.withAlpha((0.5 * 255).toInt()),
+                                                  borderRadius: const BorderRadius.only(
+                                                    bottomLeft: Radius.circular(10),
+                                                    bottomRight: Radius.circular(10),
                                                   ),
                                                 ),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 4),
+                                                padding: const EdgeInsets.symmetric(vertical: 4),
                                                 child: Center(
                                                   child: Text(
-                                                    selectedCoverIndex == index
-                                                        ? "Cover Photo"
-                                                        : "Set as Cover",
+                                                    selectedCoverIndex == index ? "Cover Photo" : "Set as Cover",
                                                     style: const TextStyle(
                                                       color: secondaryColor,
                                                       fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontWeight: FontWeight.bold,
                                                     ),
                                                   ),
                                                 ),
@@ -793,8 +680,7 @@ class ProductDetailsScreen extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.add_a_photo,
@@ -813,14 +699,11 @@ class ProductDetailsScreen extends StatelessWidget {
                               builder: (context, submitted, child) {
                                 if (submitted) {
                                   return FutureBuilder<String?>(
-                                    future: CreateAuctionValidation
-                                        .validateMediaSection(mediaList),
+                                    future: CreateAuctionValidation.validateMediaSection(mediaList),
                                     builder: (context, snapshot) {
-                                      if (snapshot.hasData &&
-                                          snapshot.data != null) {
+                                      if (snapshot.hasData && snapshot.data != null) {
                                         return Padding(
-                                          padding: const EdgeInsets.only(
-                                              top: 10, left: 12),
+                                          padding: const EdgeInsets.only(top: 10, left: 12),
                                           child: Text(
                                             snapshot.data!,
                                             style: const TextStyle(
@@ -872,11 +755,9 @@ class ProductDetailsScreen extends StatelessWidget {
                                         Radio<String>(
                                           value: "new",
                                           groupValue: value,
-                                          onChanged: (selected) =>
-                                              condition.value = selected!,
+                                          onChanged: (selected) => condition.value = selected!,
                                         ),
-                                        const Text("New",
-                                            style: radioTextStyle),
+                                        const Text("New", style: radioTextStyle),
                                       ],
                                     ),
                                     const SizedBox(width: 20),
@@ -885,11 +766,9 @@ class ProductDetailsScreen extends StatelessWidget {
                                         Radio<String>(
                                           value: "used",
                                           groupValue: value,
-                                          onChanged: (selected) =>
-                                              condition.value = selected!,
+                                          onChanged: (selected) => condition.value = selected!,
                                         ),
-                                        const Text("Used",
-                                            style: radioTextStyle),
+                                        const Text("Used", style: radioTextStyle),
                                       ],
                                     ),
                                   ],
@@ -903,349 +782,259 @@ class ProductDetailsScreen extends StatelessWidget {
 
                     Padding(
                       padding: const EdgeInsets.only(top: 10, bottom: 16),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            if (title == 'Create Auction') ...[
-                              ValueListenableBuilder<bool>(
-                                valueListenable: isSavingDraft,
-                                builder: (context, isSaving, child) {
-                                  return ElevatedButton(
-                                    onPressed: isSaving
-                                        ? null
-                                        : () async {
-                                            isSavingDraft.value = true;
-                                            isSubmitted.value = true;
+                      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        if (title == 'Create Auction') ...[
+                          ValueListenableBuilder<bool>(
+                            valueListenable: isSavingDraft,
+                            builder: (context, isSaving, child) {
+                              return ElevatedButton(
+                                onPressed: isSaving
+                                    ? null
+                                    : () async {
+                                        isSavingDraft.value = true;
+                                        isSubmitted.value = true;
 
-                                            // This will trigger the validators and show error messages
-                                            final formValid = await validateForm();
+                                        // This will trigger the validators and show error messages
+                                        final formValid = await validateForm();
 
-                                            if (formValid) {
-                                              final customFields = <String, dynamic>{};
-                                              for (final field in dynamicCustomFields.value) {
-                                                if (field.type == 'dropdown') {
-                                                  customFields[field.key] =
-                                                      customFieldDropdownValues[field.key]?.value;
-                                                } else {
-                                                  customFields[field.key] =
-                                                      customFieldControllers[field.key]?.text.trim();
-                                                }
-                                              }
-
-                                              // Filter customFields to remove empty or null values
-                                              final filteredCustomFields = <String, dynamic>{
-                                                for (final entry in customFields.entries)
-                                                  if (entry.value != null && entry.value.toString().trim().isNotEmpty)
-                                                    entry.key: entry.value
-                                              };
-
-                                              final Map<String, dynamic> productData = {
-                                                'title': itemNameController.text.trim(),
-                                                'description': descriptionController.text.trim(),
-                                                'categoryId': CategoryData.getCategoryId(
-                                                        categoryController.value ?? '') ??
-                                                    1,
-                                                'subCategoryId': CategoryData.getSubCategoryId(
-                                                        categoryController.value ?? '',
-                                                        subCategoryController.value ?? '') ??
-                                                    1,
-                                                'usageStatus': condition.value?.toUpperCase() ?? 'UNKNOWN',
-                                                ...filteredCustomFields,
-                                              };
-
-                                              // Validate required fields using API data
-                                              for (final field in dynamicCustomFields.value) {
-                                                if (field.isRequired && customFields[field.key] == null) {
-                                                  showError(context, 'Please fill in all required fields');
-                                                  isSavingDraft.value = false;
-                                                  return;
-                                                }
-                                              }
-
-                                              // Get image files from media
-                                              final imageFiles = media.value;
-                                              // Call saveDraft from AuctionService
-                                              final auctionService = AuctionService();
-                                              final result = await auctionService.saveDraft(
-                                                  auctionData: productData, images: imageFiles);
-                                              
-                                              isSavingDraft.value = false;
-                                              
-                                              if (result['success'] == true) {
-                                                // Fetch full draft details from backend
-                                                final details =
-                                                    await AuctionDetailsService
-                                                        .getAuctionDetails(result['data']
-                                                                ['id']
-                                                            .toString());
-                                                if (details!['success'] == true &&
-                                                    details['data'] != null) {
-                                                  final AuctionItem fetchedDraft =
-                                                      AuctionItem.fromJson(
-                                                          details['data']);
-                                                  debugPrint(
-                                                      '--- CONTINUE BUTTON PRESSED ---');
-                                                  debugPrint(
-                                                      'AuctionItem fields after fetch:');
-                                                  debugPrint('id: ${fetchedDraft.id}');
-                                                  debugPrint(
-                                                      'productId: ${fetchedDraft.productId}');
-                                                  debugPrint(
-                                                      'title: ${fetchedDraft.title}');
-                                                  debugPrint(
-                                                      'description: ${fetchedDraft.description}');
-                                                  debugPrint(
-                                                      'categoryId: ${fetchedDraft.categoryId}');
-                                                  debugPrint(
-                                                      'subCategoryId: ${fetchedDraft.subCategoryId}');
-                                                  debugPrint(
-                                                      'categoryName: ${fetchedDraft.categoryName}');
-                                                  debugPrint(
-                                                      'subCategoryName: ${fetchedDraft.subCategoryName}');
-                                                  debugPrint(
-                                                      'usageStatus: ${fetchedDraft.usageStatus}');
-                                                  debugPrint(
-                                                      'status: ${fetchedDraft.status}');
-                                                  debugPrint(
-                                                      'imageLinks: ${fetchedDraft.imageLinks}');
-                                                  debugPrint(
-                                                      'createdAt: ${fetchedDraft.createdAt}');
-                                                  debugPrint(
-                                                      'price: ${fetchedDraft.price}');
-                                                  debugPrint(
-                                                      'productListingPrice: ${fetchedDraft.productListingPrice}');
-                                                  debugPrint(
-                                                      'startBidAmount: ${fetchedDraft.startBidAmount}');
-                                                  debugPrint(
-                                                      'currentBid: ${fetchedDraft.currentBid}');
-                                                  debugPrint(
-                                                      'buyNowPrice: ${fetchedDraft.buyNowPrice}');
-                                                  debugPrint(
-                                                      'startDate: ${fetchedDraft.startDate}');
-                                                  debugPrint(
-                                                      'expiryDate: ${fetchedDraft.expiryDate}');
-                                                  debugPrint(
-                                                      'endDate: ${fetchedDraft.endDate}');
-                                                  debugPrint(
-                                                      'type: ${fetchedDraft.type}');
-                                                  debugPrint(
-                                                      'itemLocation: ${fetchedDraft.itemLocation}');
-                                                  debugPrint(
-                                                      'bids: ${fetchedDraft.bids}');
-                                                  debugPrint(
-                                                      'buyNowEnabled: ${fetchedDraft.buyNowEnabled}');
-                                                  debugPrint(
-                                                      'userName: ${fetchedDraft.userName}');
-                                                  debugPrint(
-                                                      'phone: ${fetchedDraft.phone}');
-                                                  debugPrint(
-                                                      'customFields: ${fetchedDraft.customFields}');
-                                                  debugPrint(
-                                                      '-----------------------------------');
-                                                  // Get user from provider
-                                                  final user = Provider.of<UserProvider>(
-                                                          context,
-                                                          listen: false)
-                                                      .user;
-                                                  Navigator.of(context).pushReplacement(
-                                                    MaterialPageRoute(
-                                                      builder: (context) => DraftsPage(
-                                                        user: user,
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  // Fallback: show error or fallback to previous logic
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            'Failed to fetch full draft details.')),
-                                                  );
-                                                }
-                                              } else {
-                                                String errorMessage;
-                                                if (result['message'] is List) {
-                                                  errorMessage = (result['message'] as List)
-                                                      .map((e) => mapBackendErrorToUserMessage(e.toString()))
-                                                      .join('\n');
-                                                } else {
-                                                  errorMessage = mapBackendErrorToUserMessage(
-                                                      result['message']?.toString());
-                                                }
-
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(errorMessage),
-                                                    backgroundColor: errorColor,
-                                                  ),
-                                                );
-                                              }
+                                        if (formValid) {
+                                          final customFields = <String, dynamic>{};
+                                          for (final field in dynamicCustomFields.value) {
+                                            if (field.type == 'dropdown') {
+                                              customFields[field.key] = customFieldDropdownValues[field.key]?.value;
                                             } else {
-                                              isSavingDraft.value = false;
+                                              customFields[field.key] = customFieldControllers[field.key]?.text.trim();
                                             }
-                                          },
-                                    style: ElevatedButton.styleFrom(
-                                      minimumSize: const Size(80, 33),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      backgroundColor: Colors.grey[300],
-                                    ),
-                                    child: isSaving
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(onSecondaryColor),
-                                            ),
-                                          )
-                                        : const Text(
-                                            "Save as Draft",
-                                            style: TextStyle(color: onSecondaryColor),
-                                          ),
-                                  );
-                                },
-                              ),
-                            ],
-                            const SizedBox(width: 16),
-                            ElevatedButton(
-                              onPressed: () async {
-                                // Set submitted to true to show validation errors
-                                isSubmitted.value = true;
+                                          }
 
-                                final formValid = await validateForm();
+                                          // Filter customFields to remove empty or null values
+                                          final filteredCustomFields = <String, dynamic>{
+                                            for (final entry in customFields.entries)
+                                              if (entry.value != null && entry.value.toString().trim().isNotEmpty) entry.key: entry.value
+                                          };
 
-                                if (formValid) {
-                                  // Create base product data
-                                  final customFields = <String, dynamic>{};
-                                  for (final field
-                                      in dynamicCustomFields.value) {
-                                    if (field.type == 'dropdown') {
-                                      customFields[field.key] =
-                                          customFieldDropdownValues[field.key]
-                                              ?.value;
-                                    } else {
-                                      customFields[field.key] =
-                                          customFieldControllers[field.key]
-                                              ?.text
-                                              .trim();
-                                    }
-                                  }
+                                          final Map<String, dynamic> productData = {
+                                            'title': itemNameController.text.trim(),
+                                            'description': descriptionController.text.trim(),
+                                            'categoryId': CategoryData.getCategoryId(categoryController.value ?? '') ?? 1,
+                                            'subCategoryId': CategoryData.getSubCategoryId(categoryController.value ?? '', subCategoryController.value ?? '') ?? 1,
+                                            'usageStatus': condition.value?.toUpperCase() ?? 'UNKNOWN',
+                                            ...filteredCustomFields,
+                                          };
 
-                                  // Filter customFields to remove empty or null values
-                                  final filteredCustomFields = <String, dynamic>{
-                                    for (final entry in customFields.entries)
-                                      if (entry.value != null && entry.value.toString().trim().isNotEmpty)
-                                        entry.key: entry.value
-                                  };
+                                          // Validate required fields using API data
+                                          for (final field in dynamicCustomFields.value) {
+                                            if (field.isRequired && customFields[field.key] == null) {
+                                              showError(context, 'Please fill in all required fields');
+                                              isSavingDraft.value = false;
+                                              return;
+                                            }
+                                          }
 
-                                  final Map<String, dynamic> productData = {
-                                    'title': itemNameController.text.trim(),
-                                    'description':
-                                        descriptionController.text.trim(),
-                                    'categoryId': CategoryData.getCategoryId(
-                                            categoryController.value ?? '') ??
-                                        1,
-                                    'subCategoryId':
-                                        CategoryData.getSubCategoryId(
-                                                categoryController.value ?? '',
-                                                subCategoryController.value ??
-                                                    '') ??
-                                            1,
-                                    'usageStatus':
-                                        condition.value?.toUpperCase() ??
-                                            'UNKNOWN',
-                                    ...filteredCustomFields,
-                                  };
+                                          // Get image files from media
+                                          final imageFiles = media.value;
+                                          // Call saveDraft from AuctionService
+                                          final auctionService = AuctionService();
+                                          final result = await auctionService.saveDraft(auctionData: productData, images: imageFiles);
 
-                                  // Validate required fields using API data
-                                  for (final field
-                                      in dynamicCustomFields.value) {
-                                    if (field.isRequired &&
-                                        customFields[field.key] == null) {
-                                      showError(context,
-                                          'Please fill in all required fields');
-                                      return;
-                                    }
-                                  }
+                                          isSavingDraft.value = false;
 
-                                  // Debug log the product structure
-                                  debugPrint('Final product data structure:');
-                                  debugPrint(json.encode(productData));
+                                          if (result['success'] == true) {
+                                            // Fetch full draft details from backend
+                                            final details = await AuctionDetailsService.getAuctionDetails(result['data']['id'].toString());
+                                            if (details!['success'] == true && details['data'] != null) {
+                                              final AuctionItem fetchedDraft = AuctionItem.fromJson(details['data']);
+                                              debugPrint('--- CONTINUE BUTTON PRESSED ---');
+                                              debugPrint('AuctionItem fields after fetch:');
+                                              debugPrint('id: ${fetchedDraft.id}');
+                                              debugPrint('productId: ${fetchedDraft.productId}');
+                                              debugPrint('title: ${fetchedDraft.title}');
+                                              debugPrint('description: ${fetchedDraft.description}');
+                                              debugPrint('categoryId: ${fetchedDraft.categoryId}');
+                                              debugPrint('subCategoryId: ${fetchedDraft.subCategoryId}');
+                                              debugPrint('categoryName: ${fetchedDraft.categoryName}');
+                                              debugPrint('subCategoryName: ${fetchedDraft.subCategoryName}');
+                                              debugPrint('usageStatus: ${fetchedDraft.usageStatus}');
+                                              debugPrint('status: ${fetchedDraft.status}');
+                                              debugPrint('imageLinks: ${fetchedDraft.imageLinks}');
+                                              debugPrint('createdAt: ${fetchedDraft.createdAt}');
+                                              debugPrint('price: ${fetchedDraft.price}');
+                                              debugPrint('productListingPrice: ${fetchedDraft.productListingPrice}');
+                                              debugPrint('startBidAmount: ${fetchedDraft.startBidAmount}');
+                                              debugPrint('currentBid: ${fetchedDraft.currentBid}');
+                                              debugPrint('buyNowPrice: ${fetchedDraft.buyNowPrice}');
+                                              debugPrint('startDate: ${fetchedDraft.startDate}');
+                                              debugPrint('expiryDate: ${fetchedDraft.expiryDate}');
+                                              debugPrint('endDate: ${fetchedDraft.endDate}');
+                                              debugPrint('type: ${fetchedDraft.type}');
+                                              debugPrint('itemLocation: ${fetchedDraft.itemLocation}');
+                                              debugPrint('bids: ${fetchedDraft.bids}');
+                                              debugPrint('buyNowEnabled: ${fetchedDraft.buyNowEnabled}');
+                                              debugPrint('userName: ${fetchedDraft.userName}');
+                                              debugPrint('phone: ${fetchedDraft.phone}');
+                                              debugPrint('customFields: ${fetchedDraft.customFields}');
+                                              debugPrint('-----------------------------------');
+                                              // Get user from provider
+                                              final user = Provider.of<UserProvider>(context, listen: false).user;
+                                              Navigator.of(context).pushReplacement(
+                                                MaterialPageRoute(
+                                                  builder: (context) => DraftsPage(
+                                                    user: user,
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              // Fallback: show error or fallback to previous logic
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text('Failed to fetch full draft details.')),
+                                              );
+                                            }
+                                          } else {
+                                            String errorMessage;
+                                            if (result['message'] is List) {
+                                              errorMessage = (result['message'] as List).map((e) => mapBackendErrorToUserMessage(e.toString())).join('\n');
+                                            } else {
+                                              errorMessage = mapBackendErrorToUserMessage(result['message']?.toString());
+                                            }
 
-                                  // Debug log media files
-                                  debugPrint(
-                                      'ProductDetailsScreen - Media files before navigation:');
-                                  debugPrint(
-                                      'Total files: ${media.value.length}');
-                                  for (var i = 0; i < media.value.length; i++) {
-                                    final file = media.value[i];
-                                    final isVideo = file.path
-                                            .toLowerCase()
-                                            .endsWith('.mp4') ||
-                                        file.path
-                                            .toLowerCase()
-                                            .endsWith('.mov');
-                                    debugPrint('  File $i: ${file.path}');
-                                    debugPrint(
-                                        '    Type: ${isVideo ? 'Video' : 'Image'}');
-                                    debugPrint(
-                                        '    Size: ${(file.lengthSync() / 1024).toStringAsFixed(2)} KB');
-                                  }
-
-                                  // Get image paths from media files
-                                  final imagePaths = media.value
-                                      .map((file) => file.path)
-                                      .toList();
-
-                                  if (title == 'Create Auction') {
-                                    // Navigate to auction details for auction creation
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            AuctionDetailsScreen(
-                                          productData: productData,
-                                          imagePaths: imagePaths,
-                                        ),
-                                      ),
-                                    );
-                                  } else {
-                                    // Navigate to shipping details for listing product
-                                    final listProductData = {
-                                      'product': {
-                                        ...productData,
-                                        'price': priceController.text.trim(),
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(errorMessage),
+                                                backgroundColor: errorColor,
+                                              ),
+                                            );
+                                          }
+                                        } else {
+                                          isSavingDraft.value = false;
+                                        }
                                       },
-                                    };
-
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            ShippingDetailsScreen(
-                                          auctionData: listProductData,
-                                          imagePaths: imagePaths,
-                                          title: title,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(80, 33),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(80, 33),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  backgroundColor: Colors.grey[300],
                                 ),
-                                backgroundColor: Theme.of(context).primaryColor,
-                              ),
-                              child: const Text("Next",
-                                  style: TextStyle(color: secondaryColor)),
+                                child: isSaving
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(onSecondaryColor),
+                                        ),
+                                      )
+                                    : const Text(
+                                        "Save as Draft",
+                                        style: TextStyle(color: onSecondaryColor),
+                                      ),
+                              );
+                            },
+                          ),
+                        ],
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () async {
+                            // Set submitted to true to show validation errors
+                            isSubmitted.value = true;
+
+                            final formValid = await validateForm();
+
+                            if (formValid) {
+                              // Create base product data
+                              final customFields = <String, dynamic>{};
+                              for (final field in dynamicCustomFields.value) {
+                                if (field.type == 'dropdown') {
+                                  customFields[field.key] = customFieldDropdownValues[field.key]?.value;
+                                } else {
+                                  customFields[field.key] = customFieldControllers[field.key]?.text.trim();
+                                }
+                              }
+
+                              // Filter customFields to remove empty or null values
+                              final filteredCustomFields = <String, dynamic>{
+                                for (final entry in customFields.entries)
+                                  if (entry.value != null && entry.value.toString().trim().isNotEmpty) entry.key: entry.value
+                              };
+
+                              final Map<String, dynamic> productData = {
+                                'title': itemNameController.text.trim(),
+                                'description': descriptionController.text.trim(),
+                                'categoryId': CategoryData.getCategoryId(categoryController.value ?? '') ?? 1,
+                                'subCategoryId': CategoryData.getSubCategoryId(categoryController.value ?? '', subCategoryController.value ?? ''),
+                                'usageStatus': condition.value?.toUpperCase() ?? 'UNKNOWN',
+                                ...filteredCustomFields,
+                              };
+
+                              // Validate required fields using API data
+                              for (final field in dynamicCustomFields.value) {
+                                if (field.isRequired && customFields[field.key] == null) {
+                                  showError(context, 'Please fill in all required fields');
+                                  return;
+                                }
+                              }
+
+                              // Debug log the product structure
+                              debugPrint('Final product data structure:');
+                              debugPrint(json.encode(productData));
+
+                              // Debug log media files
+                              debugPrint('ProductDetailsScreen - Media files before navigation:');
+                              debugPrint('Total files: ${media.value.length}');
+                              for (var i = 0; i < media.value.length; i++) {
+                                final file = media.value[i];
+                                final isVideo = file.path.toLowerCase().endsWith('.mp4') || file.path.toLowerCase().endsWith('.mov');
+                                debugPrint('  File $i: ${file.path}');
+                                debugPrint('    Type: ${isVideo ? 'Video' : 'Image'}');
+                                debugPrint('    Size: ${(file.lengthSync() / 1024).toStringAsFixed(2)} KB');
+                              }
+
+                              // Get image paths from media files
+                              final imagePaths = media.value.map((file) => file.path).toList();
+
+                              if (title == 'Create Auction') {
+                                // Navigate to auction details for auction creation
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AuctionDetailsScreen(
+                                      productData: productData,
+                                      imagePaths: imagePaths,
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                // Navigate to shipping details for listing product
+                                final listProductData = {
+                                  'product': {
+                                    ...productData,
+                                    'price': priceController.text.trim(),
+                                  },
+                                };
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ShippingDetailsScreen(
+                                      auctionData: listProductData,
+                                      imagePaths: imagePaths,
+                                      title: title,
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(80, 33),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                          ]),
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                          child: const Text("Next", style: TextStyle(color: secondaryColor)),
+                        ),
+                      ]),
                     ),
                   ],
                 ),
