@@ -464,7 +464,7 @@ class AuctionProvider with ChangeNotifier {
 
     _isLoadingUpcoming = true;
     _errorUpcoming = null;
-    notifyListeners();
+    // notifyListeners();
 
     try {
       // print('Fetching upcoming auctions...');
@@ -477,7 +477,7 @@ class AuctionProvider with ChangeNotifier {
       // print('Error fetching upcoming auctions: $_error');
     } finally {
       _isLoadingUpcoming = false;
-      notifyListeners();
+      if (_upcomingAuctions.isNotEmpty) notifyListeners();
     }
   }
 
@@ -588,7 +588,7 @@ class AuctionProvider with ChangeNotifier {
 
     _isLoadingCancelled = true;
     _errorCancelled = null;
-    notifyListeners();
+    // notifyListeners();
 
     try {
       debugPrint('🔄 [AuctionProvider] Fetching CANCELLED auctions...');
@@ -608,7 +608,7 @@ class AuctionProvider with ChangeNotifier {
       print(stackTrace);
     } finally {
       _isLoadingCancelled = false;
-      notifyListeners();
+      if (_cancelledAuctions.isNotEmpty) notifyListeners();
     }
   }
 
@@ -717,7 +717,7 @@ class AuctionProvider with ChangeNotifier {
 
     _isLoadingSold = true;
     _errorSold = null;
-    notifyListeners();
+    // notifyListeners();
 
     try {
       debugPrint('🔄 [AuctionProvider] Fetching SOLD auctions...');
@@ -734,7 +734,7 @@ class AuctionProvider with ChangeNotifier {
       _errorSold = 'Failed to load sold auctions. Please try again.';
     } finally {
       _isLoadingSold = false;
-      notifyListeners();
+      if (_soldAuctions.isNotEmpty) notifyListeners();
     }
   }
 
@@ -746,7 +746,7 @@ class AuctionProvider with ChangeNotifier {
 
     _isLoadingPending = true;
     _errorPending = null;
-    notifyListeners();
+    // notifyListeners();
 
     debugPrint('🔄 [AuctionProvider] Fetching PENDING auctions...');
 
@@ -774,7 +774,7 @@ class AuctionProvider with ChangeNotifier {
       debugPrint('Stack trace: $stackTrace');
     } finally {
       _isLoadingPending = false;
-      notifyListeners();
+      if (_pendingAuctions.isNotEmpty) notifyListeners();
 
       // Debug: Check the final state after update
       debugPrint('🏁 [AuctionProvider] Final _pendingAuctions count: ${_pendingAuctions.length}');
@@ -790,7 +790,7 @@ class AuctionProvider with ChangeNotifier {
     try {
       _isLoadingWaitingForPayment = true;
       _errorWaitingForPayment = null;
-      notifyListeners();
+      // notifyListeners();
 
       debugPrint('🔄 [AuctionProvider] Fetching WAITING_FOR_PAYMENT auctions...');
       final status = 'WAITING_FOR_PAYMENT';
@@ -805,7 +805,7 @@ class AuctionProvider with ChangeNotifier {
       debugPrint('Error fetching waiting for payment auctions: $e');
     } finally {
       _isLoadingWaitingForPayment = false;
-      notifyListeners();
+      if (_waitingForPaymentAuctions.isNotEmpty) notifyListeners();
     }
   }
 

@@ -679,7 +679,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => PaymentDetailsScreen(
-                                  auctionData: {'data': detailsJson['data']},
+                                  auctionData: {'details': detailsJson['data']},
                                 ),
                               ),
                             );
