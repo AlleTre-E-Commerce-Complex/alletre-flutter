@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -253,7 +254,12 @@ class AuctionsTabView extends StatelessWidget {
           }
           // isLoading = provider.isLoadingPending;
           error = provider.errorCancelled;
-          filtered = provider.cancelledAuctions.where((a) => a.status.toUpperCase() == status).toList();
+          filtered = provider.cancelledAuctions.where((a) {
+            for (var _status in (status as List<String>)) {
+              if (a.status.toUpperCase() == _status) return true;
+            }
+            return false;
+          }).toList();
           break;
       }
 
@@ -279,30 +285,36 @@ class AuctionsTabView extends StatelessWidget {
       if (filtered.isEmpty) {
         content = EmptyState(message: 'No $type auctions found.', fontSize: 14);
       } else {
-        content = GridView.builder(
-          padding: const EdgeInsets.all(1),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 1,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 30,
-            childAspectRatio: cardWidth / cardHeight,
-          ),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final auction = filtered[index];
-            return AuctionCard(
-              auction: auction,
-              user: UserModel(
-                name: auction.userName ?? '',
-                email: '',
-                phoneNumber: auction.phone,
-                password: '',
-              ),
-              title: type,
-              cardWidth: cardWidth,
-            );
-          },
-        );
+        if (provider.isLoading) {
+          content = const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else {
+          content = GridView.builder(
+            padding: const EdgeInsets.all(1),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 30,
+              childAspectRatio: cardWidth / cardHeight,
+            ),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) {
+              final auction = filtered[index];
+              return AuctionCard(
+                auction: auction,
+                user: UserModel(
+                  name: auction.userName ?? '',
+                  email: '',
+                  phoneNumber: auction.phone,
+                  password: '',
+                ),
+                title: type,
+                cardWidth: cardWidth,
+              );
+            },
+          );
+        }
       }
 
       return content;

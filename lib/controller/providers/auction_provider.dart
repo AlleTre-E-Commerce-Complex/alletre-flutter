@@ -56,7 +56,7 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> _outOfStockProducts = [];
   List<AuctionItem> _soldOutProducts = [];
   List<AuctionItem> _joinedAuctions = [];
-  final bool _isLoading = false;
+  bool _isLoading = false;
   String? _error;
 
   bool _isLoadingLive = false;
@@ -896,6 +896,46 @@ class AuctionProvider with ChangeNotifier {
       }
       // print('Notifying listeners about live auctions update');
     }
+  }
+
+  Future<Map<String, dynamic>> cancelAuction(AuctionItem auctionItem, int auctionId) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      final resp = await _auctionService.cancelAuction(auctionId);
+      _isLoading = false;
+      if (resp['success'] == true) {
+        switch (auctionItem.status) {
+          case "WAITING_FOR_PAYMENT":
+            _waitingForPaymentAuctions.remove(auctionItem);
+          case "SOLD":
+            _soldAuctions.remove(auctionItem);
+          case "EXPIRED":
+            _expiredAuctions.remove(auctionItem);
+          case "ACTIVE":
+            _liveMyAuctions.remove(auctionItem);
+          case "IN_SCHEDULED":
+            _upcomingAuctions.remove(auctionItem);
+          case "PENDING_OWNER_DEPOIST":
+            _pendingAuctions.remove(auctionItem);
+        }
+        if (auctionItem.expiryDate.isAfter(DateTime.now())) {
+          auctionItem.status = 'CANCELLED_BEFORE_EXP_DATE';
+        } else {
+          auctionItem.status = 'CANCELLED_AFTER_EXP_DATE';
+        }
+        _cancelledAuctions.add(auctionItem);
+      } else {
+        throw Exception(resp['message']);
+      }
+      notifyListeners();
+      return resp;
+    } catch (e, stackTrace) {
+      // print('Error in getLiveAuctions:');
+      print(e);
+      print(stackTrace);
+    }
+    return {'success': false, 'message': 'Error occurred'};
   }
 
   @override

@@ -1612,4 +1612,60 @@ class AuctionService {
       return [];
     }
   }
+
+  Future<Map<String, dynamic>> cancelAuction(int auctionId) async {
+    try {
+      String? accessToken = await _getAccessToken();
+      final url = Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/cancel-auction');
+      final body = jsonEncode({
+        'auctionId': auctionId,
+      });
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      };
+
+      debugPrint('--- cancelAuction DEBUG START ---');
+      debugPrint('Endpoint: $url');
+      debugPrint('Headers:');
+      headers.forEach((k, v) => debugPrint('  $k: $v'));
+      debugPrint('Request Body: $body');
+      debugPrint('--- Sending PUT request...');
+
+      var response = await http.put(url, headers: headers, body: body);
+
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+
+      if (response.statusCode == 401) {
+        debugPrint('401 Unauthorized. Attempting token refresh...');
+        final userService = UserService();
+        final refreshResult = await userService.refreshTokens();
+        if (refreshResult['success']) {
+          accessToken = refreshResult['data']['accessToken'];
+          headers['Authorization'] = 'Bearer $accessToken';
+          debugPrint('Retrying POST with refreshed token...');
+          response = await http.put(url, headers: headers, body: body);
+          debugPrint('Retry Response Status: ${response.statusCode}');
+          debugPrint('Retry Response Body: ${response.body}');
+        } else {
+          debugPrint('Token refresh failed.');
+          return {'success': false, 'message': 'Authentication failed'};
+        }
+      }
+      final data = json.decode(response.body);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('--- cancelAuction DEBUG END: SUCCESS ---');
+        return {'success': true, 'data': data['data']};
+      } else {
+        debugPrint('--- cancelAuction DEBUG END: FAILURE ---');
+        return {'success': false, 'message': data['message'] ?? 'Failed to set delivery type'};
+      }
+    } catch (e, stack) {
+      debugPrint('--- cancelAuction DEBUG END: EXCEPTION ---');
+      debugPrint('Exception: $e');
+      debugPrint('Stack Trace: $stack');
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }
