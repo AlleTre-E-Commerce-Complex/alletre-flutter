@@ -89,6 +89,7 @@ class AuctionCard extends StatelessWidget {
                 // Content Section
                 Expanded(
                   child: SingleChildScrollView(
+                    physics: NeverScrollableScrollPhysics(),
                     child: Container(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
