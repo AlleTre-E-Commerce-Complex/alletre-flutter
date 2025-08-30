@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/ui_helpers.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
@@ -478,7 +479,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                 ElevatedButton(
                                   // --- Handle Buy Now flow for wallet payment ---
                                   onPressed: () async {
-                                    final isBuyNow = widget.auctionData['auction'] != null && widget.auctionData['details'] != null;
+                                    final isBuyNow = (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) ? (widget.auctionData['auction'] as AuctionItem).isBuyNow : false;
                                     double totalAmount = 0;
                                     if (isBuyNow) {
                                       final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
@@ -557,6 +558,11 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                       }
                                     } else {
                                       _handleWalletPayment();
+                                      if (((widget.auctionData['details'] as Map<String, dynamic>).containsKey('isDeposit') ? widget.auctionData['details']['isDeposit'] : false) == true) {
+                                        (widget.auctionData['auction'] as AuctionItem).status = 'ACTIVE';
+                                        context.read<AuctionProvider>().pendingAuctions.remove(widget.auctionData['auction']);
+                                        context.read<AuctionProvider>().liveMyAuctions.add(widget.auctionData['auction']);
+                                      }
                                     }
                                   },
 
@@ -578,7 +584,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                         )
                                       : Text(
                                           () {
-                                            final isBuyNow = widget.auctionData['auction'] != null && widget.auctionData['details'] != null;
+                                            final isBuyNow = (widget.auctionData['auction'] != null && widget.auctionData['details'] != null) ? (widget.auctionData['auction'] as AuctionItem).isBuyNow : false;
                                             if (isBuyNow) {
                                               final acceptedAmountStr = widget.auctionData['details']['acceptedAmount']?.toString() ?? '0';
                                               final acceptedAmount = double.tryParse(acceptedAmountStr) ?? 0;
@@ -588,11 +594,12 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                               return 'Pay AED ${NumberFormat("#,##0.00").format(totalAmount)}';
                                             }
                                             // For newly created auctions, calculate deposit based on category
-                                            if (widget.auctionData['details']['isDeposit'] == null && widget.auctionData['details'] != null) {
-                                              final categoryId = widget.auctionData['data']['product']?['categoryId'];
+                                            if (((widget.auctionData['details'] as Map<String, dynamic>).containsKey('isDeposit') ? (widget.auctionData['details']['isDeposit'] == true && widget.auctionData['details'] != null) : false) == true) {
+                                              final categoryId = widget.auctionData['details']['product']?['categoryId'];
                                               if (categoryId != null) {
                                                 final depositAmount = CategoryService.getSellerDepositAmount(int.parse(categoryId.toString()));
                                                 debugPrint('🔍 Calculated Deposit Amount for Pay Button: $depositAmount');
+                                                this.depositAmount = double.parse(depositAmount);
                                                 return 'Pay AED ${NumberFormat("#,##0").format(double.tryParse(depositAmount)?.round() ?? 0)}';
                                               }
                                             }

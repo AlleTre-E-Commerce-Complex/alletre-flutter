@@ -324,6 +324,7 @@ class AuctionCard extends StatelessWidget {
                                               }
                                               detailsRes['data']['isMyAuction'] = auction.isMyAuction;
                                               if (auction.status == 'PENDING_OWNER_DEPOIST') {
+                                                detailsRes['data']['isDeposit'] = true;
                                                 Navigator.push(
                                                   MyApp.navigatorKey.currentContext!,
                                                   MaterialPageRoute(
@@ -464,7 +465,10 @@ class AuctionCard extends StatelessWidget {
                                         ),
                                         padding: const EdgeInsets.symmetric(horizontal: 4),
                                       ),
-                                      onPressed: () => _navigateToDetails(context, auction, user),
+                                      onPressed: () {
+                                        auction.isBuyNow = true;
+                                        _navigateToDetails(context, auction, user);
+                                      },
                                       child: const Text(
                                         'Buy Now',
                                         textAlign: TextAlign.center,
