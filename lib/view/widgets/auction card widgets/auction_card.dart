@@ -2,9 +2,11 @@ import 'package:alletre_app/app.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
+import 'package:alletre_app/controller/services/auction_details_service.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/auth_helper.dart';
 import 'package:alletre_app/utils/extras/search_highlight.dart';
+import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -311,8 +313,30 @@ class AuctionCard extends StatelessWidget {
                                               minimumSize: const Size(0, 32),
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                                             ),
-                                            onPressed: () {
-                                              // TODO: Implement Edit/Complete Payment logic
+                                            onPressed: () async {
+                                              final detailsRes = await AuctionDetailsService.getAuctionDetails(auction.id.toString());
+                                              if (detailsRes == null || detailsRes['data'] == null) {
+                                                ScaffoldMessenger.of(MyApp.navigatorKey.currentContext!).showSnackBar(
+                                                  const SnackBar(content: Text('Failed to get auction details')),
+                                                );
+                                                return;
+                                              }
+                                              detailsRes['data']['isMyAuction'] = auction.isMyAuction;
+                                              if (auction.status == 'PENDING_OWNER_DEPOIST') {
+                                                Navigator.push(
+                                                  MyApp.navigatorKey.currentContext!,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => PaymentDetailsScreen(
+                                                      auctionData: {
+                                                        'auction': auction,
+                                                        'details': detailsRes['data'],
+                                                      },
+                                                    ),
+                                                  ),
+                                                );
+                                              } else {
+                                                return _navigateToDetails(context, auction, user);
+                                              }
                                             },
                                             child: Text(
                                               auction.status == 'PENDING_OWNER_DEPOIST' ? 'Pay Deposit' : 'Edit Auction',

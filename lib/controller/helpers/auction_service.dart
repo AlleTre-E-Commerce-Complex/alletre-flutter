@@ -1054,7 +1054,10 @@ class AuctionService {
         if (userResponse.statusCode == 200) {
           final data = jsonDecode(userResponse.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
+            final items = (data['data'] as List).map((item) {
+              item['isMyAuction'] = true;
+              return AuctionItem.fromJson(item);
+            }).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
