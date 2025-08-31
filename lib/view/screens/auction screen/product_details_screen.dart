@@ -728,9 +728,10 @@ class ProductDetailsScreen extends StatelessWidget {
                     ValueListenableBuilder<String?>(
                       valueListenable: categoryController,
                       builder: (context, selectedCategory, child) {
-                        if (selectedCategory == "Properties") {
-                          return const SizedBox(); // Hide item condition for Properties category
-                        }
+                        // commenting this because backend does not handle that Properties category wont need item condtion value
+                        // if (selectedCategory == "Properties") {
+                        //   return const SizedBox(); // Hide item condition for Properties category
+                        // }
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
