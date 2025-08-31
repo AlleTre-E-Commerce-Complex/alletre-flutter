@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
 
+import 'package:alletre_app/app.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/utils/auth_helper.dart';
@@ -592,7 +593,45 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _isSubmitting ? null : _handleBidSubmission,
+            onPressed: () {
+              if (!_isSubmitting) {
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Are you sure?'),
+                        content: const Text(
+                          'You are about to place bid..',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(0, 32),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
+                            ),
+                            child: const Text('Go Back', style: TextStyle(color: primaryColor, fontSize: 11)),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(0, 32),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
+                            ),
+                            child: const Text('Proceed', style: TextStyle(color: primaryColor, fontSize: 11)),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _handleBidSubmission();
+                            },
+                          ),
+                        ],
+                      );
+                    });
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 12),
