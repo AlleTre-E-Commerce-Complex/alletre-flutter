@@ -26,8 +26,7 @@ class DeliveryTypeModal extends StatelessWidget {
     String? selectedType;
     // errorText must persist across StatefulBuilder rebuilds
     // so we use a ValueNotifier for errorText
-    final ValueNotifier<String?> errorTextNotifier =
-        ValueNotifier<String?>(null);
+    final ValueNotifier<String?> errorTextNotifier = ValueNotifier<String?>(null);
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
@@ -49,26 +48,17 @@ class DeliveryTypeModal extends StatelessWidget {
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select the delivery type',
-                          labelStyle: const TextStyle(
-                              fontSize: 13, color: onSecondaryColor),
+                          labelStyle: const TextStyle(fontSize: 13, color: onSecondaryColor),
                           border: const OutlineInputBorder(),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           errorText: errorText,
-                          errorStyle: const TextStyle(
-                              color: errorColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600),
+                          errorStyle: const TextStyle(color: errorColor, fontSize: 11, fontWeight: FontWeight.w600),
                         ),
                         value: selectedType,
                         items: deliveryTypes
                             .map((type) => DropdownMenuItem<String>(
                                   value: type,
-                                  child: Text(type,
-                                      style: const TextStyle(
-                                          fontSize: 13,
-                                          color: onSecondaryColor,
-                                          fontWeight: FontWeight.w500)),
+                                  child: Text(type, style: const TextStyle(fontSize: 13, color: onSecondaryColor, fontWeight: FontWeight.w500)),
                                 ))
                             .toList(),
                         onChanged: (value) {
@@ -95,11 +85,7 @@ class DeliveryTypeModal extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 16),
-                const Text('Seller Details',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: onSecondaryColor,
-                        fontSize: 14)),
+                const Text('Seller Details', style: TextStyle(fontWeight: FontWeight.w600, color: onSecondaryColor, fontSize: 14)),
                 const SizedBox(height: 8),
                 Table(
                   border: TableBorder.all(color: Colors.black54),
@@ -128,13 +114,13 @@ class DeliveryTypeModal extends StatelessWidget {
                   ],
                 ),
                 if (selectedType == 'Pick up yourself' && auction.itemLocation != null) ...[
-  const SizedBox(height: 18),
-  SellerLocationMap(
-    lat: auction.itemLocation!.lat,
-    lng: auction.itemLocation!.lng,
-    label: auction.sellerAddressLabel ?? 'Seller Location',
-  ),
-],
+                  const SizedBox(height: 18),
+                  SellerLocationMap(
+                    lat: auction.itemLocation!.lat,
+                    lng: auction.itemLocation!.lng,
+                    label: auction.sellerAddressLabel ?? 'Seller Location',
+                  ),
+                ],
               ],
             ),
           );
@@ -153,8 +139,7 @@ class DeliveryTypeModal extends StatelessWidget {
             maximumSize: const Size(108, 32),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           ),
-          child: const Text('Cancel',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
+          child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
         ),
         StatefulBuilder(
           builder: (context, setState) {
@@ -168,15 +153,13 @@ class DeliveryTypeModal extends StatelessWidget {
                     '\u001b[33m${errorTextNotifier.value}\u001b[0m');
 
                 if (selectedType == null) {
-                  debugPrint(
-                      '  No delivery type selected. Setting error message.');
+                  debugPrint('  No delivery type selected. Setting error message.');
                   errorTextNotifier.value = 'Please select a delivery type';
                   debugPrint('  errorTextNotifier (after): '
                       '\u001b[31m${errorTextNotifier.value}\u001b[0m');
                   return;
                 }
-                debugPrint(
-                    '  Delivery type selected. Clearing error and submitting.');
+                debugPrint('  Delivery type selected. Clearing error and submitting.');
                 errorTextNotifier.value = null;
                 debugPrint('  errorTextNotifier (after): '
                     '\u001b[32m${errorTextNotifier.value}\u001b[0m');
@@ -185,8 +168,7 @@ class DeliveryTypeModal extends StatelessWidget {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) =>
-                      const Center(child: CircularProgressIndicator()),
+                  builder: (context) => const Center(child: CircularProgressIndicator()),
                 );
                 bool dialogClosed = false;
                 void closeDialogIfOpen() {
@@ -204,33 +186,27 @@ class DeliveryTypeModal extends StatelessWidget {
                   };
                   final backendDeliveryType = deliveryTypeMap[selectedType]!;
                   final auctionService = AuctionService();
-                  final setDeliveryRes = await auctionService.setDeliveryType(
-                      auction.id.toString(), backendDeliveryType);
+                  final setDeliveryRes = await auctionService.setDeliveryType(auction.id.toString(), backendDeliveryType);
                   if (setDeliveryRes['success'] != true) {
                     closeDialogIfOpen();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text(setDeliveryRes['message'] ??
-                              'Failed to set delivery type')),
+                      SnackBar(content: Text(setDeliveryRes['message'] ?? 'Failed to set delivery type')),
                     );
                     return;
                   }
 
                   // Fetch latest auction details
-                  final detailsRes =
-                      await AuctionDetailsService.getAuctionDetails(
-                          auction.id.toString());
+                  final detailsRes = await AuctionDetailsService.getAuctionDetails(auction.id.toString());
                   if (detailsRes == null || detailsRes['data'] == null) {
                     closeDialogIfOpen();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Failed to get auction details')),
+                      const SnackBar(content: Text('Failed to get auction details')),
                     );
                     return;
                   }
 
                   closeDialogIfOpen();
-                  // Navigate to payment details
+                  // Navigate to payment details                  
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -242,12 +218,10 @@ class DeliveryTypeModal extends StatelessWidget {
                       ),
                     ),
                   );
-                  debugPrint(
-                      '[DeliveryTypeModal] Navigation to /payment-details finished');
+                  debugPrint('[DeliveryTypeModal] Navigation to /payment-details finished');
                 } catch (e, stack) {
                   closeDialogIfOpen();
-                  debugPrint(
-                      '[DeliveryTypeModal] Exception in submit: $e\n$stack');
+                  debugPrint('[DeliveryTypeModal] Exception in submit: $e\n$stack');
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('An error occurred: $e')),
@@ -264,15 +238,11 @@ class DeliveryTypeModal extends StatelessWidget {
                 ),
                 minimumSize: const Size(58, 32),
                 maximumSize: const Size(108, 32),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               ),
               child: const Text(
                 'Submit',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
-                    color: primaryColor),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11, color: primaryColor),
               ),
             );
           },
@@ -285,12 +255,6 @@ class DeliveryTypeModal extends StatelessWidget {
     if (child is Widget) {
       return Padding(padding: const EdgeInsets.all(8), child: child);
     }
-    return Padding(
-        padding: const EdgeInsets.all(8),
-        child: Text(child ?? '-',
-            style: const TextStyle(
-                fontSize: 12,
-                color: onSecondaryColor,
-                fontWeight: FontWeight.w500)));
+    return Padding(padding: const EdgeInsets.all(8), child: Text(child ?? '-', style: const TextStyle(fontSize: 12, color: onSecondaryColor, fontWeight: FontWeight.w500)));
   }
 }

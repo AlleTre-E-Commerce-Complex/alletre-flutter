@@ -50,6 +50,7 @@ class ItemDetailsScreen extends StatelessWidget {
         dialogClosed = true;
       }
     }
+
     // Address check: ensure user has at least one address
     final addresses = await AddressService.fetchAddresses();
     if (addresses.isEmpty) {
@@ -59,7 +60,7 @@ class ItemDetailsScreen extends StatelessWidget {
       );
       return;
     }
-    
+
     final auctionId = item.id.toString();
     final scaffold = ScaffoldMessenger.of(context);
 
@@ -89,15 +90,14 @@ class ItemDetailsScreen extends StatelessWidget {
     print('Country: ${freshItem.sellerCountry}');
     print('Contact Number: ${freshItem.sellerPhone}');
 
-
-
-final deliveryTypeMap = {
-  'Pick up yourself': 'PICKUP',
-  'Deliver by company': 'DELIVERY',
-};
+    final deliveryTypeMap = {
+      'Pick up yourself': 'PICKUP',
+      'Deliver by company': 'DELIVERY',
+    };
 
     String? selectedType;
-    
+
+    freshItem.isBuyNow = true;
     await showDialog(
       context: context,
       builder: (context) => DeliveryTypeModal(
@@ -117,26 +117,21 @@ final deliveryTypeMap = {
     try {
       // 1. Set delivery type
       final backendDeliveryType = deliveryTypeMap[selectedType]!;
-      final setDeliveryRes = await auctionService.setDeliveryType(
-        auctionId, backendDeliveryType);
+      final setDeliveryRes = await auctionService.setDeliveryType(auctionId, backendDeliveryType);
       if (setDeliveryRes['success'] != true) {
         closeDialogIfOpen();
-        scaffold.showSnackBar(SnackBar(
-            content: Text(
-                setDeliveryRes['message'] ?? 'Failed to set delivery type')));
+        scaffold.showSnackBar(SnackBar(content: Text(setDeliveryRes['message'] ?? 'Failed to set delivery type')));
         return;
       }
 
       // 2. Get auction details again (optional: for absolute latest, or skip if not needed)
-      final detailsRes =
-          await AuctionDetailsService.getAuctionDetails(auctionId);
+      final detailsRes = await AuctionDetailsService.getAuctionDetails(auctionId);
       if (detailsRes == null || detailsRes['data'] == null) {
         closeDialogIfOpen();
         scaffold.showSnackBar(const SnackBar(
             content: Center(
-              child: Text(
-                  'Failed to get auction details'),
-            )));
+          child: Text('Failed to get auction details'),
+        )));
         return;
       }
 
@@ -144,24 +139,24 @@ final deliveryTypeMap = {
       final buyNowRes = await auctionService.buyNow(auctionId);
       if (buyNowRes['success'] != true) {
         closeDialogIfOpen();
-        scaffold.showSnackBar(
-            SnackBar(content: Text(buyNowRes['message'] ?? 'Buy Now failed')));
+        scaffold.showSnackBar(SnackBar(content: Text(buyNowRes['message'] ?? 'Buy Now failed')));
         return;
       }
 
       // 4. Navigate to payment details screen (updated for Buy Now)
-    closeDialogIfOpen();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PaymentDetailsScreen(
-          auctionData: {
-            'auction': freshItem,
-            'details': detailsRes['data'],
-          },
+      closeDialogIfOpen();
+      detailsRes['data']['isMyAuction'] = item.isMyAuction;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentDetailsScreen(
+            auctionData: {
+              'auction': freshItem,
+              'details': detailsRes['data'],
+            },
+          ),
         ),
-      ),
-    );
+      );
     } catch (e) {
       closeDialogIfOpen();
       scaffold.showSnackBar(SnackBar(content: Text('An error occurred: $e')));
@@ -187,14 +182,12 @@ final deliveryTypeMap = {
 
     // Join auction room and fetch details when screen is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final auctionProvider =
-          Provider.of<AuctionProvider>(context, listen: false);
+      final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
       auctionProvider.joinAuctionRoom(item.id.toString());
 
       // Fetch auction details to get username - only if not already fetched
       if (item.isAuctionProduct && item.userName == null) {
-        final detailsProvider =
-            Provider.of<AuctionDetailsProvider>(context, listen: false);
+        final detailsProvider = Provider.of<AuctionDetailsProvider>(context, listen: false);
         detailsProvider.fetchUserName(item.id.toString());
       }
     });
@@ -206,11 +199,7 @@ final deliveryTypeMap = {
     );
 
     // Compute the username before the widget tree
-    final String? userName = item.isAuctionProduct
-        ? context
-            .watch<AuctionDetailsProvider>()
-            .getUserName(item.id.toString())
-        : (item.product?['user']?['userName'] as String? ?? item.postedBy);
+    final String? userName = item.isAuctionProduct ? context.watch<AuctionDetailsProvider>().getUserName(item.id.toString()) : (item.product?['user']?['userName'] as String? ?? item.postedBy);
 
     return Scaffold(
       appBar: AppBar(
@@ -219,9 +208,7 @@ final deliveryTypeMap = {
           onPressed: () => _popAndRefresh(context),
         ),
         title: Center(
-          child: Text(item.title,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+          child: Text(item.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
         ),
         actions: [
           if (title != 'Listed Products')
@@ -229,10 +216,7 @@ final deliveryTypeMap = {
               builder: (context, wishlistProvider, child) {
                 final isInWishlist = wishlistProvider.isWishlisted(item.id);
                 return IconButton(
-                  icon: Icon(
-                      isInWishlist ? Icons.bookmark : FontAwesomeIcons.bookmark,
-                      color: isInWishlist ? primaryColor : null,
-                      size: 18),
+                  icon: Icon(isInWishlist ? Icons.bookmark : FontAwesomeIcons.bookmark, color: isInWishlist ? primaryColor : null, size: 18),
                   onPressed: () {
                     if (!isLoggedIn) {
                       AuthHelper.showAuthenticationRequiredMessage(context);
@@ -254,9 +238,7 @@ final deliveryTypeMap = {
                 '${title == "Listed Products" ? "Price" : "Starting Bid"}: AED ${NumberFormat.decimalPattern().format(double.tryParse(item.startBidAmount) ?? 0.0)}\n'
                 '${title != "Listed Products" ? "Current Bid: AED ${NumberFormat.decimalPattern().format(double.tryParse(item.currentBid) ?? 0.0)}\n" : ""}'
                 '$itemUrl',
-                subject: title == "Listed Products"
-                    ? 'Interesting Product on Alletre'
-                    : 'Interesting Auction on Alletre',
+                subject: title == "Listed Products" ? 'Interesting Product on Alletre' : 'Interesting Auction on Alletre',
               );
             },
             padding: const EdgeInsets.only(right: 16),
@@ -302,15 +284,10 @@ final deliveryTypeMap = {
                       children: [
                         Text(
                           item.title,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(
-                                  fontWeight: FontWeight.w600, fontSize: 15),
+                          style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                           decoration: BoxDecoration(
                             color: getStatusColor(item.usageStatus),
                             borderRadius: BorderRadius.circular(5),
@@ -327,13 +304,9 @@ final deliveryTypeMap = {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    if ((title != 'Listed Products' &&
-                            title != 'Similar Products') ||
-                        (title == 'Similar Products' &&
-                            item.isAuctionProduct)) ...[
+                    if ((title != 'Listed Products' && title != 'Similar Products') || (title == 'Similar Products' && item.isAuctionProduct)) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                         decoration: BoxDecoration(
                           color: getStatusColor(item.status).withAlpha(26),
                           borderRadius: BorderRadius.circular(4),
@@ -353,8 +326,7 @@ final deliveryTypeMap = {
                     if (userName != null && userName.isNotEmpty)
                       IntrinsicWidth(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 7),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
                           decoration: BoxDecoration(
                             color: Colors.grey[300],
                             border: Border.all(color: Colors.grey[400]!),
@@ -363,27 +335,17 @@ final deliveryTypeMap = {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              const Icon(Icons.person,
-                                  size: 14, color: onSecondaryColor),
+                              const Icon(Icons.person, size: 14, color: onSecondaryColor),
                               const SizedBox(width: 3),
                               Text(
                                 'Posted by ',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge!
-                                    .copyWith(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: onSecondaryColor),
+                                style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 11, fontWeight: FontWeight.w600, color: onSecondaryColor),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Expanded(
                                 child: Text(
                                   userName,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .copyWith(
+                                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                                         fontSize: 11,
                                         color: primaryColor,
                                         fontWeight: FontWeight.w600,
@@ -400,10 +362,7 @@ final deliveryTypeMap = {
                       icon: const Icon(Icons.info_outline, size: 14),
                       label: Text(
                         'View Details',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: primaryColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 11),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: primaryColor, fontWeight: FontWeight.w500, fontSize: 11),
                       ),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -415,31 +374,21 @@ final deliveryTypeMap = {
                     const SizedBox(height: 15),
                     Text(
                       'Description',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       item.description,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge!
-                          .copyWith(fontSize: 13),
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13),
                     ),
                     const SizedBox(height: 16),
                     ItemDetailsCategoryInfo(item: item),
                     const SizedBox(height: 22),
-                    if ((title != 'Listed Products' &&
-                            title != 'Similar Products') ||
-                        (title == 'Similar Products' &&
-                            item.isAuctionProduct)) ...[
+                    if ((title != 'Listed Products' && title != 'Similar Products') || (title == 'Similar Products' && item.isAuctionProduct)) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          _buildInfoCard(context, 'Total Bids',
-                              latestItem.bids.toString()),
+                          _buildInfoCard(context, 'Total Bids', latestItem.bids.toString()),
                           const Spacer(),
                           _buildEnhancedAuctionCountdown(context),
                         ],
@@ -451,13 +400,10 @@ final deliveryTypeMap = {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if ((title == 'Live Auctions' ||
-                                  title == 'Upcoming Auctions') ||
-                              item.isMyAuction)
+                          if ((title == 'Live Auctions' || title == 'Upcoming Auctions') || item.isMyAuction)
                             Expanded(
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 6, horizontal: 8),
+                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                                 decoration: BoxDecoration(
                                   border: Border.all(color: avatarColor),
                                   borderRadius: BorderRadius.circular(6),
@@ -467,44 +413,24 @@ final deliveryTypeMap = {
                                     latestItem.bids == 0
                                         ? Text(
                                             'Starting Bid',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge
-                                                ?.copyWith(
-                                                    color: onSecondaryColor,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 13),
+                                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 13),
                                           )
                                         : Text(
                                             'Current Bid',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge
-                                                ?.copyWith(
-                                                    color: onSecondaryColor,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 13),
+                                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 13),
                                           ),
                                     const SizedBox(height: 5),
                                     Center(
                                       child: Text(
                                         'AED ${NumberFormat.decimalPattern().format(double.tryParse(latestItem.currentBid) ?? 0.0)}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge
-                                            ?.copyWith(
-                                                color: primaryColor,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12),
+                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: primaryColor, fontWeight: FontWeight.w600, fontSize: 12),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                          if (!item.isAuctionProduct ||
-                              (title == "Similar Products" &&
-                                  !item.isAuctionProduct))
+                          if (!item.isAuctionProduct || (title == "Similar Products" && !item.isAuctionProduct))
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
@@ -515,25 +441,13 @@ final deliveryTypeMap = {
                                 children: [
                                   Text(
                                     'Selling Price',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                            color: onSecondaryColor,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 13),
+                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: onSecondaryColor, fontWeight: FontWeight.w600, fontSize: 13),
                                   ),
                                   const SizedBox(width: 8),
                                   Center(
                                     child: Text(
                                       'AED ${NumberFormat.decimalPattern().format(double.tryParse(item.productListingPrice) ?? 0.0)}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                              color: primaryColor,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 12),
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(color: primaryColor, fontWeight: FontWeight.w600, fontSize: 12),
                                     ),
                                   ),
                                 ],
@@ -544,22 +458,17 @@ final deliveryTypeMap = {
                             Expanded(
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      primaryColor.withOpacity(0.1),
+                                  backgroundColor: primaryColor.withOpacity(0.1),
                                   elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(6),
-                                    side: const BorderSide(
-                                        color: primaryColor, width: 1.2),
+                                    side: const BorderSide(color: primaryColor, width: 1.2),
                                   ),
                                 ),
                                 onPressed: () async {
                                   if (!isLoggedIn) {
-                                    AuthHelper
-                                        .showAuthenticationRequiredMessage(
-                                            context);
+                                    AuthHelper.showAuthenticationRequiredMessage(context);
                                     return;
                                   }
                                   await _handleBuyNowFlow(context, latestItem);
@@ -568,10 +477,7 @@ final deliveryTypeMap = {
                                   children: [
                                     Text(
                                       'Buy Now',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w600,
                                             color: onSecondaryColor,
@@ -580,10 +486,7 @@ final deliveryTypeMap = {
                                     const SizedBox(height: 5),
                                     Text(
                                       'AED ${NumberFormat('#,##,###.##').format(double.tryParse(item.buyNowPrice) ?? 0)}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
                                             color: primaryColor,
@@ -598,51 +501,33 @@ final deliveryTypeMap = {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (!item.isAuctionProduct ||
-                        (title == "Similar Products" &&
-                            !item.isAuctionProduct)) ...[
+                    if (!item.isAuctionProduct || (title == "Similar Products" && !item.isAuctionProduct)) ...[
                       const SizedBox(height: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.location_on,
-                                  size: 30,
-                                  color:
-                                      Theme.of(context).colorScheme.secondary),
+                              Icon(Icons.location_on, size: 30, color: Theme.of(context).colorScheme.secondary),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (item.itemLocation != null &&
-                                        item.itemLocation?.address != null) ...[
+                                    if (item.itemLocation != null && item.itemLocation?.address != null) ...[
                                       Text(
-                                        item.itemLocation?.address ??
-                                            'Address not available',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge
-                                            ?.copyWith(fontSize: 13),
+                                        item.itemLocation?.address ?? 'Address not available',
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13),
                                       ),
                                       const SizedBox(),
                                       Text(
                                         '${item.itemLocation?.city ?? 'Unknown city'}, ${item.itemLocation?.country ?? 'Unknown country'}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge
-                                            ?.copyWith(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600),
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
                                       ),
                                     ] else
                                       Text(
                                         'Location not available',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge
-                                            ?.copyWith(fontSize: 13),
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13),
                                       ),
                                   ],
                                 ),
@@ -652,10 +537,8 @@ final deliveryTypeMap = {
                           const SizedBox(height: 12),
                           GestureDetector(
                             onTap: () {
-                              if (item.itemLocation?.lat != null &&
-                                  item.itemLocation?.lng != null) {
-                                launchUrl(Uri.parse(
-                                    'https://www.google.com/maps/search/?api=1&query=${item.itemLocation!.lat},${item.itemLocation!.lng}'));
+                              if (item.itemLocation?.lat != null && item.itemLocation?.lng != null) {
+                                launchUrl(Uri.parse('https://www.google.com/maps/search/?api=1&query=${item.itemLocation!.lat},${item.itemLocation!.lng}'));
                               }
                             },
                             child: Container(
@@ -669,24 +552,20 @@ final deliveryTypeMap = {
                                 borderRadius: BorderRadius.circular(6),
                                 child: Stack(
                                   children: [
-                                    if (item.itemLocation?.lat != null &&
-                                        item.itemLocation?.lng != null)
+                                    if (item.itemLocation?.lat != null && item.itemLocation?.lng != null)
                                       Image.network(
                                         'https://maps.googleapis.com/maps/api/staticmap?center=${item.itemLocation?.lat},${item.itemLocation?.lng}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${item.itemLocation?.lat},${item.itemLocation?.lng}&key=AIzaSyB9ATxmePBJdgRl8mq4D1ahCRxHy99IFqg',
                                         fit: BoxFit.cover,
                                         width: double.infinity,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
+                                        errorBuilder: (context, error, stackTrace) {
                                           return const Center(
-                                            child: Icon(Icons.map,
-                                                size: 50, color: Colors.grey),
+                                            child: Icon(Icons.map, size: 50, color: Colors.grey),
                                           );
                                         },
                                       )
                                     else
                                       const Center(
-                                        child: Icon(Icons.map,
-                                            size: 50, color: Colors.grey),
+                                        child: Icon(Icons.map, size: 50, color: Colors.grey),
                                       ),
                                     Positioned(
                                       right: 8,
@@ -695,21 +574,14 @@ final deliveryTypeMap = {
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(4),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.open_in_new,
-                                                size: 16,
-                                                color: Theme.of(context)
-                                                    .primaryColor),
+                                            Icon(Icons.open_in_new, size: 16, color: Theme.of(context).primaryColor),
                                             const SizedBox(width: 4),
-                                            Text('View Larger Map',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall),
+                                            Text('View Larger Map', style: Theme.of(context).textTheme.bodySmall),
                                           ],
                                         ),
                                       ),
@@ -740,8 +612,7 @@ final deliveryTypeMap = {
                       auctions: auctionProvider.getSimilarProducts(latestItem),
                       isLoading: auctionProvider.isLoadingListedProducts,
                       error: auctionProvider.errorListedProducts,
-                      placeholder:
-                          'No similar items found in ${CategoryService.getCategoryName(item.categoryId)}.',
+                      placeholder: 'No similar items found in ${CategoryService.getCategoryName(item.categoryId)}.',
                     ),
                   ],
                 ),
@@ -765,19 +636,13 @@ final deliveryTypeMap = {
         children: [
           Text(
             title,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: onSecondaryColor, fontSize: 13),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: onSecondaryColor, fontSize: 13),
           ),
           const SizedBox(height: 3),
           Center(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: primaryColor,
-                  fontSize: 16),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: primaryColor, fontSize: 16),
             ),
           ),
         ],
@@ -801,8 +666,7 @@ final deliveryTypeMap = {
             endDate: item.expiryDate,
             auctionId: item.id.toString(),
             customPrefix: 'Time Left',
-            textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600, color: primaryColor, fontSize: 12),
+            textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: primaryColor, fontSize: 12),
           ),
         ],
       ),
@@ -837,19 +701,15 @@ final deliveryTypeMap = {
       // Fetch item details based on whether it's an auction or listed product
       Map<String, dynamic>? itemDetails;
       try {
-        final String itemId = item.isAuctionProduct
-            ? item.id.toString()
-            : item.productId.toString();
+        final String itemId = item.isAuctionProduct ? item.id.toString() : item.productId.toString();
         print('\nDEBUG: Fetching item details');
         print('  - Using ID: $itemId');
-        print(
-            '  - Type: ${item.isAuctionProduct ? "Auction" : "Listed Product"}');
+        print('  - Type: ${item.isAuctionProduct ? "Auction" : "Listed Product"}');
 
         if (item.isAuctionProduct) {
           itemDetails = await CustomFieldsService.getAuctionDetails(itemId);
         } else if (item.productId > 0) {
-          itemDetails =
-              await CustomFieldsService.getListedProductDetails(itemId);
+          itemDetails = await CustomFieldsService.getListedProductDetails(itemId);
         } else {
           print('WARNING: Invalid product ID ${item.productId}');
         }

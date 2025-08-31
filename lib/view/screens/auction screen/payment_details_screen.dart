@@ -228,7 +228,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 
       // Try all possible endpoint variants to determine which one works
       var _url = '${ApiService.baseUrl}/auctions/user/walletPay';
-      bool isMyAuction = widget.auctionData['details']['isMyAuction'] ?? false;
+      bool isMyAuction = (widget.auctionData['auction'] as AuctionItem).isMyAuction;
       if (!isMyAuction) {
         _url = '${ApiService.baseUrl}/auctions/user/bidder-walletDeposit';
       }
@@ -314,7 +314,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     if (response.data['success']) {
       // Navigate to success screen or refresh current screen
       if (mounted) {
-        PaymentSuccessDialog.show(context, widget.auctionData.containsKey('details') ? widget.auctionData['details']['isMyAuction'] : false);
+        PaymentSuccessDialog.show(context, widget.auctionData.containsKey('details') ? (widget.auctionData['auction'] as AuctionItem).isMyAuction : false);
       }
     } else {
       throw Exception(response.data['message'] ?? 'Payment failed');
@@ -368,9 +368,22 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isMyAuction = widget.auctionData.containsKey('details') ? widget.auctionData['details']['isMyAuction'] : false;
+    var auctionItem = widget.auctionData.containsKey('auction') ? (widget.auctionData['auction'] as AuctionItem) : null;
+    final isMyAuction = auctionItem != null ? auctionItem.isMyAuction : false;
+    String appBarTitle = '';
+    String paymentDescription = '';
+    if (isMyAuction) {
+      appBarTitle = 'Publish Auction';
+      paymentDescription = 'In order to complete publishing your auction successfully, please pay the auction fee and start receiving bids immediately.';
+    } else if (!isMyAuction && (auctionItem != null ? auctionItem.isBuyNow : false) == true) {
+      appBarTitle = 'Buy Now';
+      paymentDescription = 'In order to buy this product, please pay the fee and complete the purchase.';
+    } else if (!isMyAuction && (auctionItem != null ? auctionItem.isBuyNow : false) == false) {
+      appBarTitle = 'Publish Bid';
+      paymentDescription = 'In order to complete publishing your bid successfully, please pay the bid fee and submit your bid.';
+    }
     return Scaffold(
-      appBar: NavbarElementsAppbar(appBarTitle: isMyAuction ? 'Publish Auction' : 'Publish Bid', showBackButton: true),
+      appBar: NavbarElementsAppbar(appBarTitle: appBarTitle, showBackButton: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -389,7 +402,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
             const Divider(thickness: 1, color: primaryColor),
             const SizedBox(height: 8),
             Text(
-              'In order to complete publishing your ${isMyAuction ? 'auction' : 'bid'} successfully, please pay the ${isMyAuction ? 'auction' : 'bid'} fee and ${isMyAuction ? 'start receiving bids immediately.' : 'submit your bid'}',
+              paymentDescription,
               style: TextStyle(color: onSecondaryColor, fontSize: 13, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 18),
@@ -503,47 +516,82 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                       // --- Buy Now wallet payment ---
                                       setState(() => isLoading = true);
                                       try {
-                                        final auctionId = widget.auctionData['details']['id'];
-                                        // Retrieve token using the local helper
-                                        final token = await _getValidToken();
-                                        if (token == null) {
-                                          debugPrint('❌ No access token available for Buy Now wallet payment');
-                                          if (!context.mounted) return;
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Authentication error: No access token'),
-                                              backgroundColor: errorColor,
-                                            ),
-                                          );
-                                          return;
-                                        }
-                                        final response = await PaymentService.buyNowAuctionThroughWallet(
-                                          auctionId: auctionId,
-                                          amount: totalAmount,
-                                          currency: 'AED',
-                                          token: token,
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (BuildContext diagContext) {
+                                            return AlertDialog(
+                                              title: const Text('Are you sure?'),
+                                              content: const Text(
+                                                'You are about make payment for the purchase of this product.',
+                                                style: TextStyle(color: Colors.black),
+                                              ),
+                                              actions: [
+                                                ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                    minimumSize: const Size(0, 32),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
+                                                  ),
+                                                  child: const Text('Go Back', style: TextStyle(color: primaryColor, fontSize: 11)),
+                                                  onPressed: () {
+                                                    Navigator.pop(diagContext);
+                                                  },
+                                                ),
+                                                ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                    minimumSize: const Size(0, 32),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
+                                                  ),
+                                                  child: const Text('Proceed', style: TextStyle(color: primaryColor, fontSize: 11)),
+                                                  onPressed: () async {
+                                                    Navigator.pop(diagContext);
+                                                    final auctionId = widget.auctionData['details']['id'];
+                                                    // Retrieve token using the local helper
+                                                    final token = await _getValidToken();
+                                                    if (token == null) {
+                                                      debugPrint('❌ No access token available for Buy Now wallet payment');
+                                                      if (!context.mounted) return;
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text('Authentication error: No access token'),
+                                                          backgroundColor: errorColor,
+                                                        ),
+                                                      );
+                                                      return;
+                                                    }
+                                                    final response = await PaymentService.buyNowAuctionThroughWallet(
+                                                      auctionId: auctionId,
+                                                      amount: totalAmount,
+                                                      currency: 'AED',
+                                                      token: token,
+                                                    );
+                                                    debugPrint('✅ Buy Now wallet payment response: $response');
+                                                    if (!context.mounted) return;
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Center(child: Text('Great pick. Purchase successful!!')),
+                                                        backgroundColor: activeColor,
+                                                      ),
+                                                    );
+                                                    // Remove the auction from live auctions before navigating home
+                                                    if (context.mounted) {
+                                                      final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+                                                      final auctionIdInt = auctionId is int ? auctionId : int.tryParse(auctionId.toString());
+                                                      if (auctionIdInt != null) {
+                                                        auctionProvider.removeAuctionFromLive(auctionIdInt);
+                                                      }
+                                                    }
+                                                    // Navigate to home page after short delay
+                                                    await Future.delayed(const Duration(milliseconds: 300));
+                                                    if (context.mounted) {
+                                                      Navigator.of(context).popUntil((route) => route.isFirst);
+                                                    }
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
                                         );
-                                        debugPrint('✅ Buy Now wallet payment response: $response');
-                                        if (!context.mounted) return;
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Center(child: Text('Great pick. Purchase successful!!')),
-                                            backgroundColor: activeColor,
-                                          ),
-                                        );
-                                        // Remove the auction from live auctions before navigating home
-                                        if (context.mounted) {
-                                          final auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
-                                          final auctionIdInt = auctionId is int ? auctionId : int.tryParse(auctionId.toString());
-                                          if (auctionIdInt != null) {
-                                            auctionProvider.removeAuctionFromLive(auctionIdInt);
-                                          }
-                                        }
-                                        // Navigate to home page after short delay
-                                        await Future.delayed(const Duration(milliseconds: 300));
-                                        if (context.mounted) {
-                                          Navigator.of(context).popUntil((route) => route.isFirst);
-                                        }
                                       } catch (e) {
                                         debugPrint('❌ Buy Now wallet payment failed: $e');
                                         if (!context.mounted) return;
