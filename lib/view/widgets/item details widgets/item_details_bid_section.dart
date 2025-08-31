@@ -957,6 +957,7 @@ class _ItemDetailsBidSectionState extends State<ItemDetailsBidSection> {
           MaterialPageRoute(
             builder: (context) => PaymentDetailsScreen(
               auctionData: {
+                'auction': auction,
                 'details': {
                   'id': widget.item.id,
                   'amount': submittedBidAmount,

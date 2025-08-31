@@ -5,6 +5,7 @@ import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/ui_helpers.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
@@ -82,8 +83,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
     final defaultAddress = userProvider.defaultAddress;
 
     return Scaffold(
-      appBar:
-          NavbarElementsAppbar(appBarTitle: widget.title, showBackButton: true),
+      appBar: NavbarElementsAppbar(appBarTitle: widget.title, showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.only(left: 14, right: 14, top: 8, bottom: 8),
         child: Column(
@@ -111,15 +111,12 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    print(
-                        '\u001b[31mError fetching addresses: ${snapshot.error}');
+                    print('\u001b[31mError fetching addresses: ${snapshot.error}');
                     return const Text('Failed to load addresses');
                   }
                   final apiAddresses = snapshot.data ?? [];
                   if (apiAddresses.isEmpty) {
-                    return const Center(
-                        child:
-                            Text('No addresses found. Please add a location.'));
+                    return const Center(child: Text('No addresses found. Please add a location.'));
                   }
                   return Consumer<UserProvider>(
                     builder: (context, userProvider, child) {
@@ -152,17 +149,11 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                           .toList();
                       final mergedDisplayAddresses = [
                         ...backendDisplayAddresses,
-                        ...localDisplayAddresses.where((a) =>
-                            backendDisplayAddresses
-                                .every((b) => b['id'] != a['id'])),
+                        ...localDisplayAddresses.where((a) => backendDisplayAddresses.every((b) => b['id'] != a['id'])),
                       ];
-                      final defaultAddressObj = backendDisplayAddresses
-                          .firstWhere((e) => e['isDefault'] == true,
-                              orElse: () => <String, dynamic>{});
-                      final defaultAddress = defaultAddressObj['address'] ??
-                          userProvider.defaultAddress;
-                      final sortedDisplayAddresses = [...mergedDisplayAddresses]
-                        ..sort((a, b) {
+                      final defaultAddressObj = backendDisplayAddresses.firstWhere((e) => e['isDefault'] == true, orElse: () => <String, dynamic>{});
+                      final defaultAddress = defaultAddressObj['address'] ?? userProvider.defaultAddress;
+                      final sortedDisplayAddresses = [...mergedDisplayAddresses]..sort((a, b) {
                           if (a['address'] == defaultAddress) return -1;
                           if (b['address'] == defaultAddress) return 1;
                           return 0;
@@ -171,23 +162,16 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                         itemCount: sortedDisplayAddresses.length,
                         itemBuilder: (context, index) {
                           final address = sortedDisplayAddresses[index];
-                          final addressId = address['id'] is int
-                              ? address['id']
-                              : int.tryParse(address['id'].toString());
-                          final isSelected = addressId != null &&
-                              addressId == locationProvider.selectedLocationId;
+                          final addressId = address['id'] is int ? address['id'] : int.tryParse(address['id'].toString());
+                          final isSelected = addressId != null && addressId == locationProvider.selectedLocationId;
                           return AddressCard(
                             key: ValueKey(address['id']),
                             address: address['address'] ?? '',
                             addressLabel: address['addressLabel'] ?? '',
                             phone: address['phone'] ?? '',
                             isDefault: address['address'] == defaultAddress,
-                            subtitle: ((address['city'] is Map &&
-                                        address['city']['nameEn'] != null)
-                                    ? address['city']['nameEn']
-                                    : address['city']?.toString() ?? '') +
-                                ((address['country'] is Map &&
-                                        address['country']['nameEn'] != null)
+                            subtitle: ((address['city'] is Map && address['city']['nameEn'] != null) ? address['city']['nameEn'] : address['city']?.toString() ?? '') +
+                                ((address['country'] is Map && address['country']['nameEn'] != null)
                                     ? ', ${address['country']['nameEn']}'
                                     : address['country'] != null
                                         ? ', ${address['country']}'
@@ -200,8 +184,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                             },
                             onMakeDefault: address['address'] != defaultAddress
                                 ? () async {
-                                    await AddressService.makeDefaultAddress(
-                                        address['id'].toString());
+                                    await AddressService.makeDefaultAddress(address['id'].toString());
                                     _refreshAddresses();
                                   }
                                 : null,
@@ -211,64 +194,44 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                                 MaterialPageRoute(
                                   builder: (context) => AddLocationScreen(
                                     initialAddressMap: address,
-                                    initialAddressLabel:
-                                        address['addressLabel'],
+                                    initialAddressLabel: address['addressLabel'],
                                     initialPhone: address['phone'],
-                                    initialCountry: address['country'] is Map
-                                        ? address['country']['nameEn']
-                                        : address['country']?.toString(),
-                                    initialCity: address['city'] is Map
-                                        ? address['city']['nameEn']
-                                        : address['city']?.toString(),
-                                    initialState: address['state'] is Map
-                                        ? address['state']['nameEn']
-                                        : address['state']?.toString(),
+                                    initialCountry: address['country'] is Map ? address['country']['nameEn'] : address['country']?.toString(),
+                                    initialCity: address['city'] is Map ? address['city']['nameEn'] : address['city']?.toString(),
+                                    initialState: address['state'] is Map ? address['state']['nameEn'] : address['state']?.toString(),
                                   ),
                                 ),
                               );
                               if (updatedLocation != null) {
-                                final mergedAddress = <String, dynamic>{
-                                  ...address,
-                                  ...updatedLocation
-                                };
-                                final locationId =
-                                    mergedAddress['id'].toString();
-                                final success =
-                                    await AddressService.updateAddress(
-                                        locationId, mergedAddress);
+                                final mergedAddress = <String, dynamic>{...address, ...updatedLocation};
+                                final locationId = mergedAddress['id'].toString();
+                                final success = await AddressService.updateAddress(locationId, mergedAddress);
                                 if (success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content: Center(
-                                      child:
-                                          Text('Address updated successfully!'),
+                                      child: Text('Address updated successfully!'),
                                     )),
                                   );
-                                  final updatedAddresses =
-                                      await fetchUserAddresses();
+                                  final updatedAddresses = await fetchUserAddresses();
                                   userProvider.setAddresses(updatedAddresses);
                                   addressRefreshKey.value++;
                                 } else {
-                                  showError(
-                                      context, 'Failed to update address.');
+                                  showError(context, 'Failed to update address.');
                                 }
                               }
                               _refreshAddresses();
                             },
                             onDelete: () async {
-                              final success =
-                                  await AddressService.deleteAddress(
-                                      address['id'].toString());
+                              final success = await AddressService.deleteAddress(address['id'].toString());
                               if (success) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Center(
-                                    child:
-                                        Text('Address deleted successfully!'),
+                                    child: Text('Address deleted successfully!'),
                                   )),
                                 );
-                                final updatedAddresses =
-                                    await fetchUserAddresses();
+                                final updatedAddresses = await fetchUserAddresses();
                                 userProvider.setAddresses(updatedAddresses);
                                 addressRefreshKey.value++;
                               } else {
@@ -300,15 +263,11 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   if (selectedLocation != null) {
                     // Validate fields before sending to backend
                     final errors = <String>[];
-                    final address =
-                        selectedLocation['address']?.toString().trim() ?? '';
-                    final addressLabel =
-                        selectedLocation['addressLabel']?.toString().trim() ??
-                            '';
+                    final address = selectedLocation['address']?.toString().trim() ?? '';
+                    final addressLabel = selectedLocation['addressLabel']?.toString().trim() ?? '';
                     final countryId = selectedLocation['countryId'];
                     final cityId = selectedLocation['cityId'];
-                    final phone =
-                        selectedLocation['phone']?.toString().trim() ?? '';
+                    final phone = selectedLocation['phone']?.toString().trim() ?? '';
 
                     // Address validation
                     if (address.isEmpty) {
@@ -332,8 +291,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                       return;
                     }
 
-                    final success =
-                        await AddressService.addAddress(selectedLocation);
+                    final success = await AddressService.addAddress(selectedLocation);
                     _refreshAddresses();
                     if (success) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -415,8 +373,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          LoginPage(fromAuctionCreation: true),
+                      builder: (context) => LoginPage(fromAuctionCreation: true),
                     ),
                   );
                   return;
@@ -427,8 +384,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                 if (addressesSnapshot.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Center(
-                          child: Text('Please add at least one address')),
+                      content: Center(child: Text('Please add at least one address')),
                     ),
                   );
                   return;
@@ -449,37 +405,25 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   debugPrint('Product data: ${widget.auctionData['product']}');
 
                   // Ensure product data is properly structured
-                  if (widget.auctionData['product'] == null ||
-                      widget.auctionData['product'] is! Map<String, dynamic>) {
+                  if (widget.auctionData['product'] == null || widget.auctionData['product'] is! Map<String, dynamic>) {
                     throw Exception('Product data is not properly structured');
                   }
 
                   // Parse duration and unit
-                  String durationStr =
-                      widget.auctionData['duration'] ?? '1 DAYS';
+                  String durationStr = widget.auctionData['duration'] ?? '1 DAYS';
                   List<String> durationParts = durationStr.split(' ');
                   int duration = int.parse(durationParts[0]);
-                  String durationUnit =
-                      durationParts[1].toUpperCase().contains('HR')
-                          ? 'HOURS'
-                          : 'DAYS';
+                  String durationUnit = durationParts[1].toUpperCase().contains('HR') ? 'HOURS' : 'DAYS';
 
                   // Parse prices
-                  int startBidAmount = (double.parse(
-                          widget.auctionData['startingPrice']?.toString() ??
-                              '0'))
-                      .toInt();
-                  double buyNowPrice = double.parse(
-                      widget.auctionData['buyNowPrice']?.toString() ?? '0');
+                  int startBidAmount = (double.parse(widget.auctionData['startingPrice']?.toString() ?? '0')).toInt();
+                  double buyNowPrice = double.parse(widget.auctionData['buyNowPrice']?.toString() ?? '0');
 
                   // Calculate end time based on duration and start time
                   DateTime startTime;
                   if (widget.auctionData['scheduleBid'] == true) {
                     // Parse the ISO string and convert to local time
-                    startTime = DateTime.parse(
-                            widget.auctionData['startTime'] ??
-                                widget.auctionData['startDate'])
-                        .toLocal();
+                    startTime = DateTime.parse(widget.auctionData['startTime'] ?? widget.auctionData['startDate']).toLocal();
                   } else {
                     startTime = DateTime.now();
                   }
@@ -493,30 +437,24 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
 
                   // Debug end time calculation
                   debugPrint('Start time: $startTime');
-                  debugPrint(
-                      'Duration: $duration ${durationUnit.toLowerCase()}');
+                  debugPrint('Duration: $duration ${durationUnit.toLowerCase()}');
                   debugPrint('Calculated end time: $endTime');
 
                   // Create the full auction data structure
                   final Map<String, dynamic> fullAuctionData = {
-                    'type': widget.auctionData['scheduleBid'] == true
-                        ? 'SCHEDULED'
-                        : 'ON_TIME',
+                    'type': widget.auctionData['scheduleBid'] == true ? 'SCHEDULED' : 'ON_TIME',
                     'durationUnit': durationUnit,
                     'duration': duration,
                     'startBidAmount': startBidAmount,
                     'startDate': startTime.toIso8601String(),
                     'endDate': endTime.toIso8601String(),
                     'scheduleBid': widget.auctionData['scheduleBid'] ?? false,
-                    'buyNowEnabled':
-                        widget.auctionData['buyNowEnabled'] ?? false,
+                    'buyNowEnabled': widget.auctionData['buyNowEnabled'] ?? false,
                     'buyNowPrice': buyNowPrice,
                     'product': {
-                      ...Map<String, dynamic>.from(
-                          widget.auctionData['product']),
+                      ...Map<String, dynamic>.from(widget.auctionData['product']),
                       // Always set ProductListingPrice for backend compatibility
-                      'ProductListingPrice': widget.auctionData['product']
-                          ['price'],
+                      'ProductListingPrice': widget.auctionData['product']['price'],
                       // Add location IDs to product data for backend
                       // Ensure countryId is always 1 for UAE
                       'countryId': 1,
@@ -529,8 +467,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                     // 'locationId': locationProvider.selectedLocationId ?? 0,
                     'shippingDetails': {
                       'country': locationProvider.selectedCountry ?? 'UAE',
-                      'state':
-                          locationProvider.selectedState ?? 'Ras Al Khaima',
+                      'state': locationProvider.selectedState ?? 'Ras Al Khaima',
                       'city': locationProvider.selectedCity ?? 'Nakheel',
                       'address': defaultAddress,
                       'phone': userProvider.phoneNumber,
@@ -538,34 +475,27 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   };
 
                   // Debug auction data
-                  debugPrint(
-                      'Creating auction with data: ${json.encode(fullAuctionData)}');
+                  debugPrint('Creating auction with data: ${json.encode(fullAuctionData)}');
 
                   // Clean and convert product data
-                  var productData =
-                      fullAuctionData['product'] as Map<String, dynamic>;
-                  productData.removeWhere(
-                      (key, value) => value == null || value == '');
+                  var productData = fullAuctionData['product'] as Map<String, dynamic>;
+                  productData.removeWhere((key, value) => value == null || value == '');
                   // Convert numeric fields
                   if (productData['categoryId'] != null) {
-                    productData['categoryId'] =
-                        int.parse(productData['categoryId'].toString());
+                    productData['categoryId'] = int.parse(productData['categoryId'].toString());
                   }
                   if (productData['subCategoryId'] != null) {
-                    productData['subCategoryId'] =
-                        int.parse(productData['subCategoryId'].toString());
+                    productData['subCategoryId'] = int.parse(productData['subCategoryId'].toString());
                   }
                   if (productData['quantity'] != null) {
-                    productData['quantity'] =
-                        int.parse(productData['quantity'].toString());
+                    productData['quantity'] = int.parse(productData['quantity'].toString());
                   }
                   fullAuctionData['product'] = productData;
 
                   // --- LOGIC UPDATE: Use selectedLocationId ---
                   final int? locationId = locationProvider.selectedLocationId;
                   if (locationId == null) {
-                    throw Exception(
-                        'Please select a shipping address before proceeding.');
+                    throw Exception('Please select a shipping address before proceeding.');
                   }
                   // Remove address/addressLabel from productData to avoid backend confusion
                   productData.remove('address');
@@ -576,12 +506,8 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   // --- END LOGIC UPDATE ---
 
                   // Validate product data structure
-                  final product =
-                      fullAuctionData['product'] as Map<String, dynamic>;
-                  if (!product.containsKey('title') ||
-                      !product.containsKey('description') ||
-                      !product.containsKey('categoryId') ||
-                      !product.containsKey('subCategoryId')) {
+                  final product = fullAuctionData['product'] as Map<String, dynamic>;
+                  if (!product.containsKey('title') || !product.containsKey('description') || !product.containsKey('categoryId') || !product.containsKey('subCategoryId')) {
                     throw Exception('Product data missing required fields');
                   }
 
@@ -591,12 +517,10 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
 
                   // Add optional policies if present
                   if (widget.auctionData['returnPolicy'] != null) {
-                    fullAuctionData['returnPolicy'] =
-                        widget.auctionData['returnPolicy'];
+                    fullAuctionData['returnPolicy'] = widget.auctionData['returnPolicy'];
                   }
                   if (widget.auctionData['warrantyPolicy'] != null) {
-                    fullAuctionData['warrantyPolicy'] =
-                        widget.auctionData['warrantyPolicy'];
+                    fullAuctionData['warrantyPolicy'] = widget.auctionData['warrantyPolicy'];
                   }
 
                   // Debug log the final structure
@@ -604,19 +528,16 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   debugPrint(fullAuctionData.toString());
 
                   // Debug log media files
-                  debugPrint(
-                      'ShippingDetailsScreen - Media files before API call:');
+                  debugPrint('ShippingDetailsScreen - Media files before API call:');
                   debugPrint('Total files: ${widget.imagePaths.length}');
                   for (var i = 0; i < widget.imagePaths.length; i++) {
                     final path = widget.imagePaths[i];
-                    final isVideo = path.toLowerCase().endsWith('.mp4') ||
-                        path.toLowerCase().endsWith('.mov');
+                    final isVideo = path.toLowerCase().endsWith('.mp4') || path.toLowerCase().endsWith('.mov');
                     debugPrint('  File $i: $path');
                     debugPrint('    Type: ${isVideo ? 'Video' : 'Image'}');
                     final file = File(path);
                     if (await file.exists()) {
-                      debugPrint(
-                          '    Size: ${(await file.length() / 1024).toStringAsFixed(2)} KB');
+                      debugPrint('    Size: ${(await file.length() / 1024).toStringAsFixed(2)} KB');
                       debugPrint('    Exists: Yes');
                     } else {
                       debugPrint('    Exists: No');
@@ -625,12 +546,12 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
 
                   // Ensure locationId is included in fullAuctionData before API call
                   fullAuctionData['locationId'] = locationId;
-                  debugPrint(
-                      'End time before API call: ${endTime.toIso8601String()}');
+                  debugPrint('End time before API call: ${endTime.toIso8601String()}');
 
                   // Debug the auction data before API call
                   debugPrint('Full auction data before API call:');
                   debugPrint(json.encode(fullAuctionData));
+                  fullAuctionData['isMyAuction'] = true;
 
                   final response = widget.title == 'Create Auction'
                       ? await auctionProvider.createAuction(
@@ -653,10 +574,8 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                     // Fetch auction details from backend to ensure isMyAuction is set
                     try {
                       final auctionId = response['data']['id'];
-                      final detailsUrl = Uri.parse(
-                          '${ApiEndpoints.baseUrl}/auctions/user/$auctionId/details');
-                      final token = await const FlutterSecureStorage()
-                          .read(key: 'access_token');
+                      final detailsUrl = Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/details');
+                      final token = await const FlutterSecureStorage().read(key: 'access_token');
                       final detailsResponse = await http.get(
                         detailsUrl,
                         headers: {
@@ -667,19 +586,18 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                       final detailsJson = jsonDecode(detailsResponse.body);
                       if (detailsJson['success'] == true) {
                         // Optionally, merge in endTime and any extra data you want to pass
-                        detailsJson['data']['endTime'] =
-                            endTime.toIso8601String();
-                        detailsJson['data']['ProductListingPrice'] =
-                            fullAuctionData['product']['price'];
-                        detailsJson['data']['product']['images'] =
-                            widget.imagePaths;
+                        detailsJson['data']['endTime'] = endTime.toIso8601String();
+                        detailsJson['data']['ProductListingPrice'] = fullAuctionData['product']['price'];
+                        detailsJson['data']['product']['images'] = widget.imagePaths;
+                        detailsJson['data']['isDeposit'] = true;
                         if (context.mounted) {
+                          AuctionItem auctionItem = AuctionItem.fromJson(detailsJson['data']);
                           if (widget.title == 'Create Auction') {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => PaymentDetailsScreen(
-                                  auctionData: {'details': detailsJson['data']},
+                                  auctionData: {'auction': auctionItem, 'details': detailsJson['data']},
                                 ),
                               ),
                             );
@@ -700,8 +618,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                       }
                     }
                   } else {
-                    throw Exception(
-                        response['message'] ?? 'Failed to create auction');
+                    throw Exception(response['message'] ?? 'Failed to create auction');
                   }
                 } catch (e) {
                   Navigator.pop(context);
@@ -710,18 +627,12 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                   if (context.mounted) {
                     String errorMsg = e.toString();
                     // Remove all 'Exception:' prefixes (even nested)
-                    while (errorMsg
-                        .trim()
-                        .toLowerCase()
-                        .startsWith('exception:')) {
+                    while (errorMsg.trim().toLowerCase().startsWith('exception:')) {
                       errorMsg = errorMsg.substring(10).trim();
                     }
                     // Replace auction message with product message if listing product
                     if (errorMsg.startsWith('Failed to create auction:')) {
-                      errorMsg = errorMsg
-                          .replaceFirst('Failed to create auction:',
-                              'Failed to list product:')
-                          .trim();
+                      errorMsg = errorMsg.replaceFirst('Failed to create auction:', 'Failed to list product:').trim();
                     }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

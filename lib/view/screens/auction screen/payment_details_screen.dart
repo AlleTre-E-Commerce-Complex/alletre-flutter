@@ -606,10 +606,10 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                                       }
                                     } else {
                                       _handleWalletPayment();
-                                      if (((widget.auctionData['details'] as Map<String, dynamic>).containsKey('isDeposit') ? widget.auctionData['details']['isDeposit'] : false) == true) {
-                                        (widget.auctionData['auction'] as AuctionItem).status = 'ACTIVE';
-                                        context.read<AuctionProvider>().pendingAuctions.remove(widget.auctionData['auction']);
-                                        context.read<AuctionProvider>().liveMyAuctions.add(widget.auctionData['auction']);
+                                      if (((widget.auctionData['details'] as Map<String, dynamic>).containsKey('isDeposit') ? widget.auctionData['details']['isDeposit'] : false) == true && (auctionItem!.isMyAuction == true)) {
+                                        auctionItem.status = 'ACTIVE';
+                                        context.read<AuctionProvider>().pendingAuctions.remove(auctionItem);
+                                        context.read<AuctionProvider>().liveMyAuctions.add(auctionItem);
                                       }
                                     }
                                   },
