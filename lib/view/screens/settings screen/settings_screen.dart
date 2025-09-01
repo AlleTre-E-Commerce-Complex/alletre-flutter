@@ -1,3 +1,4 @@
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
@@ -105,6 +106,20 @@ class SettingsScreen extends StatelessWidget {
     try {
       await context.read<UserProvider>().logout();
       Provider.of<LoggedInProvider>(context, listen: false).logOut();
+      var auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+      auctionProvider.liveAuctions.clear();
+      auctionProvider.liveMyAuctions.clear();
+      auctionProvider.listedProducts.clear();
+      auctionProvider.upcomingAuctions.clear();
+      auctionProvider.waitingForPaymentAuctions.clear();
+      auctionProvider.expiredAuctions.clear();
+      auctionProvider.soldAuctions.clear();
+      auctionProvider.pendingAuctions.clear();
+      auctionProvider.cancelledAuctions.clear();
+      auctionProvider.inProgressProducts.clear();
+      auctionProvider.soldOutProducts.clear();
+      auctionProvider.joinedAuctions.clear();
+      auctionProvider.purchasedAuctions.clear();
 
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
@@ -252,8 +267,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavbarElementsAppbar(
-          appBarTitle: 'Settings', showBackButton: true),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Settings', showBackButton: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 12),
         child: Column(
