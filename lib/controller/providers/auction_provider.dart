@@ -56,6 +56,7 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> _outOfStockProducts = [];
   List<AuctionItem> _soldOutProducts = [];
   List<AuctionItem> _joinedAuctions = [];
+  List<AuctionItem> _purchasedAuctions = [];
   bool _isLoading = false;
   String? _error;
 
@@ -102,6 +103,7 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> get outOfStockProducts => _outOfStockProducts;
   List<AuctionItem> get soldOutProducts => _soldOutProducts;
   List<AuctionItem> get joinedAuctions => _joinedAuctions;
+  List<AuctionItem> get purchasedAuctions => _purchasedAuctions;
 
   bool get isLoading => _isLoading;
   bool get isCreatingAuction => _isCreatingAuction;
@@ -936,6 +938,25 @@ class AuctionProvider with ChangeNotifier {
       print(stackTrace);
     }
     return {'success': false, 'message': 'Error occurred'};
+  }
+
+  Future<void> getPurchasedAuctions({bool shouldNotify = false}) async {
+    try {
+      // print('Starting to fetch live auctions...');
+      final auctions = await _auctionService.fetchPurchasedAuctions();
+      // print('Received ${auctions.length} live auctions from service');
+      _purchasedAuctions = auctions;
+      // print('Updated live auctions in provider');
+    } catch (e, stackTrace) {
+      // print('Error in getLiveAuctions:');
+      print(e);
+      print(stackTrace);
+    } finally {
+      if (shouldNotify) {
+        notifyListeners();
+      }
+      // print('Notifying listeners about live auctions update');
+    }
   }
 
   @override

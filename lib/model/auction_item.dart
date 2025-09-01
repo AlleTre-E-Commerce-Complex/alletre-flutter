@@ -44,9 +44,10 @@ class AuctionItem {
   final Map<String, dynamic>? product;
   final String? returnPolicyDescription;
   final String? warrantyPolicyDescription;
-  final bool isMyAuction;
+  bool isMyAuction;
   final String? deliveryType;
   bool isBuyNow;
+  final List<Map<String, dynamic>>? payment;
 
   AuctionItem(
       {required this.id,
@@ -89,7 +90,8 @@ class AuctionItem {
       this.warrantyPolicyDescription,
       required this.isMyAuction,
       this.deliveryType,
-      required this.isBuyNow});
+      required this.isBuyNow,
+      required this.payment});
 
   // Add copyWith method for real-time updates
   AuctionItem copyWith({
@@ -133,6 +135,7 @@ class AuctionItem {
     bool? isMyAuction,
     String? deliveryType,
     bool? isBuyNow,
+    List<Map<String, dynamic>>? payment,
   }) {
     return AuctionItem(
         id: id ?? this.id,
@@ -175,7 +178,8 @@ class AuctionItem {
         warrantyPolicyDescription: warrantyPolicyDescription ?? this.warrantyPolicyDescription,
         isMyAuction: isMyAuction ?? this.isMyAuction,
         deliveryType: deliveryType ?? this.deliveryType,
-        isBuyNow: this.isBuyNow);
+        isBuyNow: this.isBuyNow,
+        payment: this.payment);
   }
 
   // Helper for printing long strings in chunks
@@ -381,6 +385,14 @@ class AuctionItem {
         print('[AuctionItem.fromJson] Created itemLocation from IDs: city=${itemLocation.city}, country=${itemLocation.country}, address=${itemLocation.address}');
       }
 
+      // Safely handle nested product data
+      List<Map<String, dynamic>> payment = [];
+      if (json.containsKey('Payment')) {
+        for (var elem in json['Payment']) {
+          payment.add(elem as Map<String, dynamic>);
+        }
+      }
+
       // Debug: Print the relevant fields just before returning
       printLongString('[AuctionItem.fromJson] RAW JSON: ${jsonEncode(json)}');
       print('[AuctionItem.fromJson] sellerAddress: ${json['location']?['address']}');
@@ -430,7 +442,8 @@ class AuctionItem {
           warrantyPolicyDescription: warrantyPolicyDescription,
           isMyAuction: json['isMyAuction'] as bool? ?? false,
           deliveryType: json['deliveryType'] as String?,
-          isBuyNow: false);
+          isBuyNow: false,
+          payment: payment);
     } catch (e) {
       log('Error creating AuctionItem: $e');
       rethrow;
@@ -491,6 +504,7 @@ class AuctionItem {
       product: null,
       isMyAuction: false,
       isBuyNow: false,
+      payment: null,
     );
   }
 
@@ -550,6 +564,7 @@ class AuctionItem {
       'product': product,
       'isMyAuction': isMyAuction,
       'deliveryType': deliveryType,
+      'payment': payment,
     };
   }
 }

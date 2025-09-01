@@ -62,4 +62,9 @@ class DateFormatter {
     DateFormat dateFormat = DateFormat("MMM dd, yyyy");
     return dateFormat.parse(date);
   }
+
+  static String getDDMMYYYYRepresentation({required DateTime dateTime}) {
+    DateFormat dateFormat = DateFormat("dd MMMM yyyy");
+    return dateFormat.format(dateTime);
+  }
 }
