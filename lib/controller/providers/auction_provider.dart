@@ -514,7 +514,7 @@ class AuctionProvider with ChangeNotifier {
 
     _isLoadingExpired = true;
     _errorExpired = null;
-    notifyListeners();
+    // notifyListeners();
 
     try {
       debugPrint('🔵 [getExpiredMyAuctions] Fetching expired auctions...');
@@ -555,7 +555,7 @@ class AuctionProvider with ChangeNotifier {
       debugPrint('❌ [getExpiredMyAuctions] Stack trace: $stackTrace');
     } finally {
       _isLoadingExpired = false;
-      notifyListeners();
+      // notifyListeners();
       debugPrint('🔵 [getExpiredMyAuctions] Fetch completed. _expiredAuctions length: ${_expiredAuctions.length}');
 
       // Final verification
@@ -594,16 +594,18 @@ class AuctionProvider with ChangeNotifier {
 
     try {
       debugPrint('🔄 [AuctionProvider] Fetching CANCELLED auctions...');
-      final status = ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN'];
-      final auctions = await _auctionService.fetchUserAuctionsByStatus(status as String);
-      _cancelledAuctions = auctions;
-      debugPrint('✅ [AuctionProvider] Fetched ${auctions.length} CANCELLED auctions');
-      if (auctions.isNotEmpty) {
-        debugPrint('   First auction status: ${auctions.first.status}');
-      }
-      if (_cancelledAuctions.isEmpty) {
-        print('No valid cancelled auctions found');
-      }
+      final statuses = ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN'];
+      statuses.forEach((status) async {
+        final auctions = await _auctionService.fetchUserAuctionsByStatus(status);
+        _cancelledAuctions.addAll(auctions);
+        debugPrint('✅ [AuctionProvider] Fetched ${auctions.length} $status auctions');
+        if (auctions.isNotEmpty) {
+          debugPrint('   First auction status: ${auctions.first.status}');
+        }
+        if (_cancelledAuctions.isEmpty) {
+          print('No valid cancelled auctions found');
+        }
+      });
     } catch (e, stackTrace) {
       _errorCancelled = e.toString();
       debugPrint('Error fetching cancelled auctions: $e');

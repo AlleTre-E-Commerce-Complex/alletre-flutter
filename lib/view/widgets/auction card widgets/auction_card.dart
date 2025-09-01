@@ -350,63 +350,65 @@ class AuctionCard extends StatelessWidget {
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              minimumSize: const Size(0, 32),
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
+                                        if (auction.status != 'EXPIRED') ...{
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                minimumSize: const Size(0, 32),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
+                                              ),
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  barrierDismissible: false,
+                                                  builder: (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: const Text('Are you sure?'),
+                                                      content: const Text(
+                                                        'You are going to Cancel the auction. The ongoing bids will be lost.',
+                                                        style: TextStyle(color: Colors.black),
+                                                      ),
+                                                      actions: [
+                                                        ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            minimumSize: const Size(0, 32),
+                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
+                                                          ),
+                                                          child: const Text('Go Back', style: TextStyle(color: primaryColor, fontSize: 11)),
+                                                          onPressed: () {
+                                                            Navigator.pop(context);
+                                                          },
+                                                        ),
+                                                        ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            minimumSize: const Size(0, 32),
+                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
+                                                          ),
+                                                          child: const Text('Proceed', style: TextStyle(color: primaryColor, fontSize: 11)),
+                                                          onPressed: () {
+                                                            Navigator.pop(context);
+                                                            context.read<AuctionProvider>().cancelAuction(auction, auction.id).then((resp) {
+                                                              if (resp['success'] == true) {
+                                                                ScaffoldMessenger.of(MyApp.navigatorKey.currentContext!).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text('Auction cancelled successfully'),
+                                                                    backgroundColor: Colors.green,
+                                                                  ),
+                                                                );
+                                                              }
+                                                            });
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              child: const Text('Cancel Auction', style: TextStyle(color: primaryColor, fontSize: 11)),
                                             ),
-                                            onPressed: () {
-                                              showDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                builder: (BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: const Text('Are you sure?'),
-                                                    content: const Text(
-                                                      'You are going to Cancel the auction. The ongoing bids will be lost.',
-                                                      style: TextStyle(color: Colors.black),
-                                                    ),
-                                                    actions: [
-                                                      ElevatedButton(
-                                                        style: ElevatedButton.styleFrom(
-                                                          minimumSize: const Size(0, 32),
-                                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
-                                                        ),
-                                                        child: const Text('Go Back', style: TextStyle(color: primaryColor, fontSize: 11)),
-                                                        onPressed: () {
-                                                          Navigator.pop(context);
-                                                        },
-                                                      ),
-                                                      ElevatedButton(
-                                                        style: ElevatedButton.styleFrom(
-                                                          minimumSize: const Size(0, 32),
-                                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: primaryColor)),
-                                                        ),
-                                                        child: const Text('Proceed', style: TextStyle(color: primaryColor, fontSize: 11)),
-                                                        onPressed: () {
-                                                          Navigator.pop(context);
-                                                          context.read<AuctionProvider>().cancelAuction(auction, auction.id).then((resp) {
-                                                            if (resp['success'] == true) {
-                                                              ScaffoldMessenger.of(MyApp.navigatorKey.currentContext!).showSnackBar(
-                                                                SnackBar(
-                                                                  content: Text('Auction cancelled successfully'),
-                                                                  backgroundColor: Colors.green,
-                                                                ),
-                                                              );
-                                                            }
-                                                          });
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            child: const Text('Cancel Auction', style: TextStyle(color: primaryColor, fontSize: 11)),
                                           ),
-                                        ),
+                                        }
                                       ],
                                     )
                             else if (auction.isMyAuction)

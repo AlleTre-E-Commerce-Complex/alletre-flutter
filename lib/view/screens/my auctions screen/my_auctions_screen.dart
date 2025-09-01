@@ -8,7 +8,7 @@ import '../../../model/user_model.dart';
 import '../../../model/auction_item.dart';
 
 class MyAuctionsScreen extends StatelessWidget {
-  static const List<String> _auctionTypes = ['Active', 'Scheduled', 'Sold', 'Pending', 'Waiting for Payment', 'Cancelled'];
+  static const List<String> _auctionTypes = ['Active', 'Scheduled', 'Sold', 'Pending', 'Waiting for Payment', 'Cancelled', 'Expired'];
 
   static final ValueNotifier<String> _selectedType = ValueNotifier<String>(_auctionTypes[0]);
 
@@ -104,6 +104,8 @@ class MyAuctionsScreen extends StatelessWidget {
         return Icons.payment_rounded;
       case 'Cancelled':
         return Icons.cancel_rounded;
+      case 'Expired':
+        return Icons.lock_clock;
       default:
         return Icons.folder;
     }
@@ -123,7 +125,8 @@ class AuctionsTabView extends StatelessWidget {
       'Sold': 'SOLD',
       'Pending': 'PENDING_OWNER_DEPOIST',
       'Waiting for Payment': 'WAITING_FOR_PAYMENT',
-      'Cancelled': ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN']
+      'Cancelled': ['CANCELLED_BEFORE_EXP_DATE', 'CANCELLED_AFTER_EXP_DATE', 'CANCELLED_BY_ADMIN'],
+      'Expired': 'EXPIRED',
     };
     final status = statusMap[type];
 
@@ -159,6 +162,7 @@ class AuctionsTabView extends StatelessWidget {
     logAuctionStatuses(provider.pendingAuctions, 'Pending');
     logAuctionStatuses(provider.waitingForPaymentAuctions, 'Waiting for Payment');
     logAuctionStatuses(provider.cancelledAuctions, 'Cancelled');
+    logAuctionStatuses(provider.expiredAuctions, 'Expired');
 
     return Consumer<AuctionProvider>(builder: (context, provider, _) {
       // Declare filtered list and loading state
@@ -254,12 +258,25 @@ class AuctionsTabView extends StatelessWidget {
           }
           // isLoading = provider.isLoadingPending;
           error = provider.errorCancelled;
-          filtered = provider.cancelledAuctions.where((a) {
-            for (var _status in (status as List<String>)) {
-              if (a.status.toUpperCase() == _status) return true;
-            }
-            return false;
-          }).toList();
+          if (provider.cancelledAuctions.isNotEmpty) {
+            filtered = provider.cancelledAuctions.where((a) {
+              for (var _status in (status as List<String>)) {
+                if (a.status.toUpperCase() == _status) return true;
+              }
+              return false;
+            }).toList();
+          }
+          break;
+        case 'Expired':
+          final myExpiredAuctions = provider.expiredAuctions;
+          debugPrint('   My Cancelled auctions: ${myExpiredAuctions.length}');
+          if (!provider.isLoadingExpired && provider.expiredAuctions.isEmpty && provider.errorExpired == null) {
+            provider.getExpiredMyAuctions();
+            // return const Center(child: CircularProgressIndicator());
+          }
+          // isLoading = provider.isLoadingPending;
+          error = provider.errorExpired;
+          filtered = provider.expiredAuctions.where((a) => a.isMyAuction == true).toList();
           break;
       }
 
