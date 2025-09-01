@@ -205,7 +205,7 @@ class ProductsTabView extends StatelessWidget {
       Widget content;
 
       if (filtered.isEmpty) {
-        content = EmptyState(message: 'No $type auctions found.', fontSize: 14);
+        content = EmptyState(message: 'No $type products found.', fontSize: 14);
       } else {
         content = GridView.builder(
           padding: const EdgeInsets.all(1),

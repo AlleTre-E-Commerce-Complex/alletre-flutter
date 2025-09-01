@@ -816,7 +816,7 @@ class AuctionProvider with ChangeNotifier {
     try {
       _isLoadingInProgress = true;
       _errorInProgress = null;
-      notifyListeners();
+      // notifyListeners();
 
       debugPrint('🔄 [AuctionProvider] Fetching IN_PROGRESS products...');
       final status = 'IN_PROGRESS';
@@ -831,7 +831,7 @@ class AuctionProvider with ChangeNotifier {
       debugPrint('Error fetching in progress products: $e');
     } finally {
       _isLoadingInProgress = false;
-      notifyListeners();
+      if (_inProgressProducts.isNotEmpty) notifyListeners();
     }
   }
 
@@ -839,7 +839,7 @@ class AuctionProvider with ChangeNotifier {
     try {
       _isLoadingOutOfStock = true;
       _errorOutOfStock = null;
-      notifyListeners();
+      // notifyListeners();
 
       debugPrint('🔄 [AuctionProvider] Fetching OUT_OF_STOCK products...');
       final status = 'OUT_OF_STOCK';
@@ -854,7 +854,7 @@ class AuctionProvider with ChangeNotifier {
       debugPrint('Error fetching out of stock products: $e');
     } finally {
       _isLoadingOutOfStock = false;
-      notifyListeners();
+      if (_outOfStockProducts.isNotEmpty) notifyListeners();
     }
   }
 
@@ -862,7 +862,7 @@ class AuctionProvider with ChangeNotifier {
     try {
       _isLoadingSoldOut = true;
       _errorSoldOut = null;
-      notifyListeners();
+      // notifyListeners();
 
       debugPrint('🔄 [AuctionProvider] Fetching SOLD_OUT products...');
       final status = 'SOLD_OUT';
@@ -877,7 +877,7 @@ class AuctionProvider with ChangeNotifier {
       debugPrint('Error fetching sold out products: $e');
     } finally {
       _isLoadingSoldOut = false;
-      notifyListeners();
+      if (_soldOutProducts.isNotEmpty) notifyListeners();
     }
   }
 
