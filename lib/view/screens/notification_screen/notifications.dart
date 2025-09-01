@@ -1,9 +1,11 @@
+import 'package:alletre_app/app.dart';
 import 'package:alletre_app/controller/helpers/date_formatter_helper.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/notification_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/view/screens/item_details/item_details.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -108,6 +110,7 @@ class NotificationsScreen extends StatelessWidget {
                             style: TextStyle(
                               color: Colors.grey[600],
                             ),
+                            maxLines: 4,
                           ),
                           trailing: Text(
                             DateFormatter.getVerboseDateTimeRepresentation(dateTime: item.createdAt),
@@ -120,17 +123,28 @@ class NotificationsScreen extends StatelessWidget {
                           onTap: () {
                             // when tapped, mark as read
                             if (!item.isRead) provider.markAsRead();
-                            var auctionItem = context.read<AuctionProvider>().liveAuctions.singleWhere((auctionItem) => auctionItem.id == item.auctionId);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ItemDetailsScreen(
-                                  user: UserModel.empty(),
-                                  item: auctionItem,
-                                  title: auctionItem.title,
+                            var auctionProvider = context.read<AuctionProvider>();
+                            var auctionItem = auctionProvider.liveAuctions.singleWhereOrNull((auctionItem) => auctionItem.id == item.auctionId);
+                            auctionItem ??= auctionProvider.liveMyAuctions.singleWhereOrNull((auctionItem) => auctionItem.id == item.auctionId);
+                            if (auctionItem != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ItemDetailsScreen(
+                                    user: UserModel.empty(),
+                                    item: auctionItem!,
+                                    title: auctionItem.title,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            } else {
+                              ScaffoldMessenger.of(MyApp.navigatorKey.currentContext!).showSnackBar(
+                                SnackBar(
+                                  content: Text('Auction is not live anymore!'),
+                                  backgroundColor: Colors.orangeAccent,
+                                ),
+                              );
+                            }
                           },
                         ),
                       );
