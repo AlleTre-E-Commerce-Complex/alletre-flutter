@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
+import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,9 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     super.initState();
     // API calls happen after the widget is built, using Future.microtask.
     Future.microtask(() async {
+      if (mounted) {
+        await context.read<WishlistProvider>().fetchAllWishlistedAuctions();
+      }
       if (mounted) {
         await context.read<AuctionProvider>().getLiveAuctions();
       }

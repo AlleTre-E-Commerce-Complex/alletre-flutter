@@ -21,7 +21,7 @@ class WishlistProvider extends ChangeNotifier {
   Future<void> saveToWishlist(AuctionItem auction) async {
     try {
       final response = await ApiService.post(
-        '${ApiEndpoints .baseUrl}${ApiEndpoints.saveToWishlist}',
+        '${ApiEndpoints.baseUrl}${ApiEndpoints.saveToWishlist}',
         data: {
           'auctionId': auction.id,
         },
@@ -53,6 +53,30 @@ class WishlistProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error removing from wishlist: \\${e.toString()}');
+    }
+  }
+
+  Future<void> fetchAllWishlistedAuctions() async {
+    try {
+      final response = await ApiService.get(ApiEndpoints.getSavedWishlist);
+      // Assuming API returns success boolean
+      _wishlistedAuctionIds.clear();
+      _wishlistedAuctions.clear();
+      if (response.data['success'] == true) {
+        (response.data['data'] as List).map((item) {
+          AuctionItem auctionItem = AuctionItem.fromJson(item['auction']);
+          _wishlistedAuctionIds.add(auctionItem.id);
+          _wishlistedAuctions.add(auctionItem);
+        }).toList();
+      } else {
+        debugPrint('Failed to save to wishlist: \\${response.data['message']}');
+      }
+    } catch (e) {
+      debugPrint('Error saving to wishlist: \\${e.toString()}');
+    } finally {
+      if (_wishlistedAuctions.isNotEmpty) {
+        notifyListeners();
+      }
     }
   }
 }
