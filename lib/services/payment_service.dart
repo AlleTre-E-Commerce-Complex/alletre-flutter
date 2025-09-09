@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -16,7 +17,7 @@ class PaymentService {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auctions/user/$auctionId/buy-now'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/buy-now'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -63,7 +64,7 @@ class PaymentService {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auctions/user/$auctionId/buy-now-through-wallet'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/buy-now-through-wallet'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -104,8 +105,7 @@ class PaymentService {
   static final ValueNotifier<String?> paymentError =
       ValueNotifier<String?>(null);
 
-  // Base URL for API endpoints
-  static const String baseUrl = 'http://10.227.29.182:3001/api';
+  // Base URL for API endpoints  
 
   // Seller deposit payment methods
   static Future<Map<String, dynamic>> payForAuction({
@@ -129,7 +129,7 @@ class PaymentService {
           })}');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/auctions/user/pay'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/pay'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -208,7 +208,7 @@ class PaymentService {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auctions/user/walletPay'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/walletPay'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -256,7 +256,7 @@ class PaymentService {
           })}');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/auctions/user/$auctionId/bidder-deposit'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/bidder-deposit'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -335,7 +335,7 @@ class PaymentService {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/user/bidder/wallet-deposit'),
+        Uri.parse('${ApiEndpoints.baseUrl}/user/bidder/wallet-deposit'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -382,7 +382,7 @@ class PaymentService {
           })}');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/auctions/user/$auctionId/bidder-purchase'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/bidder-purchase'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -459,7 +459,7 @@ class PaymentService {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auctions/user/$auctionId/wallet-bidder-purchase'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/wallet-bidder-purchase'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

@@ -1,13 +1,12 @@
 import 'dart:convert';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 
 class AuctionDetailsService {
-  static const String baseUrl = 'http://10.227.29.182:3001/api';
-
   static Future<Map<String, dynamic>?> getAuctionDetails(
       String auctionId) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/auctions/user/$auctionId/details'),
+      Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/details'),
     );
 
     final data = jsonDecode(response.body);
@@ -23,7 +22,7 @@ class AuctionDetailsService {
       String auctionId) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/user/$auctionId'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId'),
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {

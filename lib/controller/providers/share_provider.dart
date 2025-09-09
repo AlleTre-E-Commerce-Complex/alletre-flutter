@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -6,7 +7,7 @@ class ShareProvider with ChangeNotifier {
   Future<void> shareApp(BuildContext context) async {
     try {
       const String shareMessage = 
-          "Check out this amazing bidding app! Download now: http://10.227.29.182:3001";
+          "Check out this amazing bidding app! Download now: ${ApiEndpoints.baseOrigin}";
       
       await Share.share(
         shareMessage,

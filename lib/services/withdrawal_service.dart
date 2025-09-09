@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 
-class WithdrawalService {
-  static const String baseUrl = 'http://10.227.29.182:3001/api';
+class WithdrawalService {  
   static const storage = FlutterSecureStorage();
 
   static Future<void> submitWithdrawalRequest({
@@ -15,7 +15,7 @@ class WithdrawalService {
     if (token == null) throw Exception('No authentication token found');
 
     final response = await http.post(
-      Uri.parse('$baseUrl/auctions/user/withdrawalRequest'),
+      Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/withdrawalRequest'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',

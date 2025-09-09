@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/utils/ui_helpers.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
@@ -227,10 +228,10 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       debugPrint('🔍 Parsed DateTime: $requestTime');
 
       // Try all possible endpoint variants to determine which one works
-      var _url = '${ApiService.baseUrl}/auctions/user/walletPay';
+      var _url = '${ApiEndpoints.baseUrl}/auctions/user/walletPay';
       bool isMyAuction = (widget.auctionData['auction'] as AuctionItem).isMyAuction;
       if (!isMyAuction) {
-        _url = '${ApiService.baseUrl}/auctions/user/bidder-walletDeposit';
+        _url = '${ApiEndpoints.baseUrl}/auctions/user/bidder-walletDeposit';
       }
       try {
         // Attempt with endpoint variant 1

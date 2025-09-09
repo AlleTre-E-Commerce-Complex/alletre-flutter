@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/error/auth_error_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:alletre_app/controller/services/token_refresh_service.dart';
 
 class UserService {
-  final String baseUrl = 'http://10.227.29.182:3001/api/auth';
+  final String baseUrl = '${ApiEndpoints.baseUrl}/auth';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -253,7 +254,7 @@ class UserService {
         try {
           response = await http.post(
             oAuthUrl,
-            headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Origin': 'http://10.227.29.182:3001', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'Content-Type'},
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Origin': ApiEndpoints.baseOrigin, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'Content-Type'},
             body: json.encode(requestBody),
           );
         } catch (e) {
@@ -419,7 +420,7 @@ class UserService {
         return {'success': false, 'message': 'Not authenticated'};
       }
       final response = await http.post(
-        Uri.parse('http://10.227.29.182:3001/api/users/locations/$locationId/make-default'),
+        Uri.parse('${ApiEndpoints.baseUrl}/users/locations/$locationId/make-default'),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',

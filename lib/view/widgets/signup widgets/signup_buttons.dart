@@ -134,12 +134,14 @@ class SignupButtons extends StatelessWidget {
                         // });
                         Future.delayed(const Duration(seconds: 2), () {
                           if (context.mounted) {
-                            Navigator.pushReplacementNamed(
-                                context, AppRoutes.login);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginPage()),
+                            );
                           }
                           // if (context.mounted) {
                           //   UrlHandlerService.handleUrl(
-                          //       'http://10.227.29.182:3001/login', // The website login URL
+                          //       '${ApiEndpoints.baseOrigin}/login', // The website login URL
                           //       context);
                           // }
                         });
@@ -179,9 +181,7 @@ class SignupButtons extends StatelessWidget {
               Expanded(child: Divider(color: dividerColor)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text('OR',
-                    style: TextStyle(
-                        color: dividerColor, fontWeight: FontWeight.w500)),
+                child: Text('OR', style: TextStyle(color: dividerColor, fontWeight: FontWeight.w500)),
               ),
               Expanded(
                 child: Divider(color: dividerColor),
@@ -205,8 +205,7 @@ class SignupButtons extends StatelessWidget {
                 print("Signed in as ${user.displayName}");
 
                 // Store the user info in the provider
-                Provider.of<UserProvider>(context, listen: false)
-                    .setFirebaseUserInfo(user, 'google');
+                Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'google');
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -221,8 +220,7 @@ class SignupButtons extends StatelessWidget {
                 );
 
                 Provider.of<LoggedInProvider>(context, listen: false).logIn();
-                Provider.of<TabIndexProvider>(context, listen: false)
-                    .updateIndex(1);
+                Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
                 if (!context.mounted) return;
 
@@ -235,8 +233,7 @@ class SignupButtons extends StatelessWidget {
                 // Authentication failed or user canceled login
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content:
-                        const Text('Google sign-up failed. Please try again.'),
+                    content: const Text('Google sign-up failed. Please try again.'),
                     backgroundColor: avatarColor,
                     duration: const Duration(seconds: 3),
                   ),
@@ -246,8 +243,7 @@ class SignupButtons extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset('assets/icons/google_icon.svg',
-                    width: 15, height: 15),
+                SvgPicture.asset('assets/icons/google_icon.svg', width: 15, height: 15),
                 const SizedBox(width: 10),
                 const Text(
                   'Sign up with Google',
@@ -272,8 +268,7 @@ class SignupButtons extends StatelessWidget {
                 print("Signed in as ${user.displayName}");
 
                 // Store the user info in the provider
-                Provider.of<UserProvider>(context, listen: false)
-                    .setFirebaseUserInfo(user, 'apple');
+                Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'apple');
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -288,8 +283,7 @@ class SignupButtons extends StatelessWidget {
                 );
 
                 Provider.of<LoggedInProvider>(context, listen: false).logIn();
-                Provider.of<TabIndexProvider>(context, listen: false)
-                    .updateIndex(1);
+                Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
                 if (!context.mounted) return;
 
@@ -302,8 +296,7 @@ class SignupButtons extends StatelessWidget {
                 // Authentication failed or user canceled login
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text(
-                        'Apple sign-up is not supported on this platform'),
+                    content: const Text('Apple sign-up is not supported on this platform'),
                     backgroundColor: avatarColor,
                     duration: const Duration(seconds: 3),
                   ),
@@ -313,8 +306,7 @@ class SignupButtons extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset('assets/icons/apple_icon.svg',
-                    width: 15, height: 15),
+                SvgPicture.asset('assets/icons/apple_icon.svg', width: 15, height: 15),
                 const SizedBox(width: 10),
                 const Text(
                   'Sign up with Apple',

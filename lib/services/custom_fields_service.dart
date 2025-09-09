@@ -1,19 +1,19 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:alletre_app/model/custom_field_model.dart';
 import 'package:flutter/foundation.dart';
 
 class CustomFieldsService {
-  static const String baseUrl = 'http://10.227.29.182:3001/api';
 
   // Get all system fields
   static Future<CategoryFields> getSystemFields() async {
     print('🔄 Fetching all system fields');
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/categories/system-fields'),
+        Uri.parse('${ApiEndpoints.baseUrl}/categories/system-fields'),
       );
 
       print('📥 Response status code: ${response.statusCode}');
@@ -58,7 +58,7 @@ class CustomFieldsService {
     print('🔄 Fetching custom fields for category: $categoryId');
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/categories/custom-fields?categoryId=$categoryId'),
+        Uri.parse('${ApiEndpoints.baseUrl}/categories/custom-fields?categoryId=$categoryId'),
       );
 
       print('📥 Response status code: ${response.statusCode}');
@@ -144,7 +144,7 @@ class CustomFieldsService {
     try {
       final response = await http.get(
         Uri.parse(
-            '$baseUrl/categories/custom-fields?subCategoryId=$subCategoryId'),
+            '${ApiEndpoints.baseUrl}/categories/custom-fields?subCategoryId=$subCategoryId'),
       );
 
       print('📥 Response status code: ${response.statusCode}');
@@ -247,7 +247,7 @@ class CustomFieldsService {
     // print('🔄 Fetching auction details: $auctionId');
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/user/$auctionId/details'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/$auctionId/details'),
       );
 
       // print('📥 Response status code: ${response.statusCode}');
@@ -281,7 +281,7 @@ class CustomFieldsService {
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/listedProducts/$productId/details'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/listedProducts/$productId/details'),
       );
 
       // print('📥 Response status code: ${response.statusCode}');

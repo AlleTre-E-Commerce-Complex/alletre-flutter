@@ -1,3 +1,4 @@
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -22,8 +23,6 @@ class GoogleAuthService {
   Future<String?> hCurrentToken() async {
     return await _storage.read(key: 'access_token');
   }
-
-  static const String baseUrl = 'http://10.227.29.182:3001/api';
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
@@ -53,11 +52,11 @@ class GoogleAuthService {
 
         // Call backend OAuth endpoint
         debugPrint('📤 Preparing OAuth request...');
-        debugPrint('Base URL: $baseUrl');
-        debugPrint('🌐 Parsed Request URL: $baseUrl/auth/oAuth');
+        debugPrint('Base URL: ${ApiEndpoints.baseUrl}');
+        debugPrint('🌐 Parsed Request URL: ${ApiEndpoints.baseUrl}/auth/oAuth');
 
         final response = await http.post(
-          Uri.parse('$baseUrl/auth/oAuth'),
+          Uri.parse('${ApiEndpoints.baseUrl}/auth/oAuth'),
           headers: {
             'Content-Type': 'application/json',
           },

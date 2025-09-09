@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,7 @@ import '../controller/helpers/navigation_services.dart';
 import '../view/screens/login screen/login_page.dart';
 
 class ApiService {
-  static final Dio _dio = Dio();
-  static const String baseUrl = 'http://10.227.29.182:3001/api';
+  static final Dio _dio = Dio();  
   static const _storage = FlutterSecureStorage();
 
   static Future<String?> _getToken() async {
@@ -105,7 +105,7 @@ class ApiService {
 
   static Future<Response> get(String endpoint) async {
     final token = await _getToken();
-    debugPrint('🔍 API Request: GET $baseUrl$endpoint');
+    debugPrint('🔍 API Request: GET ${ApiEndpoints.baseUrl}endpoint');
 
     if (token == null) {
       throw Exception('No access token found');
@@ -113,7 +113,7 @@ class ApiService {
 
     try {
       final response = await _dio.get(
-        baseUrl + endpoint,
+        ApiEndpoints.baseUrl + endpoint,
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',

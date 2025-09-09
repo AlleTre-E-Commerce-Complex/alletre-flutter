@@ -1,11 +1,11 @@
 import 'dart:convert';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 import '../model/bank_account.dart';
 
-class BankAccountService {
-  static const String baseUrl = 'http://10.227.29.182:3001/api';
+class BankAccountService {  
   static const storage = FlutterSecureStorage();
 
   static Future<List<BankAccount>> getAccountData() async {
@@ -19,7 +19,7 @@ class BankAccountService {
       debugPrint('Token found: ${token.substring(0, 10)}...');
 
       final response = await http.get(
-        Uri.parse('$baseUrl/auctions/user/getAccountData'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/getAccountData'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ class BankAccountService {
       debugPrint('Request payload: $accountJson');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/auctions/user/addBankAccount'),
+        Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/addBankAccount'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
