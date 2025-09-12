@@ -107,8 +107,9 @@ class GoogleAuthService {
       // Clean up on error
       await _googleAuth.signOut();
       await _googleSignIn.signOut();
-      rethrow;
+      // rethrow;
     }
+    return null;
   }
 
   Future<void> signOut() async {

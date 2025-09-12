@@ -74,20 +74,22 @@ class BottomNavBar extends StatelessWidget {
         children: [
           buildFixedSizeButton(
             text: 'Login',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
-            ),
+            onPressed: () {
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+            },
             backgroundColor: secondaryColor,
             borderColor: primaryColor,
             textStyle: Theme.of(context).textTheme.bodySmall!,
           ),
           buildFixedSizeButton(
             text: 'Sign Up',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SignUpPage()),
-            ),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => SignUpPage(),
+                ),
+              );
+            },
             backgroundColor: primaryColor,
             borderColor: secondaryColor,
             textStyle: Theme.of(context).textTheme.bodyMedium!,

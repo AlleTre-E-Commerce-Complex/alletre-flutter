@@ -1,8 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 import 'package:alletre_app/controller/providers/focus_state_provider.dart';
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/utils/images/images.dart';
-import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';

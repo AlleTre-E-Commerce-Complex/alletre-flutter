@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
         return const MainStack();
       } else if (hasCompletedOnboarding) {
         // User has seen onboarding but is not logged in, go to login
-        return LoginPage();
+        return MainStack();
       } else if (!hasCompletedOnboarding) {
         return OnboardingPages();
       } else {

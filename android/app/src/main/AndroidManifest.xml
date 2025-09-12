@@ -11,7 +11,7 @@
 
     <application
         android:requestLegacyExternalStorage="true"
-        android:label="alletre_app"
+        android:label="Alletre"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"

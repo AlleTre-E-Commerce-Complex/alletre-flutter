@@ -1,8 +1,8 @@
 class ApiEndpoints {
   // static const String baseUrl = 'https://api.alletre.kooman.tech/api';
-  static const String baseUrl = 'http://10.187.39.182:3001/api';
+  static const String baseUrl = 'http://172.20.10.3:3001/api';
   // static const String baseOrigin = 'https://api.alletre.kooman.tech';
-  static const String baseOrigin = 'http://10.187.39.182:3001';
+  static const String baseOrigin = 'http://172.20.10.3:3001';
 
   // Auction endpoints
   static const String auctions = '/auctions';
