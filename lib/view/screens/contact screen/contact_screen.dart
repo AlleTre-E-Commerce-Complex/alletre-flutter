@@ -21,7 +21,7 @@ class ContactUsScreen extends StatelessWidget {
                 title: 'Email us',
                 description:
                     'Reach out to us via email and a customer service representative will respond as soon as possible.',
-                contactInfo: 'auctions.alletre@gmail.com',
+                contactInfo: 'info@alletre.com',
                 onTap: () {},
               ),
               const SizedBox(height: 22),
@@ -30,8 +30,7 @@ class ContactUsScreen extends StatelessWidget {
                 title: 'Call us',
                 description:
                     'Our customer support is available around the clock to assist with any concerns.',
-                contactInfo: '+971 50 562 1180',
-                contactPrefix: '24/7',
+                contactInfo: '+971 72663004',
                 onTap: () {},
               ),
               const SizedBox(height: 22),

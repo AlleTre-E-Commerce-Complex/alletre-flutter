@@ -13,7 +13,7 @@ String getDisplayStatus(String status) {
     case 'EXPIRED':
       return 'EXPIRED';
     case 'WAITING_FOR_PAYMENT':
-      return 'SOLD';
+      return 'WAITING FOR PAYMENT';
     case 'SOLD':
       return 'SOLD';
     case 'CANCELLED_BEFORE_EXP_DATE':
@@ -25,14 +25,14 @@ String getDisplayStatus(String status) {
     case 'PENDING_OWNER_DEPOIST':
       return 'PENDING';
     default:
-      return 'Unknown';
+      return 'UNKNOWN';
   }
 }
 
 Color getStatusColor(String status) {
   switch (status) {
     case "WAITING_FOR_PAYMENT":
-      return errorColor;
+      return facebookColor;
     case "SOLD":
       return errorColor;
     case "EXPIRED":
@@ -41,6 +41,8 @@ Color getStatusColor(String status) {
       return activeColor;
     case "IN_SCHEDULED":
       return scheduledColor;
+    case "PENDING_OWNER_DEPOIST":
+      return avatarColor;
     case "CANCELLED_BEFORE_EXP_DATE":
       return primaryColor;
     case "USED":
@@ -54,12 +56,14 @@ Color getStatusColor(String status) {
 
 double getCardHeight(String title, {bool isAuctionProduct = false}) {
   if (title == "Similar Products") {
-    return isAuctionProduct ? 337 : 333; // Use appropriate height based on item type
+    return isAuctionProduct
+        ? 337
+        : 333; // Use appropriate height based on item type
   }
-  
+
   switch (title) {
     case "Live Auctions" || "Upcoming Auctions":
-      return 337; // Taller to accommodate the countdown and the buttons
+      return 325; // Taller to accommodate the countdown and the buttons
     case "Listed Products":
       return 333; // Tall enough for location and view details button
     default:

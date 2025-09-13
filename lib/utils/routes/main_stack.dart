@@ -1,7 +1,11 @@
 import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/controller/services/auth_services.dart';
+import 'package:alletre_app/controller/services/google_auth.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/navbar_utils.dart';
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
+import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/item_details/item_details.dart';
 import 'package:alletre_app/view/screens/auction%20screen/payment_details_screen.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
@@ -13,16 +17,17 @@ import 'package:alletre_app/view/screens/faqs%20screen/faqs_screen.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_screen3.dart';
+import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dart';
 import 'package:alletre_app/view/screens/settings%20screen/settings_screen.dart';
 import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/screens/sub%20categories%20screen/sub_categories_screen.dart';
 import 'package:alletre_app/view/screens/user%20terms%20screen/user_terms.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/create_auction_button.dart';
 import 'package:flutter/material.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
-import 'package:alletre_app/view/screens/purchases%20screen/purchases_screen.dart';
-import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/profile%20screen/profile_screen.dart';
 import 'package:alletre_app/model/auction_item.dart';
 import '../../view/widgets/home widgets/bottom_navbar.dart';
@@ -54,11 +59,11 @@ class MainStack extends StatelessWidget {
         return const HomeScreenContent();
       case 1: // Purchases
         return const PurchaseScreen();
-      case 2: // Bids
+      case 2: // My Bids
         return const BidsScreen();
       case 3: // Profile
         return const ProfileScreen();
-      // Other screens that can be navigated to from these main screens
+      // Other screens that can be navigated to from the main screens
       case 4:
         return const FaqScreen();
       case 5:
@@ -82,7 +87,7 @@ class MainStack extends StatelessWidget {
       case 14:
         return const AddLocationScreen();
       case 15:
-        // return const ListProductsScreen();
+      // return const ListProductsScreen();
       case 16:
         return const PaymentDetailsScreen(auctionData: {'message': 'Please create an auction first'});
       // Auth screens
@@ -112,6 +117,30 @@ class MainStack extends StatelessWidget {
           Future.microtask(() {
             tabIndexProvider.updateIndex(18); // Login page index
           });
+        } else if (isLoggedIn) {
+          final userProvider = context.read<UserProvider>();
+          final userAuthService = UserAuthService();
+          if ((userProvider.displayEmail.isEmpty || userProvider.displayEmail.trim() == 'Add Email') && isLoggedIn) {
+            userAuthService.getAuthMethod().then((authMethod) {
+              if (authMethod == 'custom') {
+                userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
+                  if (data.containsKey('id') == true) {
+                    userProvider.setName(data['userName']);
+                    userProvider.setEmail(data['email']);
+
+                    PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
+                      userProvider.setPhoneNumber(val);
+                    });
+                  }
+                });
+              } else if (authMethod == 'google') {
+                final GoogleAuthService _googleAuthService = GoogleAuthService();
+                _googleAuthService.signInWithGoogle().then((userCredential) {
+                  userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
+                });
+              }
+            });
+          }
         }
 
         return Scaffold(
@@ -125,12 +154,14 @@ class MainStack extends StatelessWidget {
               ),
             ),
           ),
+          floatingActionButton: isLoggedIn ? const CreateAuctionButton() : null,
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: isLoggedIn
-                  ? BottomNavBarUtils.buildAuthenticatedNavBar(
-                      context,
-                      onTabChange: (index) => tabIndexProvider.updateIndex(index),
-                    )
-                  : const BottomNavBar(),
+              ? BottomNavBarUtils.buildAuthenticatedNavBar(
+                  context,
+                  onTabChange: (index) => tabIndexProvider.updateIndex(index),
+                )
+              : const BottomNavBar(),
         );
       },
     );

@@ -1,3 +1,4 @@
+import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -20,14 +21,18 @@ class WishlistScreen extends StatelessWidget {
     final cardWidth = (screenWidth - 32 - 10) / 2;
     const cardHeight = 337;
 
+    if (context.watch<LoggedInProvider>().isLoggedIn == true) {
+      context.read<WishlistProvider>().fetchAllWishlistedAuctions();
+    }
+
     return Scaffold(
-      appBar: const NavbarElementsAppbar(
-          appBarTitle: 'Wishlist', showBackButton: true),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Wishlist', showBackButton: true),
       body: Column(
         children: [
           const SizedBox(height: 9),
           SearchFieldWidget(
             isNavigable: false,
+            query: context.watch<AuctionProvider>().searchQuery,
             onChanged: (value) {
               context.read<AuctionProvider>().searchItems(value);
             },

@@ -14,9 +14,8 @@ class UserProvider with ChangeNotifier {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   final UserModel _user = UserModel();
-  String? selectedAddress;
-  final List<String> _addresses = []; // List of stored addresses
-  String? _defaultAddress;
+  final List<Map<String, dynamic>> _addresses = []; // List of stored addresses as Maps
+  Map<String, dynamic>? _defaultAddress;
   bool _agreeToTerms = false;
   bool _rememberPassword = false;
   String _isoCode = 'AE'; // Store country ISO code
@@ -40,8 +39,8 @@ class UserProvider with ChangeNotifier {
   bool get rememberPassword => _rememberPassword;
   String get phoneNumber => _user.phoneNumber;
   String get isoCode => _isoCode;
-  List<String> get addresses => _addresses;
-  String? get defaultAddress => _defaultAddress;
+  List<Map<String, dynamic>> get addresses => _addresses;
+  Map<String, dynamic>? get defaultAddress => _defaultAddress;
   bool get isLoading => _isLoading;
   String get lastValidationMessage => _lastValidationMessage;
   String get authMethod => _authMethod;
@@ -50,9 +49,7 @@ class UserProvider with ChangeNotifier {
     if (_displayNumber != null && _displayNumber!.isNotEmpty) {
       return _displayNumber!;
     }
-    return _user.phoneNumber.isNotEmpty
-        ? _user.phoneNumber
-        : 'Add Phone Number';
+    return _user.phoneNumber.isNotEmpty ? _user.phoneNumber : 'Add Phone Number';
   }
 
   String get displayEmail {
@@ -127,8 +124,7 @@ class UserProvider with ChangeNotifier {
 
   // Validation for login credentials
   bool validateLoginCredentials() {
-    return emailController.text.isNotEmpty &&
-        passwordController.text.isNotEmpty;
+    return emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
   }
 
   // Checkbox handlers
@@ -151,14 +147,25 @@ class UserProvider with ChangeNotifier {
   }
 
   // Add a new address
-  void addAddress(String address) {
+  void addAddress(Map<String, dynamic> address) {
+    // Add a unique id if not present
+    if (!address.containsKey('id')) {
+      address['id'] = DateTime.now().millisecondsSinceEpoch.toString();
+    }
     _addresses.add(address);
     _defaultAddress ??= address;
     notifyListeners();
   }
 
+  // Set addresses from backend
+  void setAddresses(List<Map<String, dynamic>> addresses) {
+    _addresses.clear();
+    _addresses.addAll(addresses);
+    notifyListeners();
+  }
+
   // Set default address
-  void setDefaultAddress(String address) {
+  void setDefaultAddress(Map<String, dynamic> address) {
     if (_addresses.contains(address)) {
       _defaultAddress = address;
       notifyListeners();
@@ -166,23 +173,38 @@ class UserProvider with ChangeNotifier {
   }
 
   // Edit an address
-  void editAddress(String oldAddress, String newAddress) {
-    final index = _addresses.indexOf(oldAddress);
+  void editAddress(Map<String, dynamic> oldAddress, Map<String, dynamic> newAddress) {
+    final id = oldAddress['id'];
+    debugPrint('[UserProvider] editAddress called with id: $id');
+    debugPrint('[UserProvider] Current addresses: $_addresses');
+    final index = _addresses.indexWhere((a) => a['id'] == id);
     if (index != -1) {
+      // Preserve the id in the new address
+      newAddress['id'] = id;
       _addresses[index] = newAddress;
-      if (_defaultAddress == oldAddress) {
-        _defaultAddress = newAddress; // Update default address if edited
+      if (_defaultAddress?['id'] == id) {
+        _defaultAddress = newAddress;
       }
       notifyListeners();
+    } else {
+      debugPrint('[UserProvider] No address found with id: $id');
     }
   }
 
   // Remove an address
-  void removeAddress(String address) {
-    _addresses.remove(address);
-    if (_defaultAddress == address) {
+  void removeAddress(Map<String, dynamic> address) {
+    final id = address['id'];
+    _addresses.removeWhere((a) => a['id'] == id);
+    if (_defaultAddress?['id'] == id) {
       _defaultAddress = _addresses.isNotEmpty ? _addresses.first : null;
     }
+    notifyListeners();
+  }
+
+  // Clear all addresses
+  void clearAddresses() {
+    _addresses.clear();
+    _defaultAddress = null;
     notifyListeners();
   }
 
@@ -193,15 +215,10 @@ class UserProvider with ChangeNotifier {
   }
 
   bool validateSignupForm() {
-    bool isValid = _user.name.isNotEmpty &&
-        _user.email.isNotEmpty &&
-        _user.phoneNumber.isNotEmpty &&
-        _user.password.isNotEmpty &&
-        _agreeToTerms;
+    bool isValid = _user.name.isNotEmpty && _user.email.isNotEmpty && _user.phoneNumber.isNotEmpty && _user.password.isNotEmpty && _agreeToTerms;
 
     if (!isValid) {
-      String emptyFieldsMessage = FormValidators.getEmptyFieldsMessage(
-          _user.name, _user.email, _user.phoneNumber, _user.password);
+      String emptyFieldsMessage = FormValidators.getEmptyFieldsMessage(_user.name, _user.email, _user.phoneNumber, _user.password);
 
       if (!_agreeToTerms) {
         if (emptyFieldsMessage.isNotEmpty) {
@@ -219,10 +236,7 @@ class UserProvider with ChangeNotifier {
 
   Future<Map<String, dynamic>> signup() async {
     if (!validateSignupForm()) {
-      return {
-        'success': false,
-        'message': 'Please fill in all required fields and agree to terms'
-      };
+      return {'success': false, 'message': 'Please fill in all required fields and agree to terms'};
     }
 
     setLoading(true);
@@ -272,15 +286,13 @@ class UserProvider with ChangeNotifier {
       _displayNumber = firebaseUser.phoneNumber;
       _displayEmail = firebaseUser.email;
       // OAuth providers (Google, Apple) have pre-verified emails
-      _emailVerified = (method == 'google' || method == 'apple')
-          ? true
-          : firebaseUser.emailVerified;
+      _emailVerified = (method == 'google' || method == 'apple') ? true : firebaseUser.emailVerified;
       _photoUrl = firebaseUser.photoURL;
 
       // Debug: Print tokens
       final idToken = await firebaseUser.getIdToken();
       debugPrint('Firebase ID Token: $idToken');
-      
+
       // Get refresh token from secure storage
       final refreshToken = await _storage.read(key: 'refresh_token');
       debugPrint('Current refresh token: $refreshToken');
@@ -295,10 +307,7 @@ class UserProvider with ChangeNotifier {
 
   Future<Map<String, dynamic>> login() async {
     if (!validateLoginForm()) {
-      return {
-        'success': false,
-        'message': 'Please enter both email and password'
-      };
+      return {'success': false, 'message': 'Please enter both email and password'};
     }
 
     setLoading(true);
@@ -323,20 +332,23 @@ class UserProvider with ChangeNotifier {
         final userAuthService = UserAuthService();
         await userAuthService.setAuthMethod('custom');
 
-        if (_rememberPassword) {
-          // Save credentials if remember password is checked
-          await _storage.write(key: 'saved_email', value: email);
-          await _storage.write(key: 'saved_password', value: password);
-        }
+        // if (_rememberPassword) {
+        var _pass = await _storage.read(key: 'saved_password');
+        debugPrint(_pass);
+        // Save credentials if remember password is checked
+        await _storage.write(key: 'saved_email', value: email);
+        await _storage.write(key: 'saved_password', value: password);
+        // }
 
         // Validate tokens after successful login
-        final hasValidTokens = await _userService.validateTokens();
-        if (!hasValidTokens) {
-          return {
-            'success': false,
-            'message': 'Login failed: Unable to store authentication tokens'
-          };
-        }
+        // commented out because there is not such endpoint for validating access_token
+        // final hasValidTokens = await _userService.validateTokens();
+        // if (!hasValidTokens) {
+        //   return {
+        //     'success': false,
+        //     'message': 'Login failed: Unable to store authentication tokens'
+        //   };
+        // }
 
         resetLoginForm(); // form reset on successful login
       }
@@ -344,26 +356,64 @@ class UserProvider with ChangeNotifier {
       return result;
     } catch (e) {
       debugPrint('Error in login process: $e');
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred during login'
-      };
+      return {'success': false, 'message': 'An unexpected error occurred during login'};
     } finally {
       setLoading(false);
     }
   }
 
   Future<void> logout() async {
-    await _userService.logout(); // Added logout method to match UserService
+    try {
+      _isLoading = true;
 
-    // Also handle Firebase logout if needed
+      // Also handle Firebase logout if needed
+      await logoutFirebase();
+
+      // Reset all user-related state by creating a new empty instance
+      _user.name = '';
+      _user.email = '';
+      _user.phoneNumber = '';
+      _user.password = '';
+      _user.profileImagePath = null;
+
+      _addresses.clear();
+      _defaultAddress = null;
+      _displayName = null;
+      _displayNumber = null;
+      _displayEmail = null;
+      _photoUrl = null;
+      _emailVerified = null;
+      _authMethod = 'custom';
+      _agreeToTerms = false;
+      _rememberPassword = false;
+      _lastValidationMessage = '';
+
+      // Clear controllers
+      emailController.clear();
+      passwordController.clear();
+
+      notifyListeners();
+
+      // Clear secure storage and sign out from services
+      await _userService.logout();      
+
+      debugPrint('User provider state cleared after logout');
+    } catch (e) {
+      debugPrint('Error during user provider logout: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> logoutFirebase() async {
     if (_authMethod == 'google' || _authMethod == 'apple') {
       await FirebaseAuth.instance.signOut();
     }
 
     resetLoginForm();
     resetSignupForm();
-    _authMethod = 'custom';
     _displayName = null;
     _displayNumber = null;
     _displayEmail = null;
@@ -373,14 +423,16 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<Map<String, String?>> getTokens() async {
-    return await _userService
-        .getTokens(); // Added getTokens to match UserService
+    return await _userService.getTokens(); // Added getTokens to match UserService
   }
 
   void resetLoginForm() {
     emailController.clear();
     passwordController.clear();
     _rememberPassword = false;
+    _displayEmail = null;
+    _user.email = "";
+    _user.password = "";
     notifyListeners();
   }
 
@@ -411,4 +463,29 @@ class UserProvider with ChangeNotifier {
   //     throw Exception('Login failed: $e');
   //   }
   // }
+
+  // Make address default (backend + frontend)
+  Future<Map<String, dynamic>> makeDefaultAddress(String locationId, Map<String, dynamic> address) async {
+    setLoading(true);
+    try {
+      final result = await _userService.makeDefaultAddress(locationId);
+      if (result['success']) {
+        _defaultAddress = address;
+        notifyListeners();
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to make address default'};
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Mark an address as default locally
+  void markAddressAsDefault(dynamic locationId) {
+    for (var addr in _addresses) {
+      addr['isDefault'] = (addr['id'] == locationId);
+    }
+    notifyListeners();
+  }
 }

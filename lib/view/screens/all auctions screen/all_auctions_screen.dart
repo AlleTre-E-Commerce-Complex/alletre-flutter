@@ -1,3 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:alletre_app/controller/helpers/address_service.dart';
+import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
@@ -29,23 +33,25 @@ class AllAuctionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // debugPrint('AllAuctionsScreen build called with ${auctions.length} items');
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
-    
+
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - 32 - 10) / 2;
     // Get card height based on whether we're showing auctions or listed products
-    final cardHeight = getCardHeight(title, isAuctionProduct: title == 'Similar Products' ? auctions.firstOrNull?.isAuctionProduct ?? false : title.contains('Auction'));
+    final cardHeight = getCardHeight(title,
+        isAuctionProduct: title == 'Similar Products'
+            ? auctions.firstOrNull?.isAuctionProduct ?? false
+            : title.contains('Auction'));
 
     // Create a filtered list based on the search query from AuctionProvider
     final auctionProvider = context.watch<AuctionProvider>();
     final filteredAuctions = auctionProvider.searchQuery.isEmpty
         ? auctions
         : auctions
-            .where((auction) =>
-                auction.title
-                    .toLowerCase()
-                    .contains(auctionProvider.searchQuery.toLowerCase()))
+            .where((auction) => auction.title
+                .toLowerCase()
+                .contains(auctionProvider.searchQuery.toLowerCase()))
             .toList();
-    
+
     // debugPrint('Filtered auctions count: ${filteredAuctions.length}');
 
     return Scaffold(
@@ -58,6 +64,7 @@ class AllAuctionsScreen extends StatelessWidget {
           const SizedBox(height: 9),
           SearchFieldWidget(
             isNavigable: false,
+            query: auctionProvider.searchQuery,
             onChanged: (value) {
               auctionProvider.searchItems(value);
             },
@@ -75,8 +82,7 @@ class AllAuctionsScreen extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium!
-                              .copyWith(
-                                  color: onSecondaryColor, fontSize: 13),
+                              .copyWith(color: onSecondaryColor, fontSize: 13),
                         ),
                       ),
                       if (title == "Live Auctions" ||
@@ -91,15 +97,27 @@ class AllAuctionsScreen extends StatelessWidget {
                             ),
                           ),
                           onPressed: () async {
+                            // Address check before auction creation
+                            final addresses =
+                                await AddressService.fetchAddresses();
+                            if (addresses.isEmpty) {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => const AddLocationScreen()),
+                              );
+                              return;
+                            }
                             if (isLoggedIn) {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const ProductDetailsScreen(),
+                                  builder: (context) =>
+                                      const ProductDetailsScreen(),
                                 ),
                               );
                             } else {
-                              AuthHelper.showAuthenticationRequiredMessage(context);
+                              AuthHelper.showAuthenticationRequiredMessage(
+                                  context);
                             }
                           },
                           child: Text(
@@ -115,8 +133,7 @@ class AllAuctionsScreen extends StatelessWidget {
                 : Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: GridView.builder(
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 20,

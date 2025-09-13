@@ -1,15 +1,17 @@
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
+import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/contact%20screen/contact_screen.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
-import 'package:alletre_app/view/widgets/settings%20widgets/settings_list_tile.dart';
+import 'package:alletre_app/view/widgets/profile%20widgets/profile_list_tile.dart';
 import 'package:alletre_app/view/widgets/settings%20widgets/settings_section_title.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
-import '../contact screen/contact_screen.dart';
-import '../user terms screen/user_terms.dart';
+import 'package:provider/provider.dart';
+import '../faqs screen/faqs_screen.dart';
+import '../login screen/login_page.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -19,42 +21,247 @@ class SettingsScreen extends StatelessWidget {
     return 'Version ${packageInfo.version}';
   }
 
-  Future<void> _showLogoutDialog(BuildContext context) async {
-    // Show dialog
-    showDialog(
+  Future<void> _showLogoutConfirmation(BuildContext context) async {
+    final shouldLogout = await showDialog<bool>(
       context: context,
-      barrierDismissible:
-          false, // Prevents dismissing the dialog by tapping outside
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout',
-              style: TextStyle(fontWeight: FontWeight.w500)),
-          content: const Text('Do you want to logout?',
-              style: TextStyle(
-                  color: onSecondaryColor, fontWeight: FontWeight.w500)),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel', style: TextStyle(fontSize: 12)),
-            ),
-            TextButton(
-              onPressed: () {
-                // Log out the user
-                context.read<LoggedInProvider>().logOut();
-                // Navigate using TabIndexProvider
-                context
-                    .read<TabIndexProvider>()
-                    .updateIndex(2); // Index for LoginPage
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Logout', style: TextStyle(fontSize: 12)),
-            ),
-          ],
-        );
-      },
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.logout_sharp,
+                color: greyColor,
+                size: 64,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Confirm Logout?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 19,
+                  color: onSecondaryColor,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Yes',
+                          style: TextStyle(color: secondaryColor, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: secondaryColor,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: primaryColor,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'No',
+                          style: TextStyle(color: primaryColor, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+
+    if (shouldLogout != true) return;
+    if (!context.mounted) return;
+
+    final scaffold = ScaffoldMessenger.of(context);
+
+    try {
+      await context.read<UserProvider>().logout();
+      Provider.of<LoggedInProvider>(context, listen: false).logOut();
+      var auctionProvider = Provider.of<AuctionProvider>(context, listen: false);
+      auctionProvider.liveAuctions.clear();
+      auctionProvider.liveMyAuctions.clear();
+      auctionProvider.listedProducts.clear();
+      auctionProvider.upcomingAuctions.clear();
+      auctionProvider.waitingForPaymentAuctions.clear();
+      auctionProvider.expiredAuctions.clear();
+      auctionProvider.soldAuctions.clear();
+      auctionProvider.pendingAuctions.clear();
+      auctionProvider.cancelledAuctions.clear();
+      auctionProvider.inProgressProducts.clear();
+      auctionProvider.soldOutProducts.clear();
+      auctionProvider.joinedAuctions.clear();
+      auctionProvider.purchasedAuctions.clear();
+
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Successfully logged out')),
+            backgroundColor: activeColor,
+          ),
+        );
+      }
+
+      if (context.mounted) {
+        final tabIndexProvider = context.read<TabIndexProvider>();
+        tabIndexProvider.updateIndex(0);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Logout failed: ${e.toString()}')),
+            backgroundColor: errorColor,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showDeleteAccountConfirmation(BuildContext context) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.logout_sharp,
+                color: greyColor,
+                size: 64,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Confirm Delete?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 19,
+                  color: onSecondaryColor,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Yes',
+                          style: TextStyle(color: secondaryColor, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: secondaryColor,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: primaryColor,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'No',
+                          style: TextStyle(color: primaryColor, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (shouldDelete != true) return;
+    if (!context.mounted) return;
+
+    final scaffold = ScaffoldMessenger.of(context);
+
+    try {
+      await context.read<UserProvider>().logout();
+
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Your account has been deleted')),
+            backgroundColor: activeColor,
+          ),
+        );
+      }
+
+      if (context.mounted) {
+        final tabIndexProvider = context.read<TabIndexProvider>();
+        tabIndexProvider.updateIndex(0);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Center(child: Text('Failed to delete account: ${e.toString()}')),
+            backgroundColor: errorColor,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -67,45 +274,45 @@ class SettingsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SettingsSectionTitle(title: 'General'),
-            SettingsListTile(
-              title: 'Theme',
-              subtitle: 'Use the theme set in your device settings',
-              onTap: () {},
+            ProfileListTile(
+              icon: Icons.question_mark_rounded,
+              title: 'FAQs',
+              subtitle: 'Know more about the services',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FaqScreen(),
+                  ),
+                );
+              },
             ),
-            SettingsListTile(
-              title: 'Country',
-              subtitle: 'United Arab Emirates',
-              onTap: () {},
-            ),
-            SettingsListTile(
-              title: 'Clear search history',
-              onTap: () {},
-            ),
-            Divider(color: dividerColor, thickness: 0.5),
-            const SettingsSectionTitle(title: 'Support'),
-            SettingsListTile(
+            ProfileListTile(
+              icon: Icons.call,
               title: 'Contact us',
+              subtitle: 'Reach out for help',
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactUsScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ContactUsScreen(),
+                  ),
+                );
               },
             ),
-            SettingsListTile(
-              title: 'Terms and Conditions',
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsAndConditions()));
-              },
-            ),
-            Divider(color: dividerColor, thickness: 0.5),
-            const SettingsSectionTitle(title: 'About'),
-            SettingsListTile(
-              title: 'Delete account',
-              onTap: () {},
-            ),
-            SettingsListTile(
+            const SizedBox(height: 5),
+            SettingsSectionTitle(title: 'Account'),
+            ProfileListTile(
+              icon: Icons.logout,
               title: 'Logout',
-              onTap: () {
-                _showLogoutDialog(context); // logout confirmation dialog
-              },
+              subtitle: 'Logout from your account',
+              onTap: () => _showLogoutConfirmation(context),
+            ),
+            ProfileListTile(
+              icon: Icons.delete,
+              title: 'Delete Account',
+              subtitle: 'Delete your account',
+              onTap: () => _showDeleteAccountConfirmation(context),
             ),
             const SizedBox(height: 20),
             FutureBuilder<String>(
@@ -131,7 +338,7 @@ class SettingsScreen extends StatelessWidget {
                       snapshot.data!,
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey,
+                            color: greyColor,
                             fontSize: 13,
                           ),
                     ),
@@ -139,7 +346,7 @@ class SettingsScreen extends StatelessWidget {
                 }
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
           ],
         ),
       ),

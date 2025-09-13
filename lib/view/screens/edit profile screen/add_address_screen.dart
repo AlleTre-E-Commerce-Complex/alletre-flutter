@@ -80,7 +80,11 @@ class GoogleMapScreen extends StatelessWidget {
             onTap: (LatLng tappedLocation) async {
               String address = await _getAddressFromLatLng(tappedLocation);
               // ignore: use_build_context_synchronously
-              Navigator.pop(context, address);
+              Navigator.pop(context, {
+                'address': address,
+                'lat': tappedLocation.latitude,
+                'lng': tappedLocation.longitude,
+              });
             },
           );
         },

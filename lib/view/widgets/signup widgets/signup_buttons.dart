@@ -1,11 +1,14 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
+import 'package:alletre_app/app.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/services/apple_auth.dart';
+import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -134,12 +137,14 @@ class SignupButtons extends StatelessWidget {
                         // });
                         Future.delayed(const Duration(seconds: 2), () {
                           if (context.mounted) {
-                            Navigator.pushReplacementNamed(
-                                context, AppRoutes.login);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginPage()),
+                            );
                           }
                           // if (context.mounted) {
                           //   UrlHandlerService.handleUrl(
-                          //       'https://www.alletre.com/login', // The website login URL
+                          //       '${ApiEndpoints.baseOrigin}/login', // The website login URL
                           //       context);
                           // }
                         });
@@ -179,9 +184,7 @@ class SignupButtons extends StatelessWidget {
               Expanded(child: Divider(color: dividerColor)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text('OR',
-                    style: TextStyle(
-                        color: dividerColor, fontWeight: FontWeight.w500)),
+                child: Text('OR', style: TextStyle(color: dividerColor, fontWeight: FontWeight.w500)),
               ),
               Expanded(
                 child: Divider(color: dividerColor),
@@ -199,55 +202,48 @@ class SignupButtons extends StatelessWidget {
               ),
             ),
             onPressed: () async {
-              var userCredential = await _googleAuthService.signInWithGoogle();
-              if (userCredential != null && userCredential.user != null) {
-                final user = userCredential.user!;
-                print("Signed in as ${user.displayName}");
+              _googleAuthService.signInWithGoogle().then((userCredential) {
+                if (userCredential != null && userCredential.user != null) {
+                  final user = userCredential.user!;
+                  print("Signed in as ${user.displayName}");
 
-                // Store the user info in the provider
-                Provider.of<UserProvider>(context, listen: false)
-                    .setFirebaseUserInfo(user, 'google');
+                  // Store the user info in the provider
+                  Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'google');
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Center(
-                      child: Text(
-                        'Registration successful.\nWelcome ${user.displayName}',
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Center(
+                        child: Text(
+                          'Registration successful.\nWelcome ${user.displayName}',
+                        ),
                       ),
+                      backgroundColor: activeColor,
+                      duration: const Duration(seconds: 3),
                     ),
-                    backgroundColor: activeColor,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
+                  );
 
-                Provider.of<LoggedInProvider>(context, listen: false).logIn();
-                Provider.of<TabIndexProvider>(context, listen: false)
-                    .updateIndex(1);
+                  Provider.of<LoggedInProvider>(context, listen: false).logIn();
+                  Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
-                if (!context.mounted) return;
-
-                Future.delayed(const Duration(seconds: 2), () {
-                  if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, AppRoutes.login);
-                  }
-                });
-              } else {
-                // Authentication failed or user canceled login
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content:
-                        const Text('Google sign-up failed. Please try again.'),
-                    backgroundColor: avatarColor,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
+                  Future.delayed(const Duration(seconds: 2), () {
+                    Navigator.pushReplacement(MyApp.navigatorKey.currentContext!, MaterialPageRoute(builder: (builder) => MainStack()));
+                  });
+                } else {
+                  // Authentication failed or user canceled login
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Google sign-up failed. Please try again.'),
+                      backgroundColor: avatarColor,
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                }
+              });
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset('assets/icons/google_icon.svg',
-                    width: 15, height: 15),
+                SvgPicture.asset('assets/icons/google_icon.svg', width: 15, height: 15),
                 const SizedBox(width: 10),
                 const Text(
                   'Sign up with Google',
@@ -272,8 +268,7 @@ class SignupButtons extends StatelessWidget {
                 print("Signed in as ${user.displayName}");
 
                 // Store the user info in the provider
-                Provider.of<UserProvider>(context, listen: false)
-                    .setFirebaseUserInfo(user, 'apple');
+                Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'apple');
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -288,8 +283,7 @@ class SignupButtons extends StatelessWidget {
                 );
 
                 Provider.of<LoggedInProvider>(context, listen: false).logIn();
-                Provider.of<TabIndexProvider>(context, listen: false)
-                    .updateIndex(1);
+                Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
                 if (!context.mounted) return;
 
@@ -302,8 +296,7 @@ class SignupButtons extends StatelessWidget {
                 // Authentication failed or user canceled login
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text(
-                        'Apple sign-up is not supported on this platform'),
+                    content: const Text('Apple sign-up is not supported on this platform'),
                     backgroundColor: avatarColor,
                     duration: const Duration(seconds: 3),
                   ),
@@ -313,8 +306,7 @@ class SignupButtons extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset('assets/icons/apple_icon.svg',
-                    width: 15, height: 15),
+                SvgPicture.asset('assets/icons/apple_icon.svg', width: 15, height: 15),
                 const SizedBox(width: 10),
                 const Text(
                   'Sign up with Apple',

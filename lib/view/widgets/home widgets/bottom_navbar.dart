@@ -18,50 +18,46 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: isAuthenticated ? 60 : 70, // Increased height for unauthenticated users
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: const BoxDecoration(
-        color: primaryColor,
-      ),
-      child: isAuthenticated
-          ? _buildAuthenticatedNavBar(context)
-          : _buildUnauthenticatedNavBar(context),
-    );
+    return isAuthenticated ? _buildAuthenticatedNavBar(context) : _buildUnauthenticatedNavBar(context);
   }
 
   Widget _buildAuthenticatedNavBar(BuildContext context) {
     final tabIndex = Provider.of<TabIndexProvider>(context).selectedIndex;
 
-    return Theme(
-      data: Theme.of(context).copyWith(
-        splashFactory: NoSplash.splashFactory,
-        highlightColor: Colors.transparent,
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 8.0,
+      color: primaryColor,
+      child: SizedBox(
+        height: 60,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavItem(Icons.home, "Home", 0, tabIndex),
+            _buildNavItem(Icons.shopping_cart, "Purchases", 1, tabIndex),
+            const SizedBox(width: 40), // space for FAB
+            _buildNavItem(Icons.gavel, "My Bids", 2, tabIndex),
+            _buildNavItem(Icons.person, "Profile", 3, tabIndex),
+          ],
+        ),
       ),
-      child: BottomNavigationBar(
-        backgroundColor: primaryColor,
-        currentIndex: tabIndex,
-        onTap: onTabChange,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: selectedIndex,
-        unselectedItemColor: secondaryColor,
-        elevation: 0,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Purchases',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.gavel),
-            label: 'My Bids',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index, int selectedIndex) {
+    final isSelected = selectedIndex == index;
+    return InkWell(
+      onTap: () => onTabChange?.call(index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: isSelected ? primaryVariantColor : secondaryColor),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: isSelected ? primaryVariantColor : secondaryColor,
+            ),
           ),
         ],
       ),
@@ -69,27 +65,31 @@ class BottomNavBar extends StatelessWidget {
   }
 
   Widget _buildUnauthenticatedNavBar(BuildContext context) {
-    return SizedBox(
-      height: 80, // Adjusted height to make buttons more spacious
+    return Container(
+      height: 70,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      color: primaryColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           buildFixedSizeButton(
             text: 'Login',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
-            ),
+            onPressed: () {
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+            },
             backgroundColor: secondaryColor,
             borderColor: primaryColor,
             textStyle: Theme.of(context).textTheme.bodySmall!,
           ),
           buildFixedSizeButton(
             text: 'Sign Up',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SignUpPage()),
-            ),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => SignUpPage(),
+                ),
+              );
+            },
             backgroundColor: primaryColor,
             borderColor: secondaryColor,
             textStyle: Theme.of(context).textTheme.bodyMedium!,

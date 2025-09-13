@@ -7,14 +7,16 @@ class AuctionDetailsProvider extends ChangeNotifier {
   String? getUserName(String auctionId) => _userNames[auctionId];
 
   Future<void> fetchUserName(String auctionId) async {
+    if (auctionId.isEmpty || _userNames.containsKey(auctionId)) return;
+    
     try {
       final data = await AuctionDetailsService.getAuctionDetails(auctionId);
-      if (data['success'] == true && data['data']?['user']?['userName'] != null) {
+      if (data != null && data['success'] == true && data['data']?['user']?['userName'] != null) {
         _userNames[auctionId] = data['data']['user']['userName'];
         notifyListeners();
       }
     } catch (e) {
-      print('Error fetching auction details: $e');
+      // Silently handle the error without logging
     }
   }
 }

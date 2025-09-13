@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/services/api_service.dart';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 
 class WishlistProvider extends ChangeNotifier {
   final Set<int> _wishlistedAuctionIds = {};
@@ -10,12 +12,71 @@ class WishlistProvider extends ChangeNotifier {
 
   void toggleWishlist(AuctionItem auction) {
     if (_wishlistedAuctionIds.contains(auction.id)) {
-      _wishlistedAuctionIds.remove(auction.id);
-      _wishlistedAuctions.removeWhere((item) => item.id == auction.id);
+      removeFromWishlist(auction);
     } else {
-      _wishlistedAuctionIds.add(auction.id);
-      _wishlistedAuctions.add(auction);
+      saveToWishlist(auction);
     }
-    notifyListeners();
+  }
+
+  Future<void> saveToWishlist(AuctionItem auction) async {
+    try {
+      final response = await ApiService.post(
+        '${ApiEndpoints.baseUrl}${ApiEndpoints.saveToWishlist}',
+        data: {
+          'auctionId': auction.id,
+        },
+      );
+      // Assuming API returns success boolean
+      if (response.data['success'] == true) {
+        _wishlistedAuctionIds.add(auction.id);
+        _wishlistedAuctions.add(auction);
+        notifyListeners();
+      } else {
+        debugPrint('Failed to save to wishlist: \\${response.data['message']}');
+      }
+    } catch (e) {
+      debugPrint('Error saving to wishlist: \\${e.toString()}');
+    }
+  }
+
+  Future<void> removeFromWishlist(AuctionItem auction) async {
+    try {
+      final response = await ApiService.delete(
+        '${ApiEndpoints.baseUrl}${ApiEndpoints.unSaveFromWishlist(auction.id)}',
+      );
+      if (response.data['success'] == true) {
+        _wishlistedAuctionIds.remove(auction.id);
+        _wishlistedAuctions.removeWhere((item) => item.id == auction.id);
+        notifyListeners();
+      } else {
+        debugPrint('Failed to remove from wishlist: \\${response.data['message']}');
+      }
+    } catch (e) {
+      debugPrint('Error removing from wishlist: \\${e.toString()}');
+    }
+  }
+
+  Future<void> fetchAllWishlistedAuctions() async {
+    try {
+      final response = await ApiService.get(ApiEndpoints.getSavedWishlist);
+      // Assuming API returns success boolean
+      _wishlistedAuctionIds.clear();
+      _wishlistedAuctions.clear();
+      if (response.data['success'] == true) {
+        (response.data['data'] as List).map((item) {
+          AuctionItem auctionItem = AuctionItem.fromJson(item['auction']);
+          _wishlistedAuctionIds.add(auctionItem.id);
+          _wishlistedAuctions.add(auctionItem);
+        }).toList();
+      } else {
+        debugPrint('Failed to save to wishlist: \\${response.data['message']}');
+      }
+    } catch (e) {
+      debugPrint('Error saving to wishlist: \\${e.toString()}');
+    } finally {
+      if (_wishlistedAuctions.isNotEmpty) {
+        notifyListeners();
+      }
+    }
   }
 }

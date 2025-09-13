@@ -1,5 +1,6 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 import 'dart:math';
+import 'package:alletre_app/controller/helpers/address_service.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/model/auction_item.dart';
@@ -9,6 +10,7 @@ import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../screens/all auctions screen/all_auctions_screen.dart';
+import '../../screens/auction screen/add_location_screen.dart';
 import '../../screens/auction screen/product_details_screen.dart';
 import '../auction card widgets/auction_card.dart';
 import 'package:shimmer/shimmer.dart';
@@ -161,6 +163,16 @@ class AuctionListWidget extends StatelessWidget {
                         ),
                       ),
                       onPressed: () async {
+                        // Address check before auction creation
+                            final addresses =
+                                await AddressService.fetchAddresses();
+                            if (addresses.isEmpty) {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => const AddLocationScreen()),
+                              );
+                              return;
+                            }
                         if (isLoggedIn) {
                           if (title == "Live Auctions") {
                             Navigator.push(
@@ -174,7 +186,7 @@ class AuctionListWidget extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      const ProductDetailsScreen()),
+                                      const ProductDetailsScreen(title: 'List Product')),
                             );
                           }
                         } else {

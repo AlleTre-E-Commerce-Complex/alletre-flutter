@@ -8,6 +8,7 @@ import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:provider/provider.dart';
 import '../withdraw_screens/withdraw_screen.dart';
+import 'package:alletre_app/view/screens/login screen/login_page.dart';
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
@@ -35,7 +36,7 @@ class WalletScreen extends StatelessWidget {
     try {
       final token = await _getValidToken();
       if (token == null) {
-        throw Exception('Session expired. Please login again.');
+        throw Exception('Session expired. Please login again');
       }
 
       // Fetch balance
@@ -50,8 +51,6 @@ class WalletScreen extends StatelessWidget {
         } else {
           balance = double.tryParse(balanceData.toString()) ?? 0.0;
         }
-      } else if (balanceResponse.statusCode == 403) {
-        throw Exception('Session expired. Please login again.');
       }
 
       // Fetch transactions
@@ -64,8 +63,6 @@ class WalletScreen extends StatelessWidget {
             .map((json) => WalletTransaction.fromJson(json))
             .toList()
           ..sort((a, b) => b.date.compareTo(a.date));
-      } else if (transactionsResponse.statusCode == 403) {
-        throw Exception('Session expired. Please login again.');
       }
 
       return {
@@ -75,9 +72,6 @@ class WalletScreen extends StatelessWidget {
       };
     } catch (e) {
       debugPrint('Error fetching wallet data: $e');
-      if (e.toString().contains('403') || e.toString().contains('token')) {
-        throw Exception('Session expired. Please login again.');
-      }
       // Return empty data instead of throwing an error
       return {
         'balance': 0.0,
@@ -85,22 +79,6 @@ class WalletScreen extends StatelessWidget {
         'needsAuth': false,
       };
     }
-  }
-
-  void _handleSessionExpired(BuildContext context) {
-    // Clear stored tokens
-    const FlutterSecureStorage().delete(key: 'access_token');
-
-    // Show error message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Your session has expired. Please log in again.'),
-        backgroundColor: errorColor,
-      ),
-    );
-
-    // Navigate to login screen using TabIndexProvider
-    context.read<TabIndexProvider>().updateIndex(18); // login page index
   }
 
   @override
@@ -118,14 +96,6 @@ class WalletScreen extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
-            if (snapshot.error.toString().contains('Session expired')) {
-              // Handle session expiration
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _handleSessionExpired(context);
-              });
-              return const Center(child: CircularProgressIndicator());
-            }
-            
             // Show a more user-friendly error state
             return Center(
               child: Column(
@@ -183,8 +153,12 @@ class WalletScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: () {
-                      // Navigate to login screen using TabIndexProvider
-                      context.read<TabIndexProvider>().updateIndex(18); // login page index
+                      // Navigate to login screen using standard navigation
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                        (route) => false,
+                      );
                     },
                     child: const Text('Login'),
                   ),

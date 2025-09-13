@@ -14,11 +14,99 @@
       },
       "oauth_client": [
         {
-          "client_id": "1043853491459-2ntuv0c6mp761tuk8f1hb78ilp746pg0.apps.googleusercontent.com",
+          "client_id": "1043853491459-pgehk3iom5sfbgqhatlsp14j7pfl7pbo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.alletre.app",
-            "certificate_hash": "264dcf942d5cbd50fa97481fec6ad91d2e89c18f"
+            "certificate_hash": "028547e1dff635e457ec725c926aa3ebdd6a00d0"
+          }
+        },
+        {
+          "client_id": "1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDgbclpNusftI8wyGVLOKtviWHperC9Mc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1043853491459-1ul5h5bjnnnhck1p4q7uq5o1hgataoi4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.alletre.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043853491459:android:8f675ff43f71b5abf6bd36",
+        "android_client_info": {
+          "package_name": "com.alletre1.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043853491459-sdl3ukislttmn3ptol1l0sfr4l8esd1g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.alletre1.app",
+            "certificate_hash": "450fc01950ffd80b9274686e148ae263b5e0a4dd"
+          }
+        },
+        {
+          "client_id": "1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDgbclpNusftI8wyGVLOKtviWHperC9Mc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1043853491459-1ul5h5bjnnnhck1p4q7uq5o1hgataoi4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.alletre.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043853491459:android:71a425c537e13b20f6bd36",
+        "android_client_info": {
+          "package_name": "com.alletre2.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043853491459-30un0dl45ipjftl9d8iamsl6ggtd49cs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.alletre2.app",
+            "certificate_hash": "450fc01950ffd80b9274686e148ae263b5e0a4dd"
           }
         },
         {

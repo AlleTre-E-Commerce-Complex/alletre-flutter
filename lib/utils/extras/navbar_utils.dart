@@ -24,6 +24,8 @@ class BottomNavBarUtils {
           currentIndex: tabIndex,
           onTap: onTabChange,
           type: BottomNavigationBarType.fixed,
+          // selectedLabelStyle: TextStyle(fontSize: 11),
+          // unselectedLabelStyle: TextStyle(fontSize: 11),
           selectedItemColor: selectedIndex,
           unselectedItemColor: secondaryColor,
           // backgroundColor: Colors.transparent,

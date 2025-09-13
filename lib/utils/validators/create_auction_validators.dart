@@ -34,26 +34,30 @@ class CreateAuctionValidation {
     if (mediaList.length > 50) {
       return "You can upload upto 50 images & 1 video [max 50MB]";
     }
-    
+
     // Count videos in the media list
-    int videoCount = mediaList.where((file) => 
-      file.path.toLowerCase().endsWith('.mp4') || 
-      file.path.toLowerCase().endsWith('.mov')
-    ).length;
-    
+    int videoCount = mediaList
+        .where((file) =>
+            file.path.toLowerCase().endsWith('.mp4') ||
+            file.path.toLowerCase().endsWith('.mov'))
+        .length;
+
     if (videoCount > 1) {
       return "You can only upload 1 video";
     }
-    
+
     // Check file sizes
     for (var file in mediaList) {
+      // // If path is a network URL, skip file size check
+      // if (file.path.startsWith('http')) {
+      //   continue;
+      // }
       final fileSizeInMB = await file.length() / (1024 * 1024); // Convert to MB
       if (fileSizeInMB > 50) {
         final fileName = file.path.split('/').last;
         return "$fileName exceeds 50MB limit";
       }
     }
-    
     return null;
   }
 

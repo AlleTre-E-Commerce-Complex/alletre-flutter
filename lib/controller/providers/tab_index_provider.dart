@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 
 class TabIndexProvider extends ChangeNotifier {
@@ -7,7 +8,6 @@ class TabIndexProvider extends ChangeNotifier {
   int get selectedIndex => _selectedIndex;
 
   void updateIndex(int index) {
-    // ignore: avoid_print
     print('Updating tab index to: $index');
     // Validate index is within bounds
     if (index < 0 || index > maxIndex) {

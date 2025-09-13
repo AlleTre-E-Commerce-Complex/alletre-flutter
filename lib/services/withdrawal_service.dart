@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 
-class WithdrawalService {
-  static const String baseUrl = 'http://192.168.0.158:3001/api';
+class WithdrawalService {  
   static const storage = FlutterSecureStorage();
 
   static Future<void> submitWithdrawalRequest({
@@ -15,7 +15,7 @@ class WithdrawalService {
     if (token == null) throw Exception('No authentication token found');
 
     final response = await http.post(
-      Uri.parse('$baseUrl/auctions/user/withdrawalRequest'),
+      Uri.parse('${ApiEndpoints.baseUrl}/auctions/user/withdrawalRequest'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -28,15 +28,17 @@ class WithdrawalService {
 
     debugPrint('Withdrawal response status: ${response.statusCode}');
     debugPrint('Withdrawal response body: ${response.body}');
-    
+
     final responseData = json.decode(response.body);
-    
+
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception(responseData['message'] ?? 'Failed to submit withdrawal request');
+      throw Exception(
+          responseData['message'] ?? 'Failed to submit withdrawal request');
     }
 
     if (responseData['success'] == false) {
-      throw Exception(responseData['message'] ?? 'Failed to submit withdrawal request');
+      throw Exception(
+          responseData['message'] ?? 'Failed to submit withdrawal request');
     }
   }
 }

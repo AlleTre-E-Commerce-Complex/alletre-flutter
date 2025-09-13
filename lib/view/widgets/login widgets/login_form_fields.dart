@@ -45,51 +45,27 @@ class LoginFormFields extends StatelessWidget {
                 Provider.of<UserProvider>(context, listen: false)
                     .setLoginPassword(value),
           ),
-          const SizedBox(height: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Transform.scale(
-                    scale: 0.8,
-                    child: Checkbox(
-                      value: userProvider.rememberPassword,
-                      onChanged: (_) => userProvider.toggleRememberPassword(),
-                    ),
-                  ),
-                  const Text(
-                    'Remember Password',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: onSecondaryColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 15),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ForgotPasswordScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: surfaceColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ForgotPasswordScreen(),
+                ),
+              );
+            },
+            child: const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Forgot Password?',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: surfaceColor,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),

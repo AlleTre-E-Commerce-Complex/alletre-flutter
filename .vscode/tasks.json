@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "uninstall-app",
+      "type": "shell",
+      "command": "/home/ali/Android/Sdk/platform-tools/adb uninstall com.alletre.app",
+      "problemMatcher": []
+    }
+  ]
+}
