@@ -14,8 +14,7 @@ class GoogleAuthService {
       'email',
       'profile',
     ],
-    serverClientId:
-        '1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com',
+    serverClientId: '1043853491459-v2vu534unt5v880p5qe4cntfs265qsfi.apps.googleusercontent.com',
   );
   final FirebaseAuth _googleAuth = FirebaseAuth.instance;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -37,8 +36,7 @@ class GoogleAuthService {
       debugPrint('✅ Google sign-in successful');
       debugPrint('Getting Google authentication...');
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -47,6 +45,7 @@ class GoogleAuthService {
       final userCredential = await _googleAuth.signInWithCredential(credential);
 
       if (userCredential.user != null) {
+        await _storage.write(key: 'saved_email', value: userCredential.user!.email);
         // Start token refresh service
         TokenRefreshService().startTokenRefresh();
 
@@ -60,15 +59,7 @@ class GoogleAuthService {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: jsonEncode({
-            'accessToken': googleAuth.accessToken,
-            'idToken': await userCredential.user!.getIdToken(),
-            'email': userCredential.user!.email,
-            'displayName': userCredential.user!.displayName,
-            'photoUrl': userCredential.user!.photoURL,
-            'provider': 'google',
-            'oAuthType': 'GOOGLE'
-          }),
+          body: jsonEncode({'accessToken': googleAuth.accessToken, 'idToken': await userCredential.user!.getIdToken(), 'email': userCredential.user!.email, 'displayName': userCredential.user!.displayName, 'photoUrl': userCredential.user!.photoURL, 'provider': 'google', 'oAuthType': 'GOOGLE'}),
         );
 
         debugPrint('\n=== OAuth Response ===');
@@ -82,8 +73,7 @@ class GoogleAuthService {
           await FirebaseAuth.instance.signOut();
           await _googleSignIn.signOut();
 
-          final error =
-              jsonDecode(response.body)['message'] ?? 'Failed to authenticate';
+          final error = jsonDecode(response.body)['message'] ?? 'Failed to authenticate';
           throw Exception(error);
         }
 
@@ -92,8 +82,7 @@ class GoogleAuthService {
         if (responseData['success'] && responseData['data'] != null) {
           final data = responseData['data'];
           await _storage.write(key: 'access_token', value: data['accessToken']);
-          await _storage.write(
-              key: 'refresh_token', value: data['refreshToken']);
+          await _storage.write(key: 'refresh_token', value: data['refreshToken']);
           debugPrint('✅ Backend tokens stored successfully');
         }
 

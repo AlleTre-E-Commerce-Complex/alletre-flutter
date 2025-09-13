@@ -1,6 +1,7 @@
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
+import 'package:alletre_app/controller/services/google_auth.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/navbar_utils.dart';
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
@@ -120,13 +121,22 @@ class MainStack extends StatelessWidget {
           final userProvider = context.read<UserProvider>();
           final userAuthService = UserAuthService();
           if ((userProvider.displayEmail.isEmpty || userProvider.displayEmail.trim() == 'Add Email') && isLoggedIn) {
-            userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
-              if (data.containsKey('id') == true) {
-                userProvider.setName(data['userName']);
-                userProvider.setEmail(data['email']);
+            userAuthService.getAuthMethod().then((authMethod) {
+              if (authMethod == 'custom') {
+                userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
+                  if (data.containsKey('id') == true) {
+                    userProvider.setName(data['userName']);
+                    userProvider.setEmail(data['email']);
 
-                PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
-                  userProvider.setPhoneNumber(val);
+                    PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
+                      userProvider.setPhoneNumber(val);
+                    });
+                  }
+                });
+              } else if (authMethod == 'google') {
+                final GoogleAuthService _googleAuthService = GoogleAuthService();
+                _googleAuthService.signInWithGoogle().then((userCredential) {
+                  userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
                 });
               }
             });
