@@ -366,6 +366,9 @@ class UserProvider with ChangeNotifier {
     try {
       _isLoading = true;
 
+      // Also handle Firebase logout if needed
+      await logoutFirebase();
+
       // Reset all user-related state by creating a new empty instance
       _user.name = '';
       _user.email = '';
@@ -392,10 +395,7 @@ class UserProvider with ChangeNotifier {
       notifyListeners();
 
       // Clear secure storage and sign out from services
-      await _userService.logout();
-
-      // Also handle Firebase logout if needed
-      await logoutFirebase();
+      await _userService.logout();      
 
       debugPrint('User provider state cleared after logout');
     } catch (e) {

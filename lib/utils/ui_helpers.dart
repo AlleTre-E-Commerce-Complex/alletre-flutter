@@ -7,13 +7,15 @@ void showError(BuildContext context, dynamic e) {
     errorMsg = errorMsg.substring(10).trim();
   }
   // Standardize session expired messages
-  if (errorMsg.toLowerCase().contains('jwt expired') ||
-      errorMsg.toLowerCase().contains('token error') ||
-      errorMsg.toLowerCase().contains('session expired')) {
+  if (errorMsg.toLowerCase().contains('jwt expired') || errorMsg.toLowerCase().contains('token error') || errorMsg.toLowerCase().contains('session expired')) {
     errorMsg = 'Session expired. Please login again';
   }
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Center(child: Text(errorMsg))),
+    SnackBar(
+      content: Center(child: Text(errorMsg)),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(left: 0, right: 0, bottom: 0),
+    ),
   );
 }
 
