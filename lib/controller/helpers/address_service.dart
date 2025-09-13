@@ -36,7 +36,7 @@ class AddressService {
     return [];
   }
 
-  static Future<bool> addAddress(Map<String, dynamic> address) async {
+  static Future<Map<String, dynamic>> addAddress(Map<String, dynamic> address) async {
     final token = await _getToken();
     final url = Uri.parse('${ApiEndpoints.baseUrl}/users/locations');
     final body = json.encode({
@@ -50,7 +50,7 @@ class AddressService {
     });
     print('[DEBUG] AddressService.addAddress payload:');
     print(body);
-    final response = await http.post(
+    var response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer $token',
@@ -64,7 +64,7 @@ class AddressService {
       final refreshResult = await userService.refreshTokens();
       if (refreshResult['success']) {
         var accessToken = refreshResult['data']['accessToken'];
-        final response = await http.post(
+        response = await http.post(
           url,
           headers: {
             'Authorization': 'Bearer $accessToken',
@@ -78,9 +78,10 @@ class AddressService {
         debugPrint('Token refresh failed.');
       }
     }
+    var apiResp = json.decode(response.body);
     print('[DEBUG] AddressService.addAddress status: ${response.statusCode}');
     print('[DEBUG] AddressService.addAddress response: ${response.body}');
-    return response.statusCode == 201 || response.statusCode == 200;
+    return apiResp;
   }
 
   static Future<bool> updateAddress(String locationId, Map<String, dynamic> updatedAddress) async {

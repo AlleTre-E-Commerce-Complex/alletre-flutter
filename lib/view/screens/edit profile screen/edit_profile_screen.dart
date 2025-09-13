@@ -77,7 +77,7 @@ class EditProfileScreen extends StatelessWidget {
       debugPrint('Make Default API status: \u001b[33m${response.statusCode}\u001b[0m');
       debugPrint('Make Default API raw body: \u001b[36m${response.body}\u001b[0m');
       return response.statusCode == 200 || response.statusCode == 201;
-    }    
+    }
 
     return Scaffold(
       appBar: const NavbarElementsAppbar(appBarTitle: 'Edit Profile', showBackButton: true),
@@ -374,10 +374,11 @@ class EditProfileScreen extends StatelessWidget {
                                             }
 
                                             // Optimistic UI update: add address to provider and trigger UI refresh
-                                            userProvider.addAddress(selectedLocation);
-                                            addressRefreshKey.value++;
+                                            // userProvider.addAddress(selectedLocation);
+                                            // addressRefreshKey.value++;
 
-                                            final success = await AddressService.addAddress(selectedLocation);
+                                            final apiResp = await AddressService.addAddress(selectedLocation);
+                                            final success = apiResp['success'];
                                             if (success) {
                                               ScaffoldMessenger.of(scaffoldContext).showSnackBar(
                                                 const SnackBar(
@@ -390,7 +391,7 @@ class EditProfileScreen extends StatelessWidget {
                                               userProvider.setAddresses(updatedAddresses);
                                               addressRefreshKey.value++;
                                             } else {
-                                              showError(scaffoldContext, 'Failed to save address.');
+                                              showError(scaffoldContext, 'Failed to save address : ${apiResp['message']['en']}');
                                             }
                                           }
                                         },

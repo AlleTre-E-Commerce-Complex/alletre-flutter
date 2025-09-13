@@ -291,7 +291,8 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                       return;
                     }
 
-                    final success = await AddressService.addAddress(selectedLocation);
+                    final apiResp = await AddressService.addAddress(selectedLocation);
+                    final success = apiResp['success'];
                     _refreshAddresses();
                     if (success) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -304,7 +305,7 @@ class _ShippingDetailsScreenState extends State<ShippingDetailsScreen> {
                       userProvider.clearAddresses();
                       _refreshAddresses();
                     } else {
-                      showError(context, 'Failed to save address.');
+                      showError(context, 'Failed to save address : ${apiResp['message']['en']}');
                     }
                   }
                 },

@@ -3,6 +3,7 @@ import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/edit%20profile%20screen/add_address_screen.dart';
+import 'package:collection/collection.dart';
 import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -158,9 +159,11 @@ class AddLocationScreen extends StatelessWidget {
                           locationProvider.updateCountry(country, id: countryId);
                         },
                         onStateChanged: (state) {
-                          if (state != null) {
-                            int stateId = locationProvider.lsStates.singleWhere((elem) => ((elem.nameEn == state) || (elem.nameAr == state))).id;
-                            locationProvider.updateState(state, id: stateId);
+                          if (state != null && state != "Select State") {
+                            var stateInfo = locationProvider.lsStates.singleWhereOrNull((elem) => ((elem.nameEn == state) || (elem.nameAr == state)));
+                            if (stateInfo != null) {
+                              locationProvider.updateState(state, id: stateInfo.id);
+                            }
                           }
                         },
                         onCityChanged: (city) {
@@ -405,7 +408,7 @@ class AddLocationScreen extends StatelessWidget {
                             errors.add('Country is required.');
                           }
                           if (cityMissing) {
-                            errors.add('State is required.');
+                            errors.add('Sorry!. We are not running our services on this state.');
                           }
                           // Use intl_phone_number_input validation
                           final phoneIsValid = phoneValidNotifier.value;
