@@ -110,6 +110,7 @@ class MainStack extends StatelessWidget {
       builder: (context, tabIndexProvider, _) {
         final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
         final currentIndex = tabIndexProvider.selectedIndex;
+        final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
         // Redirect to login if trying to access protected pages while not logged in
         if (!isLoggedIn && currentIndex > 0 && currentIndex < 4) {
@@ -144,6 +145,7 @@ class MainStack extends StatelessWidget {
         }
 
         return Scaffold(
+          resizeToAvoidBottomInset: false,
           body: IndexedStack(
             index: currentIndex,
             children: List.generate(
@@ -154,14 +156,14 @@ class MainStack extends StatelessWidget {
               ),
             ),
           ),
-          floatingActionButton: isLoggedIn ? const CreateAuctionButton() : null,
+          floatingActionButton: isLoggedIn && !isKeyboardOpen ? const CreateAuctionButton() : null,
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          bottomNavigationBar: isLoggedIn
+          bottomNavigationBar: isLoggedIn && !isKeyboardOpen
               ? BottomNavBarUtils.buildAuthenticatedNavBar(
                   context,
                   onTabChange: (index) => tabIndexProvider.updateIndex(index),
                 )
-              : const BottomNavBar(),
+              : null,
         );
       },
     );
