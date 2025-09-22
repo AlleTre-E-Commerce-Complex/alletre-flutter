@@ -163,7 +163,7 @@ class MainStack extends StatelessWidget {
                   context,
                   onTabChange: (index) => tabIndexProvider.updateIndex(index),
                 )
-              : null,
+              : const BottomNavBar(),
         );
       },
     );

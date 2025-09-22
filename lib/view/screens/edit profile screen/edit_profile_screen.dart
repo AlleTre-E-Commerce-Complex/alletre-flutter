@@ -109,6 +109,7 @@ class EditProfileScreen extends StatelessWidget {
                     label: 'Username',
                     value: displayName,
                     icon: Icons.person,
+                    hintText: 'Add Username',
                     actionButton: EditNameButton(
                       onPressed: () {
                         // Handle edit action
@@ -119,7 +120,8 @@ class EditProfileScreen extends StatelessWidget {
                 EditProfileCard(
                   label: 'Primary Number',
                   // value: context.watch<UserProvider>().phoneNumber,
-                  value: displayNumber,
+                  value: (displayNumber == "Add Phone Number" ? '' : displayNumber),
+                  hintText: 'Add Phone Number',
                   icon: Icons.phone,
                   actionButton: AddPhoneButton(
                     onPressed: () {
@@ -132,6 +134,7 @@ class EditProfileScreen extends StatelessWidget {
                   label: 'Primary Email',
                   value: displayEmail,
                   icon: Icons.email,
+                  hintText: 'Add Email ID',
                   actionButton: emailVerified == true
                       ? const Padding(
                           padding: EdgeInsets.only(top: 16.0),
