@@ -94,11 +94,12 @@ class EditProfileScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 UserProfileCard(
                   user: user,
-                  buttonText: "Upload Photo",
+                  buttonText: "Update Photo",
                   onButtonPressed: () async {
                     final File? newImage = await pickMediaFromGallery();
                     if (newImage != null) {
                       await userProvider.updateProfilePhoto(newImage);
+                      userProvider.updateProfileInfo();
                     }
                   },
                 ),
@@ -113,6 +114,7 @@ class EditProfileScreen extends StatelessWidget {
                     actionButton: EditNameButton(
                       onPressed: () {
                         // Handle edit action
+                        userProvider.updateProfileInfo();
                       },
                     ),
                   ),
@@ -126,6 +128,7 @@ class EditProfileScreen extends StatelessWidget {
                   actionButton: AddPhoneButton(
                     onPressed: () {
                       // Handle add phone action
+                      userProvider.updateProfileInfo();
                     },
                   ),
                 ),

@@ -395,7 +395,7 @@ class UserProvider with ChangeNotifier {
       notifyListeners();
 
       // Clear secure storage and sign out from services
-      await _userService.logout();      
+      await _userService.logout();
 
       debugPrint('User provider state cleared after logout');
     } catch (e) {
@@ -487,5 +487,14 @@ class UserProvider with ChangeNotifier {
       addr['isDefault'] = (addr['id'] == locationId);
     }
     notifyListeners();
+  }
+
+  Future<Map<String, dynamic>> updateProfileInfo() async {
+    try {
+      final result = await _userService.updateProfileInfo(userName: user.name, phone: user.phoneNumber, photoUrl: _photoUrl);
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to update profile'};
+    }
   }
 }

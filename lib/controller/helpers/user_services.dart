@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/error/auth_error_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:alletre_app/controller/services/token_refresh_service.dart';
+import 'package:http_parser/http_parser.dart';
 
 class UserService {
   final String baseUrl = '${ApiEndpoints.baseUrl}/auth';
@@ -453,6 +455,63 @@ class UserService {
     } catch (e) {
       debugPrint('Error during logout: $e');
       rethrow; // Re-throw to handle in the caller
+    }
+  }
+
+  Future<Map<String, dynamic>> updateProfileInfo({required String userName, required String phone, required String? photoUrl}) async {
+    try {
+      final tokens = await getTokens();
+      final accessToken = tokens['accessToken'];
+      if (accessToken == null) {
+        return {'success': false, 'message': 'Not authenticated'};
+      }
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('${ApiEndpoints.baseUrl}/users/personal-info'),
+      );
+      request.headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'Accept': 'application/json',
+      });
+      request.fields['userName'] = userName;
+      request.fields['phone'] = phone;
+      if (photoUrl != null) {
+        var file = File.fromUri(Uri.parse(photoUrl));
+        final stream = http.ByteStream(file.openRead());
+        final length = await file.length();
+        final filename = file.path.split('/').last;
+
+        // Determine MIME type based on file extension
+        final mimeType = filename.toLowerCase().endsWith('.png')
+            ? 'image/png'
+            : filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg')
+                ? 'image/jpeg'
+                : 'image/jpeg'; // default to jpeg
+
+        final multipartFile = http.MultipartFile(
+          'image',
+          stream,
+          length,
+          filename: filename,
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
+      }
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+      final data = jsonDecode(responseData) as Map<String, dynamic>;
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        // Replace jwt expired error message for user
+        if (data['message']?.toString().contains('jwt expired') ?? false) {
+          throw Exception('Session expired. Please login again.');
+        } else {
+          throw Exception('Failed to update profile: ${data['message']}');
+        }
+      }
+      return data;
+    } catch (e) {
+      debugPrint('Error making address default: $e');
+      return {'success': false, 'message': 'Failed to make address default'};
     }
   }
 }
