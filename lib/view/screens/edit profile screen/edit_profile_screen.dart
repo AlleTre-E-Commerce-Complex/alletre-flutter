@@ -32,9 +32,9 @@ class EditProfileScreen extends StatelessWidget {
     final scaffoldContext = context; // Top-level context for all SnackBars and errors
     // Get the current user info from the provider
     final userProvider = Provider.of<UserProvider>(context);
-    final displayName = userProvider.displayName.isNotEmpty ? userProvider.displayName : 'Username';
-    final displayNumber = userProvider.displayNumber.isNotEmpty ? userProvider.displayNumber : 'Number';
-    final displayEmail = userProvider.displayEmail.isNotEmpty ? userProvider.displayEmail : 'Email';
+    final displayName = userProvider.displayName.isNotEmpty ? userProvider.displayName : '';
+    final displayNumber = userProvider.displayNumber.isNotEmpty ? userProvider.displayNumber : '';
+    final displayEmail = userProvider.displayEmail.isNotEmpty ? userProvider.displayEmail : '';
     final emailVerified = userProvider.emailVerified;
     final authMethod = userProvider.authMethod;
     final photoUrl = userProvider.photoUrl;
@@ -117,10 +117,20 @@ class EditProfileScreen extends StatelessWidget {
                       onPressed: () {
                         // Handle edit action
                         userProvider.updateProfileInfo(action: 'update_username').then((resp) => {
-                              if (resp['status'] == false) {showError(scaffoldContext, resp['message'][0])}
+                              if (resp['success'] == false)
+                                {showError(scaffoldContext, resp['message'][0])}
+                              else if (resp['success'] == true)
+                                {
+                                  ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                                    const SnackBar(content: Text('User name updated successfully!')),
+                                  )
+                                }
                             });
                       },
                     ),
+                    onUpdate: (value) {
+                      userProvider.user.name = value;
+                    },
                   ),
                 const SizedBox(height: 16),
                 EditProfileCard(
@@ -133,7 +143,7 @@ class EditProfileScreen extends StatelessWidget {
                     onPressed: () {
                       // Handle add phone action
                       userProvider.updateProfileInfo(action: 'update_phone').then((resp) => {
-                            if (resp['status'] == false) {showError(scaffoldContext, resp['message'][0])}
+                            if (resp['success'] == false) {showError(scaffoldContext, resp['message'][0])}
                           });
                     },
                   ),
