@@ -11,6 +11,7 @@ import 'package:alletre_app/view/screens/signup%20screen/signup_page.dart';
 import 'package:alletre_app/view/widgets/login%20widgets/success_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
 
 class LoginButtons extends StatelessWidget {
@@ -20,7 +21,7 @@ class LoginButtons extends StatelessWidget {
   final VoidCallback? onLoginSuccess;
 
   LoginButtons({
-    super.key, 
+    super.key,
     required this.formKey,
     this.onLoginSuccess,
   });
@@ -62,8 +63,7 @@ class LoginButtons extends StatelessWidget {
                         Provider.of<LoggedInProvider>(context, listen: false).logIn();
 
                         // First update the tab index to home
-                        Provider.of<TabIndexProvider>(context, listen: false)
-                            .updateIndex(1);
+                        Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
                         if (!context.mounted) return;
 
@@ -112,9 +112,7 @@ class LoginButtons extends StatelessWidget {
               Expanded(child: Divider(color: dividerColor)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text('OR',
-                    style: TextStyle(
-                        color: dividerColor, fontWeight: FontWeight.w500)),
+                child: Text('OR', style: TextStyle(color: dividerColor, fontWeight: FontWeight.w500)),
               ),
               Expanded(
                 child: Divider(color: dividerColor),
@@ -132,14 +130,17 @@ class LoginButtons extends StatelessWidget {
               ),
             ),
             onPressed: () async {
-              var userCredential = await _googleAuthService.signInWithGoogle();
+              var userCredential = await _googleAuthService.signInWithGoogle(
+                updateUserInfo: (phoneNumber) {
+                  userProvider.setPhoneNumber(PhoneNumber(phoneNumber: phoneNumber));
+                },
+              );
               if (userCredential != null && userCredential.user != null) {
                 final user = userCredential.user!;
                 print("Signed in as ${user.displayName}");
 
                 // Store the user info in the provider
-                Provider.of<UserProvider>(context, listen: false)
-                    .setFirebaseUserInfo(user, 'google');
+                Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'google');
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -165,10 +166,8 @@ class LoginButtons extends StatelessWidget {
                   if (context.mounted) {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const MainStack()),
-                      (Route<dynamic> route) =>
-                          false, // Removes all previous screens
+                      MaterialPageRoute(builder: (context) => const MainStack()),
+                      (Route<dynamic> route) => false, // Removes all previous screens
                     );
                   }
                 });
@@ -176,8 +175,7 @@ class LoginButtons extends StatelessWidget {
                 // Authentication failed or user canceled login
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content:
-                        const Text('Google sign-in failed. Please try again.'),
+                    content: const Text('Google sign-in failed. Please try again.'),
                     backgroundColor: avatarColor,
                     duration: const Duration(seconds: 3),
                   ),
@@ -187,8 +185,7 @@ class LoginButtons extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset('assets/icons/google_icon.svg',
-                    width: 15, height: 15),
+                SvgPicture.asset('assets/icons/google_icon.svg', width: 15, height: 15),
                 const SizedBox(width: 10),
                 const Text(
                   'Login with Google',
@@ -213,8 +210,7 @@ class LoginButtons extends StatelessWidget {
                 print("Signed-in as ${user.displayName}");
 
                 // Store the user info in the provider
-                Provider.of<UserProvider>(context, listen: false)
-                    .setFirebaseUserInfo(user, 'apple');
+                Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'apple');
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -229,8 +225,7 @@ class LoginButtons extends StatelessWidget {
                 );
 
                 Provider.of<LoggedInProvider>(context, listen: false).logIn();
-                Provider.of<TabIndexProvider>(context, listen: false)
-                    .updateIndex(1);
+                Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
                 if (!context.mounted) return;
 
@@ -243,8 +238,7 @@ class LoginButtons extends StatelessWidget {
                 // Authentication failed or user canceled login
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text(
-                        'Apple sign-in is not supported on this platform'),
+                    content: const Text('Apple sign-in is not supported on this platform'),
                     backgroundColor: avatarColor,
                     duration: const Duration(seconds: 3),
                   ),
@@ -254,8 +248,7 @@ class LoginButtons extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset('assets/icons/apple_icon.svg',
-                    width: 15, height: 15),
+                SvgPicture.asset('assets/icons/apple_icon.svg', width: 15, height: 15),
                 const SizedBox(width: 10),
                 const Text(
                   'Login with Apple',

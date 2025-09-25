@@ -99,7 +99,9 @@ class EditProfileScreen extends StatelessWidget {
                     final File? newImage = await pickMediaFromGallery();
                     if (newImage != null) {
                       await userProvider.updateProfilePhoto(newImage);
-                      userProvider.updateProfileInfo();
+                      userProvider.updateProfileInfo(action: 'update_photo').then((resp) => {
+                            if (resp['status'] == false) {showError(scaffoldContext, resp['message'][0])}
+                          });
                     }
                   },
                 ),
@@ -114,7 +116,9 @@ class EditProfileScreen extends StatelessWidget {
                     actionButton: EditNameButton(
                       onPressed: () {
                         // Handle edit action
-                        userProvider.updateProfileInfo();
+                        userProvider.updateProfileInfo(action: 'update_username').then((resp) => {
+                              if (resp['status'] == false) {showError(scaffoldContext, resp['message'][0])}
+                            });
                       },
                     ),
                   ),
@@ -128,7 +132,9 @@ class EditProfileScreen extends StatelessWidget {
                   actionButton: AddPhoneButton(
                     onPressed: () {
                       // Handle add phone action
-                      userProvider.updateProfileInfo();
+                      userProvider.updateProfileInfo(action: 'update_phone').then((resp) => {
+                            if (resp['status'] == false) {showError(scaffoldContext, resp['message'][0])}
+                          });
                     },
                   ),
                 ),

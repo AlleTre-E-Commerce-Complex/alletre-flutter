@@ -136,7 +136,11 @@ class MainStack extends StatelessWidget {
                 });
               } else if (authMethod == 'google') {
                 final GoogleAuthService _googleAuthService = GoogleAuthService();
-                _googleAuthService.signInWithGoogle().then((userCredential) {
+                _googleAuthService.signInWithGoogle(
+                  updateUserInfo: (phoneNumber) {
+                    userProvider.setPhoneNumber(PhoneNumber(phoneNumber: phoneNumber));
+                  },
+                ).then((userCredential) {
                   userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
                 });
               }

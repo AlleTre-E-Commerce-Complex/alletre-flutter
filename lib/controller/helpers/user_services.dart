@@ -458,7 +458,7 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>> updateProfileInfo({required String userName, required String phone, required String? photoUrl}) async {
+  Future<Map<String, dynamic>> updateProfileInfo({required String userName, required String phone, required String? photoUrl, required String action}) async {
     try {
       final tokens = await getTokens();
       final accessToken = tokens['accessToken'];
@@ -475,8 +475,8 @@ class UserService {
       });
       request.fields['userName'] = userName;
       request.fields['phone'] = phone;
-      if (photoUrl != null) {
-        var file = File.fromUri(Uri.parse(photoUrl));
+      if ((photoUrl != null || photoUrl != "") && action == 'update_photo') {
+        var file = File.fromUri(Uri.parse(photoUrl!));
         final stream = http.ByteStream(file.openRead());
         final length = await file.length();
         final filename = file.path.split('/').last;
@@ -504,8 +504,6 @@ class UserService {
         // Replace jwt expired error message for user
         if (data['message']?.toString().contains('jwt expired') ?? false) {
           throw Exception('Session expired. Please login again.');
-        } else {
-          throw Exception('Failed to update profile: ${data['message']}');
         }
       }
       return data;

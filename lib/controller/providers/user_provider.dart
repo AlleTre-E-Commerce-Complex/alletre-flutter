@@ -489,9 +489,9 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Map<String, dynamic>> updateProfileInfo() async {
+  Future<Map<String, dynamic>> updateProfileInfo({required String action}) async {
     try {
-      final result = await _userService.updateProfileInfo(userName: user.name, phone: user.phoneNumber, photoUrl: _photoUrl);
+      final result = await _userService.updateProfileInfo(userName: (user.name == '' ? _displayName! : user.name), phone: user.phoneNumber, photoUrl: _photoUrl, action: action);
       return result;
     } catch (e) {
       return {'success': false, 'message': 'Failed to update profile'};
