@@ -37,7 +37,7 @@ class EditProfileScreen extends StatelessWidget {
     final displayEmail = userProvider.displayEmail.isNotEmpty ? userProvider.displayEmail : '';
     final emailVerified = userProvider.emailVerified;
     final authMethod = userProvider.authMethod;
-    final photoUrl = userProvider.photoUrl;
+    final photoUrl = userProvider.photoUrl;    
 
     Future<List<Map<String, dynamic>>> fetchUserAddresses() async {
       const storage = FlutterSecureStorage();
@@ -58,7 +58,7 @@ class EditProfileScreen extends StatelessWidget {
         if (data['success'] == true && data['data'] is List) {
           return List<Map<String, dynamic>>.from(data['data']);
         }
-      }
+      }      
       return [];
     }
 

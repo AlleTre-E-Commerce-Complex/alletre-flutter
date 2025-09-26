@@ -1,3 +1,4 @@
+import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/view/screens/auction%20screen/product_details_screen.dart';
 import 'package:alletre_app/view/screens/bids%20screen/bids_screen.dart';
 import 'package:alletre_app/view/screens/categories%20screen/categories_page.dart';
@@ -49,7 +50,9 @@ class AppRoutes {
       // search: (context) => const SearchScreen(),
       purchases: (context) => const PurchaseScreen(),
       bids: (context) => const BidsScreen(),
-      profile: (context) => const ProfileScreen(),
+      profile: (context) => ProfileScreen(
+            user: UserModel.empty(),
+          ),
       editProfile: (context) => const EditProfileScreen(),
       categories: (context) => CategoriesPage(),
       paymentDetails: (context) => const PaymentDetailsScreen(auctionData: {}),

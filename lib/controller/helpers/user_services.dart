@@ -512,4 +512,25 @@ class UserService {
       return {'success': false, 'message': 'Failed to make address default'};
     }
   }
+
+  Future<Map<String, dynamic>> fetchProfileInfo() async {
+    Map<String, dynamic> resp = {};
+    final tokens = await getTokens();
+    final accessToken = tokens['accessToken'];
+    if (accessToken == null) {
+      return {'success': false, 'message': 'Not authenticated'};
+    }
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/users/my-profile');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      resp = jsonDecode(response.body)['data'];
+    }
+    return resp;
+  }
 }

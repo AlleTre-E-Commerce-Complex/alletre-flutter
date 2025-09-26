@@ -500,4 +500,19 @@ class UserProvider with ChangeNotifier {
       return {'success': false, 'message': 'Failed to update profile'};
     }
   }
+
+  fetchProfileInfo() async {
+    try {
+      final data = await _userService.fetchProfileInfo();
+      _photoUrl = data['imageLink'];
+      user.name = data['userName'];
+      user.email = data['email'];
+
+      PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString()).then((val) {
+        setPhoneNumber(val);
+      });
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to update profile'};
+    }
+  }
 }

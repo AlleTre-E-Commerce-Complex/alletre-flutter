@@ -1,7 +1,6 @@
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
-import 'package:alletre_app/controller/services/firebase_messaging_android.dart';
 import 'package:alletre_app/controller/services/google_auth.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/navbar_utils.dart';
@@ -63,7 +62,9 @@ class MainStack extends StatelessWidget {
       case 2: // My Bids
         return const BidsScreen();
       case 3: // Profile
-        return const ProfileScreen();
+        return ProfileScreen(
+          user: UserModel.empty(),
+        );
       // Other screens that can be navigated to from the main screens
       case 4:
         return const FaqScreen();
@@ -125,16 +126,17 @@ class MainStack extends StatelessWidget {
           if ((userProvider.displayEmail.isEmpty || userProvider.displayEmail.trim() == 'Add Email') && isLoggedIn) {
             userAuthService.getAuthMethod().then((authMethod) {
               if (authMethod == 'custom') {
-                userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
-                  if (data.containsKey('id') == true) {
-                    userProvider.setName(data['userName']);
-                    userProvider.setEmail(data['email']);
+                userProvider.fetchProfileInfo();
+                // userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
+                //   if (data.containsKey('id') == true) {
+                //     userProvider.setName(data['userName']);
+                //     userProvider.setEmail(data['email']);
 
-                    PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
-                      userProvider.setPhoneNumber(val);
-                    });
-                  }
-                });
+                //     PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
+                //       userProvider.setPhoneNumber(val);
+                //     });
+                //   }
+                // });
               } else if (authMethod == 'google') {
                 final GoogleAuthService _googleAuthService = GoogleAuthService();
                 _googleAuthService.signInWithGoogle(
@@ -145,7 +147,7 @@ class MainStack extends StatelessWidget {
                   userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
                 });
               }
-              initializedFirebaseNotification();
+              // initializedFirebaseNotification();              
             });
           }
         }

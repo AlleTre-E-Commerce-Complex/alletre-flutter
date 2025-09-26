@@ -1,7 +1,4 @@
-import 'package:alletre_app/app.dart';
 import 'package:alletre_app/controller/providers/share_provider.dart';
-import 'package:alletre_app/controller/providers/user_provider.dart';
-import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/view/screens/my%20auctions%20screen/my_auctions_screen.dart';
 import 'package:alletre_app/view/screens/my%20products%20screen/my_products.dart';
@@ -21,17 +18,18 @@ import '../wishlist screen/wishlist_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? title;
+  final UserModel user;
 
-  const ProfileScreen({super.key, this.title});
+  const ProfileScreen({super.key, this.title, required this.user});
 
   @override
   Widget build(BuildContext context) {
-    final user = UserModel(
-      name: "Username",
-      email: "email",
-      phoneNumber: "+1234567890",
-      profileImagePath: null, // Initially empty
-    );
+    // final user = UserModel(
+    //   name: "Username",
+    //   email: "email",
+    //   phoneNumber: "+1234567890",
+    //   profileImagePath: null, // Initially empty
+    // );
 
     return Scaffold(
       appBar: const NavbarElementsAppbar(appBarTitle: 'Profile'),
