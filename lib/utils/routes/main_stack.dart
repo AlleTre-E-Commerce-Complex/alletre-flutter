@@ -1,6 +1,7 @@
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
+import 'package:alletre_app/controller/services/firebase_messaging_android.dart';
 import 'package:alletre_app/controller/services/google_auth.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/extras/navbar_utils.dart';
@@ -144,6 +145,7 @@ class MainStack extends StatelessWidget {
                   userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
                 });
               }
+              initializedFirebaseNotification();
             });
           }
         }

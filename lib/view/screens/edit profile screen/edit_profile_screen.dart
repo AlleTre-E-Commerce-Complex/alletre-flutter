@@ -100,7 +100,14 @@ class EditProfileScreen extends StatelessWidget {
                     if (newImage != null) {
                       await userProvider.updateProfilePhoto(newImage);
                       userProvider.updateProfileInfo(action: 'update_photo').then((resp) => {
-                            if (resp['status'] == false) {showError(scaffoldContext, resp['message'][0])}
+                            if (resp['success'] == false)
+                              {showError(scaffoldContext, resp['message'][0])}
+                            else if (resp['success'] == true)
+                              {
+                                ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                                  const SnackBar(content: Text('Profile pic updated successfully!.')),
+                                )
+                              }
                           });
                     }
                   },
@@ -143,7 +150,14 @@ class EditProfileScreen extends StatelessWidget {
                     onPressed: () {
                       // Handle add phone action
                       userProvider.updateProfileInfo(action: 'update_phone').then((resp) => {
-                            if (resp['success'] == false) {showError(scaffoldContext, resp['message'][0])}
+                            if (resp['success'] == false)
+                              {showError(scaffoldContext, resp['message'][0])}
+                            else if (resp['success'] == true)
+                              {
+                                ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                                  const SnackBar(content: Text('Phone number updated successfully!')),
+                                )
+                              }
                           });
                     },
                   ),
