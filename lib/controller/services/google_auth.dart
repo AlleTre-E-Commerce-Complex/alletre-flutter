@@ -23,7 +23,7 @@ class GoogleAuthService {
     return await _storage.read(key: 'access_token');
   }
 
-  Future<UserCredential?> signInWithGoogle() async {
+  Future<UserCredential?> signInWithGoogle({Function(String phoneNumber)? updateUserInfo}) async {
     try {
       debugPrint('Starting Google sign-in...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -81,6 +81,9 @@ class GoogleAuthService {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] && responseData['data'] != null) {
           final data = responseData['data'];
+          if (data['phone'] != null && data['phone'] != "" && updateUserInfo != null) {
+            updateUserInfo(data['phone']);
+          }
           await _storage.write(key: 'access_token', value: data['accessToken']);
           await _storage.write(key: 'refresh_token', value: data['refreshToken']);
           debugPrint('✅ Backend tokens stored successfully');

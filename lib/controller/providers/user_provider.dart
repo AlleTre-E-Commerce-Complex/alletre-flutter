@@ -395,7 +395,7 @@ class UserProvider with ChangeNotifier {
       notifyListeners();
 
       // Clear secure storage and sign out from services
-      await _userService.logout();      
+      await _userService.logout();
 
       debugPrint('User provider state cleared after logout');
     } catch (e) {
@@ -487,5 +487,32 @@ class UserProvider with ChangeNotifier {
       addr['isDefault'] = (addr['id'] == locationId);
     }
     notifyListeners();
+  }
+
+  Future<Map<String, dynamic>> updateProfileInfo({required String action}) async {
+    try {
+      final result = await _userService.updateProfileInfo(userName: (user.name == '' ? _displayName! : user.name), phone: user.phoneNumber, photoUrl: _photoUrl, action: action);
+      if (action == 'update_username' && user.name != _displayName) {
+        _displayName = user.name;
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to update profile'};
+    }
+  }
+
+  fetchProfileInfo() async {
+    try {
+      final data = await _userService.fetchProfileInfo();
+      _photoUrl = data['imageLink'];
+      user.name = data['userName'];
+      user.email = data['email'];
+
+      PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString()).then((val) {
+        setPhoneNumber(val);
+      });
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to update profile'};
+    }
   }
 }

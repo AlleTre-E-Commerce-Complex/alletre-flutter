@@ -6,14 +6,10 @@ class EditProfileCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Widget? actionButton;
+  final String? hintText;
+  final Function(String value)? onUpdate;
 
-  const EditProfileCard({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.actionButton,
-  });
+  const EditProfileCard({super.key, required this.label, required this.value, required this.icon, this.actionButton, this.hintText, this.onUpdate});
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +37,17 @@ class EditProfileCard extends StatelessWidget {
                       height: 36,
                       child: TextField(
                         controller: TextEditingController(text: value),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 7.0, horizontal: 6.0),
+                          hintText: hintText,
+                          contentPadding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 6.0),
                         ),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(fontSize: 13),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13),
+                        onChanged: (value) {
+                          if (onUpdate != null) {
+                            onUpdate!(value);
+                          }
+                        },
                       ),
                     ),
                   ],
