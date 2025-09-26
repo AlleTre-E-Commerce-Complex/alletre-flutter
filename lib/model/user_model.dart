@@ -19,7 +19,7 @@ class UserModel {
       email: '',
       phoneNumber: '',
       password: '',
-      profileImagePath: '',
+      profileImagePath: null,
     );
   }
 
