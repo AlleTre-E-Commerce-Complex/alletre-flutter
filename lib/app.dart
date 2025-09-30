@@ -1,9 +1,9 @@
-import 'package:alletre_app/controller/helpers/user_services.dart';
+import 'dart:io';
+
 import 'package:alletre_app/controller/providers/auction_image_provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/auction_details_provider.dart';
 import 'package:alletre_app/controller/providers/contact_provider.dart';
-import 'package:alletre_app/controller/providers/notification_provider.dart';
 import 'package:alletre_app/controller/providers/search_provider.dart';
 import 'package:alletre_app/controller/providers/share_provider.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
@@ -13,14 +13,14 @@ import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
-import 'package:alletre_app/model/user_model.dart';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/onboarding%20screens/onboarding_pages.dart';
+import 'package:alletre_app/view/screens/update_update_screen/update_app.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'controller/providers/login_state.dart';
 import 'view/screens/login screen/login_page.dart';
@@ -49,6 +49,12 @@ class MyApp extends StatelessWidget {
         // User is authenticated, go straight to home via MainStack
         Provider.of<LoggedInProvider>(navigatorKey.currentContext!, listen: false).logIn();
         Provider.of<TabIndexProvider>(navigatorKey.currentContext!, listen: false).updateIndex(0); // Home tab
+        final appVersionInfo = await userAuthService.fetchAppVersion();
+        if (Platform.isAndroid && appVersionInfo['LatestAndroidVersion'] == APP_VERSION) {
+          return UpdateAppScreen(latestVersion: appVersionInfo['LatestAndroidVersion']);
+        } else if (Platform.isIOS && appVersionInfo['LatestIOSVersion'] == APP_VERSION) {
+          return UpdateAppScreen(latestVersion: appVersionInfo['LatestIOSVersion']);
+        }
         return const MainStack();
       } else if (hasCompletedOnboarding) {
         // User has seen onboarding but is not logged in, go to login

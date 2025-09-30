@@ -1,6 +1,8 @@
 // Create a new file: lib/controller/services/auth_service.dart
 import 'dart:convert';
+import 'dart:io';
 import 'package:alletre_app/controller/helpers/user_services.dart';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -105,5 +107,20 @@ class UserAuthService {
     } else {
       return {'success': false, 'message': 'error : email not provided'};
     }
+  }
+
+  Future<Map<String, dynamic>> fetchAppVersion() async {
+    var resp = {'success': false, 'message': 'Error occurred'};
+    final url = Uri.parse('${ApiEndpoints.baseUrl}/appVersion/latest?platform=${Platform.isAndroid ? 'android' : 'ios'}');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      resp = jsonDecode(response.body);
+    }
+    return resp;
   }
 }
