@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
+import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/images/images.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
+import 'package:alletre_app/view/screens/update_update_screen/update_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -10,28 +14,21 @@ import 'package:slide_to_act/slide_to_act.dart';
 class OnboardingPage3 extends StatelessWidget {
   final PageController pageController; // Added PageController
 
-  const OnboardingPage3(
-      {super.key, required this.pageController}); // Receiving PageController
+  const OnboardingPage3({super.key, required this.pageController}); // Receiving PageController
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          SvgPicture.asset(
-            AppImages.onboarding3,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity
-          ),
+          SvgPicture.asset(AppImages.onboarding3, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
           Positioned(
             bottom: 30,
             left: 30,
             right: 30,
             child: SlideAction(
               text: "Get Started",
-              textStyle:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
               height: 60,
               sliderButtonIconSize: 17,
               sliderRotate: true,
@@ -42,15 +39,40 @@ class OnboardingPage3 extends StatelessWidget {
 
                 // Navigate to home screen with auth options
                 if (!context.mounted) return null;
-                
+
                 // Set index to home (0) before navigating
                 Provider.of<TabIndexProvider>(context, listen: false).updateIndex(0);
-                
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MainStack()),
-                  (route) => false,
-                );
+
+                final appVersionInfo = await userAuthService.fetchAppVersion();
+                if (Platform.isAndroid && appVersionInfo['LatestAndroidVersion'] != APP_VERSION) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpdateAppScreen(
+                        latestVersion: (appVersionInfo['LatestAndroidVersion'] as String),
+                        updateUrl: appVersionInfo['AndroidAppUpdateURL'],
+                      ),
+                    ),
+                    (route) => false,
+                  );
+                } else if (Platform.isIOS && appVersionInfo['LatestIOSVersion'] != APP_VERSION) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpdateAppScreen(
+                        latestVersion: (appVersionInfo['LatestIOSVersion'] as String),
+                        updateUrl: appVersionInfo['IOSAppUpdateURL'],
+                      ),
+                    ),
+                    (route) => false,
+                  );
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MainStack()),
+                    (route) => false,
+                  );
+                }
                 return null;
               },
             ),
