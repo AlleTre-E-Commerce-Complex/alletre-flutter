@@ -2,10 +2,12 @@ import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UpdateAppScreen extends StatelessWidget {
   final String latestVersion;
-  const UpdateAppScreen({super.key, required this.latestVersion});
+  final String updateUrl;
+  const UpdateAppScreen({super.key, required this.latestVersion, required this.updateUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class UpdateAppScreen extends StatelessWidget {
             Text(
               'Your app version is $APP_VERSION. Please update to $latestVersion proceed',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: primaryColor),
             ),
             const SizedBox(
               height: 30,
@@ -45,7 +47,11 @@ class UpdateAppScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  if (updateUrl != "") {
+                    launchUrl(Uri.parse(updateUrl), mode: LaunchMode.externalApplication);
+                  }
+                },
                 child: const Text(
                   'Update',
                   style: TextStyle(

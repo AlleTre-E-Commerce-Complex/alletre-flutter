@@ -110,7 +110,7 @@ class UserAuthService {
   }
 
   Future<Map<String, dynamic>> fetchAppVersion() async {
-    var resp = {'success': false, 'message': 'Error occurred'};
+    Map<String, dynamic> resp = {'success': false, 'message': 'Error occurred'};
     final url = Uri.parse('${ApiEndpoints.baseUrl}/appVersion/latest?platform=${Platform.isAndroid ? 'android' : 'ios'}');
     final response = await http.get(
       url,

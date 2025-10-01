@@ -50,14 +50,32 @@ class MyApp extends StatelessWidget {
         Provider.of<LoggedInProvider>(navigatorKey.currentContext!, listen: false).logIn();
         Provider.of<TabIndexProvider>(navigatorKey.currentContext!, listen: false).updateIndex(0); // Home tab
         final appVersionInfo = await userAuthService.fetchAppVersion();
-        if (Platform.isAndroid && appVersionInfo['LatestAndroidVersion'] == APP_VERSION) {
-          return UpdateAppScreen(latestVersion: appVersionInfo['LatestAndroidVersion']);
-        } else if (Platform.isIOS && appVersionInfo['LatestIOSVersion'] == APP_VERSION) {
-          return UpdateAppScreen(latestVersion: appVersionInfo['LatestIOSVersion']);
+        if (Platform.isAndroid && appVersionInfo['LatestAndroidVersion'] != APP_VERSION) {
+          return UpdateAppScreen(
+            latestVersion: (appVersionInfo['LatestAndroidVersion'] as String),
+            updateUrl: appVersionInfo['AndroidAppUpdateURL'],
+          );
+        } else if (Platform.isIOS && appVersionInfo['LatestIOSVersion'] != APP_VERSION) {
+          return UpdateAppScreen(
+            latestVersion: (appVersionInfo['LatestIOSVersion'] as String),
+            updateUrl: appVersionInfo['IOSAppUpdateURL'],
+          );
         }
         return const MainStack();
       } else if (hasCompletedOnboarding) {
         // User has seen onboarding but is not logged in, go to login
+        final appVersionInfo = await userAuthService.fetchAppVersion();
+        if (Platform.isAndroid && appVersionInfo['LatestAndroidVersion'] != APP_VERSION) {
+          return UpdateAppScreen(
+            latestVersion: (appVersionInfo['LatestAndroidVersion'] as String),
+            updateUrl: appVersionInfo['AndroidAppUpdateURL'],
+          );
+        } else if (Platform.isIOS && appVersionInfo['LatestIOSVersion'] != APP_VERSION) {
+          return UpdateAppScreen(
+            latestVersion: (appVersionInfo['LatestIOSVersion'] as String),
+            updateUrl: appVersionInfo['IOSAppUpdateURL'],
+          );
+        }
         return MainStack();
       } else if (!hasCompletedOnboarding) {
         return OnboardingPages();
@@ -107,6 +125,7 @@ class MyApp extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SplashScreen();
               }
+
               return snapshot.data ?? const MainStack();
             },
           ),
