@@ -1,16 +1,15 @@
 class ApiEndpoints {
   // static const String baseUrl = 'https://api.alletre.kooman.tech/api';
-  static const String baseUrl = 'http://192.168.1.40:3001/api';
+  static const String baseUrl = 'http://192.168.1.3:3001/api';
   // static const String baseOrigin = 'https://api.alletre.kooman.tech';
-  static const String baseOrigin = 'http://192.168.40.47:3001';
+  static const String baseOrigin = 'http://192.168.3.47:3001';
 
   // Auction endpoints
   static const String auctions = '/auctions';
   static const String productListing = '/auctions/product-listing';
 
   // Draft auction details endpoint
-  static String userAuctionDetails(String auctionId) =>
-      '/auctions/user/$auctionId';
+  static String userAuctionDetails(String auctionId) => '/auctions/user/$auctionId';
 
   // Category endpoints
   static const String categories = '/categories/all';
@@ -23,6 +22,7 @@ class ApiEndpoints {
   // Wishlist endpoints
   static const String saveToWishlist = '/watch-lists/save';
   static const String getSavedWishlist = '/watch-lists/saved';
-  static String unSaveFromWishlist(int auctionId) =>
-      '/watch-lists/un-save?auctionId=$auctionId';
+  static String unSaveFromWishlist(int auctionId) => '/watch-lists/un-save?auctionId=$auctionId';
 }
+
+const APP_VERSION = "1.0.2";
