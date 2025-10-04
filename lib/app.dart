@@ -13,6 +13,7 @@ import 'package:alletre_app/controller/providers/location_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/providers/wishlist_provider.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
+import 'package:alletre_app/controller/services/firebase_messaging_android.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
@@ -28,6 +29,7 @@ import 'view/screens/splash screen/splash_screen.dart';
 
 class MyApp extends StatelessWidget {
   static final navigatorKey = GlobalKey<NavigatorState>();
+  static final setupFCMNotification = initializedFirebaseNotification;
 
   const MyApp({super.key});
 

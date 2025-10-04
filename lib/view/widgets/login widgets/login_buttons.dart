@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
+import 'package:alletre_app/app.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
@@ -66,6 +67,8 @@ class LoginButtons extends StatelessWidget {
                         Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
                         if (!context.mounted) return;
+
+                        MyApp.setupFCMNotification();
 
                         // Show success dialog
                         await showDialog(
@@ -161,6 +164,8 @@ class LoginButtons extends StatelessWidget {
                 //     .updateIndex(0);
 
                 if (!context.mounted) return;
+
+                MyApp.setupFCMNotification();
 
                 Future.delayed(const Duration(seconds: 2), () {
                   if (context.mounted) {
