@@ -38,7 +38,7 @@ Future<NotificationDetails> _notificationDetails() async {
       priority: Priority.max,
       playSound: true,
       ticker: 'ticker',
-      icon: 'app_icon_launcher',
+      icon: 'ic_launcher',
       largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
       color: Color.fromARGB(255, 243, 145, 33));
   NotificationDetails platformSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
