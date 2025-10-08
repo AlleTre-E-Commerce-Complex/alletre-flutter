@@ -9,7 +9,7 @@ import 'package:alletre_app/model/sub_category.dart';
 class CategoryService {
   /// In-memory cache of categories indexed by ID
   static final Map<int, Category> _categories = {};
-  
+
   /// In-memory cache of subcategories indexed by ID
   static final Map<int, SubCategory> _subCategories = {};
 
@@ -25,9 +25,7 @@ class CategoryService {
 
   /// Get subcategories for a specific category
   static List<SubCategory> getSubCategoriesForCategory(int categoryId) {
-    return _subCategories.values
-        .where((subcat) => subcat.categoryId == categoryId)
-        .toList();
+    return _subCategories.values.where((subcat) => subcat.categoryId == categoryId).toList();
   }
 
   /// Initialize categories from API response
@@ -36,11 +34,11 @@ class CategoryService {
     try {
       print('Initializing categories with response: $jsonResponse');
       final Map<String, dynamic> data = json.decode(jsonResponse);
-      
+
       if (data['success'] == true && data['data'] != null) {
         final List<dynamic> categoriesData = data['data'] as List<dynamic>;
         // print('Found ${categoriesData.length} categories');
-        
+
         for (var categoryData in categoriesData) {
           final category = Category.fromJson(categoryData as Map<String, dynamic>);
           _categories[category.id] = category;
@@ -59,10 +57,10 @@ class CategoryService {
       // print('Initializing subcategories with response: $jsonResponse');
       final Map<String, dynamic> data = json.decode(jsonResponse);
       // print('Decoded JSON data: $data');
-      
+
       if (data['success'] == true && data['data'] != null) {
         dynamic subCategoriesData;
-        
+
         // Handle different API response structures
         if (data['data'] is List) {
           subCategoriesData = data['data'];
@@ -70,7 +68,7 @@ class CategoryService {
         } else if (data['data'] is Map) {
           final categoryData = data['data'] as Map<String, dynamic>;
           // print('Category data structure: ${categoryData.keys}');
-          
+
           // Try different possible keys based on API response
           if (categoryData['subCategories'] != null) {
             subCategoriesData = categoryData['subCategories'];
@@ -80,12 +78,12 @@ class CategoryService {
             subCategoriesData = categoryData['items'];
           }
         }
-        
+
         if (subCategoriesData != null) {
           // print('Processing subcategories data: $subCategoriesData');
           final List<dynamic> subCategories = subCategoriesData as List<dynamic>;
           // print('Found ${subCategories.length} subcategories');
-          
+
           for (var subCategoryData in subCategories) {
             // print('Processing subcategory: $subCategoryData');
             try {
@@ -96,7 +94,7 @@ class CategoryService {
               print('Error processing individual subcategory: $e');
             }
           }
-        } 
+        }
       }
     } catch (e, stackTrace) {
       print('Error initializing subcategories: $e');
@@ -138,5 +136,13 @@ class CategoryService {
   static String getSellerDepositAmount(int categoryId) {
     final category = _categories[categoryId];
     return category!.sellerDepositFixedAmount;
+  }
+
+  static void updateAuctionsListingCount({int categoryId = 0, String type = 'auction'}) {
+    if (type == 'auction') {
+      _categories[categoryId]?.auctionsCount += 1;
+    } else if (type == 'listing') {
+      _categories[categoryId]?.auctionsCount += 1;
+    }
   }
 }
