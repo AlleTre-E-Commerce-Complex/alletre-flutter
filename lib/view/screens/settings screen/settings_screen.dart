@@ -2,6 +2,7 @@ import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/contact%20screen/contact_screen.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
@@ -233,24 +234,35 @@ class SettingsScreen extends StatelessWidget {
     final scaffold = ScaffoldMessenger.of(context);
 
     try {
-      await context.read<UserProvider>().logout();
+      final _authService = UserAuthService();
+      var resp = await _authService.deleteAccount(false);
+      if (resp['success'] == true) {
+        await context.read<UserProvider>().logout();
 
-      if (context.mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
+        if (context.mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
 
+          scaffold.showSnackBar(
+            SnackBar(
+              content: Center(child: Text('Your account has been deleted')),
+              backgroundColor: activeColor,
+            ),
+          );
+        }
+
+        if (context.mounted) {
+          final tabIndexProvider = context.read<TabIndexProvider>();
+          tabIndexProvider.updateIndex(0);
+        }
+      } else {
         scaffold.showSnackBar(
           SnackBar(
-            content: Center(child: Text('Your account has been deleted')),
-            backgroundColor: activeColor,
+            content: Center(child: Text('Failed to delete account')),
+            backgroundColor: errorColor,
           ),
         );
-      }
-
-      if (context.mounted) {
-        final tabIndexProvider = context.read<TabIndexProvider>();
-        tabIndexProvider.updateIndex(0);
       }
     } catch (e) {
       if (context.mounted) {

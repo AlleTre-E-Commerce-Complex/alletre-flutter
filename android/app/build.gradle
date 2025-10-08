@@ -9,17 +9,9 @@ plugins {
 }
 
 def keystoreProperties = new Properties()
-println ">>> key store obect created"
 def keystorePropertiesFile = rootProject.file("key.properties")
-println ">>> rootProject path = " + rootProject.projectDir.absolutePath
-println ">>> key.properties full path = " + keystorePropertiesFile.absolutePath
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    println ">>> Loaded key.properties"
-    println ">>> storeFile=" + keystoreProperties['storeFile']
-    println ">>> keyAlias=" + keystoreProperties['keyAlias']
-    println ">>> storePassword=" + keystoreProperties['storePassword']
-    println ">>> keyPassword=" + keystoreProperties['keyPassword']
 }else{
     println ">>> key store is null"
 }
