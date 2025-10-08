@@ -51,3 +51,6 @@ jdk-11.tar.gz
 
 # FVM Version Cache
 .fvm/
+
+alletre-release-key.jks
+key.properties

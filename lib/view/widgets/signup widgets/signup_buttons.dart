@@ -8,7 +8,6 @@ import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -85,6 +84,8 @@ class SignupButtons extends StatelessWidget {
                       final result = await userProvider.signup();
 
                       if (!context.mounted) return;
+
+                      MyApp.setupFCMNotification();
 
                       if (result['success']) {
                         // Show verification dialog
@@ -224,6 +225,8 @@ class SignupButtons extends StatelessWidget {
 
                   Provider.of<LoggedInProvider>(context, listen: false).logIn();
                   Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
+
+                  MyApp.setupFCMNotification();
 
                   Future.delayed(const Duration(seconds: 2), () {
                     Navigator.pushReplacement(MyApp.navigatorKey.currentContext!, MaterialPageRoute(builder: (builder) => MainStack()));

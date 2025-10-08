@@ -123,4 +123,43 @@ class UserAuthService {
     }
     return resp;
   }
+
+  // Forgot Password
+  Future<Map<String, dynamic>> deleteAccount(bool isBlocked) async {
+    debugPrint('📧 Initiating account deletion: $isBlocked');
+    try {
+      final url = '${ApiEndpoints.baseUrl}/users/updateUserBlockStatus?currentStatus=${isBlocked.toString()}';
+      debugPrint('🔗 Making request to: $url');
+
+      final accessToken = await _storage.read(key: 'access_token');
+
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $accessToken', 'Accept': 'application/json'},
+      );
+
+      debugPrint('📥 Response status code: ${response.statusCode}');
+      final data = jsonDecode(response.body);
+      debugPrint('📦 Response data: $data');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Account deletion successful',
+        };
+      } else {
+        debugPrint('❌ Failed to send reset email. Status: ${response.statusCode}, Message: ${data['message']}');
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Failed to process request',
+        };
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error in forgotPassword: $e');
+      return {
+        'success': false,
+        'message': 'An error occurred. Please try again later.',
+      };
+    }
+  }
 }
