@@ -7,7 +7,6 @@ import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/chip_widget.dart';
 import '../../widgets/home widgets/auction_list_widget.dart';
 import '../../widgets/home widgets/carousel_banner_widget.dart';
-import '../../widgets/home widgets/create_auction_button.dart';
 import '../../widgets/home widgets/home_appbar.dart';
 import '../../widgets/home widgets/search_field_widget.dart';
 

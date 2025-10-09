@@ -1,22 +1,16 @@
-import 'package:alletre_app/controller/providers/tab_index_provider.dart';
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/category_state.dart';
-import 'package:alletre_app/view/widgets/home%20widgets/categories%20widgets/categories_card.dart';
+import 'package:alletre_app/model/auction_item.dart';
+import 'package:alletre_app/model/category.dart';
+import 'package:alletre_app/model/user_model.dart';
+import 'package:alletre_app/services/category_service.dart';
+import 'package:alletre_app/view/screens/all%20auctions%20screen/all_auctions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
 
 class CategoriesPage extends StatelessWidget {
-  final List<Map<String, String>> categories = [
-    {
-      'title': 'Electronic Devices',
-      'image': 'assets/images/electronics_category.svg'
-    },
-    {'title': 'Jewellers', 'image': 'assets/images/jewellery_category.svg'},
-    {'title': 'Properties', 'image': 'assets/images/properties_category.svg'},
-    {'title': 'Cars', 'image': 'assets/images/cars_category.svg'},
-    {'title': 'Furniture', 'image': 'assets/images/furniture_category.svg'},
-    {'title': 'Antiques', 'image': 'assets/images/sports_category.svg'},
-  ];
+  final List<Category> categories = CategoryService.getAllCategories();
 
   CategoriesPage({super.key});
 
@@ -28,61 +22,169 @@ class CategoriesPage extends StatelessWidget {
     });
 
     return Scaffold(
-      appBar: const NavbarElementsAppbar(
-          appBarTitle: 'Categories', showBackButton: true),
+      appBar: const NavbarElementsAppbar(appBarTitle: 'Categories', showBackButton: true),
       body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ListView.builder(
+        padding: const EdgeInsets.all(12.0),
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.9,
+          ),
           itemCount: categories.length,
           itemBuilder: (context, index) {
-            final title = categories[index]['title']!;
-            final image = categories[index]['image']!;
-            // Check if category is not "Electronic Devices"
-            // final showBadge = title.toLowerCase() != 'electronic devices';
-
-            return Column(
-              children: [
-                Stack(
-                  children: [
-                    CategoryListTile(
-                      index: index,
+            final item = categories[index];
+            return CategoryCard(
+              title: item.nameEn,
+              auctions: item.auctionsCount,
+              listings: item.listingCount,
+              imageUrl: item.bannerLink!,
+              onTap: (type) {
+                final auctionProvider = context.read<AuctionProvider>();
+                String title = 'Live Auctions';
+                List<AuctionItem> auctions = [];
+                String placeholder = 'No live auctions at the moment.\nPlace your auction right away.';
+                if (type == 'Listings') {
+                  title = 'Listed Products';
+                  auctions.addAll(auctionProvider.listedProducts);
+                  placeholder = 'No products listed for sale.\nList your product here.';
+                } else {
+                  auctions.addAll(auctionProvider.liveAuctions);
+                  auctions.addAll(auctionProvider.upcomingAuctions);
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AllAuctionsScreen(
                       title: title,
-                      image: image,
-                      onTap: () {
-                        context.read<TabIndexProvider>().updateIndex(11);
-                      },
+                      user: UserModel.empty(),
+                      auctions: auctions,
+                      placeholder: placeholder,
                     ),
-                    // if (showBadge)
-                    //   Positioned.fill(
-                    //     child: Container(
-                    //       alignment: Alignment.center,
-                    //       decoration: BoxDecoration(
-                    //         color: const Color(0x66000000),
-                    //         borderRadius: BorderRadius.circular(8),
-                    //       ),
-                    //       child: Container(
-                    //         padding: const EdgeInsets.symmetric(
-                    //             horizontal: 111, vertical: 8),
-                    //         decoration: const BoxDecoration(
-                    //           color: primaryColor,
-                    //         ),
-                    //         child: const Text(
-                    //           'coming soon',
-                    //           style: TextStyle(
-                    //             color: secondaryColor,
-                    //             fontSize: 14,
-                    //             fontWeight: FontWeight.bold,
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                  ],
-                ),
-                if (index < categories.length - 1) const SizedBox(height: 20),
-              ],
+                  ),
+                );
+              },
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class CategoryCard extends StatelessWidget {
+  final String title;
+  final int auctions;
+  final int listings;
+  final String imageUrl;
+  final Function(String type) onTap;
+
+  const CategoryCard({
+    super.key,
+    required this.title,
+    required this.auctions,
+    required this.listings,
+    required this.imageUrl,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () {
+        // TODO: Navigate to category details page
+      },
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Image section
+            Expanded(
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+
+            // Gradient section
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color.fromARGB(255, 64, 2, 18), Color.fromARGB(255, 109, 1, 28)],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Bottom row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _infoBox(value: '$auctions', label: 'Auctions', onTap: onTap),
+                        _infoBox(value: '$listings', label: 'Listings', onTap: onTap),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoBox({String value = '', String label = '', Function(String)? onTap}) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          onTap!(label);
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Column(
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

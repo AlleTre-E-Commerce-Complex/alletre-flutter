@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:alletre_app/services/category_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -819,7 +820,11 @@ class AuctionService {
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
+            final items = (data['data'] as List).map((item) {
+              var auctionItem = AuctionItem.fromJson(item);
+              CategoryService.updateAuctionsListingCount(categoryId: auctionItem.categoryId, type: 'auction');
+              return auctionItem;
+            }).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
@@ -880,7 +885,11 @@ class AuctionService {
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
+            final items = (data['data'] as List).map((item) {
+              var auctionItem = AuctionItem.fromJson(item);
+              CategoryService.updateAuctionsListingCount(categoryId: auctionItem.categoryId, type: 'listing');
+              return auctionItem;
+            }).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;
@@ -938,7 +947,11 @@ class AuctionService {
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
-            final items = (data['data'] as List).map((item) => AuctionItem.fromJson(item)).toList();
+            final items = (data['data'] as List).map((item) {
+              var auctionItem = AuctionItem.fromJson(item);
+              CategoryService.updateAuctionsListingCount(categoryId: auctionItem.categoryId, type: 'auction');
+              return auctionItem;
+            }).toList();
 
             final pagination = data['pagination'] as Map<String, dynamic>;
             final totalPages = pagination['totalPages'] as int;

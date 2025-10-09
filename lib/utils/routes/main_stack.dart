@@ -155,11 +155,11 @@ class MainStack extends StatelessWidget {
         }
 
         return Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           body: IndexedStack(
             index: currentIndex,
             children: List.generate(
-              22, // Total number of screens
+              22,
               (index) => KeyedSubtree(
                 key: ValueKey(index),
                 child: _buildScreen(index, isLoggedIn),
@@ -168,12 +168,14 @@ class MainStack extends StatelessWidget {
           ),
           floatingActionButton: isLoggedIn && !isKeyboardOpen ? const CreateAuctionButton() : null,
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          bottomNavigationBar: isLoggedIn && !isKeyboardOpen
-              ? BottomNavBarUtils.buildAuthenticatedNavBar(
-                  context,
-                  onTabChange: (index) => tabIndexProvider.updateIndex(index),
-                )
-              : const BottomNavBar(),
+          bottomNavigationBar: isKeyboardOpen
+              ? const SizedBox.shrink()
+              : (isLoggedIn
+                  ? BottomNavBarUtils.buildAuthenticatedNavBar(
+                      context,
+                      onTabChange: (index) => tabIndexProvider.updateIndex(index),
+                    )
+                  : const BottomNavBar()),
         );
       },
     );

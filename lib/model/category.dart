@@ -8,18 +8,11 @@ class Category {
   final String? bannerLink;
   final String? sliderLink;
   final bool status;
+  int auctionsCount;
+  int listingCount;
 
-  Category({
-    required this.id,
-    required this.nameEn,
-    required this.nameAr,
-    required this.hasUsageCondition,
-    required this.sellerDepositFixedAmount,
-    required this.bidderDepositFixedAmount,
-    this.bannerLink,
-    this.sliderLink,
-    required this.status,
-  });
+  Category(
+      {required this.id, required this.nameEn, required this.nameAr, required this.hasUsageCondition, required this.sellerDepositFixedAmount, required this.bidderDepositFixedAmount, this.bannerLink, this.sliderLink, required this.status, required this.auctionsCount, required this.listingCount});
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
@@ -32,6 +25,8 @@ class Category {
       bannerLink: json['bannerLink'] as String?,
       sliderLink: json['sliderLink'] as String?,
       status: json['status'] as bool,
+      auctionsCount: 0,
+      listingCount: 0,
     );
   }
 }
