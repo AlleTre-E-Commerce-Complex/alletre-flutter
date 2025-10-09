@@ -1,6 +1,10 @@
+import 'package:alletre_app/controller/providers/auction_provider.dart';
 import 'package:alletre_app/controller/providers/category_state.dart';
+import 'package:alletre_app/model/auction_item.dart';
 import 'package:alletre_app/model/category.dart';
+import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/services/category_service.dart';
+import 'package:alletre_app/view/screens/all%20auctions%20screen/all_auctions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/common widgets/footer_elements_appbar.dart';
@@ -33,9 +37,34 @@ class CategoriesPage extends StatelessWidget {
             final item = categories[index];
             return CategoryCard(
               title: item.nameEn,
-              auctions: item.auctionsCount ?? 0,
-              listings: item.listingCount ?? 0,
+              auctions: item.auctionsCount,
+              listings: item.listingCount,
               imageUrl: item.bannerLink!,
+              onTap: (type) {
+                final auctionProvider = context.read<AuctionProvider>();
+                String title = 'Live Auctions';
+                List<AuctionItem> auctions = [];
+                String placeholder = 'No live auctions at the moment.\nPlace your auction right away.';
+                if (type == 'Listings') {
+                  title = 'Listed Products';
+                  auctions.addAll(auctionProvider.listedProducts);
+                  placeholder = 'No products listed for sale.\nList your product here.';
+                } else {
+                  auctions.addAll(auctionProvider.liveAuctions);
+                  auctions.addAll(auctionProvider.upcomingAuctions);
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AllAuctionsScreen(
+                      title: title,
+                      user: UserModel.empty(),
+                      auctions: auctions,
+                      placeholder: placeholder,
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),
@@ -49,6 +78,7 @@ class CategoryCard extends StatelessWidget {
   final int auctions;
   final int listings;
   final String imageUrl;
+  final Function(String type) onTap;
 
   const CategoryCard({
     super.key,
@@ -56,6 +86,7 @@ class CategoryCard extends StatelessWidget {
     required this.auctions,
     required this.listings,
     required this.imageUrl,
+    required this.onTap,
   });
 
   @override
@@ -84,7 +115,7 @@ class CategoryCard extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF4B0013), Color(0xFFB1183A)],
+                  colors: [Color.fromARGB(255, 64, 2, 18), Color.fromARGB(255, 109, 1, 28)],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
@@ -108,8 +139,8 @@ class CategoryCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _infoBox('$auctions', 'Auctions'),
-                        _infoBox('$listings', 'Listings'),
+                        _infoBox(value: '$auctions', label: 'Auctions', onTap: onTap),
+                        _infoBox(value: '$listings', label: 'Listings', onTap: onTap),
                       ],
                     ),
                   ],
@@ -122,33 +153,38 @@ class CategoryCard extends StatelessWidget {
     );
   }
 
-  Widget _infoBox(String value, String label) {
+  Widget _infoBox({String value = '', String label = '', Function(String)? onTap}) {
     return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+      child: GestureDetector(
+        onTap: () {
+          onTap!(label);
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Column(
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 10,
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -887,6 +887,7 @@ class AuctionService {
           if (data['success'] == true && data['data'] is List) {
             final items = (data['data'] as List).map((item) {
               var auctionItem = AuctionItem.fromJson(item);
+              CategoryService.updateAuctionsListingCount(categoryId: auctionItem.categoryId, type: 'listing');
               return auctionItem;
             }).toList();
 
