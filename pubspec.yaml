@@ -40,7 +40,7 @@ dependencies:
   flutter_svg:
   carousel_slider:
   slide_to_act:
-  intl_phone_number_input:
+  intl_phone_number_input: ^0.7.5
   package_info_plus:
   permission_handler:
   csc_picker_plus:
