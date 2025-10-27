@@ -60,13 +60,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD__JBXQY6br0wKBGFr1I65Rck2FeF05mI',
-    appId: '1:1043853491459:ios:8bd70f2a36ca6fb7f6bd36',
+    appId: '1:1043853491459:ios:a9a5aad0cbd3b930f6bd36',
     messagingSenderId: '1043853491459',
     projectId: 'alletre-auctions',
     storageBucket: 'alletre-auctions.firebasestorage.app',
-    androidClientId: '1043853491459-2ntuv0c6mp761tuk8f1hb78ilp746pg0.apps.googleusercontent.com',
-    iosClientId: '1043853491459-gqe7h7h4cg9omdsoaag5qm0pubu5lsru.apps.googleusercontent.com',
-    iosBundleId: 'com.example.alletreApp',
+    androidClientId: '1043853491459-0op88jp4efcegcbf7itlra4f68pl5fo4.apps.googleusercontent.com',
+    iosClientId: '1043853491459-1ul5h5bjnnnhck1p4q7uq5o1hgataoi4.apps.googleusercontent.com',
+    iosBundleId: 'com.alletre.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
