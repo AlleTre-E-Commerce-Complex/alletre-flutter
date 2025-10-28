@@ -31,17 +31,34 @@ Future<void> onMessageOpenedAppBackground(RemoteMessage? message) async {
 }
 
 Future<NotificationDetails> _notificationDetails() async {
-  AndroidNotificationDetails androidPlatformChannelSpecifics = const AndroidNotificationDetails('parco_notification', 'Parco Notifications',
-      groupKey: 'com.example.parco_admin_mobile',
-      channelDescription: 'This channel will show notifications from Parco Admin service',
-      importance: Importance.max,
-      priority: Priority.max,
-      playSound: true,
-      ticker: 'ticker',
-      icon: 'ic_launcher',
-      largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
-      color: Color.fromARGB(255, 243, 145, 33));
-  NotificationDetails platformSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+  // ANDROID DETAILS
+  AndroidNotificationDetails androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+    'alletre_notification', // Unique Channel ID
+    'Alletre Notifications', // Channel Name
+    channelDescription: 'This channel will show notifications from the Alletre service',
+    importance: Importance.max,
+    priority: Priority.max,
+    playSound: true,
+    ticker: 'ticker',
+    // Ensure 'ic_launcher' is in the drawable folders
+    icon: 'ic_launcher', 
+    largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
+    // Note: color is an Android specific setting
+    color: Color.fromARGB(255, 243, 145, 33), 
+  );
+
+  // IOS DETAILS
+  const DarwinNotificationDetails iosPlatformChannelSpecifics = DarwinNotificationDetails(
+    // You can customize sound, presentAlert, presentBadge, presentSound here
+    presentAlert: true,
+    presentBadge: true,
+    presentSound: true,
+  );
+
+  NotificationDetails platformSpecifics = NotificationDetails(
+    android: androidPlatformChannelSpecifics,
+    iOS: iosPlatformChannelSpecifics, // Add iOS details
+  );
   return platformSpecifics;
 }
 
@@ -56,58 +73,97 @@ onSelectNotification(NotificationResponse notificationResponse) async {
   }
 }
 
-initializedFirebaseNotification() async {
+Future<void> initializedFirebaseNotification() async {
   final _firebaseMessaging = FirebaseMessaging.instance;
   try {
+    // 1. REQUEST PERMISSIONS (Crucial for iOS)
+    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+    
+    debugPrint('User granted permission: ${settings.authorizationStatus}');
+
+    // 2. SUBSCRIBER AND TOKEN RETRIEVAL
     _firebaseMessaging.subscribeToTopic('ALLETRENOTIFY');
-    await _firebaseMessaging.requestPermission();
     final tokenFcm = await _firebaseMessaging.getToken();
 
     // Call backend FCM Update endpoint
+    // (Your existing backend logic is kept here)
     debugPrint('📤 Preparing FCM Token update request...');
-    debugPrint('Base URL: ${ApiEndpoints.baseUrl}');
     debugPrint('🌐 Parsed Request URL: ${ApiEndpoints.baseUrl}/notifications/save-token');
 
     var accessToken = await _storage.read(key: 'access_token');
-    final response = await http.post(
-      Uri.parse('${ApiEndpoints.baseUrl}/notifications/save-token'),
-      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'},
-      body: jsonEncode({'fcmToken': tokenFcm}),
-    );
+    if (tokenFcm != null && accessToken != null) {
+        final response = await http.post(
+          Uri.parse('${ApiEndpoints.baseUrl}/notifications/save-token'),
+          headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'},
+          body: jsonEncode({'fcmToken': tokenFcm}),
+        );
+        debugPrint('\n=== FCM Update Response ===');
+        debugPrint('Status Code: ${response.statusCode}');
+        // debugPrint('Body: ${response.body}'); // Commented out for security/verbosity
+        debugPrint('=====================\n');
+    }
 
-    debugPrint('\n=== FCM Update Response ===');
-    debugPrint('Status Code: ${response.statusCode}');
-    debugPrint('Headers: ${response.headers}');
-    debugPrint('Body: ${response.body}');
-    debugPrint('=====================\n');
-
+    // 3. LOCAL NOTIFICATIONS INITIALIZATION
+    // Set presentation options for foreground notifications (needed for iOS)
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
+    
+    // ANDROID INITIALIZATION
     const android = AndroidInitializationSettings('ic_launcher');
-    const initSettings = InitializationSettings(android: android);
+    
+    // iOS INITIALIZATION
+    const DarwinInitializationSettings ios = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      // You can add a handler for when a notification is presented in the foreground here if needed.
+    );
+    
+    final initSettings = InitializationSettings(android: android, iOS: ios);
+
     await _localNotifications.initialize(
       initSettings,
       onDidReceiveBackgroundNotificationResponse: onSelectNotification,
       onDidReceiveNotificationResponse: onSelectNotification,
     );
 
+    // 4. FOREGROUND MESSAGE HANDLER
     FirebaseMessaging.onMessage.listen((message) {
       final notification = message.notification;
+      // You MUST use local notifications to display a notification when the app is in the foreground on iOS
       if (notification == null) return;
       try {
-        showLocalNotification(id: 0, title: notification.title!, body: notification.body!, payload: jsonEncode(message.toMap()));
+        debugPrint('FCM Foreground message received. Title: ${notification.title}');
+        showLocalNotification(
+          id: 0, 
+          title: notification.title!, 
+          body: notification.body!, 
+          payload: jsonEncode(message.toMap()),
+        );
       } catch (err) {
-        print('Error occurred while showing notitfication onMessage');
+        debugPrint('Error occurred while showing local notification onMessage: $err');
       }
     });
+
+    // 5. MESSAGE OPENED HANDLERS
     FirebaseMessaging.onMessageOpenedApp.listen(onMessageOpenedAppBackground);
     FirebaseMessaging.instance.getInitialMessage().then(onMessageOpenedAppBackground);
 
+    // 6. BACKGROUND MESSAGE HANDLER
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+    
   } catch (err) {
-    print(err);
+    print('An error occurred during Firebase/Notification initialization: $err');
   }
 }
