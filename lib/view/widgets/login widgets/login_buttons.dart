@@ -210,7 +210,9 @@ class LoginButtons extends StatelessWidget {
               ),
             ),
             onPressed: () async {
-              var user = await _appleAuthService.signInWithApple();
+              var user = await _appleAuthService.signInWithApple(updateUserInfo: (phoneNumber) {
+                userProvider.setPhoneNumber(PhoneNumber(phoneNumber: phoneNumber));
+              },);
               if (user != null) {
                 print("Signed-in as ${user.displayName}");
 
@@ -232,18 +234,22 @@ class LoginButtons extends StatelessWidget {
                 Provider.of<LoggedInProvider>(context, listen: false).logIn();
                 Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
+                userProvider.fetchProfileInfo();
+
                 if (!context.mounted) return;
+
+                MyApp.setupFCMNotification();
 
                 Future.delayed(const Duration(seconds: 2), () {
                   if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainStack(),));
                   }
                 });
               } else {
                 // Authentication failed or user canceled login
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('Apple sign-in is not supported on this platform'),
+                    content: const Text('Apple sign-in error'),
                     backgroundColor: avatarColor,
                     duration: const Duration(seconds: 3),
                   ),

@@ -64,5 +64,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We use your location to provide you with services based on your current vicinity, such as nearby auctions and product listings/</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The camera is needed to allow you to take and upload photos for your profile or product listings.</string>
 </dict>
 </plist>

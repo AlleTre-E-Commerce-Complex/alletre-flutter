@@ -7,6 +7,7 @@ import 'package:alletre_app/controller/services/apple_auth.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
 import 'package:alletre_app/utils/routes/named_routes.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
+import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
 import 'package:alletre_app/view/screens/login%20screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -290,9 +291,11 @@ class SignupButtons extends StatelessWidget {
 
                 if (!context.mounted) return;
 
+                MyApp.setupFCMNotification();
+
                 Future.delayed(const Duration(seconds: 2), () {
                   if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainStack(),));
                   }
                 });
               } else {
