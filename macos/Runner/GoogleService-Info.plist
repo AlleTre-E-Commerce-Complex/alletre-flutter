@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1043853491459-gqe7h7h4cg9omdsoaag5qm0pubu5lsru.apps.googleusercontent.com</string>
+	<string>1043853491459-1ul5h5bjnnnhck1p4q7uq5o1hgataoi4.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1043853491459-gqe7h7h4cg9omdsoaag5qm0pubu5lsru</string>
+	<string>com.googleusercontent.apps.1043853491459-1ul5h5bjnnnhck1p4q7uq5o1hgataoi4</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>1043853491459-2ntuv0c6mp761tuk8f1hb78ilp746pg0.apps.googleusercontent.com</string>
+	<string>1043853491459-0op88jp4efcegcbf7itlra4f68pl5fo4.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyD__JBXQY6br0wKBGFr1I65Rck2FeF05mI</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.alletreApp</string>
+	<string>com.alletre.app</string>
 	<key>PROJECT_ID</key>
 	<string>alletre-auctions</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,5 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1043853491459:ios:8bd70f2a36ca6fb7f6bd36</string>
+	<string>1:1043853491459:ios:a9a5aad0cbd3b930f6bd36</string>
 </dict>
-</plist>

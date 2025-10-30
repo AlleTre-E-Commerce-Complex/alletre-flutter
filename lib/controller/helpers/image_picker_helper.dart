@@ -12,7 +12,7 @@ Future<File?> pickMediaFromGallery({bool isImage = true}) async {
     pickedFile = await picker.pickVideo(source: ImageSource.gallery);
   }
   if (pickedFile != null) {
-    String? fileExtension = pickedFile!.path.split('.').last.toLowerCase();
+    String? fileExtension = pickedFile.path.split('.').last.toLowerCase();
     List<String> excludedExtensions = ['jpg', 'jpeg', 'png']; // Add extensions to exclude
 
     if (!excludedExtensions.contains(fileExtension)) {
