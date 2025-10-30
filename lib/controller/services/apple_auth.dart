@@ -47,20 +47,21 @@ class AppleAuthService {
           debugPrint(
               '🌐 Parsed Request URL: ${ApiEndpoints.baseUrl}/auth/oAuth');
 
-          final response = await http.post(
-            Uri.parse('${ApiEndpoints.baseUrl}/auth/oAuth'),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({
+          var body={
               'accessToken': appleCredential.authorizationCode,
               'idToken': await userCredential.user!.getIdToken(),
               'email': userCredential.user!.email,
               'displayName': userCredential.user!.displayName,
               'photoUrl': userCredential.user!.photoURL,
-              'provider': 'google',
-              'oAuthType': 'GOOGLE'
-            }),
+              'provider': 'apple',
+              'oAuthType': 'APPLE'
+            };
+          final response = await http.post(
+            Uri.parse('${ApiEndpoints.baseUrl}/auth/oAuth'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(body),
           );
 
           debugPrint('\n=== OAuth Response ===');

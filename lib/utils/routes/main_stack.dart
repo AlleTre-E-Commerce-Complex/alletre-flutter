@@ -139,7 +139,7 @@ class MainStack extends StatelessWidget {
                 //     });
                 //   }
                 // });
-              } else if (authMethod == 'google') {
+              } else if (authMethod == 'google') { 
                 final GoogleAuthService _googleAuthService = GoogleAuthService();
                 _googleAuthService.signInWithGoogle(
                   updateUserInfo: (phoneNumber) {
