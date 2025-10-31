@@ -147,6 +147,7 @@ class MainStack extends StatelessWidget {
                   },
                 ).then((userCredential) {
                   userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
+                  userProvider.fetchProfileInfo();
                 });
               }
               MyApp.setupFCMNotification();
