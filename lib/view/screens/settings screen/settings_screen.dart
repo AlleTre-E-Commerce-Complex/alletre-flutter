@@ -3,6 +3,7 @@ import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
 import 'package:alletre_app/controller/providers/user_provider.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
+import 'package:alletre_app/utils/app_logger.dart';
 import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/contact%20screen/contact_screen.dart';
 import 'package:alletre_app/view/widgets/common%20widgets/footer_elements_appbar.dart';
@@ -325,6 +326,14 @@ class SettingsScreen extends StatelessWidget {
               title: 'Delete Account',
               subtitle: 'Delete your account',
               onTap: () => _showDeleteAccountConfirmation(context),
+            ),
+            ProfileListTile(
+              icon: Icons.document_scanner_outlined,
+              title: 'Download Debug Log',
+              subtitle: 'Download your app\'s debug log',
+              onTap: () {
+                LogFileWriter().shareLogs();
+              },
             ),
             const SizedBox(height: 20),
             FutureBuilder<String>(

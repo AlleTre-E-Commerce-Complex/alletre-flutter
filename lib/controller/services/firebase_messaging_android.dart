@@ -8,6 +8,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../../utils/app_logger.dart';
+
 final FlutterSecureStorage _storage = const FlutterSecureStorage();
 final _localNotifications = FlutterLocalNotificationsPlugin();
 
@@ -16,7 +18,7 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
     final notification = message.notification;
     if (notification == null) return;
   } catch (err) {
-    debugPrint('Error occurred while showing notification : handleBackgroundMessage');
+    AppLogger.log.d('Error occurred while showing notification : handleBackgroundMessage');
     // print(err);
   }
 }
@@ -25,7 +27,7 @@ Future<void> onMessageOpenedAppBackground(RemoteMessage? message) async {
   try {
     if (message != null) {}
   } catch (err) {
-    debugPrint('Error occurred while showing notification : onMessageOpenedAppBackground');
+    AppLogger.log.d('Error occurred while showing notification : onMessageOpenedAppBackground');
     // print(err);
   }
 }
@@ -76,6 +78,7 @@ onSelectNotification(NotificationResponse notificationResponse) async {
 Future<void> initializedFirebaseNotification() async {
   final _firebaseMessaging = FirebaseMessaging.instance;
   try {
+    AppLogger.log.d('--- Firebase permission request start ---');
     // 1. REQUEST PERMISSIONS (Crucial for iOS)
     NotificationSettings settings = await _firebaseMessaging.requestPermission(
       alert: true,
@@ -87,7 +90,7 @@ Future<void> initializedFirebaseNotification() async {
       sound: true,
     );
     
-    debugPrint('User granted permission: ${settings.authorizationStatus}');
+    AppLogger.log.d('User granted permission: ${settings.authorizationStatus}');
 
     // 2. SUBSCRIBER AND TOKEN RETRIEVAL
     _firebaseMessaging.subscribeToTopic('ALLETRENOTIFY');
@@ -95,8 +98,8 @@ Future<void> initializedFirebaseNotification() async {
 
     // Call backend FCM Update endpoint
     // (Your existing backend logic is kept here)
-    debugPrint('📤 Preparing FCM Token update request...');
-    debugPrint('🌐 Parsed Request URL: ${ApiEndpoints.baseUrl}/notifications/save-token');
+    AppLogger.log.d('📤 Preparing FCM Token update request...');
+    AppLogger.log.d('🌐 Parsed Request URL: ${ApiEndpoints.baseUrl}/notifications/save-token');
 
     var accessToken = await _storage.read(key: 'access_token');
     if (tokenFcm != null && accessToken != null) {
@@ -105,10 +108,10 @@ Future<void> initializedFirebaseNotification() async {
           headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'},
           body: jsonEncode({'fcmToken': tokenFcm}),
         );
-        debugPrint('\n=== FCM Update Response ===');
-        debugPrint('Status Code: ${response.statusCode}');
-        // debugPrint('Body: ${response.body}'); // Commented out for security/verbosity
-        debugPrint('=====================\n');
+        AppLogger.log.d('\n=== FCM Update Response ===');
+        AppLogger.log.d('Status Code: ${response.statusCode}');
+        // AppLogger.log.d('Body: ${response.body}'); // Commented out for security/verbosity
+        AppLogger.log.d('=====================\n');
     }
 
     // 3. LOCAL NOTIFICATIONS INITIALIZATION
@@ -144,7 +147,7 @@ Future<void> initializedFirebaseNotification() async {
       // You MUST use local notifications to display a notification when the app is in the foreground on iOS
       if (notification == null) return;
       try {
-        debugPrint('FCM Foreground message received. Title: ${notification.title}');
+        AppLogger.log.d('FCM Foreground message received. Title: ${notification.title}');
         showLocalNotification(
           id: 0, 
           title: notification.title!, 
@@ -152,7 +155,7 @@ Future<void> initializedFirebaseNotification() async {
           payload: jsonEncode(message.toMap()),
         );
       } catch (err) {
-        debugPrint('Error occurred while showing local notification onMessage: $err');
+        AppLogger.log.d('Error occurred while showing local notification onMessage: $err');
       }
     });
 

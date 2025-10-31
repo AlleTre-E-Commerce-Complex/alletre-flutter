@@ -1,12 +1,13 @@
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:alletre_app/controller/services/token_refresh_service.dart';
+
+import '../../utils/app_logger.dart';
 
 class GoogleAuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -25,16 +26,16 @@ class GoogleAuthService {
 
   Future<UserCredential?> signInWithGoogle({Function(String phoneNumber)? updateUserInfo}) async {
     try {
-      debugPrint('Starting Google sign-in...');
+      AppLogger.log.d('Starting Google sign-in...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        debugPrint('❌ Google sign-in cancelled by user');
+        AppLogger.log.d('❌ Google sign-in cancelled by user');
         return null;
       }
 
-      debugPrint('✅ Google sign-in successful');
-      debugPrint('Getting Google authentication...');
+      AppLogger.log.d('✅ Google sign-in successful');
+      AppLogger.log.d('Getting Google authentication...');
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -50,9 +51,9 @@ class GoogleAuthService {
         TokenRefreshService().startTokenRefresh();
 
         // Call backend OAuth endpoint
-        debugPrint('📤 Preparing OAuth request...');
-        debugPrint('Base URL: ${ApiEndpoints.baseUrl}');
-        debugPrint('🌐 Parsed Request URL: ${ApiEndpoints.baseUrl}/auth/oAuth');
+        AppLogger.log.d('📤 Preparing OAuth request...');
+        AppLogger.log.d('Base URL: ${ApiEndpoints.baseUrl}');
+        AppLogger.log.d('🌐 Parsed Request URL: ${ApiEndpoints.baseUrl}/auth/oAuth');
 
         final response = await http.post(
           Uri.parse('${ApiEndpoints.baseUrl}/auth/oAuth'),
@@ -62,11 +63,11 @@ class GoogleAuthService {
           body: jsonEncode({'accessToken': googleAuth.accessToken, 'idToken': await userCredential.user!.getIdToken(), 'email': userCredential.user!.email, 'displayName': userCredential.user!.displayName, 'photoUrl': userCredential.user!.photoURL, 'provider': 'google', 'oAuthType': 'GOOGLE'}),
         );
 
-        debugPrint('\n=== OAuth Response ===');
-        debugPrint('Status Code: ${response.statusCode}');
-        debugPrint('Headers: ${response.headers}');
-        debugPrint('Body: ${response.body}');
-        debugPrint('=====================\n');
+        AppLogger.log.d('\n=== OAuth Response ===');
+        AppLogger.log.d('Status Code: ${response.statusCode}');
+        AppLogger.log.d('Headers: ${response.headers}');
+        AppLogger.log.d('Body: ${response.body}');
+        AppLogger.log.d('=====================\n');
 
         if (response.statusCode != 200 && response.statusCode != 201) {
           // If backend OAuth fails, sign out from Firebase
@@ -86,16 +87,16 @@ class GoogleAuthService {
           }
           await _storage.write(key: 'access_token', value: data['accessToken']);
           await _storage.write(key: 'refresh_token', value: data['refreshToken']);
-          debugPrint('✅ Backend tokens stored successfully');
+          AppLogger.log.d('✅ Backend tokens stored successfully');
         }
 
-        debugPrint('✅ Backend OAuth successful');
+        AppLogger.log.d('✅ Backend OAuth successful');
         return userCredential;
       }
 
       return userCredential;
     } catch (e) {
-      debugPrint('❌ Google sign-in error: $e');
+      AppLogger.log.d('❌ Google sign-in error: $e');
       // Clean up on error
       await _googleAuth.signOut();
       await _googleSignIn.signOut();
@@ -107,6 +108,7 @@ class GoogleAuthService {
   Future<void> signOut() async {
     TokenRefreshService().stopTokenRefresh();
     await _storage.delete(key: 'access_token');
+    await _googleSignIn.disconnect(); // <-- This clears the cached Google account
     await _googleSignIn.signOut();
     await _googleAuth.signOut();
   }

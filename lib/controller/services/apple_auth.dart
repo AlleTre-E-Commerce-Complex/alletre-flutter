@@ -4,11 +4,12 @@ import 'dart:convert';
 import 'package:alletre_app/controller/services/token_refresh_service.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'dart:io'; // To check for platform
+import 'dart:io';
+
+import '../../utils/app_logger.dart'; // To check for platform
 
 class AppleAuthService {
   final FirebaseAuth _appleAuth = FirebaseAuth.instance;
@@ -42,9 +43,9 @@ class AppleAuthService {
           TokenRefreshService().startTokenRefresh();
 
           // Call backend OAuth endpoint
-          debugPrint('📤 Preparing OAuth request...');
-          debugPrint('Base URL: ${ApiEndpoints.baseUrl}');
-          debugPrint(
+          AppLogger.log.d('📤 Preparing OAuth request...');
+          AppLogger.log.d('Base URL: ${ApiEndpoints.baseUrl}');
+          AppLogger.log.d(
               '🌐 Parsed Request URL: ${ApiEndpoints.baseUrl}/auth/oAuth');
 
           var body={
@@ -64,11 +65,11 @@ class AppleAuthService {
             body: jsonEncode(body),
           );
 
-          debugPrint('\n=== OAuth Response ===');
-          debugPrint('Status Code: ${response.statusCode}');
-          debugPrint('Headers: ${response.headers}');
-          debugPrint('Body: ${response.body}');
-          debugPrint('=====================\n');
+          AppLogger.log.d('\n=== OAuth Response ===');
+          AppLogger.log.d('Status Code: ${response.statusCode}');
+          AppLogger.log.d('Headers: ${response.headers}');
+          AppLogger.log.d('Body: ${response.body}');
+          AppLogger.log.d('=====================\n');
 
           if (response.statusCode != 200 && response.statusCode != 201) {
             // If backend OAuth fails, sign out from Firebase
@@ -93,10 +94,10 @@ class AppleAuthService {
                 key: 'access_token', value: data['accessToken']);
             await _storage.write(
                 key: 'refresh_token', value: data['refreshToken']);
-            debugPrint('✅ Backend tokens stored successfully');
+            AppLogger.log.d('✅ Backend tokens stored successfully');
           }
 
-          debugPrint('✅ Backend OAuth successful');
+          AppLogger.log.d('✅ Backend OAuth successful');
           return userCredential.user;
         }
         return userCredential.user;

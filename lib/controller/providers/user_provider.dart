@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:alletre_app/controller/helpers/user_services.dart';
 import 'package:alletre_app/controller/services/auth_services.dart';
+import 'package:alletre_app/controller/services/google_auth.dart';
 import 'package:alletre_app/model/user_model.dart';
 import 'package:alletre_app/utils/validators/form_validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -410,6 +411,9 @@ class UserProvider with ChangeNotifier {
   Future<void> logoutFirebase() async {
     if (_authMethod == 'google' || _authMethod == 'apple') {
       await FirebaseAuth.instance.signOut();
+      if (_authMethod == 'google') {
+        GoogleAuthService().signOut();
+      }
     }
 
     resetLoginForm();
