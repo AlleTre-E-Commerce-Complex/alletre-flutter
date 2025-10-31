@@ -1,4 +1,5 @@
 // --- 1. File Handling Class: Responsible for all Disk I/O ---
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -41,7 +42,12 @@ class LogFileWriter {
       if (!await file.exists()) {
         return 'Log file does not exist yet. Generate some logs first!';
       }
-      return await file.readAsString();
+      // Read the file as raw bytes first to handle potential encoding issues
+      final bytes = await file.readAsBytes();
+
+      // Decode bytes using UTF-8, with allowInvalid: true to replace
+      // non-UTF8 bytes (which caused the error) with '' instead of crashing.
+      return utf8.decode(bytes, allowMalformed: true);
     } catch (e) {
       // If reading fails (e.g., file permissions issue)
       return 'Error reading log file: $e';
@@ -59,7 +65,7 @@ class LogFileWriter {
       }
 
       // Use the share_plus package to prompt the user to share the file
-      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'Application Log File'));
+      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: await readLogs()));
     } catch (e) {
       AppLogger.log.e('Failed to share log file: $e');
     }
@@ -96,18 +102,23 @@ class FileLogOutput extends LogOutput {
   }
 }
 
+// --- 3. Custom Printer: Removes all decorations, headers, and colors ---
+class RawMessagePrinter extends LogPrinter {
+  // Overrides the log method to return only the raw message string
+  @override
+  List<String> log(LogEvent event) {
+    // We return the raw message. We check if it's a String, otherwise use toString() 
+    // to handle exceptions/objects.
+    return [event.message.toString()];
+  }
+}
+
 // --- 3. App Logger Configuration: Your central access point ---
 class AppLogger {
   // This is the instance you will call: AppLogger.log.i('Your message')
   static final Logger log = Logger(
     // Use the default PrettyPrinter for formatting (timestamps, level names)
-    printer: PrettyPrinter(
-      methodCount: 0, // Reduces noise by not showing the calling method stack in the log file
-      errorMethodCount: 5,
-      lineLength: 80,
-      colors: false, // Must be false for file writing
-      dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart, // Crucial: Ensures every line is timestamped
-    ),
+    printer: RawMessagePrinter(),
     // Crucial: Use the custom file writer output instead of the default ConsoleOutput
     output: FileLogOutput(),
     // Set the logging level to capture everything (Debug, Info, Warning, Error, Fatal)
