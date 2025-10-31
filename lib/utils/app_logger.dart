@@ -18,7 +18,7 @@ class LogFileWriter {
 
   // Gets the full file path in the application support directory
   Future<File> get _localFile async {
-    final directory = await getApplicationSupportDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     final path = directory.path;
     return File('$path/$_logFileName');
   }

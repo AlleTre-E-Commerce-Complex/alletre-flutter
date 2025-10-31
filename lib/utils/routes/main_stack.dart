@@ -139,16 +139,7 @@ class MainStack extends StatelessWidget {
                   userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
                 });
               }else if(authMethod=='apple'){
-                userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
-                  if (data.containsKey('id') == true) {
-                    userProvider.setName(data['userName']);
-                    userProvider.setEmail(data['email']);
-
-                    PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
-                      userProvider.setPhoneNumber(val);
-                    });
-                  }
-                });
+                userProvider.fetchProfileInfo();
               }
               // MyApp.setupFCMNotification();
             });
