@@ -1,4 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
+import 'dart:io';
+
 import 'package:alletre_app/app.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:alletre_app/controller/providers/tab_index_provider.dart';
@@ -123,151 +125,161 @@ class LoginButtons extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
-              side: const BorderSide(color: primaryColor),
-              padding: const EdgeInsets.only(right: 18),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () async {
-              var userCredential = await _googleAuthService.signInWithGoogle(
-                updateUserInfo: (phoneNumber) {
-                  userProvider.setPhoneNumber(PhoneNumber(phoneNumber: phoneNumber));
-                },
-              );
-              if (userCredential != null && userCredential.user != null) {
-                final user = userCredential.user!;
-                print("Signed in as ${user.displayName}");
-
-                // Store the user info in the provider
-                Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'google');
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Center(
-                      child: Text(
-                        'Logged in as ${user.displayName}',
-                      ),
+          Platform.isAndroid
+              ? OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    side: const BorderSide(color: primaryColor),
+                    padding: const EdgeInsets.only(right: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    backgroundColor: activeColor,
-                    duration: const Duration(seconds: 2),
                   ),
-                );
-
-                Provider.of<LoggedInProvider>(context, listen: false).logIn();
-
-                // First update the tab index to home
-                // Provider.of<TabIndexProvider>(context, listen: false)
-                //     .updateIndex(0);
-
-                if (!context.mounted) return;
-
-                MyApp.setupFCMNotification();
-
-                Future.delayed(const Duration(seconds: 2), () {
-                  if (context.mounted) {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MainStack()),
-                      (Route<dynamic> route) => false, // Removes all previous screens
+                  onPressed: () async {
+                    var userCredential = await _googleAuthService.signInWithGoogle(
+                      updateUserInfo: (phoneNumber) {
+                        userProvider.setPhoneNumber(PhoneNumber(phoneNumber: phoneNumber));
+                      },
                     );
-                  }
-                });
-              } else {
-                // Authentication failed or user canceled login
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Google sign-in failed. Please try again.'),
-                    backgroundColor: avatarColor,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset('assets/icons/google_icon.svg', width: 15, height: 15),
-                const SizedBox(width: 10),
-                const Text(
-                  'Login with Google',
-                  style: TextStyle(color: primaryColor, fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
-              side: const BorderSide(color: primaryColor),
-              padding: const EdgeInsets.only(right: 26),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () async {
-              var user = await _appleAuthService.signInWithApple(updateUserInfo: (phoneNumber) {
-                userProvider.setPhoneNumber(PhoneNumber(phoneNumber: phoneNumber));
-              },);
-              if (user != null) {
-                print("Signed-in as ${user.displayName}");
+                    if (userCredential != null && userCredential.user != null) {
+                      final user = userCredential.user!;
+                      print("Signed in as ${user.displayName}");
 
-                // Store the user info in the provider
-                Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'apple');
+                      // Store the user info in the provider
+                      Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'google');
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Center(
-                      child: Text(
-                        'Logged in as ${user.displayName}',
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Center(
+                            child: Text(
+                              'Logged in as ${user.displayName}',
+                            ),
+                          ),
+                          backgroundColor: activeColor,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+
+                      Provider.of<LoggedInProvider>(context, listen: false).logIn();
+
+                      // First update the tab index to home
+                      // Provider.of<TabIndexProvider>(context, listen: false)
+                      //     .updateIndex(0);
+
+                      if (!context.mounted) return;
+
+                      MyApp.setupFCMNotification();
+
+                      Future.delayed(const Duration(seconds: 2), () {
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const MainStack()),
+                            (Route<dynamic> route) => false, // Removes all previous screens
+                          );
+                        }
+                      });
+                    } else {
+                      // Authentication failed or user canceled login
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Google sign-in failed. Please try again.'),
+                          backgroundColor: avatarColor,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset('assets/icons/google_icon.svg', width: 15, height: 15),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Login with Google',
+                        style: TextStyle(color: primaryColor, fontSize: 14),
                       ),
+                    ],
+                  ),
+                )
+              : const SizedBox(),
+          const SizedBox(height: 16),
+          Platform.isIOS
+              ? OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    side: const BorderSide(color: primaryColor),
+                    padding: const EdgeInsets.only(right: 26),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    backgroundColor: activeColor,
-                    duration: const Duration(seconds: 3),
                   ),
-                );
+                  onPressed: () async {
+                    var user = await _appleAuthService.signInWithApple(
+                      updateUserInfo: (phoneNumber) {
+                        userProvider.setPhoneNumber(PhoneNumber(phoneNumber: phoneNumber));
+                      },
+                    );
+                    if (user != null) {
+                      print("Signed-in as ${user.displayName}");
 
-                Provider.of<LoggedInProvider>(context, listen: false).logIn();
-                Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
+                      // Store the user info in the provider
+                      Provider.of<UserProvider>(context, listen: false).setFirebaseUserInfo(user, 'apple');
 
-                userProvider.fetchProfileInfo();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Center(
+                            child: Text(
+                              'Logged in as ${user.displayName}',
+                            ),
+                          ),
+                          backgroundColor: activeColor,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
 
-                if (!context.mounted) return;
+                      Provider.of<LoggedInProvider>(context, listen: false).logIn();
+                      Provider.of<TabIndexProvider>(context, listen: false).updateIndex(1);
 
-                MyApp.setupFCMNotification();
+                      userProvider.fetchProfileInfo();
 
-                Future.delayed(const Duration(seconds: 2), () {
-                  if (context.mounted) {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainStack(),));
-                  }
-                });
-              } else {
-                // Authentication failed or user canceled login
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Apple sign-in error'),
-                    backgroundColor: avatarColor,
-                    duration: const Duration(seconds: 3),
+                      if (!context.mounted) return;
+
+                      MyApp.setupFCMNotification();
+
+                      Future.delayed(const Duration(seconds: 2), () {
+                        if (context.mounted) {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MainStack(),
+                              ));
+                        }
+                      });
+                    } else {
+                      // Authentication failed or user canceled login
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Apple sign-in error'),
+                          backgroundColor: avatarColor,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset('assets/icons/apple_icon.svg', width: 15, height: 15),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Login with Apple',
+                        style: TextStyle(color: primaryColor, fontSize: 14),
+                      ),
+                    ],
                   ),
-                );
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset('assets/icons/apple_icon.svg', width: 15, height: 15),
-                const SizedBox(width: 10),
-                const Text(
-                  'Login with Apple',
-                  style: TextStyle(color: primaryColor, fontSize: 14),
-                ),
-              ],
-            ),
-          ),
+                )
+              : const SizedBox(),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

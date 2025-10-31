@@ -1,7 +1,7 @@
 class ApiEndpoints {
-  static const String baseUrl = 'https://alletre.com/api';
+  static const String baseUrl = 'https://www.alletre.com/api';
   // static const String baseUrl = 'http://192.168.1.3:3001/api';
-  static const String baseOrigin = 'https://alletre.com';
+  static const String baseOrigin = 'https://www.alletre.com';
   // static const String baseOrigin = 'http://192.168.1.3:3001';
 
   // Auction endpoints
