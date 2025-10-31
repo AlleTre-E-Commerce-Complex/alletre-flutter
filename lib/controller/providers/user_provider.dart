@@ -512,9 +512,11 @@ class UserProvider with ChangeNotifier {
       user.name = data['userName'];
       user.email = data['email'];
 
-      PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString()).then((val) {
-        setPhoneNumber(val);
-      });
+      if(data['phone']!=null){
+        PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString()).then((val) {
+          setPhoneNumber(val);
+        });
+      }
     } catch (e) {
       return {'success': false, 'message': 'Failed to update profile'};
     }
