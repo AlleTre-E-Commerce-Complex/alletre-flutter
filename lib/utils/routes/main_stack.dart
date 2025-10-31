@@ -128,17 +128,7 @@ class MainStack extends StatelessWidget {
           if ((userProvider.displayEmail.isEmpty || userProvider.displayEmail.trim() == 'Add Email') && isLoggedIn) {
             userAuthService.getAuthMethod().then((authMethod) {
               if (authMethod == 'custom') {
-                userProvider.fetchProfileInfo();
-                // userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
-                //   if (data.containsKey('id') == true) {
-                //     userProvider.setName(data['userName']);
-                //     userProvider.setEmail(data['email']);
-
-                //     PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
-                //       userProvider.setPhoneNumber(val);
-                //     });
-                //   }
-                // });
+                userProvider.fetchProfileInfo();                
               } else if (authMethod == 'google') { 
                 final GoogleAuthService _googleAuthService = GoogleAuthService();
                 _googleAuthService.signInWithGoogle(
@@ -148,8 +138,19 @@ class MainStack extends StatelessWidget {
                 ).then((userCredential) {
                   userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
                 });
+              }else if(authMethod=='apple'){
+                userAuthService.fetchUserInfoForAlreadyLoggedInUser().then((data) {
+                  if (data.containsKey('id') == true) {
+                    userProvider.setName(data['userName']);
+                    userProvider.setEmail(data['email']);
+
+                    PhoneNumber.getRegionInfoFromPhoneNumber(data['phone'].toString(), 'AE').then((val) {
+                      userProvider.setPhoneNumber(val);
+                    });
+                  }
+                });
               }
-              MyApp.setupFCMNotification();
+              // MyApp.setupFCMNotification();
             });
           }
         }
