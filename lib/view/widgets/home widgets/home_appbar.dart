@@ -25,6 +25,8 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
           SvgPicture.asset(
             AppImages.header,
             fit: BoxFit.contain,
+            width: 75,
+            height: 29,
           ),
           // const SizedBox(width: 105),
           // Language Text

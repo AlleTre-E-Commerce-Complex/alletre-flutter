@@ -5,6 +5,7 @@ import 'package:alletre_app/controller/services/auth_services.dart';
 import 'package:alletre_app/utils/constants/api_endpoints.dart';
 import 'package:alletre_app/utils/images/images.dart';
 import 'package:alletre_app/utils/routes/main_stack.dart';
+import 'package:alletre_app/utils/themes/app_theme.dart';
 import 'package:alletre_app/view/screens/update_update_screen/update_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -32,6 +33,7 @@ class OnboardingPage3 extends StatelessWidget {
               height: 60,
               sliderButtonIconSize: 17,
               sliderRotate: true,
+              outerColor: primaryColor,
               onSubmit: () async {
                 // Mark onboarding as completed
                 final userAuthService = UserAuthService();

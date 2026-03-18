@@ -74,7 +74,7 @@ double getCardHeight(String title, {bool isAuctionProduct = false}) {
 // Define color palette
 const Color onSecondaryColor = Color(0xFF000000);
 const Color primaryVariantColor = Color(0xFF5b0c1f);
-const Color primaryColor = Color(0xFFa91d3a);
+const Color primaryColor = Color(0xFF2A3A54);
 const Color surfaceColor = Color(0xFFc73659);
 const Color secondaryColor = Color(0xFFFFFFFF);
 const Color errorColor = Color(0xFFB91C1C);
