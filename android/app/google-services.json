@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "1043853491459-oerd09meji848s3mk4vanc58tc5cpsd6.apps.googleusercontent.com",
+          "client_id": "1043853491459-0op88jp4efcegcbf7itlra4f68pl5fo4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.alletre.app",
-            "certificate_hash": "d279d73c7455e10997de5661225cc3c0055a87db"
+            "certificate_hash": "dc405f5a26da35fc8696e3282fdaf78416c2961b"
           }
         },
         {

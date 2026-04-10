@@ -39,7 +39,7 @@ class CategoriesPage extends StatelessWidget {
               title: item.nameEn,
               auctions: item.auctionsCount,
               listings: item.listingCount,
-              imageUrl: item.bannerLink!,
+              imageUrl: item.bannerLink == null ? "" : item.bannerLink!,
               onTap: (type) {
                 final auctionProvider = context.read<AuctionProvider>();
                 String title = 'Live Auctions';
@@ -103,14 +103,19 @@ class CategoryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image section
-            Expanded(
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
+            if (imageUrl == "") ...{
+              Expanded(
+                child: Image.asset('assets/images/no_image.png'),
               ),
-            ),
-
+            } else ...{
+              // Image section
+              Expanded(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            },
             // Gradient section
             Container(
               decoration: const BoxDecoration(
