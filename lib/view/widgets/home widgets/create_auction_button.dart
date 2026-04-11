@@ -65,7 +65,7 @@ class CreateAuctionButton extends StatelessWidget {
           ],
         );
       },
-      backgroundColor: Theme.of(context).primaryColorLight, // OLX-style bright color
+      backgroundColor: Theme.of(context).textSelectionTheme.selectionColor, // OLX-style bright color
       shape: const CircleBorder(),
       elevation: 6,
       child: Column(

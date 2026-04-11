@@ -128,8 +128,8 @@ class MainStack extends StatelessWidget {
           if ((userProvider.displayEmail.isEmpty || userProvider.displayEmail.trim() == 'Add Email') && isLoggedIn) {
             userAuthService.getAuthMethod().then((authMethod) {
               if (authMethod == 'custom') {
-                userProvider.fetchProfileInfo();                
-              } else if (authMethod == 'google') { 
+                userProvider.fetchProfileInfo();
+              } else if (authMethod == 'google') {
                 final GoogleAuthService _googleAuthService = GoogleAuthService();
                 _googleAuthService.signInWithGoogle(
                   updateUserInfo: (phoneNumber) {
@@ -139,7 +139,7 @@ class MainStack extends StatelessWidget {
                   userProvider.setFirebaseUserInfo(userCredential!.user, 'google');
                   userProvider.fetchProfileInfo();
                 });
-              }else if(authMethod=='apple'){
+              } else if (authMethod == 'apple') {
                 userProvider.fetchProfileInfo();
               }
               // MyApp.setupFCMNotification();

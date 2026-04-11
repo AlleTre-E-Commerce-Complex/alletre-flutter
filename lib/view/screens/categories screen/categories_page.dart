@@ -118,9 +118,9 @@ class CategoryCard extends StatelessWidget {
             },
             // Gradient section
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color.fromARGB(255, 64, 2, 18), Color.fromARGB(255, 109, 1, 28)],
+                  colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColorDark],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
@@ -144,8 +144,8 @@ class CategoryCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _infoBox(value: '$auctions', label: 'Auctions', onTap: onTap),
-                        _infoBox(value: '$listings', label: 'Listings', onTap: onTap),
+                        _infoBox(value: '$auctions', label: 'Auctions', onTap: onTap, context: context),
+                        _infoBox(value: '$listings', label: 'Listings', onTap: onTap, context: context),
                       ],
                     ),
                   ],
@@ -158,7 +158,7 @@ class CategoryCard extends StatelessWidget {
     );
   }
 
-  Widget _infoBox({String value = '', String label = '', Function(String)? onTap}) {
+  Widget _infoBox({String value = '', String label = '', Function(String)? onTap, BuildContext? context}) {
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -175,8 +175,8 @@ class CategoryCard extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context!).textSelectionTheme.selectionColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),

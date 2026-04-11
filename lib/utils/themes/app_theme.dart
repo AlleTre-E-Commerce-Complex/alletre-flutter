@@ -1,8 +1,7 @@
 import 'package:alletre_app/view/screens/home%20screen/home_contents.dart';
 import 'package:flutter/material.dart';
 
-final myRoute =
-    MaterialPageRoute(builder: (context) => const HomeScreenContent());
+final myRoute = MaterialPageRoute(builder: (context) => const HomeScreenContent());
 
 String getDisplayStatus(String status) {
   switch (status.toUpperCase()) {
@@ -56,9 +55,7 @@ Color getStatusColor(String status) {
 
 double getCardHeight(String title, {bool isAuctionProduct = false}) {
   if (title == "Similar Products") {
-    return isAuctionProduct
-        ? 337
-        : 333; // Use appropriate height based on item type
+    return isAuctionProduct ? 337 : 333; // Use appropriate height based on item type
   }
 
   switch (title) {
@@ -73,7 +70,7 @@ double getCardHeight(String title, {bool isAuctionProduct = false}) {
 
 // Define color palette
 const Color onSecondaryColor = Color(0xFF000000);
-const Color primaryVariantColor = Color(0xFF5b0c1f);
+const Color primaryVariantColor = Color.fromARGB(255, 12, 66, 91);
 const Color primaryColor = Color(0xFF2A3A54);
 // const Color surfaceColor = Color(0xFFc73659);
 const Color surfaceColor = Color.fromARGB(255, 39, 89, 163);
@@ -81,7 +78,7 @@ const Color secondaryColor = Color(0xFFFFFFFF);
 const Color errorColor = Color(0xFFB91C1C);
 const Color activeColor = Color(0xFF089F28);
 const Color scheduledColor = Color(0xFFD57A0A);
-const Color selectedIndex = Color(0xFFCDAF89);
+const Color selectedIndex = Color(0xFFd4af37);
 const Color highlightColor = Colors.yellow;
 Color buttonBgColor = Colors.grey.shade200;
 Color borderColor = Colors.grey.shade300;
@@ -104,8 +101,7 @@ Color telegramColor = const Color(0xFF0088CC);
 Color whatsappColor = const Color(0xFF25D366);
 Color snapchatColor = const Color(0xFFFFCC00);
 
-const TextStyle radioTextStyle = TextStyle(
-    fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500);
+const TextStyle radioTextStyle = TextStyle(fontSize: 14, color: onSecondaryColor, fontWeight: FontWeight.w500);
 
 ThemeData customTheme() {
   return ThemeData(
@@ -115,6 +111,7 @@ ThemeData customTheme() {
     splashColor: secondaryColor,
     hintColor: surfaceColor,
     fontFamily: 'Montserrat',
+    textSelectionTheme: TextSelectionThemeData(selectionColor: selectedIndex),
 
     // Define text styles using specific Montserrat font weights
     textTheme: const TextTheme(
@@ -123,11 +120,8 @@ ThemeData customTheme() {
             fontWeight: FontWeight.w400, // Light
             fontSize: 14,
             color: onSecondaryColor),
-        displayLarge: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            fontSize: 32,
-            color: onSecondaryColor),
+        displayLarge:
+            TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold, fontSize: 32, color: onSecondaryColor),
         displayMedium: TextStyle(
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.w500, // Medium
@@ -178,7 +172,7 @@ ThemeData customTheme() {
 
     // Color scheme with errorColor
     colorScheme: ColorScheme.fromSwatch(
-        primarySwatch: const MaterialColor(0xFFa91d3a, {
+        primarySwatch: const MaterialColor(0xFF1D40A9, {
       50: primaryColor,
       100: primaryColor,
       200: primaryColor,
@@ -218,8 +212,7 @@ ThemeData customTheme() {
         borderSide: BorderSide(color: onSecondaryColor), // Default border color
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-            color: primaryColor), // Border color when focused (tapped)
+        borderSide: BorderSide(color: primaryColor), // Border color when focused (tapped)
       ),
       errorStyle: TextStyle(
         color: errorColor, // Error text color
