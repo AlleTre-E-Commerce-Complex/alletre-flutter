@@ -65,93 +65,52 @@ class FilterBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               // Filter Option: Categories
-              _buildFilterTile(
-                context,
-                title: 'Categories',
-                icon: Icons.category,
-                onTap: () {
-                  // Navigate to or display a category picker
-                },
-              ),
-              // Filter Option: Brand
-              _buildFilterTile(
-                context,
-                title: 'Brand',
-                icon: Icons.branding_watermark,
-                onTap: () {
-                  // Navigate to or display a brand picker
-                },
-              ),
-              // Filter Option: Selling Type
-              _buildFilterTile(
-                context,
-                title: 'Selling Type',
-                icon: Icons.sell,
-                onTap: () {
-                  // Navigate to or display selling type options
-                },
-              ),
-              // Filter Option: Auction State
-              _buildFilterTile(
-                context,
-                title: 'Auction State',
-                icon: Icons.gavel,
-                onTap: () {
-                  // Navigate to or display auction state options
-                },
-              ),
-              // Filter Option: Location
-              _buildFilterTile(
-                context,
-                title: 'Location',
-                icon: Icons.location_on,
-                onTap: () {
-                  // Navigate to or display location options
-                },
-              ),
-              // Filter Option: Condition
-              _buildFilterTile(
-                context,
-                title: 'Condition',
-                icon: Icons.build,
-                onTap: () {
-                  // Navigate to or display condition picker
-                },
-              ),
-              // Filter Option: Price
-              _buildFilterTile(
-                context,
-                title: 'Price',
-                icon: Icons.price_change,
-                onTap: () {
-                  // Navigate to or display price range picker
-                },
-              ),
-              const SizedBox(height: 16),
-              // Center(
-              //   child: ElevatedButton(
-              //     onPressed: () {
-              //       // Handle filter application logic
-              //       Navigator.pop(context); // Close the bottom sheet
-              //     },
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: Theme.of(context).primaryColorDark,
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(8), // Adjust border radius here
-              //       ),
-              //       padding: const EdgeInsets.symmetric(
-              //           horizontal: 24, vertical: 12), // Optional padding for better appearance
-              //     ),
-              //     child: Text(
-              //       'Apply',
-              //       style: TextStyle(
-              //           color: Theme.of(context).textTheme.bodyMedium!.color,
-              //           fontWeight: FontWeight.w600,
-              //           fontSize: 13),
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(height: 8), // Bottom padding for the button
+              ListView(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                children: [
+                  _buildExpandableTile(
+                      title: "CATEGORIES",
+                      children: [
+                        SegmentedButton<String>(
+                          segments: const [
+                            ButtonSegment(value: 'cars', label: Text('Cars'), icon: Icon(Icons.car_rental)),
+                            ButtonSegment(value: 'properties', label: Text('Properties'), icon: Icon(Icons.apartment)),
+                          ],
+                          emptySelectionAllowed: true,
+                          selected: {},
+                          onSelectionChanged: (newSelection) {},
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return Theme.of(context)
+                                      .textSelectionTheme
+                                      .selectionColor!
+                                      .withValues(alpha: 0.1); // Selected background
+                                }
+                                return Theme.of(context).scaffoldBackgroundColor; // Unselected background
+                              },
+                            ),
+                            // 2. Foreground (Text/Icon) Color
+                            foregroundColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                return Theme.of(context).textSelectionTheme.selectionColor; // Selected text color
+                              },
+                            ),
+                            // 3. Border (Side) customization
+                            side: WidgetStateProperty.resolveWith<BorderSide>((Set<WidgetState> states) {
+                              return BorderSide(
+                                color: Theme.of(context).textSelectionTheme.selectionColor!, // Border color
+                                width: 1.0, // Border thickness
+                              );
+                            }),
+                          ),
+                        )
+                      ],
+                      context: context),
+                ],
+              )
             ],
           ),
         ),
@@ -159,20 +118,29 @@ class FilterBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterTile(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Theme.of(context).iconTheme.color),
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge,
+  // Generic tile builder
+  Widget _buildExpandableTile({required String title, required List<Widget> children, BuildContext? context}) {
+    return Theme(
+      data: Theme.of(context!).copyWith(dividerColor: Colors.transparent),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: ExpansionTile(
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFFD4AF37), // Golden color from screenshot
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          childrenPadding: const EdgeInsets.all(16),
+          children: children,
+        ),
       ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
     );
   }
 }
