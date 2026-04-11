@@ -15,14 +15,53 @@ class FilterBottomSheet extends StatelessWidget {
       ),
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Filter Options',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                        foregroundColor: Theme.of(context).textTheme.bodyMedium!.color,
+                        minimumSize: const Size(59, 25),
+                        maximumSize: const Size(150, 26),
+                        padding: EdgeInsets.zero,
+                        textStyle: const TextStyle(fontSize: 14),
+                        side: BorderSide(color: Theme.of(context).textSelectionTheme.selectionColor!)),
+                    child: Text(
+                      'Clear All',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).textSelectionTheme.selectionColor,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  Text(
+                    'Filters',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor),
+                  ),
+                  OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                        foregroundColor: Theme.of(context).textTheme.bodyMedium!.color,
+                        minimumSize: const Size(59, 25),
+                        maximumSize: const Size(60, 26),
+                        padding: EdgeInsets.zero,
+                        textStyle: const TextStyle(fontSize: 14),
+                        side: BorderSide(color: Theme.of(context).primaryColor)),
+                    child: Text(
+                      'Apply',
+                      style:
+                          TextStyle(fontSize: 12, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600),
+                    ),
+                  )
+                ],
               ),
               const SizedBox(height: 8),
               // Filter Option: Categories
@@ -89,24 +128,29 @@ class FilterBottomSheet extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Handle filter application logic
-                    Navigator.pop(context); // Close the bottom sheet
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(8), // Adjust border radius here
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12), // Optional padding for better appearance
-                  ),
-                  child: const Text('Apply Filters'),
-                ),
-              ),
+              // Center(
+              //   child: ElevatedButton(
+              //     onPressed: () {
+              //       // Handle filter application logic
+              //       Navigator.pop(context); // Close the bottom sheet
+              //     },
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Theme.of(context).primaryColorDark,
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(8), // Adjust border radius here
+              //       ),
+              //       padding: const EdgeInsets.symmetric(
+              //           horizontal: 24, vertical: 12), // Optional padding for better appearance
+              //     ),
+              //     child: Text(
+              //       'Apply',
+              //       style: TextStyle(
+              //           color: Theme.of(context).textTheme.bodyMedium!.color,
+              //           fontWeight: FontWeight.w600,
+              //           fontSize: 13),
+              //     ),
+              //   ),
+              // ),
               const SizedBox(height: 8), // Bottom padding for the button
             ],
           ),

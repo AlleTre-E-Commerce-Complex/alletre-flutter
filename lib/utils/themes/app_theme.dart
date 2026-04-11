@@ -112,7 +112,7 @@ ThemeData customTheme() {
     hintColor: surfaceColor,
     fontFamily: 'Montserrat',
     textSelectionTheme: TextSelectionThemeData(selectionColor: selectedIndex),
-
+    scaffoldBackgroundColor: secondaryColor,
     // Define text styles using specific Montserrat font weights
     textTheme: const TextTheme(
         displaySmall: TextStyle(

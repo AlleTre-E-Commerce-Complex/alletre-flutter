@@ -2,6 +2,7 @@
 
 import 'package:alletre_app/controller/helpers/address_service.dart';
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
+import 'package:alletre_app/view/widgets/home%20widgets/filter_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alletre_app/controller/providers/auction_provider.dart';
@@ -38,18 +39,15 @@ class AllAuctionsScreen extends StatelessWidget {
     final cardWidth = (screenWidth - 32 - 10) / 2;
     // Get card height based on whether we're showing auctions or listed products
     final cardHeight = getCardHeight(title,
-        isAuctionProduct: title == 'Similar Products'
-            ? auctions.firstOrNull?.isAuctionProduct ?? false
-            : title.contains('Auction'));
+        isAuctionProduct:
+            title == 'Similar Products' ? auctions.firstOrNull?.isAuctionProduct ?? false : title.contains('Auction'));
 
     // Create a filtered list based on the search query from AuctionProvider
     final auctionProvider = context.watch<AuctionProvider>();
     final filteredAuctions = auctionProvider.searchQuery.isEmpty
         ? auctions
         : auctions
-            .where((auction) => auction.title
-                .toLowerCase()
-                .contains(auctionProvider.searchQuery.toLowerCase()))
+            .where((auction) => auction.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase()))
             .toList();
 
     // debugPrint('Filtered auctions count: ${filteredAuctions.length}');
@@ -68,6 +66,18 @@ class AllAuctionsScreen extends StatelessWidget {
             onChanged: (value) {
               auctionProvider.searchItems(value);
             },
+            onFilterPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Theme.of(context).splashColor,
+                isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(topRight: Radius.circular(28), topLeft: Radius.circular(28))),
+                builder: (context) {
+                  return Container(width: double.infinity, padding: EdgeInsets.all(0), child: FilterBottomSheet());
+                },
+              );
+            },
           ),
           const SizedBox(height: 9),
           // Expanded content below the search field
@@ -79,14 +89,11 @@ class AllAuctionsScreen extends StatelessWidget {
                       Center(
                         child: Text(
                           placeholder,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium!
-                              .copyWith(color: onSecondaryColor, fontSize: 13),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium!.copyWith(color: onSecondaryColor, fontSize: 13),
                         ),
                       ),
-                      if (title == "Live Auctions" ||
-                          title == "Listed Products")
+                      if (title == "Live Auctions" || title == "Listed Products")
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(58, 32),
@@ -98,12 +105,10 @@ class AllAuctionsScreen extends StatelessWidget {
                           ),
                           onPressed: () async {
                             // Address check before auction creation
-                            final addresses =
-                                await AddressService.fetchAddresses();
+                            final addresses = await AddressService.fetchAddresses();
                             if (addresses.isEmpty) {
                               await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) => const AddLocationScreen()),
+                                MaterialPageRoute(builder: (_) => const AddLocationScreen()),
                               );
                               return;
                             }
@@ -111,21 +116,16 @@ class AllAuctionsScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ProductDetailsScreen(),
+                                  builder: (context) => const ProductDetailsScreen(),
                                 ),
                               );
                             } else {
-                              AuthHelper.showAuthenticationRequiredMessage(
-                                  context);
+                              AuthHelper.showAuthenticationRequiredMessage(context);
                             }
                           },
                           child: Text(
-                            title == "Live Auctions"
-                                ? "Create Now"
-                                : "List Product",
-                            style: const TextStyle(
-                                color: secondaryColor, fontSize: 9),
+                            title == "Live Auctions" ? "Create Now" : "List Product",
+                            style: const TextStyle(color: secondaryColor, fontSize: 9),
                           ),
                         ),
                     ],
