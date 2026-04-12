@@ -79,7 +79,27 @@ class AllAuctionsScreen extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 5),
+          // --- Start of Scrollable Filter Group ---
+          SizedBox(
+            height: 45, // Set a fixed height for the scroll area
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  _buildFilterButton(context, "Emirate", isSelected: false),
+                  const SizedBox(width: 10),
+                  _buildFilterButton(context, "Year", isSelected: false),
+                  const SizedBox(width: 10),
+                  _buildFilterButton(context, "Price Range", isSelected: true), // Gold border style
+                  const SizedBox(width: 10),
+                  _buildFilterButton(context, "Category", isSelected: false),
+                ],
+              ),
+            ),
+          ),
+          // --- End of Scrollable Filter Group ---          
           // Expanded content below the search field
           Expanded(
             child: filteredAuctions.isEmpty
@@ -150,6 +170,49 @@ class AllAuctionsScreen extends StatelessWidget {
                       },
                     ),
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildFilterButton(BuildContext context, String label, {bool isSelected = false}) {
+    // Define colors based on your screenshot
+    Color goldColor = Theme.of(context).textSelectionTheme.selectionColor!; // Approximate gold color from image
+    Color textColor = Theme.of(context).primaryColor; // Darker text color
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: isSelected ? goldColor : Colors.transparent,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.09),
+            blurRadius: 2,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? goldColor : textColor,
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            Icons.keyboard_arrow_down,
+            size: 18,
+            color: isSelected ? goldColor : textColor,
           ),
         ],
       ),

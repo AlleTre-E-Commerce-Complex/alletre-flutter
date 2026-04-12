@@ -319,14 +319,14 @@ class _ToggleGroupState extends State<ToggleGroup> {
               color: isSelected ? const Color(0xFFFFF9E7) : Colors.white,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: isSelected ? const Color(0xFFD4AF37) : Colors.grey.shade200,
+                color: isSelected ? Theme.of(context).textSelectionTheme.selectionColor! : Colors.grey.shade200,
                 width: 1.5,
               ),
             ),
             child: Text(
               brand,
               style: TextStyle(
-                color: isSelected ? const Color(0xFFD4AF37) : const Color(0xFF2E3E5C),
+                color: isSelected ? Theme.of(context).textSelectionTheme.selectionColor : Theme.of(context).primaryColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
