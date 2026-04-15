@@ -1,14 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/services.dart';
 
 Future<List<Map<String, dynamic>>> fetchCarBrandData() async {
-  final fileCarBrandData = File('assets/car-data.json');
-  final strCarBrandData = await fileCarBrandData.readAsString();
+  final strCarBrandData = await rootBundle.loadString('assets/car-data.json');
   Map<String, dynamic> carBrandData = jsonDecode(strCarBrandData);
 
   List<Map<String, dynamic>> lstCarBrands = [];
   for (var brand in carBrandData.keys) {
-    lstCarBrands.add(carBrandData[brand]);
+    lstCarBrands.add({brand: carBrandData[brand]});
   }
   return lstCarBrands;
 }

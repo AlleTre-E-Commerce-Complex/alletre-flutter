@@ -76,6 +76,7 @@ class FilterBottomSheet extends StatelessWidget {
                       builder: (context, value, child) {
                         return _buildExpandableTile(
                           title: "CATEGORIES",
+                          initiallyExpanded: true,
                           children: [
                             SegmentedButton<String>(
                               segments: const [
@@ -115,6 +116,9 @@ class FilterBottomSheet extends StatelessWidget {
                           context: context,
                         );
                       },
+                    ),
+                    SizedBox(
+                      height: 10,
                     ),
                     ValueListenableBuilder(
                       valueListenable: categoryNotifier,
@@ -160,10 +164,27 @@ class FilterBottomSheet extends StatelessWidget {
           }
           lstFilters.add(_buildExpandableTile(
             title: filter['name'].toString(),
+            initiallyExpanded: false,
             context: context,
             children: [
               ToggleGroup(
                 lstValues: lstValues,
+              ),
+            ],
+          ));
+          lstFilters.add(SizedBox(
+            height: 10,
+          ));
+        } else if (filter['type'] == 'range_selector') {
+          lstFilters.add(_buildExpandableTile(
+            title: filter['name'].toString(),
+            initiallyExpanded: false,
+            context: context,
+            children: [
+              RangeWidget(
+                adjusterEnabled: filter['need_adjuster'] as bool,
+                minValue: double.parse((filter['values'] as Map<String, dynamic>)['min'].toString()),
+                maxValue: double.parse((filter['values'] as Map<String, dynamic>)['max'].toString()),
               ),
             ],
           ));
@@ -177,7 +198,7 @@ class FilterBottomSheet extends StatelessWidget {
   }
 
   // Generic tile builder
-  Widget _buildExpandableTile({required String title, required List<Widget> children, BuildContext? context}) {
+  Widget _buildExpandableTile({required String title, required List<Widget> children, BuildContext? context, required bool initiallyExpanded}) {
     return Theme(
       data: Theme.of(context!).copyWith(dividerColor: Colors.transparent),
       child: Container(
@@ -187,6 +208,7 @@ class FilterBottomSheet extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: ExpansionTile(
+          initiallyExpanded: initiallyExpanded,
           title: Text(
             title,
             style: TextStyle(
@@ -204,7 +226,10 @@ class FilterBottomSheet extends StatelessWidget {
 }
 
 class RangeWidget extends StatefulWidget {
-  const RangeWidget({super.key});
+  final bool adjusterEnabled;
+  final double minValue;
+  final double maxValue;
+  const RangeWidget({super.key, required this.adjusterEnabled, required this.minValue, required this.maxValue});
 
   @override
   State<RangeWidget> createState() => _RangeWidgetState();
@@ -219,30 +244,31 @@ class _RangeWidgetState extends State<RangeWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 1. The Range Slider
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            activeTrackColor: Theme.of(context).textSelectionTheme.selectionColor, // Gold color
-            inactiveTrackColor: Theme.of(context).textSelectionTheme.selectionColor!.withValues(alpha: 0.3),
-            thumbColor: Theme.of(context).scaffoldBackgroundColor,
-            rangeThumbShape: const RoundRangeSliderThumbShape(
-              enabledThumbRadius: 12,
-              elevation: 4,
+        if (widget.adjusterEnabled)
+          // 1. The Range Slider
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: Theme.of(context).textSelectionTheme.selectionColor, // Gold color
+              inactiveTrackColor: Theme.of(context).textSelectionTheme.selectionColor!.withValues(alpha: 0.3),
+              thumbColor: Theme.of(context).scaffoldBackgroundColor,
+              rangeThumbShape: const RoundRangeSliderThumbShape(
+                enabledThumbRadius: 12,
+                elevation: 4,
+              ),
+            ),
+            child: RangeSlider(
+              values: _currentRangeValues,
+              min: widget.minValue,
+              max: widget.maxValue,
+              onChanged: (RangeValues values) {
+                setState(() {
+                  _currentRangeValues = values;
+                  _minController.text = values.start.round().toString();
+                  _maxController.text = values.end.round().toString();
+                });
+              },
             ),
           ),
-          child: RangeSlider(
-            values: _currentRangeValues,
-            min: 1,
-            max: 1000000,
-            onChanged: (RangeValues values) {
-              setState(() {
-                _currentRangeValues = values;
-                _minController.text = values.start.round().toString();
-                _maxController.text = values.end.round().toString();
-              });
-            },
-          ),
-        ),
         const SizedBox(height: 16),
         // 2. The Input Boxes
         Row(
@@ -310,13 +336,12 @@ class _ToggleGroupState extends State<ToggleGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8.0, // Gap between adjacent chips
-      runSpacing: 8.0, // Gap between lines
-      children: widget.lstValues.map((value) {
-        final isSelected = _selected.contains(value);
+    List<Widget> childWidgets = [];
+    for (var value in widget.lstValues) {
+      final isSelected = _selected.contains(value);
 
-        return GestureDetector(
+      childWidgets.add(
+        GestureDetector(
           onTap: () {
             setState(() {
               if (isSelected) {
@@ -346,8 +371,13 @@ class _ToggleGroupState extends State<ToggleGroup> {
               ),
             ),
           ),
-        );
-      }).toList(),
+        ),
+      );
+    }
+    return Wrap(
+      spacing: 8.0, // Gap between adjacent chips
+      runSpacing: 8.0, // Gap between lines
+      children: childWidgets,
     );
   }
 }
