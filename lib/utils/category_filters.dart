@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
-Future<List<String>> fetchCarBrandData() async {
+Future<List<Map<String, dynamic>>> fetchCarBrandData() async {
   final fileCarBrandData = File('assets/car-data.json');
   final strCarBrandData = await fileCarBrandData.readAsString();
   Map<String, dynamic> carBrandData = jsonDecode(strCarBrandData);
 
-  List<String> lstCarBrands = [];
+  List<Map<String, dynamic>> lstCarBrands = [];
   for (var brand in carBrandData.keys) {
-    lstCarBrands.add(brand);
+    lstCarBrands.add(carBrandData[brand]);
   }
   return lstCarBrands;
 }
@@ -26,7 +26,7 @@ final filtersCar = [
     'values': {'min': 1, 'max': 10000000}
   },
   {'name': 'BRAND', 'type': 'toggle_group', 'values': 'dynamic'},
-  {'name': 'MODEL', 'type': 'toggle_group', 'values': 'dynamic'},
+  {'name': 'MODEL', 'type': 'toggle_group', 'values': []},
   {
     'name': 'YEAR',
     'type': 'range_selector',
@@ -46,23 +46,7 @@ final filtersCar = [
   {
     'name': 'BODY TYPE',
     'type': 'toggle_group',
-    'values': [
-      'MICRO CARS',
-      'HATCHBACK',
-      'SEDAN',
-      'SUV',
-      'MPV',
-      'COUPE',
-      'CONVERTIBLE',
-      'WAGON',
-      'LUXURY',
-      'ANTIQUE',
-      'SPORTS CAR',
-      'SUPERCAR',
-      'LIMOUSINE',
-      'HYBRID CAR',
-      'OFF-ROAD' 'CLASSIC'
-    ]
+    'values': ['MICRO CARS', 'HATCHBACK', 'SEDAN', 'SUV', 'MPV', 'COUPE', 'CONVERTIBLE', 'WAGON', 'LUXURY', 'ANTIQUE', 'SPORTS CAR', 'SUPERCAR', 'LIMOUSINE', 'HYBRID CAR', 'OFF-ROAD' 'CLASSIC']
   },
   {
     'name': 'SEATS',
@@ -82,32 +66,7 @@ final filtersCar = [
   {
     'name': 'EXTERIOR COLOR',
     'type': 'toggle_group',
-    'values': [
-      'WHITE',
-      'BLACK',
-      'SILVER',
-      'GREY',
-      'RED',
-      'BLUE',
-      'NAVY BLUE',
-      'GREEN',
-      'YELLOW',
-      'ORANGE',
-      'PURPLE',
-      'BROWN',
-      'BEIGE',
-      'BURGUNDY',
-      'PINK',
-      'CYAN',
-      'TURQUOISE',
-      'BRONZE',
-      'GOLDEN',
-      'MATTE BLACK',
-      'ROSE GOLD',
-      'PEARL',
-      'CHAMPAGNE',
-      'TITANIUM'
-    ]
+    'values': ['WHITE', 'BLACK', 'SILVER', 'GREY', 'RED', 'BLUE', 'NAVY BLUE', 'GREEN', 'YELLOW', 'ORANGE', 'PURPLE', 'BROWN', 'BEIGE', 'BURGUNDY', 'PINK', 'CYAN', 'TURQUOISE', 'BRONZE', 'GOLDEN', 'MATTE BLACK', 'ROSE GOLD', 'PEARL', 'CHAMPAGNE', 'TITANIUM']
   },
   {
     'name': 'INTERIOR COLOR',
@@ -145,35 +104,12 @@ final filtersCar = [
   {
     'name': 'HORSEPOWER',
     'type': 'toggle_group',
-    'values': [
-      '0 - 99 HP',
-      '100 - 199 HP',
-      '200 - 299 HP',
-      '300 - 399 HP',
-      '400 - 499 HP',
-      '500 - 599 HP',
-      '600 - 699 HP',
-      '700 - 799 HP',
-      '800 - 899 HP',
-      '900+ HP',
-      'UNKNOWN'
-    ]
+    'values': ['0 - 99 HP', '100 - 199 HP', '200 - 299 HP', '300 - 399 HP', '400 - 499 HP', '500 - 599 HP', '600 - 699 HP', '700 - 799 HP', '800 - 899 HP', '900+ HP', 'UNKNOWN']
   },
   {
     'name': 'ENGINE CAPACITY (CC)',
     'type': 'toggle_group',
-    'values': [
-      '0 - 499 CC',
-      '500 - 999 CC',
-      '1000 - 1499 CC',
-      '1500 - 1999 CC',
-      '2000 - 2499 CC',
-      '2500 - 2999 CC',
-      '3000 - 3499 CC',
-      '3500 - 3999 CC',
-      '4000+ CC',
-      'UNKNOWN'
-    ]
+    'values': ['0 - 499 CC', '500 - 999 CC', '1000 - 1499 CC', '1500 - 1999 CC', '2000 - 2499 CC', '2500 - 2999 CC', '3000 - 3499 CC', '3500 - 3999 CC', '4000+ CC', 'UNKNOWN']
   },
   {
     'name': 'DOORS',

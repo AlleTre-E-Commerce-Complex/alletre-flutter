@@ -1,11 +1,15 @@
+import 'package:alletre_app/utils/category_filters.dart';
 import 'package:flutter/material.dart';
 
 class FilterBottomSheet extends StatelessWidget {
-  const FilterBottomSheet({super.key});
+  final List<Map<String, dynamic>> carBrandData;
+  const FilterBottomSheet({super.key, required this.carBrandData});
 
   @override
   Widget build(BuildContext context) {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+    final categoryNotifier = ValueNotifier<String>('');
 
     return Padding(
       padding: EdgeInsets.only(bottom: keyboardHeight),
@@ -37,16 +41,12 @@ class FilterBottomSheet extends StatelessWidget {
                           side: BorderSide(color: Theme.of(context).textSelectionTheme.selectionColor!)),
                       child: Text(
                         'Clear All',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).textSelectionTheme.selectionColor,
-                            fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).textSelectionTheme.selectionColor, fontWeight: FontWeight.w600),
                       ),
                     ),
                     Text(
                       'Filters',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor),
                     ),
                     OutlinedButton(
                       onPressed: () {},
@@ -60,8 +60,7 @@ class FilterBottomSheet extends StatelessWidget {
                           side: BorderSide(color: Theme.of(context).primaryColor)),
                       child: Text(
                         'Apply',
-                        style:
-                            TextStyle(fontSize: 12, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600),
                       ),
                     )
                   ],
@@ -72,67 +71,69 @@ class FilterBottomSheet extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   children: [
-                    _buildExpandableTile(
-                      title: "CATEGORIES",
-                      children: [
-                        SegmentedButton<String>(
-                          segments: const [
-                            ButtonSegment(value: 'cars', label: Text('Cars'), icon: Icon(Icons.car_rental)),
-                            ButtonSegment(value: 'properties', label: Text('Properties'), icon: Icon(Icons.apartment)),
+                    ValueListenableBuilder(
+                      valueListenable: categoryNotifier,
+                      builder: (context, value, child) {
+                        return _buildExpandableTile(
+                          title: "CATEGORIES",
+                          children: [
+                            SegmentedButton<String>(
+                              segments: const [
+                                ButtonSegment(value: 'cars', label: Text('Cars'), icon: Icon(Icons.car_rental)),
+                                ButtonSegment(value: 'properties', label: Text('Properties'), icon: Icon(Icons.apartment)),
+                              ],
+                              emptySelectionAllowed: true,
+                              selected: {categoryNotifier.value},
+                              onSelectionChanged: (newSelection) {
+                                categoryNotifier.value = newSelection.single;
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                                  (Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.selected)) {
+                                      return Theme.of(context).textSelectionTheme.selectionColor!.withValues(alpha: 0.1); // Selected background
+                                    }
+                                    return Theme.of(context).scaffoldBackgroundColor; // Unselected background
+                                  },
+                                ),
+                                // 2. Foreground (Text/Icon) Color
+                                foregroundColor: WidgetStateProperty.resolveWith<Color?>(
+                                  (Set<WidgetState> states) {
+                                    return Theme.of(context).textSelectionTheme.selectionColor; // Selected text color
+                                  },
+                                ),
+                                // 3. Border (Side) customization
+                                side: WidgetStateProperty.resolveWith<BorderSide>((Set<WidgetState> states) {
+                                  return BorderSide(
+                                    color: Theme.of(context).textSelectionTheme.selectionColor!, // Border color
+                                    width: 1.0, // Border thickness
+                                  );
+                                }),
+                              ),
+                            )
                           ],
-                          emptySelectionAllowed: true,
-                          selected: {},
-                          onSelectionChanged: (newSelection) {},
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                              (Set<WidgetState> states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return Theme.of(context)
-                                      .textSelectionTheme
-                                      .selectionColor!
-                                      .withValues(alpha: 0.1); // Selected background
-                                }
-                                return Theme.of(context).scaffoldBackgroundColor; // Unselected background
-                              },
-                            ),
-                            // 2. Foreground (Text/Icon) Color
-                            foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-                              (Set<WidgetState> states) {
-                                return Theme.of(context).textSelectionTheme.selectionColor; // Selected text color
-                              },
-                            ),
-                            // 3. Border (Side) customization
-                            side: WidgetStateProperty.resolveWith<BorderSide>((Set<WidgetState> states) {
-                              return BorderSide(
-                                color: Theme.of(context).textSelectionTheme.selectionColor!, // Border color
-                                width: 1.0, // Border thickness
-                              );
-                            }),
-                          ),
-                        )
-                      ],
-                      context: context,
+                          context: context,
+                        );
+                      },
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    // Inside your FilterBottomSheet ListView:
-                    _buildExpandableTile(
-                      title: "PRICE",
-                      context: context,
-                      children: [
-                        const RangeWidget(),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    _buildExpandableTile(
-                      title: "BRAND",
-                      context: context,
-                      children: [
-                        const ToggleGroup(),
-                      ],
+                    ValueListenableBuilder(
+                      valueListenable: categoryNotifier,
+                      builder: (context, value, child) {
+                        if (value != "") {
+                          var lstWidgets = generateFilterWidgets(value, context);
+                          lstWidgets
+                              .map((widget) => Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 0),
+                                    child: widget,
+                                  ))
+                              .toList();
+                          return Column(
+                            children: lstWidgets,
+                          );
+                        } else {
+                          return const SizedBox();
+                        }
+                      },
                     ),
                   ],
                 )
@@ -142,6 +143,37 @@ class FilterBottomSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<Widget> generateFilterWidgets(String category, BuildContext context) {
+    List<Widget> lstFilters = [];
+    if (category == 'cars') {
+      for (var filter in filtersCar) {
+        if (filter['type'] == 'toggle_group') {
+          var lstValues = [];
+          if (filter['values'] is String && filter['name'] == 'BRAND') {
+            for (var name in carBrandData) {
+              lstValues.add(name.keys.single);
+            }
+          } else {
+            lstValues = filter['values'] as List<dynamic>;
+          }
+          lstFilters.add(_buildExpandableTile(
+            title: filter['name'].toString(),
+            context: context,
+            children: [
+              ToggleGroup(
+                lstValues: lstValues,
+              ),
+            ],
+          ));
+          lstFilters.add(SizedBox(
+            height: 10,
+          ));
+        }
+      }
+    }
+    return lstFilters;
   }
 
   // Generic tile builder
@@ -265,50 +297,32 @@ class _RangeWidgetState extends State<RangeWidget> {
 }
 
 class ToggleGroup extends StatefulWidget {
-  const ToggleGroup({super.key});
+  final lstValues;
+  const ToggleGroup({super.key, required this.lstValues});
 
   @override
   State<ToggleGroup> createState() => _ToggleGroupState();
 }
 
 class _ToggleGroupState extends State<ToggleGroup> {
-  // Store multiple selected brands
-  final Set<String> _selectedBrands = {'AION', 'AUDI'};
-
-  final List<String> _brands = [
-    '212',
-    'ABARTH',
-    'ACURA',
-    'AION',
-    'ALFA ROMEO',
-    'ASTON MARTIN',
-    'AUDI',
-    'AVATR',
-    'BAIC',
-    'BENTLEY',
-    'BESTUNE',
-    'BMW',
-    'BORGWARD',
-    'BRILLIANCE',
-    'BUGATTI',
-    'BYD'
-  ];
+  // Store multiple selected values
+  final Set<String> _selected = {};
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 8.0, // Gap between adjacent chips
       runSpacing: 8.0, // Gap between lines
-      children: _brands.map((brand) {
-        final isSelected = _selectedBrands.contains(brand);
+      children: widget.lstValues.map((value) {
+        final isSelected = _selected.contains(value);
 
         return GestureDetector(
           onTap: () {
             setState(() {
               if (isSelected) {
-                _selectedBrands.remove(brand);
+                _selected.remove(value);
               } else {
-                _selectedBrands.add(brand);
+                _selected.add(value);
               }
             });
           },
@@ -324,7 +338,7 @@ class _ToggleGroupState extends State<ToggleGroup> {
               ),
             ),
             child: Text(
-              brand,
+              value,
               style: TextStyle(
                 color: isSelected ? Theme.of(context).textSelectionTheme.selectionColor : Theme.of(context).primaryColor,
                 fontWeight: FontWeight.bold,

@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:alletre_app/controller/helpers/address_service.dart';
+import 'package:alletre_app/utils/category_filters.dart';
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
 import 'package:alletre_app/view/widgets/home%20widgets/filter_bottom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -38,19 +39,18 @@ class AllAuctionsScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - 32 - 10) / 2;
     // Get card height based on whether we're showing auctions or listed products
-    final cardHeight = getCardHeight(title,
-        isAuctionProduct:
-            title == 'Similar Products' ? auctions.firstOrNull?.isAuctionProduct ?? false : title.contains('Auction'));
+    final cardHeight = getCardHeight(title, isAuctionProduct: title == 'Similar Products' ? auctions.firstOrNull?.isAuctionProduct ?? false : title.contains('Auction'));
 
     // Create a filtered list based on the search query from AuctionProvider
     final auctionProvider = context.watch<AuctionProvider>();
-    final filteredAuctions = auctionProvider.searchQuery.isEmpty
-        ? auctions
-        : auctions
-            .where((auction) => auction.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase()))
-            .toList();
+    final filteredAuctions = auctionProvider.searchQuery.isEmpty ? auctions : auctions.where((auction) => auction.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase())).toList();
 
-    // debugPrint('Filtered auctions count: ${filteredAuctions.length}');
+    List<Map<String,dynamic>> cardBrandData = [];
+    Future.delayed(const Duration(seconds: 0), () async {
+      cardBrandData = await fetchCarBrandData();
+    });
+
+    debugPrint('Filtered auctions count: ${filteredAuctions.length}');
 
     return Scaffold(
       appBar: NavbarElementsAppbar(
@@ -71,10 +71,9 @@ class AllAuctionsScreen extends StatelessWidget {
                 context: context,
                 backgroundColor: Theme.of(context).splashColor,
                 isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(topRight: Radius.circular(28), topLeft: Radius.circular(28))),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(28), topLeft: Radius.circular(28))),
                 builder: (context) {
-                  return Container(width: double.infinity, padding: EdgeInsets.all(0), child: FilterBottomSheet());
+                  return Container(width: double.infinity, padding: EdgeInsets.all(0), child: FilterBottomSheet(carBrandData: cardBrandData));
                 },
               );
             },
@@ -99,7 +98,7 @@ class AllAuctionsScreen extends StatelessWidget {
               ),
             ),
           ),
-          // --- End of Scrollable Filter Group ---          
+          // --- End of Scrollable Filter Group ---
           // Expanded content below the search field
           Expanded(
             child: filteredAuctions.isEmpty
@@ -109,8 +108,7 @@ class AllAuctionsScreen extends StatelessWidget {
                       Center(
                         child: Text(
                           placeholder,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium!.copyWith(color: onSecondaryColor, fontSize: 13),
+                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: onSecondaryColor, fontSize: 13),
                         ),
                       ),
                       if (title == "Live Auctions" || title == "Listed Products")
@@ -175,6 +173,7 @@ class AllAuctionsScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildFilterButton(BuildContext context, String label, {bool isSelected = false}) {
     // Define colors based on your screenshot
     Color goldColor = Theme.of(context).textSelectionTheme.selectionColor!; // Approximate gold color from image

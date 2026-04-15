@@ -108,6 +108,7 @@ flutter:
     - assets/html/privacy_policy.html
     - assets/images/
     - assets/icons/
+    - assets/car-data.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

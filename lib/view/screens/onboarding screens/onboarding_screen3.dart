@@ -22,7 +22,7 @@ class OnboardingPage3 extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          SvgPicture.asset(AppImages.onboarding3, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+          Image.asset(AppImages.onboarding3, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
           Positioned(
             bottom: 30,
             left: 30,

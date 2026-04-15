@@ -5,5 +5,5 @@
   "editor.gotoLocation.multipleDefinitions": "goto",
   "dart.previewHotReloadOnSave": true,
   "dart.flutterSdkPath": ".fvm/versions/3.32.5",
-  "dart.lineLength": 120
+  "dart.lineLength": 300
 }
