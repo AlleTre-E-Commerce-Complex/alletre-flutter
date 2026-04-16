@@ -250,7 +250,7 @@ class RangeWidget extends StatefulWidget {
 class _RangeWidgetState extends State<RangeWidget> {
   RangeValues _currentRangeValues = RangeValues(1, 1000000);
   TextEditingController _minController = TextEditingController(text: "1");
-  TextEditingController _maxController = TextEditingController(text: "1000000");
+  TextEditingController _maxController = TextEditingController(text: "100000");
 
   @override
   void initState() {
@@ -297,9 +297,16 @@ class _RangeWidgetState extends State<RangeWidget> {
                 child: _buildRangeInput(
               controller: _minController,
               onRangeChanged: (rangeValue) {
-                setState(() {
-                  _currentRangeValues = RangeValues(double.parse(rangeValue == "" ? "0" : rangeValue), _currentRangeValues.start);
-                });
+                double rangeStart = double.parse(rangeValue == "" ? "0" : rangeValue);
+                if (rangeStart >= widget.minValue && rangeStart < widget.maxValue) {
+                  setState(() {
+                    if (rangeStart > _currentRangeValues.end) {
+                      _currentRangeValues = RangeValues(_currentRangeValues.end, _currentRangeValues.end);
+                    } else {
+                      _currentRangeValues = RangeValues(rangeStart, _currentRangeValues.end);
+                    }
+                  });
+                }
               },
             )),
             const Padding(
@@ -310,9 +317,16 @@ class _RangeWidgetState extends State<RangeWidget> {
                 child: _buildRangeInput(
               controller: _maxController,
               onRangeChanged: (rangeValue) {
-                setState(() {
-                  _currentRangeValues = RangeValues(_currentRangeValues.start, double.parse(rangeValue == "" ? "0" : rangeValue));
-                });
+                double rangeEnd = double.parse(rangeValue == "" ? "0" : rangeValue);
+                if (rangeEnd <= widget.maxValue && rangeEnd > widget.minValue) {
+                  setState(() {
+                    if (rangeEnd < _currentRangeValues.start) {
+                      _currentRangeValues = RangeValues(_currentRangeValues.start, _currentRangeValues.start);
+                    } else {
+                      _currentRangeValues = RangeValues(_currentRangeValues.start, rangeEnd);
+                    }
+                  });
+                }
               },
             )),
           ],
