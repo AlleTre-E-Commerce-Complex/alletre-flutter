@@ -1,15 +1,26 @@
 import 'package:alletre_app/utils/category_filters.dart';
 import 'package:flutter/material.dart';
 
-class FilterBottomSheet extends StatelessWidget {
+class FilterBottomSheet extends StatefulWidget {
   final List<Map<String, dynamic>> carBrandData;
-  const FilterBottomSheet({super.key, required this.carBrandData});
+  final String defaultCategory;
+  const FilterBottomSheet({super.key, required this.carBrandData, required this.defaultCategory});
+
+  @override
+  State<FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<FilterBottomSheet> {
+  final categoryNotifier = ValueNotifier<String>('');
+  @override
+  void initState() {
+    super.initState();
+    categoryNotifier.value = widget.defaultCategory;
+  }
 
   @override
   Widget build(BuildContext context) {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-
-    final categoryNotifier = ValueNotifier<String>('');
 
     return Padding(
       padding: EdgeInsets.only(bottom: keyboardHeight),
@@ -156,7 +167,7 @@ class FilterBottomSheet extends StatelessWidget {
         if (filter['type'] == 'toggle_group') {
           var lstValues = [];
           if (filter['values'] is String && filter['name'] == 'BRAND') {
-            for (var name in carBrandData) {
+            for (var name in widget.carBrandData) {
               lstValues.add(name.keys.single);
             }
           } else {
@@ -176,6 +187,7 @@ class FilterBottomSheet extends StatelessWidget {
             height: 10,
           ));
         } else if (filter['type'] == 'range_selector') {
+          print(filter['need_adjuster']);
           lstFilters.add(_buildExpandableTile(
             title: filter['name'].toString(),
             initiallyExpanded: false,
@@ -236,9 +248,17 @@ class RangeWidget extends StatefulWidget {
 }
 
 class _RangeWidgetState extends State<RangeWidget> {
-  RangeValues _currentRangeValues = const RangeValues(1, 1000000);
-  final TextEditingController _minController = TextEditingController(text: "1");
-  final TextEditingController _maxController = TextEditingController(text: "1000000");
+  RangeValues _currentRangeValues = RangeValues(1, 1000000);
+  TextEditingController _minController = TextEditingController(text: "1");
+  TextEditingController _maxController = TextEditingController(text: "1000000");
+
+  @override
+  void initState() {
+    super.initState();
+    _currentRangeValues = RangeValues(widget.minValue, widget.maxValue);
+    _minController = TextEditingController(text: widget.minValue.round().toString());
+    _maxController = TextEditingController(text: widget.maxValue.round().toString());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -273,19 +293,35 @@ class _RangeWidgetState extends State<RangeWidget> {
         // 2. The Input Boxes
         Row(
           children: [
-            Expanded(child: _buildRangeInput(_minController)),
+            Expanded(
+                child: _buildRangeInput(
+              controller: _minController,
+              onRangeChanged: (rangeValue) {
+                setState(() {
+                  _currentRangeValues = RangeValues(double.parse(rangeValue == "" ? "0" : rangeValue), _currentRangeValues.start);
+                });
+              },
+            )),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.0),
               child: Text("—", style: TextStyle(color: Colors.grey)),
             ),
-            Expanded(child: _buildRangeInput(_maxController)),
+            Expanded(
+                child: _buildRangeInput(
+              controller: _maxController,
+              onRangeChanged: (rangeValue) {
+                setState(() {
+                  _currentRangeValues = RangeValues(_currentRangeValues.start, double.parse(rangeValue == "" ? "0" : rangeValue));
+                });
+              },
+            )),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildRangeInput(TextEditingController controller) {
+  Widget _buildRangeInput({required TextEditingController controller, required Function(String rangeValue) onRangeChanged}) {
     return Container(
       height: 45,
       decoration: BoxDecoration(
@@ -303,6 +339,7 @@ class _RangeWidgetState extends State<RangeWidget> {
                 border: InputBorder.none,
               ),
               style: const TextStyle(fontSize: 16, color: Color(0xFF2E3E5C)),
+              onChanged: onRangeChanged,
             ),
           ),
           // Up/Down arrows icon

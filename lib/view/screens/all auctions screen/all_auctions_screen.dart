@@ -45,7 +45,7 @@ class AllAuctionsScreen extends StatelessWidget {
     final auctionProvider = context.watch<AuctionProvider>();
     final filteredAuctions = auctionProvider.searchQuery.isEmpty ? auctions : auctions.where((auction) => auction.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase())).toList();
 
-    List<Map<String,dynamic>> cardBrandData = [];
+    List<Map<String, dynamic>> cardBrandData = [];
     Future.delayed(const Duration(seconds: 0), () async {
       cardBrandData = await fetchCarBrandData();
     });
@@ -73,7 +73,13 @@ class AllAuctionsScreen extends StatelessWidget {
                 isScrollControlled: true,
                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(28), topLeft: Radius.circular(28))),
                 builder: (context) {
-                  return Container(width: double.infinity, padding: EdgeInsets.all(0), child: FilterBottomSheet(carBrandData: cardBrandData));
+                  return Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(0),
+                      child: FilterBottomSheet(
+                        carBrandData: cardBrandData,
+                        defaultCategory: '',
+                      ));
                 },
               );
             },

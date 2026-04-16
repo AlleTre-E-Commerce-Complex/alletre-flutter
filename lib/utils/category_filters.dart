@@ -22,7 +22,7 @@ final filtersCar = [
     'name': 'PRICE',
     'type': 'range_selector',
     'need_adjuster': true,
-    'values': {'min': 1, 'max': 10000000}
+    'values': {'min': 1, 'max': 1000000}
   },
   {'name': 'BRAND', 'type': 'toggle_group', 'values': 'dynamic'},
   {'name': 'MODEL', 'type': 'toggle_group', 'values': []},
@@ -30,7 +30,7 @@ final filtersCar = [
     'name': 'YEAR',
     'type': 'range_selector',
     'need_adjuster': false,
-    'values': {'min': 1, 'max': 10000000}
+    'values': {'min': 1, 'max': 1000000}
   },
   {
     'name': 'EMIRATE',
