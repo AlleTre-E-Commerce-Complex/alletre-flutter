@@ -178,8 +178,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             initiallyExpanded: false,
             context: context,
             children: [
-              ToggleGroup(
-                lstValues: lstValues,
+              SizedBox(
+                height: 200,
+                child: ToggleGroup(
+                  lstValues: lstValues,
+                ),
               ),
             ],
           ));
@@ -385,6 +388,14 @@ class _ToggleGroupState extends State<ToggleGroup> {
   // Store multiple selected values
   final Set<String> _selected = {};
 
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> childWidgets = [];
@@ -425,10 +436,17 @@ class _ToggleGroupState extends State<ToggleGroup> {
         ),
       );
     }
-    return Wrap(
-      spacing: 8.0, // Gap between adjacent chips
-      runSpacing: 8.0, // Gap between lines
-      children: childWidgets,
+    return Scrollbar(
+      controller: _scrollController,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        child: Wrap(
+          spacing: 8.0, // Gap between adjacent chips
+          runSpacing: 8.0, // Gap between lines
+          children: childWidgets,
+        ),
+      ),
     );
   }
 }
