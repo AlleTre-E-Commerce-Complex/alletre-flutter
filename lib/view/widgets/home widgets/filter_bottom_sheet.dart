@@ -12,6 +12,7 @@ class FilterBottomSheet extends StatefulWidget {
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   final categoryNotifier = ValueNotifier<String>('');
+  ValueNotifier<List<String>>? modelNotifier;
   @override
   void initState() {
     super.initState();
@@ -163,15 +164,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   List<Widget> generateFilterWidgets(String category, BuildContext context) {
     List<Widget> lstFilters = [];
     if (category == 'cars') {
+      int index = 0;
       for (var filter in filtersCar) {
         if (filter['type'] == 'toggle_group') {
-          var lstValues = [];
+          List<String> lstValues = [];
           if (filter['values'] is String && filter['name'] == 'BRAND') {
             for (var name in widget.carBrandData) {
               lstValues.add(name.keys.single);
             }
+          } else if (filter['name'] == 'MODEL') {
+            modelNotifier = ValueNotifier<List<String>>([]);
           } else {
-            lstValues = filter['values'] as List<dynamic>;
+            lstValues = filter['values'] as List<String>;
           }
           lstFilters.add(_buildExpandableTile(
             title: filter['name'].toString(),
@@ -181,7 +185,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               SizedBox(
                 height: 200,
                 child: ToggleGroup(
+                  key: ValueKey(index),
                   lstValues: lstValues,
+                  modelFilterNotifier: modelNotifier,
+                  onSelectionChanged: (selectedValues) {
+                    if (filter['name'] == 'BRAND') {
+                      List<String> lstModelValues = [];
+                      for (String brandName in selectedValues) {
+                        for (Map<String, dynamic> brandInfo in widget.carBrandData) {
+                          if (brandName == brandInfo.keys.single) {
+                            for (String modelName in (brandInfo[brandName]['models'] as Map<String, dynamic>).keys) {
+                              lstModelValues.add(modelName);
+                            }
+                            break;
+                          }
+                        }
+                      }
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        modelNotifier!.value = lstModelValues;
+                      });
+                    }
+                  },
                 ),
               ),
             ],
@@ -197,6 +221,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             context: context,
             children: [
               RangeWidget(
+                key: ValueKey(index),
                 adjusterEnabled: filter['need_adjuster'] as bool,
                 minValue: double.parse((filter['values'] as Map<String, dynamic>)['min'].toString()),
                 maxValue: double.parse((filter['values'] as Map<String, dynamic>)['max'].toString()),
@@ -207,6 +232,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             height: 10,
           ));
         }
+        index++;
       }
     }
     return lstFilters;
@@ -377,8 +403,10 @@ class _RangeWidgetState extends State<RangeWidget> {
 }
 
 class ToggleGroup extends StatefulWidget {
-  final lstValues;
-  const ToggleGroup({super.key, required this.lstValues});
+  final List<String> lstValues;
+  final Function(Set<String> selectedValues) onSelectionChanged;
+  final ValueNotifier<List<String>>? modelFilterNotifier;
+  const ToggleGroup({super.key, required this.lstValues, required this.onSelectionChanged, this.modelFilterNotifier});
 
   @override
   State<ToggleGroup> createState() => _ToggleGroupState();
@@ -398,8 +426,48 @@ class _ToggleGroupState extends State<ToggleGroup> {
 
   @override
   Widget build(BuildContext context) {
+    Widget scrollbarWidget = Scrollbar(
+      controller: _scrollController,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        child: Wrap(
+          spacing: 8.0, // Gap between adjacent chips
+          runSpacing: 8.0, // Gap between lines
+          children: _generateChildWidgets(widget.lstValues),
+        ),
+      ),
+    );
+    if (widget.modelFilterNotifier != null) {
+      return ValueListenableBuilder(
+        valueListenable: widget.modelFilterNotifier!,
+        builder: (context, value, child) {
+          if (value.isNotEmpty) {
+            widget.lstValues.clear();
+            widget.lstValues.addAll(value);
+            scrollbarWidget = Scrollbar(
+              controller: _scrollController,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Wrap(
+                  spacing: 8.0, // Gap between adjacent chips
+                  runSpacing: 8.0, // Gap between lines
+                  children: _generateChildWidgets(widget.lstValues),
+                ),
+              ),
+            );
+          }
+          return scrollbarWidget;
+        },
+      );
+    }
+    return scrollbarWidget;
+  }
+
+  List<Widget> _generateChildWidgets(List<String> lstValues) {
     List<Widget> childWidgets = [];
-    for (var value in widget.lstValues) {
+    for (var value in lstValues) {
       final isSelected = _selected.contains(value);
 
       childWidgets.add(
@@ -412,6 +480,7 @@ class _ToggleGroupState extends State<ToggleGroup> {
                 _selected.add(value);
               }
             });
+            widget.onSelectionChanged(_selected);
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
@@ -436,17 +505,6 @@ class _ToggleGroupState extends State<ToggleGroup> {
         ),
       );
     }
-    return Scrollbar(
-      controller: _scrollController,
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        child: Wrap(
-          spacing: 8.0, // Gap between adjacent chips
-          runSpacing: 8.0, // Gap between lines
-          children: childWidgets,
-        ),
-      ),
-    );
+    return childWidgets;
   }
 }
