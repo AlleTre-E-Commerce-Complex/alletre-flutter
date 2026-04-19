@@ -163,77 +163,78 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   List<Widget> generateFilterWidgets(String category, BuildContext context) {
     List<Widget> lstFilters = [];
+    var filterFields = [];
     if (category == 'cars') {
-      int index = 0;
-      for (var filter in filtersCar) {
-        if (filter['type'] == 'toggle_group') {
-          List<String> lstValues = [];
-          if (filter['values'] is String && filter['name'] == 'BRAND') {
-            for (var name in widget.carBrandData) {
-              lstValues.add(name.keys.single);
-            }
-          } else if (filter['name'] == 'MODEL') {
-            modelNotifier = ValueNotifier<List<String>>([]);
-          } else {
-            lstValues = filter['values'] as List<String>;
+      filterFields = filtersCar;
+    } else if (category == 'property') {
+      filterFields = filtersProperty;
+    }
+    int index = 0;
+    for (var filter in filterFields) {
+      if (filter['type'] == 'toggle_group') {
+        List<String> lstValues = [];
+        if (filter['values'] is String && filter['name'] == 'BRAND') {
+          for (var name in widget.carBrandData) {
+            lstValues.add(name.keys.single);
           }
-          lstFilters.add(_buildExpandableTile(
-            title: filter['name'].toString(),
-            initiallyExpanded: false,
-            context: context,
-            children: [
-              SizedBox(
-                height: 200,
-                child: ToggleGroup(
-                  key: ValueKey(index),
-                  lstValues: lstValues,
-                  modelFilterNotifier: modelNotifier,
-                  onSelectionChanged: (selectedValues) {
-                    if (filter['name'] == 'BRAND') {
-                      List<String> lstModelValues = [];
-                      for (String brandName in selectedValues) {
-                        for (Map<String, dynamic> brandInfo in widget.carBrandData) {
-                          if (brandName == brandInfo.keys.single) {
-                            for (String modelName in (brandInfo[brandName]['models'] as Map<String, dynamic>).keys) {
-                              lstModelValues.add(modelName);
-                            }
-                            break;
-                          }
-                        }
-                      }
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        modelNotifier!.value = lstModelValues;
-                      });
-                    }
-                  },
-                ),
-              ),
-            ],
-          ));
-          lstFilters.add(SizedBox(
-            height: 10,
-          ));
-        } else if (filter['type'] == 'range_selector') {
-          print(filter['need_adjuster']);
-          lstFilters.add(_buildExpandableTile(
-            title: filter['name'].toString(),
-            initiallyExpanded: false,
-            context: context,
-            children: [
-              RangeWidget(
-                key: ValueKey(index),
-                adjusterEnabled: filter['need_adjuster'] as bool,
-                minValue: double.parse((filter['values'] as Map<String, dynamic>)['min'].toString()),
-                maxValue: double.parse((filter['values'] as Map<String, dynamic>)['max'].toString()),
-              ),
-            ],
-          ));
-          lstFilters.add(SizedBox(
-            height: 10,
-          ));
+        } else if (filter['name'] == 'MODEL') {
+          modelNotifier = ValueNotifier<List<String>>([]);
+        } else {
+          lstValues = filter['values'] as List<String>;
         }
-        index++;
+        lstFilters.add(_buildExpandableTile(
+          title: filter['name'].toString(),
+          initiallyExpanded: false,
+          context: context,
+          children: [
+            ToggleGroup(
+              key: ValueKey(index),
+              lstValues: lstValues,
+              modelFilterNotifier: filter['name'] == 'MODEL' ? modelNotifier : null,
+              onSelectionChanged: (selectedValues) {
+                if (filter['name'] == 'BRAND') {
+                  List<String> lstModelValues = [];
+                  for (String brandName in selectedValues) {
+                    for (Map<String, dynamic> brandInfo in widget.carBrandData) {
+                      if (brandName == brandInfo.keys.single) {
+                        for (String modelName in (brandInfo[brandName]['models'] as Map<String, dynamic>).keys) {
+                          lstModelValues.add(modelName);
+                        }
+                        break;
+                      }
+                    }
+                  }
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    modelNotifier!.value = lstModelValues;
+                  });
+                }
+              },
+            ),
+          ],
+        ));
+        lstFilters.add(SizedBox(
+          height: 10,
+        ));
+      } else if (filter['type'] == 'range_selector') {
+        print(filter['need_adjuster']);
+        lstFilters.add(_buildExpandableTile(
+          title: filter['name'].toString(),
+          initiallyExpanded: false,
+          context: context,
+          children: [
+            RangeWidget(
+              key: ValueKey(index),
+              adjusterEnabled: filter['need_adjuster'] as bool,
+              minValue: double.parse((filter['values'] as Map<String, dynamic>)['min'].toString()),
+              maxValue: double.parse((filter['values'] as Map<String, dynamic>)['max'].toString()),
+            ),
+          ],
+        ));
+        lstFilters.add(SizedBox(
+          height: 10,
+        ));
       }
+      index++;
     }
     return lstFilters;
   }
@@ -426,15 +427,27 @@ class _ToggleGroupState extends State<ToggleGroup> {
 
   @override
   Widget build(BuildContext context) {
-    Widget scrollbarWidget = Scrollbar(
-      controller: _scrollController,
-      thumbVisibility: true,
-      child: SingleChildScrollView(
+    double height = 0;
+    if (widget.lstValues.isEmpty) {
+      height = 50;
+    } else {
+      height = widget.lstValues.length * 30;
+      if (height > 200) {
+        height = 200;
+      }
+    }
+    Widget scrollbarWidget = SizedBox(
+      height: height,
+      child: Scrollbar(
         controller: _scrollController,
-        child: Wrap(
-          spacing: 8.0, // Gap between adjacent chips
-          runSpacing: 8.0, // Gap between lines
-          children: _generateChildWidgets(widget.lstValues),
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Wrap(
+            spacing: 8.0, // Gap between adjacent chips
+            runSpacing: 8.0, // Gap between lines
+            children: _generateChildWidgets(widget.lstValues),
+          ),
         ),
       ),
     );
@@ -445,15 +458,27 @@ class _ToggleGroupState extends State<ToggleGroup> {
           if (value.isNotEmpty) {
             widget.lstValues.clear();
             widget.lstValues.addAll(value);
-            scrollbarWidget = Scrollbar(
-              controller: _scrollController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
+            double height = 0;
+            if (widget.lstValues.isEmpty) {
+              height = 50;
+            } else {
+              height = widget.lstValues.length * 50;
+              if (height > 200) {
+                height = 200;
+              }
+            }
+            scrollbarWidget = SizedBox(
+              height: height,
+              child: Scrollbar(
                 controller: _scrollController,
-                child: Wrap(
-                  spacing: 8.0, // Gap between adjacent chips
-                  runSpacing: 8.0, // Gap between lines
-                  children: _generateChildWidgets(widget.lstValues),
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Wrap(
+                    spacing: 8.0, // Gap between adjacent chips
+                    runSpacing: 8.0, // Gap between lines
+                    children: _generateChildWidgets(widget.lstValues),
+                  ),
                 ),
               ),
             );
