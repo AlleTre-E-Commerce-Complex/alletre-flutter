@@ -1,4 +1,5 @@
 import 'package:alletre_app/utils/category_filters.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class FilterBottomSheet extends StatefulWidget {
@@ -13,6 +14,7 @@ class FilterBottomSheet extends StatefulWidget {
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   final categoryNotifier = ValueNotifier<String>('');
   ValueNotifier<List<String>>? modelNotifier;
+  List<Map<String, dynamic>> lstSelectedValues = [];
   @override
   void initState() {
     super.initState();
@@ -192,6 +194,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               lstValues: lstValues,
               modelFilterNotifier: filter['name'] == 'MODEL' ? modelNotifier : null,
               onSelectionChanged: (selectedValues) {
+                int _idxFilter = lstSelectedValues.indexWhere((_filter) => filter['name'] == _filter['name']);
+                if (_idxFilter == -1) {
+                  lstSelectedValues.add({'name': filter['name'], 'type': filter['type'], 'values': selectedValues});
+                } else if (_idxFilter > -1) {
+                  lstSelectedValues[_idxFilter] = {'name': filter['name'], 'type': filter['type'], 'values': selectedValues};
+                }
+                if (selectedValues.isEmpty) {
+                  lstSelectedValues.removeAt(_idxFilter);
+                }
                 if (filter['name'] == 'BRAND') {
                   List<String> lstModelValues = [];
                   for (String brandName in selectedValues) {
@@ -204,10 +215,30 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       }
                     }
                   }
+                  int _idxModel = lstSelectedValues.indexWhere((_filterModel) => _filterModel['name'] == 'MODEL');
+                  if (_idxModel > -1) {
+                    lstSelectedValues[_idxModel]['values'].removeWhere((_selectedModel) {
+                      int _idxModel = lstModelValues.indexWhere((_model) => _model == _selectedModel);
+                      if (_idxModel == -1) {
+                        return true;
+                      } else {
+                        return false;
+                      }
+                    });
+                  }
                   Future.delayed(const Duration(milliseconds: 500), () {
                     modelNotifier!.value = lstModelValues;
                   });
                 }
+              },
+              fetchInitialValues: () {
+                Set<String> initialValues = Set<String>.from(lstSelectedValues.singleWhere(
+                  (_selectedFilter) => _selectedFilter['name'] == filter['name'],
+                  orElse: () {
+                    return Map<String, dynamic>.from({'name': 'default', 'values': []});
+                  },
+                )['values']);
+                return initialValues;
               },
             ),
           ],
@@ -227,6 +258,33 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               adjusterEnabled: filter['need_adjuster'] as bool,
               minValue: double.parse((filter['values'] as Map<String, dynamic>)['min'].toString()),
               maxValue: double.parse((filter['values'] as Map<String, dynamic>)['max'].toString()),
+              onSelectionChanged: (minValue, maxValue) {
+                int _idxFilter = lstSelectedValues.indexWhere((_filter) => filter['name'] == _filter['name']);
+                if (_idxFilter == -1) {
+                  lstSelectedValues.add({
+                    'name': filter['name'],
+                    'type': filter['type'],
+                    'values': {'min': minValue, 'max': maxValue}
+                  });
+                } else if (_idxFilter > -1) {
+                  lstSelectedValues[_idxFilter] = {
+                    'name': filter['name'],
+                    'type': filter['type'],
+                    'values': {'min': minValue, 'max': maxValue}
+                  };
+                }
+              },
+              fetchInitialValues: () {
+                var rangeValues = lstSelectedValues.singleWhere(
+                  (_selectedFilter) => _selectedFilter['name'] == filter['name'],
+                  orElse: () {
+                    return Map<String, dynamic>.from({'name': 'default', 'values': filter['values']});
+                  },
+                )['values'];
+                double selectedMinValue = double.parse(rangeValues['min'].toString());
+                double selectedMaxValue = double.parse(rangeValues['max'].toString());
+                return RangeValues(selectedMinValue, selectedMaxValue);
+              },
             ),
           ],
         ));
@@ -271,7 +329,9 @@ class RangeWidget extends StatefulWidget {
   final bool adjusterEnabled;
   final double minValue;
   final double maxValue;
-  const RangeWidget({super.key, required this.adjusterEnabled, required this.minValue, required this.maxValue});
+  final Function(double minValue, double maxValue) onSelectionChanged;
+  final RangeValues Function() fetchInitialValues;
+  const RangeWidget({super.key, required this.adjusterEnabled, required this.minValue, required this.maxValue, required this.onSelectionChanged, required this.fetchInitialValues});
 
   @override
   State<RangeWidget> createState() => _RangeWidgetState();
@@ -285,9 +345,9 @@ class _RangeWidgetState extends State<RangeWidget> {
   @override
   void initState() {
     super.initState();
-    _currentRangeValues = RangeValues(widget.minValue, widget.maxValue);
-    _minController = TextEditingController(text: widget.minValue.round().toString());
-    _maxController = TextEditingController(text: widget.maxValue.round().toString());
+    _currentRangeValues = widget.fetchInitialValues();
+    _minController = TextEditingController(text: _currentRangeValues.start.round().toString());
+    _maxController = TextEditingController(text: _currentRangeValues.end.round().toString());
   }
 
   @override
@@ -315,6 +375,7 @@ class _RangeWidgetState extends State<RangeWidget> {
                   _currentRangeValues = values;
                   _minController.text = values.start.round().toString();
                   _maxController.text = values.end.round().toString();
+                  widget.onSelectionChanged(_currentRangeValues.start, _currentRangeValues.end);
                 });
               },
             ),
@@ -335,6 +396,7 @@ class _RangeWidgetState extends State<RangeWidget> {
                     } else {
                       _currentRangeValues = RangeValues(rangeStart, _currentRangeValues.end);
                     }
+                    widget.onSelectionChanged(_currentRangeValues.start, _currentRangeValues.end);
                   });
                 }
               },
@@ -355,6 +417,7 @@ class _RangeWidgetState extends State<RangeWidget> {
                     } else {
                       _currentRangeValues = RangeValues(_currentRangeValues.start, rangeEnd);
                     }
+                    widget.onSelectionChanged(_currentRangeValues.start, _currentRangeValues.end);
                   });
                 }
               },
@@ -407,7 +470,8 @@ class ToggleGroup extends StatefulWidget {
   final List<String> lstValues;
   final Function(Set<String> selectedValues) onSelectionChanged;
   final ValueNotifier<List<String>>? modelFilterNotifier;
-  const ToggleGroup({super.key, required this.lstValues, required this.onSelectionChanged, this.modelFilterNotifier});
+  final Set<String> Function() fetchInitialValues;
+  const ToggleGroup({super.key, required this.lstValues, required this.onSelectionChanged, this.modelFilterNotifier, required this.fetchInitialValues});
 
   @override
   State<ToggleGroup> createState() => _ToggleGroupState();
@@ -418,6 +482,13 @@ class _ToggleGroupState extends State<ToggleGroup> {
   final Set<String> _selected = {};
 
   final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _selected.clear();
+    _selected.addAll(widget.fetchInitialValues());
+  }
 
   @override
   void dispose() {
