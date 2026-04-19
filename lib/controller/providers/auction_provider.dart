@@ -90,6 +90,8 @@ class AuctionProvider with ChangeNotifier {
   String? _createAuctionError;
   String? _listProductError;
 
+  final List<Map<String, dynamic>> _filters = [];
+
   List<AuctionItem> get liveAuctions => _liveAuctions;
   List<AuctionItem> get liveMyAuctions => _liveMyAuctions;
   List<AuctionItem> get listedProducts => _listedProducts;
@@ -125,6 +127,8 @@ class AuctionProvider with ChangeNotifier {
   String? get errorSoldOut => _errorSoldOut;
   String? get createAuctionError => _createAuctionError;
   String? get listProductError => _listProductError;
+
+  List<Map<String, dynamic>> get filters => _filters;
 
   List<AuctionItem> getSimilarProducts(AuctionItem currentItem) {
     // Combine all available products
@@ -351,8 +355,12 @@ class AuctionProvider with ChangeNotifier {
   List<AuctionItem> _filteredExpiredAuctions = [];
   List<AuctionItem> _filteredSoldAuctions = [];
 
-  void searchItems(String query) {
+  void searchItems(String query, List<Map<String, dynamic>>? pFilters) {
     _searchQuery = query.toLowerCase();
+    if (pFilters != null) {
+      _filters.clear();
+      _filters.addAll(pFilters);
+    }
 
     _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
     _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();

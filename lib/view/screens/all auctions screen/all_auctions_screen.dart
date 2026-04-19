@@ -64,7 +64,7 @@ class AllAuctionsScreen extends StatelessWidget {
             isNavigable: false,
             query: auctionProvider.searchQuery,
             onChanged: (value) {
-              auctionProvider.searchItems(value);
+              auctionProvider.searchItems(value, null);
             },
             onFilterPressed: () {
               showModalBottomSheet(
@@ -78,7 +78,10 @@ class AllAuctionsScreen extends StatelessWidget {
                       padding: EdgeInsets.all(0),
                       child: FilterBottomSheet(
                         carBrandData: cardBrandData,
-                        defaultCategory: '',
+                        filters: [...auctionProvider.filters],
+                        onFilterComplete: (filters) {
+                          auctionProvider.searchItems(auctionProvider.searchQuery, filters);
+                        },
                       ));
                 },
               );

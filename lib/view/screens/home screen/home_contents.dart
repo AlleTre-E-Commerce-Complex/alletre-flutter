@@ -81,7 +81,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 isNavigable: false,
                 query: auctionProvider.searchQuery,
                 onChanged: (value) {
-                  context.read<AuctionProvider>().searchItems(value);
+                  context.read<AuctionProvider>().searchItems(value,null);
                 },
               ),
               const SizedBox(height: 5),

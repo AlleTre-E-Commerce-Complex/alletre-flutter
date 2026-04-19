@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final List<Map<String, dynamic>> carBrandData;
-  final String defaultCategory;
-  const FilterBottomSheet({super.key, required this.carBrandData, required this.defaultCategory});
+  final List<Map<String, dynamic>> filters;
+  final Function(List<Map<String, dynamic>> filters) onFilterComplete;
+  const FilterBottomSheet({super.key, required this.carBrandData, required this.filters, required this.onFilterComplete});
 
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
@@ -14,11 +15,12 @@ class FilterBottomSheet extends StatefulWidget {
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   final categoryNotifier = ValueNotifier<String>('');
   ValueNotifier<List<String>>? modelNotifier;
-  List<Map<String, dynamic>> lstSelectedValues = [];
   @override
   void initState() {
     super.initState();
-    categoryNotifier.value = widget.defaultCategory;
+    if (widget.filters.isNotEmpty) {
+      categoryNotifier.value = Set<String>.from(widget.filters.first['values']).first;
+    }
   }
 
   @override
@@ -63,7 +65,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor),
                     ),
                     OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        widget.onFilterComplete(widget.filters);
+                        Navigator.pop(context);
+                      },
                       style: OutlinedButton.styleFrom(
                           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                           foregroundColor: Theme.of(context).textTheme.bodyMedium!.color,
@@ -101,6 +106,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               selected: {categoryNotifier.value},
                               onSelectionChanged: (newSelection) {
                                 categoryNotifier.value = newSelection.single;
+                                widget.filters.clear();
+                                widget.filters.add({'name': 'CATEGORY', 'type': 'segmented_button', 'values': newSelection});
                               },
                               style: ButtonStyle(
                                 backgroundColor: WidgetStateProperty.resolveWith<Color?>(
@@ -168,7 +175,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     var filterFields = [];
     if (category == 'cars') {
       filterFields = filtersCar;
-    } else if (category == 'property') {
+    } else if (category == 'properties') {
       filterFields = filtersProperty;
     }
     int index = 0;
@@ -180,7 +187,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             lstValues.add(name.keys.single);
           }
         } else if (filter['name'] == 'MODEL') {
-          modelNotifier = ValueNotifier<List<String>>([]);
+          var brandFilter = widget.filters.singleWhere(
+            (_pfilter) => _pfilter['name'] == 'BRAND',
+            orElse: () => {},
+          );
+          var modelFilter = widget.filters.singleWhere(
+            (_pfilter) => _pfilter['name'] == 'MODEL',
+            orElse: () => {},
+          );
+          if (modelFilter.isNotEmpty) {
+            for (String brandName in brandFilter['values']) {
+              for (Map<String, dynamic> brandInfo in widget.carBrandData) {
+                if (brandName == brandInfo.keys.single) {
+                  for (String modelName in (brandInfo[brandName]['models'] as Map<String, dynamic>).keys) {
+                    lstValues.add(modelName);
+                  }
+                  break;
+                }
+              }
+            }
+          }
+          modelNotifier = ValueNotifier<List<String>>(lstValues);
         } else {
           lstValues = filter['values'] as List<String>;
         }
@@ -194,14 +221,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               lstValues: lstValues,
               modelFilterNotifier: filter['name'] == 'MODEL' ? modelNotifier : null,
               onSelectionChanged: (selectedValues) {
-                int _idxFilter = lstSelectedValues.indexWhere((_filter) => filter['name'] == _filter['name']);
+                int _idxFilter = widget.filters.indexWhere((_filter) => filter['name'] == _filter['name']);
                 if (_idxFilter == -1) {
-                  lstSelectedValues.add({'name': filter['name'], 'type': filter['type'], 'values': selectedValues});
+                  widget.filters.add({'name': filter['name'], 'type': filter['type'], 'values': selectedValues});
                 } else if (_idxFilter > -1) {
-                  lstSelectedValues[_idxFilter] = {'name': filter['name'], 'type': filter['type'], 'values': selectedValues};
+                  widget.filters[_idxFilter] = {'name': filter['name'], 'type': filter['type'], 'values': selectedValues};
                 }
                 if (selectedValues.isEmpty) {
-                  lstSelectedValues.removeAt(_idxFilter);
+                  widget.filters.removeAt(_idxFilter);
                 }
                 if (filter['name'] == 'BRAND') {
                   List<String> lstModelValues = [];
@@ -215,9 +242,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       }
                     }
                   }
-                  int _idxModel = lstSelectedValues.indexWhere((_filterModel) => _filterModel['name'] == 'MODEL');
+                  int _idxModel = widget.filters.indexWhere((_filterModel) => _filterModel['name'] == 'MODEL');
                   if (_idxModel > -1) {
-                    lstSelectedValues[_idxModel]['values'].removeWhere((_selectedModel) {
+                    widget.filters[_idxModel]['values'].removeWhere((_selectedModel) {
                       int _idxModel = lstModelValues.indexWhere((_model) => _model == _selectedModel);
                       if (_idxModel == -1) {
                         return true;
@@ -232,7 +259,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 }
               },
               fetchInitialValues: () {
-                Set<String> initialValues = Set<String>.from(lstSelectedValues.singleWhere(
+                Set<String> initialValues = Set<String>.from(widget.filters.singleWhere(
                   (_selectedFilter) => _selectedFilter['name'] == filter['name'],
                   orElse: () {
                     return Map<String, dynamic>.from({'name': 'default', 'values': []});
@@ -259,15 +286,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               minValue: double.parse((filter['values'] as Map<String, dynamic>)['min'].toString()),
               maxValue: double.parse((filter['values'] as Map<String, dynamic>)['max'].toString()),
               onSelectionChanged: (minValue, maxValue) {
-                int _idxFilter = lstSelectedValues.indexWhere((_filter) => filter['name'] == _filter['name']);
+                int _idxFilter = widget.filters.indexWhere((_filter) => filter['name'] == _filter['name']);
                 if (_idxFilter == -1) {
-                  lstSelectedValues.add({
+                  widget.filters.add({
                     'name': filter['name'],
                     'type': filter['type'],
                     'values': {'min': minValue, 'max': maxValue}
                   });
                 } else if (_idxFilter > -1) {
-                  lstSelectedValues[_idxFilter] = {
+                  widget.filters[_idxFilter] = {
                     'name': filter['name'],
                     'type': filter['type'],
                     'values': {'min': minValue, 'max': maxValue}
@@ -275,7 +302,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 }
               },
               fetchInitialValues: () {
-                var rangeValues = lstSelectedValues.singleWhere(
+                var rangeValues = widget.filters.singleWhere(
                   (_selectedFilter) => _selectedFilter['name'] == filter['name'],
                   orElse: () {
                     return Map<String, dynamic>.from({'name': 'default', 'values': filter['values']});
@@ -526,9 +553,10 @@ class _ToggleGroupState extends State<ToggleGroup> {
       return ValueListenableBuilder(
         valueListenable: widget.modelFilterNotifier!,
         builder: (context, value, child) {
+          var newValue = [...value];
           if (value.isNotEmpty) {
             widget.lstValues.clear();
-            widget.lstValues.addAll(value);
+            widget.lstValues.addAll(newValue);
             double height = 0;
             if (widget.lstValues.isEmpty) {
               height = 50;

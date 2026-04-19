@@ -5,9 +5,9 @@ class AppImages {
   static const String banner4 = 'assets/images/banner4.jpg';
   static const String header = 'assets/images/arbon_header.svg';
   static const String splash = 'assets/images/arbon_splash.svg';
-  static const String onboarding1 = 'assets/images/onboarding1.PNG';
-  static const String onboarding2 = 'assets/images/onboarding2.PNG';
-  static const String onboarding3 = 'assets/images/onboarding3.PNG';
+  static const String onboarding1 = 'assets/images/onboarding1.png';
+  static const String onboarding2 = 'assets/images/onboarding2.png';
+  static const String onboarding3 = 'assets/images/onboarding3.png';
 
   static const List<String> bannerImages = [
     banner1,

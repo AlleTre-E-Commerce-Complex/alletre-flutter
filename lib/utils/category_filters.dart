@@ -141,13 +141,13 @@ final filtersProperty = [
     'name': 'PRICE',
     'type': 'range_selector',
     'need_adjuster': true,
-    'values': {'min': 1, 'max': 10000000}
+    'values': {'min': 1, 'max': 1000000}
   },
   {
     'name': 'AREA / SIZE(SQFT)',
     'type': 'range_selector',
     'need_adjuster': false,
-    'values': {'min': 1, 'max': 10000000}
+    'values': {'min': 1, 'max': 1000000}
   },
   {
     'name': 'PROPERTY TYPE',
