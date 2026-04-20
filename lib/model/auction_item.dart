@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:convert';
 import 'package:alletre_app/model/item_location.dart';
 import 'package:alletre_app/model/custom_field_model.dart';
+import 'package:alletre_app/utils/category_filters.dart';
 import 'package:flutter/foundation.dart';
 
 class AuctionItem {
@@ -48,6 +49,7 @@ class AuctionItem {
   final String? deliveryType;
   bool isBuyNow;
   final List<Map<String, dynamic>>? payment;
+  final Map<String, dynamic>? filters;
 
   AuctionItem(
       {required this.id,
@@ -91,7 +93,8 @@ class AuctionItem {
       required this.isMyAuction,
       this.deliveryType,
       required this.isBuyNow,
-      required this.payment});
+      required this.payment,
+      this.filters});
 
   // Add copyWith method for real-time updates
   AuctionItem copyWith({
@@ -136,6 +139,7 @@ class AuctionItem {
     String? deliveryType,
     bool? isBuyNow,
     List<Map<String, dynamic>>? payment,
+    Map<String, dynamic>? filters,
   }) {
     return AuctionItem(
         id: id ?? this.id,
@@ -179,7 +183,8 @@ class AuctionItem {
         isMyAuction: isMyAuction ?? this.isMyAuction,
         deliveryType: deliveryType ?? this.deliveryType,
         isBuyNow: this.isBuyNow,
-        payment: this.payment);
+        payment: this.payment,
+        filters: this.filters);
   }
 
   // Helper for printing long strings in chunks
@@ -214,6 +219,7 @@ class AuctionItem {
       final subCategoryId = product['subCategoryId'] as int? ?? 0;
 
       // Parse custom fields if available
+
       CategoryFields? customFields;
       if (json['customFields'] != null) {
         try {
@@ -393,6 +399,15 @@ class AuctionItem {
         }
       }
 
+      // Custom filter fields population
+      Map<String, dynamic> pFilters = {};
+      for (var filter in filtersCar) {
+        pFilters[filter['backend_key_name'].toString()] = product[filter['backend_key_name']];
+      }
+      for (var filter in filtersProperty) {
+        pFilters[filter['backend_key_name'].toString()] = product[filter['backend_key_name']];
+      }
+
       // Debug: Print the relevant fields just before returning
       printLongString('[AuctionItem.fromJson] RAW JSON: ${jsonEncode(json)}');
       print('[AuctionItem.fromJson] sellerAddress: ${json['location']?['address']}');
@@ -400,6 +415,7 @@ class AuctionItem {
       print('[AuctionItem.fromJson] sellerCity: ${json['location']?['city']?['nameEn']}');
       print('[AuctionItem.fromJson] sellerCountry: ${json['location']?['country']?['nameEn']}');
       print('[AuctionItem.fromJson] sellerPhone: ${json['location']?['phone']}');
+      print('[AuctionItem.fromJson] filters: $pFilters');
 
       return AuctionItem(
           id: json['id'] as int? ?? 0,
@@ -443,7 +459,8 @@ class AuctionItem {
           isMyAuction: json['isMyAuction'] as bool? ?? false,
           deliveryType: json['deliveryType'] as String?,
           isBuyNow: false,
-          payment: payment);
+          payment: payment,
+          filters: pFilters);
     } catch (e) {
       log('Error creating AuctionItem: $e');
       rethrow;
