@@ -116,8 +116,23 @@ class AllAuctionsScreen extends StatelessWidget {
                     padding: EdgeInsets.all(0),
                     child: FilterBottomSheetLite(
                       filterField: filter,
-                      onFilterComplete: (filters) {
-                        // auctionProvider.searchItems(auctionProvider.searchQuery, filters);
+                      onFilterComplete: (newValue) {
+                        int index = 0;
+                        bool isFound = false;
+                        for (var tFilter in auctionProvider.filters) {
+                          if (filter['name'] == tFilter['name']) {
+                            isFound = true;
+                            break;
+                          }
+                          index++;
+                        }
+                        if (isFound) {
+                          auctionProvider.filters[index]['values'] = newValue;
+                        } else if (!isFound) {
+                          filter['values'] = newValue;
+                          auctionProvider.filters.add(filter);
+                        }
+                        auctionProvider.searchItems(auctionProvider.searchQuery, [...auctionProvider.filters]);
                       },
                       fetchInitialValue: (pFilterField) {
                         for (var filter in auctionProvider.filters) {

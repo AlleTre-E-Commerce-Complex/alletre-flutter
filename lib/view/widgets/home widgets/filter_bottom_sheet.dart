@@ -638,7 +638,7 @@ class _ToggleGroupState extends State<ToggleGroup> {
 class FilterBottomSheetLite extends StatefulWidget {
   final Map<String, dynamic> filterField;
   final dynamic Function(Map<String, dynamic> pFilterField) fetchInitialValue;
-  final Function(List<Map<String, dynamic>> filters) onFilterComplete;
+  final Function(dynamic newValue) onFilterComplete;
   const FilterBottomSheetLite({super.key, required this.filterField, required this.onFilterComplete, required this.fetchInitialValue});
 
   @override
@@ -646,8 +646,7 @@ class FilterBottomSheetLite extends StatefulWidget {
 }
 
 class _FilterBottomSheetLiteState extends State<FilterBottomSheetLite> {
-  final categoryNotifier = ValueNotifier<String>('');
-  ValueNotifier<List<String>>? modelNotifier;
+  dynamic newValue;
   @override
   void initState() {
     super.initState();
@@ -681,7 +680,7 @@ class _FilterBottomSheetLiteState extends State<FilterBottomSheetLite> {
                     ),
                     OutlinedButton(
                       onPressed: () {
-                        // widget.onFilterComplete(widget.filters);
+                        widget.onFilterComplete(newValue);
                         Navigator.pop(context);
                       },
                       style: OutlinedButton.styleFrom(
@@ -705,8 +704,10 @@ class _FilterBottomSheetLiteState extends State<FilterBottomSheetLite> {
                   children: [
                     if (widget.filterField['type'] == 'toggle_group')
                       ToggleGroup(
-                        lstValues: widget.filterField['values'],
-                        onSelectionChanged: (selectedValues) {},
+                        lstValues: widget.filterField['values'].toList(),
+                        onSelectionChanged: (selectedValues) {
+                          newValue = selectedValues;
+                        },
                         fetchInitialValues: () {
                           var values = widget.fetchInitialValue(widget.filterField);
                           values ??= <String>{};
@@ -718,7 +719,9 @@ class _FilterBottomSheetLiteState extends State<FilterBottomSheetLite> {
                         adjusterEnabled: widget.filterField['need_adjuster'],
                         minValue: double.parse(widget.filterField['values']['min'].toString()),
                         maxValue: double.parse(widget.filterField['values']['max'].toString()),
-                        onSelectionChanged: (minValue, maxValue) {},
+                        onSelectionChanged: (minValue, maxValue) {
+                          newValue = {'min': minValue, 'max': maxValue};
+                        },
                         fetchInitialValues: () {
                           var values = widget.fetchInitialValue(widget.filterField);
 
