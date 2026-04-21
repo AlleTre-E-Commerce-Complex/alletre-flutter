@@ -44,30 +44,98 @@ class AllAuctionsScreen extends StatelessWidget {
     // Create a filtered list based on the search query from AuctionProvider
     final auctionProvider = context.watch<AuctionProvider>();
 
+    String generalCategory = "All";
+
+    final filteredAuctions = [];
     if (auctionProvider.filters.isNotEmpty) {
-      auctions.removeWhere((item) {
+      generalCategory = Set<String>.from(auctionProvider.filters[0]['values']).elementAt(0);
+      filteredAuctions.addAll(auctions.where((item) {
         bool isOk = false;
-        for (var filter in auctionProvider.filters) {
-          bool isFoundFilter = false;
-          for (var filterValue in filter['values']) {
-            var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
-            if (productValue == filterValue.toString().toLowerCase()) {
-              isFoundFilter = true;
-              break;
+        if (item.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase())) {
+          for (var filter in auctionProvider.filters) {
+            bool isFoundFilter = false;
+            for (var filterValue in filter['values']) {
+              var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
+              if (productValue == filterValue.toString().toLowerCase()) {
+                isFoundFilter = true;
+                break;
+              }
             }
-          }
-          if (!isFoundFilter) {
-            isOk = true;
-            break;
-          } else {
-            isOk = false;
+            if (!isFoundFilter) {
+              isOk = false;
+              break;
+            } else {
+              isOk = true;
+            }
           }
         }
         return isOk;
-      });
+      }).toList());
+    } else {
+      bool isSameCategory = true;
+      filteredAuctions.addAll(auctionProvider.searchQuery.isEmpty
+          ? auctions
+          : auctions.where((auction) {
+              if (auction.categoryName.toLowerCase() != auctions[0].categoryName.toLowerCase()) {
+                isSameCategory = false;
+              }
+              if (auction.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase())) {
+                return true;
+              } else {
+                return false;
+              }
+            }).toList());
+      if (isSameCategory) {
+        generalCategory = auctions[0].categoryName;
+      }
     }
 
-    final filteredAuctions = auctionProvider.searchQuery.isEmpty ? auctions : auctions.where((auction) => auction.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase())).toList();
+    List<Widget> lstQuickFilterMenu = [];
+    var categoryFilters = [];
+    if (generalCategory.toLowerCase() == 'cars') {
+      categoryFilters = filtersCar;
+    } else if (generalCategory.toLowerCase() == 'properties') {
+      categoryFilters = filtersProperty;
+    }
+    for (var filter in categoryFilters) {
+      if (filter['show_in_quick_menu'] == true) {
+        String menuName = filter['name'].toString()[0] + filter['name'].toString().toLowerCase().substring(1);
+        lstQuickFilterMenu.add(_buildFilterButton(
+          context,
+          menuName,
+          isSelected: false,
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Theme.of(context).splashColor,
+              isScrollControlled: true,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(28), topLeft: Radius.circular(28))),
+              builder: (context) {
+                return Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(0),
+                    child: FilterBottomSheetLite(
+                      filterField: filter,
+                      onFilterComplete: (filters) {
+                        // auctionProvider.searchItems(auctionProvider.searchQuery, filters);
+                      },
+                      fetchInitialValue: (pFilterField) {
+                        for (var filter in auctionProvider.filters) {
+                          if (filter['name'] == pFilterField['name']) {
+                            return filter['values'];
+                          }
+                        }
+                      },
+                    ));
+              },
+            );
+          },
+        ));
+        lstQuickFilterMenu.add(const SizedBox(
+          width: 10,
+        ));
+      }
+    }
 
     List<Map<String, dynamic>> cardBrandData = [];
     Future.delayed(const Duration(seconds: 0), () async {
@@ -119,15 +187,12 @@ class AllAuctionsScreen extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: [
-                  _buildFilterButton(context, "Emirate", isSelected: false),
-                  const SizedBox(width: 10),
-                  _buildFilterButton(context, "Year", isSelected: false),
-                  const SizedBox(width: 10),
-                  _buildFilterButton(context, "Price Range", isSelected: true), // Gold border style
-                  const SizedBox(width: 10),
-                  _buildFilterButton(context, "Category", isSelected: false),
-                ],
+                children: lstQuickFilterMenu
+                    .map((widget) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 0),
+                          child: widget,
+                        ))
+                    .toList(),
               ),
             ),
           ),
@@ -207,46 +272,49 @@ class AllAuctionsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterButton(BuildContext context, String label, {bool isSelected = false}) {
+  Widget _buildFilterButton(BuildContext context, String label, {bool isSelected = false, required Function() onTap}) {
     // Define colors based on your screenshot
     Color goldColor = Theme.of(context).textSelectionTheme.selectionColor!; // Approximate gold color from image
     Color textColor = Theme.of(context).primaryColor; // Darker text color
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: isSelected ? goldColor : Colors.transparent,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.09),
-            blurRadius: 2,
-            offset: const Offset(0, 2),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: isSelected ? goldColor : Colors.transparent,
+            width: 1.5,
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? goldColor : textColor,
-              fontWeight: FontWeight.w500,
-              fontSize: 12,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.09),
+              blurRadius: 2,
+              offset: const Offset(0, 2),
             ),
-          ),
-          const SizedBox(width: 4),
-          Icon(
-            Icons.keyboard_arrow_down,
-            size: 18,
-            color: isSelected ? goldColor : textColor,
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? goldColor : textColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 18,
+              color: isSelected ? goldColor : textColor,
+            ),
+          ],
+        ),
       ),
     );
   }

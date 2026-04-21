@@ -634,3 +634,113 @@ class _ToggleGroupState extends State<ToggleGroup> {
     return childWidgets;
   }
 }
+
+class FilterBottomSheetLite extends StatefulWidget {
+  final Map<String, dynamic> filterField;
+  final dynamic Function(Map<String, dynamic> pFilterField) fetchInitialValue;
+  final Function(List<Map<String, dynamic>> filters) onFilterComplete;
+  const FilterBottomSheetLite({super.key, required this.filterField, required this.onFilterComplete, required this.fetchInitialValue});
+
+  @override
+  State<FilterBottomSheetLite> createState() => _FilterBottomSheetLiteState();
+}
+
+class _FilterBottomSheetLiteState extends State<FilterBottomSheetLite> {
+  final categoryNotifier = ValueNotifier<String>('');
+  ValueNotifier<List<String>>? modelNotifier;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardHeight),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.filterField['name'],
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor),
+                    ),
+                    OutlinedButton(
+                      onPressed: () {
+                        // widget.onFilterComplete(widget.filters);
+                        Navigator.pop(context);
+                      },
+                      style: OutlinedButton.styleFrom(
+                          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                          foregroundColor: Theme.of(context).textTheme.bodyMedium!.color,
+                          minimumSize: const Size(59, 25),
+                          maximumSize: const Size(60, 26),
+                          padding: EdgeInsets.zero,
+                          textStyle: const TextStyle(fontSize: 14),
+                          side: BorderSide(color: Theme.of(context).primaryColor)),
+                      child: Text(
+                        'Apply',
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600),
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Filter Option: Categories
+                Column(
+                  children: [
+                    if (widget.filterField['type'] == 'toggle_group')
+                      ToggleGroup(
+                        lstValues: widget.filterField['values'],
+                        onSelectionChanged: (selectedValues) {},
+                        fetchInitialValues: () {
+                          var values = widget.fetchInitialValue(widget.filterField);
+                          values ??= <String>{};
+                          return values;
+                        },
+                      )
+                    else if (widget.filterField['type'] == 'range_selector')
+                      RangeWidget(
+                        adjusterEnabled: widget.filterField['need_adjuster'],
+                        minValue: double.parse(widget.filterField['values']['min'].toString()),
+                        maxValue: double.parse(widget.filterField['values']['max'].toString()),
+                        onSelectionChanged: (minValue, maxValue) {},
+                        fetchInitialValues: () {
+                          var values = widget.fetchInitialValue(widget.filterField);
+
+                          double start = 0;
+                          double end = 0;
+                          if (values == null) {
+                            start = double.parse(widget.filterField['values']['min'].toString());
+                            end = double.parse(widget.filterField['values']['max'].toString());
+                          } else {
+                            start = double.parse(values['min'].toString());
+                            end = double.parse(values['max'].toString());
+                          }
+                          return RangeValues(start, end);
+                        },
+                      )
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
