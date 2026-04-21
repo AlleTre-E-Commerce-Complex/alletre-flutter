@@ -205,6 +205,7 @@ class AuctionItem {
 
       // Safely handle nested product data
       final product = json['product'] as Map<String, dynamic>? ?? {};
+      product['categoryName'] = product['category']?['nameEn'] as String? ?? '';
 
       // Parse policy descriptions
       String? returnPolicyDescription;

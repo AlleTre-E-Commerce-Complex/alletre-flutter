@@ -363,7 +363,28 @@ class AuctionProvider with ChangeNotifier {
     }
 
     _filteredLiveAuctions = _liveAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
-    _filteredListedProducts = _listedProducts.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
+    _filteredListedProducts = _listedProducts.where((item) {
+      bool isOk = false;
+      if (item.title.toLowerCase().contains(_searchQuery)) {
+        for (var filter in pFilters!) {
+          bool isFoundFilter = false;
+          for (var filterValue in filter['values']) {
+            var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
+            if (productValue == filterValue.toString().toLowerCase()) {
+              isFoundFilter = true;
+              break;
+            }
+          }
+          if (!isFoundFilter) {
+            isOk = false;
+            break;
+          } else {
+            isOk = true;
+          }
+        }
+      }
+      return isOk;
+    }).toList();
     _filteredUpcomingAuctions = _upcomingAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
     _filteredExpiredAuctions = _expiredAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();
     _filteredSoldAuctions = _soldAuctions.where((item) => item.title.toLowerCase().contains(_searchQuery)).toList();

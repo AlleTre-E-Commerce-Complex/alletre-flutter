@@ -107,7 +107,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               onSelectionChanged: (newSelection) {
                                 categoryNotifier.value = newSelection.single;
                                 widget.filters.clear();
-                                widget.filters.add({'name': 'CATEGORY', 'type': 'segmented_button', 'values': newSelection});
+                                widget.filters.add({'name': 'CATEGORY', 'type': 'segmented_button', 'backend_key_name': 'categoryName', 'values': newSelection});
                               },
                               style: ButtonStyle(
                                 backgroundColor: WidgetStateProperty.resolveWith<Color?>(
@@ -223,9 +223,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               onSelectionChanged: (selectedValues) {
                 int _idxFilter = widget.filters.indexWhere((_filter) => filter['name'] == _filter['name']);
                 if (_idxFilter == -1) {
-                  widget.filters.add({'name': filter['name'], 'type': filter['type'], 'values': selectedValues});
+                  widget.filters.add({'name': filter['name'], 'type': filter['type'], 'backend_key_name': filter['backend_key_name'], 'values': selectedValues});
                 } else if (_idxFilter > -1) {
-                  widget.filters[_idxFilter] = {'name': filter['name'], 'type': filter['type'], 'values': selectedValues};
+                  widget.filters[_idxFilter] = {'name': filter['name'], 'type': filter['type'], 'backend_key_name': filter['backend_key_name'], 'values': selectedValues};
                 }
                 if (selectedValues.isEmpty) {
                   widget.filters.removeAt(_idxFilter);
@@ -291,12 +291,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   widget.filters.add({
                     'name': filter['name'],
                     'type': filter['type'],
+                    'backend_key_name': filter['backend_key_name'],
                     'values': {'min': minValue, 'max': maxValue}
                   });
                 } else if (_idxFilter > -1) {
                   widget.filters[_idxFilter] = {
                     'name': filter['name'],
                     'type': filter['type'],
+                    'backend_key_name': filter['backend_key_name'],
                     'values': {'min': minValue, 'max': maxValue}
                   };
                 }

@@ -43,6 +43,30 @@ class AllAuctionsScreen extends StatelessWidget {
 
     // Create a filtered list based on the search query from AuctionProvider
     final auctionProvider = context.watch<AuctionProvider>();
+
+    if (auctionProvider.filters.isNotEmpty) {
+      auctions.removeWhere((item) {
+        bool isOk = false;
+        for (var filter in auctionProvider.filters) {
+          bool isFoundFilter = false;
+          for (var filterValue in filter['values']) {
+            var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
+            if (productValue == filterValue.toString().toLowerCase()) {
+              isFoundFilter = true;
+              break;
+            }
+          }
+          if (!isFoundFilter) {
+            isOk = true;
+            break;
+          } else {
+            isOk = false;
+          }
+        }
+        return isOk;
+      });
+    }
+
     final filteredAuctions = auctionProvider.searchQuery.isEmpty ? auctions : auctions.where((auction) => auction.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase())).toList();
 
     List<Map<String, dynamic>> cardBrandData = [];
