@@ -48,7 +48,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        widget.filters.clear();
+                        filters.clear();
+                        categoryNotifier.value = '';
+                      },
                       style: OutlinedButton.styleFrom(
                           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                           foregroundColor: Theme.of(context).textTheme.bodyMedium!.color,
