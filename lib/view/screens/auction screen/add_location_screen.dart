@@ -159,8 +159,9 @@ class AddLocationScreen extends StatelessWidget {
                           locationProvider.updateCountry(country, id: countryId);
                         },
                         onStateChanged: (state) {
-                          if (state != null && state != "Select State") {
-                            var stateInfo = locationProvider.lsStates.singleWhereOrNull((elem) => ((elem.nameEn == state) || (elem.nameAr == state)));
+                          if (state != null && state != "Select State") {                            
+                            var fixedStateName=state.replaceAll(' Emirate', '');
+                            var stateInfo = locationProvider.lsStates.singleWhereOrNull((elem) => ((elem.nameEn == fixedStateName) || (elem.nameAr == fixedStateName)));
                             if (stateInfo != null) {
                               locationProvider.updateState(state, id: stateInfo.id);
                             }

@@ -1,7 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:alletre_app/controller/helpers/address_service.dart';
+import 'package:alletre_app/controller/providers/user_provider.dart';
+import 'package:alletre_app/utils/ui_helpers.dart';
 import 'package:alletre_app/view/screens/auction%20screen/add_location_screen.dart';
+import 'package:alletre_app/view/screens/auction%20screen/shipping_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:alletre_app/controller/providers/login_state.dart';
 import 'package:provider/provider.dart';
@@ -37,9 +40,60 @@ class CreateAuctionButton extends StatelessWidget {
 
         final addresses = await AddressService.fetchAddresses();
         if (addresses.isEmpty) {
-          await Navigator.of(context).push(
+          final selectedLocation = await Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const AddLocationScreen()),
           );
+          if (selectedLocation != null) {
+            // Validate fields before sending to backend
+            final errors = <String>[];
+            final address = selectedLocation['address']?.toString().trim() ?? '';
+            final addressLabel = selectedLocation['addressLabel']?.toString().trim() ?? '';
+            final countryId = selectedLocation['countryId'];
+            final cityId = selectedLocation['cityId'];
+            final phone = selectedLocation['phone']?.toString().trim() ?? '';
+
+            // Address validation
+            if (address.isEmpty) {
+              errors.add('Address is required.');
+            }
+            if (addressLabel.isEmpty) {
+              errors.add('Address label is required.');
+            }
+            if (countryId == null || countryId.toString().isEmpty) {
+              errors.add('Country is required.');
+            }
+            if (cityId == null || cityId.toString().isEmpty) {
+              errors.add('State is required.');
+            }
+            if (phone.isEmpty) {
+              errors.add('Phone number is required.');
+            }
+
+            if (errors.isNotEmpty) {
+              showError(context, errors.join('\n'));
+              return;
+            }
+
+            // Optimistic UI update: add address to provider and trigger UI refresh
+            // userProvider.addAddress(selectedLocation);
+            // addressRefreshKey.value++;
+
+            final apiResp = await AddressService.addAddress(selectedLocation);
+            final success = apiResp['success'];
+            if (success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Center(
+                  child: Text('Address added successfully!'),
+                )),
+              );
+              // Always fetch the latest addresses from backend after adding
+              final updatedAddresses = await fetchUserAddresses();
+              Provider.of<UserProvider>(context, listen: false).setAddresses(updatedAddresses);
+            } else {
+              showError(context, 'Failed to save address : ${apiResp['message']['en']}');
+            }
+          }
           return;
         }
 
@@ -47,7 +101,7 @@ class CreateAuctionButton extends StatelessWidget {
           context: context,
           position: RelativeRect.fromLTRB(
             MediaQuery.of(context).size.width / 2 - 100, // center horizontally
-            MediaQuery.of(context).size.height - 200,    // position above nav
+            MediaQuery.of(context).size.height - 200, // position above nav
             MediaQuery.of(context).size.width / 2 + 100,
             0,
           ),
