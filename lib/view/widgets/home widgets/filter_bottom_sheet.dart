@@ -15,11 +15,13 @@ class FilterBottomSheet extends StatefulWidget {
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   final categoryNotifier = ValueNotifier<String>('');
   ValueNotifier<List<String>>? modelNotifier;
+  List<Map<String, dynamic>> filters = [];
   @override
   void initState() {
     super.initState();
     if (widget.filters.isNotEmpty) {
-      categoryNotifier.value = Set<String>.from(widget.filters.first['values']).first;
+      filters.addAll([...widget.filters]);
+      categoryNotifier.value = Set<String>.from(filters.first['values']).first;
     }
   }
 
@@ -66,7 +68,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ),
                     OutlinedButton(
                       onPressed: () {
-                        widget.onFilterComplete(widget.filters);
+                        widget.onFilterComplete(filters);
                         Navigator.pop(context);
                       },
                       style: OutlinedButton.styleFrom(
@@ -106,8 +108,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               selected: {categoryNotifier.value},
                               onSelectionChanged: (newSelection) {
                                 categoryNotifier.value = newSelection.single;
-                                widget.filters.clear();
-                                widget.filters.add({'name': 'CATEGORY', 'type': 'segmented_button', 'backend_key_name': 'categoryName', 'values': newSelection});
+                                filters.clear();
+                                filters.add({'name': 'CATEGORY', 'type': 'segmented_button', 'backend_key_name': 'categoryName', 'values': newSelection});
                               },
                               style: ButtonStyle(
                                 backgroundColor: WidgetStateProperty.resolveWith<Color?>(
@@ -187,11 +189,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             lstValues.add(name.keys.single);
           }
         } else if (filter['name'] == 'MODEL') {
-          var brandFilter = widget.filters.singleWhere(
+          var brandFilter = filters.singleWhere(
             (_pfilter) => _pfilter['name'] == 'BRAND',
             orElse: () => {},
           );
-          var modelFilter = widget.filters.singleWhere(
+          var modelFilter = filters.singleWhere(
             (_pfilter) => _pfilter['name'] == 'MODEL',
             orElse: () => {},
           );
@@ -221,14 +223,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               lstValues: lstValues,
               modelFilterNotifier: filter['name'] == 'MODEL' ? modelNotifier : null,
               onSelectionChanged: (selectedValues) {
-                int _idxFilter = widget.filters.indexWhere((_filter) => filter['name'] == _filter['name']);
+                int _idxFilter = filters.indexWhere((_filter) => filter['name'] == _filter['name']);
                 if (_idxFilter == -1) {
-                  widget.filters.add({'name': filter['name'], 'type': filter['type'], 'backend_key_name': filter['backend_key_name'], 'values': selectedValues});
+                  filters.add({'name': filter['name'], 'type': filter['type'], 'backend_key_name': filter['backend_key_name'], 'values': selectedValues});
                 } else if (_idxFilter > -1) {
-                  widget.filters[_idxFilter] = {'name': filter['name'], 'type': filter['type'], 'backend_key_name': filter['backend_key_name'], 'values': selectedValues};
+                  filters[_idxFilter] = {'name': filter['name'], 'type': filter['type'], 'backend_key_name': filter['backend_key_name'], 'values': selectedValues};
                 }
                 if (selectedValues.isEmpty) {
-                  widget.filters.removeAt(_idxFilter);
+                  filters.removeAt(_idxFilter);
                 }
                 if (filter['name'] == 'BRAND') {
                   List<String> lstModelValues = [];
@@ -242,9 +244,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       }
                     }
                   }
-                  int _idxModel = widget.filters.indexWhere((_filterModel) => _filterModel['name'] == 'MODEL');
+                  int _idxModel = filters.indexWhere((_filterModel) => _filterModel['name'] == 'MODEL');
                   if (_idxModel > -1) {
-                    widget.filters[_idxModel]['values'].removeWhere((_selectedModel) {
+                    filters[_idxModel]['values'].removeWhere((_selectedModel) {
                       int _idxModel = lstModelValues.indexWhere((_model) => _model == _selectedModel);
                       if (_idxModel == -1) {
                         return true;
@@ -259,7 +261,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 }
               },
               fetchInitialValues: () {
-                Set<String> initialValues = Set<String>.from(widget.filters.singleWhere(
+                Set<String> initialValues = Set<String>.from(filters.singleWhere(
                   (_selectedFilter) => _selectedFilter['name'] == filter['name'],
                   orElse: () {
                     return Map<String, dynamic>.from({'name': 'default', 'values': []});
@@ -286,16 +288,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               minValue: double.parse((filter['values'] as Map<String, dynamic>)['min'].toString()),
               maxValue: double.parse((filter['values'] as Map<String, dynamic>)['max'].toString()),
               onSelectionChanged: (minValue, maxValue) {
-                int _idxFilter = widget.filters.indexWhere((_filter) => filter['name'] == _filter['name']);
+                int _idxFilter = filters.indexWhere((_filter) => filter['name'] == _filter['name']);
                 if (_idxFilter == -1) {
-                  widget.filters.add({
+                  filters.add({
                     'name': filter['name'],
                     'type': filter['type'],
                     'backend_key_name': filter['backend_key_name'],
                     'values': {'min': minValue, 'max': maxValue}
                   });
                 } else if (_idxFilter > -1) {
-                  widget.filters[_idxFilter] = {
+                  filters[_idxFilter] = {
                     'name': filter['name'],
                     'type': filter['type'],
                     'backend_key_name': filter['backend_key_name'],
@@ -304,7 +306,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 }
               },
               fetchInitialValues: () {
-                var rangeValues = widget.filters.singleWhere(
+                var rangeValues = filters.singleWhere(
                   (_selectedFilter) => _selectedFilter['name'] == filter['name'],
                   orElse: () {
                     return Map<String, dynamic>.from({'name': 'default', 'values': filter['values']});
@@ -414,7 +416,7 @@ class _RangeWidgetState extends State<RangeWidget> {
         Row(
           children: [
             Expanded(
-              child: _buildRangeInput(
+                child: _buildRangeInput(
               controller: _minController,
               onRangeChanged: (rangeValue) {
                 double rangeStart = double.parse(rangeValue == "" ? "0" : rangeValue);
@@ -435,7 +437,7 @@ class _RangeWidgetState extends State<RangeWidget> {
               child: Text("—", style: TextStyle(color: Colors.grey)),
             ),
             Expanded(
-              child: _buildRangeInput(
+                child: _buildRangeInput(
               controller: _maxController,
               onRangeChanged: (rangeValue) {
                 double rangeEnd = double.parse(rangeValue == "" ? "0" : rangeValue);
