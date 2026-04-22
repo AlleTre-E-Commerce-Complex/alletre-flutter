@@ -97,27 +97,30 @@ class CreateAuctionButton extends StatelessWidget {
           return;
         }
 
-        showMenu(
-          context: context,
-          position: RelativeRect.fromLTRB(
-            MediaQuery.of(context).size.width / 2 - 100, // center horizontally
-            MediaQuery.of(context).size.height - 200, // position above nav
-            MediaQuery.of(context).size.width / 2 + 100,
-            0,
-          ),
-          items: [
-            PopupMenuItem<String>(
-              value: 'Create Auction',
-              child: const Text('Create Auction', textAlign: TextAlign.center),
-              onTap: () => _handleOptionSelected(context, 'Create Auction'),
-            ),
-            PopupMenuItem<String>(
-              value: 'List Product',
-              child: const Text('List Product', textAlign: TextAlign.center),
-              onTap: () => _handleOptionSelected(context, 'List Product'),
-            ),
-          ],
-        );
+        // Now only product listing is proceeding in the business. future Auctions will also be displayed
+        _handleOptionSelected(context, 'List Product');
+
+        // showMenu(
+        //   context: context,
+        //   position: RelativeRect.fromLTRB(
+        //     MediaQuery.of(context).size.width / 2 - 100, // center horizontally
+        //     MediaQuery.of(context).size.height - 200, // position above nav
+        //     MediaQuery.of(context).size.width / 2 + 100,
+        //     0,
+        //   ),
+        //   items: [
+        //     PopupMenuItem<String>(
+        //       value: 'Create Auction',
+        //       child: const Text('Create Auction', textAlign: TextAlign.center),
+        //       onTap: () => _handleOptionSelected(context, 'Create Auction'),
+        //     ),
+        //     PopupMenuItem<String>(
+        //       value: 'List Product',
+        //       child: const Text('List Product', textAlign: TextAlign.center),
+        //       onTap: () => _handleOptionSelected(context, 'List Product'),
+        //     ),
+        //   ],
+        // );
       },
       backgroundColor: Theme.of(context).textSelectionTheme.selectionColor, // OLX-style bright color
       shape: const CircleBorder(),

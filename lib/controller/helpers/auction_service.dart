@@ -820,6 +820,9 @@ class AuctionService {
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
+            CategoryService.getAllCategories().forEach((_category) {
+              CategoryService.clearAuctionListingCount(categoryId: _category.id, type: 'auction');
+            });
             final items = (data['data'] as List).map((item) {
               var auctionItem = AuctionItem.fromJson(item);
               CategoryService.updateAuctionsListingCount(categoryId: auctionItem.categoryId, type: 'auction');
@@ -885,6 +888,9 @@ class AuctionService {
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
+            CategoryService.getAllCategories().forEach((_category) {
+              CategoryService.clearAuctionListingCount(categoryId: _category.id, type: 'listing');
+            });
             final items = (data['data'] as List).map((item) {
               var auctionItem = AuctionItem.fromJson(item);
               CategoryService.updateAuctionsListingCount(categoryId: auctionItem.categoryId, type: 'listing');
@@ -947,6 +953,9 @@ class AuctionService {
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           if (data['success'] == true && data['data'] is List) {
+            CategoryService.getAllCategories().map((_category) {
+              CategoryService.clearAuctionListingCount(categoryId: _category.id, type: 'auction');
+            });
             final items = (data['data'] as List).map((item) {
               var auctionItem = AuctionItem.fromJson(item);
               CategoryService.updateAuctionsListingCount(categoryId: auctionItem.categoryId, type: 'auction');

@@ -138,11 +138,19 @@ class CategoryService {
     return category!.sellerDepositFixedAmount;
   }
 
+  static void clearAuctionListingCount({int categoryId = 0, String type = 'auction'}){
+    if (type == 'auction') {
+      _categories[categoryId]?.auctionsCount = 0;
+    } else if (type == 'listing') {
+      _categories[categoryId]?.listingCount = 0;
+    }
+  }
+
   static void updateAuctionsListingCount({int categoryId = 0, String type = 'auction'}) {
     if (type == 'auction') {
       _categories[categoryId]?.auctionsCount += 1;
     } else if (type == 'listing') {
-      _categories[categoryId]?.auctionsCount += 1;
+      _categories[categoryId]?.listingCount += 1;
     }
   }
 }

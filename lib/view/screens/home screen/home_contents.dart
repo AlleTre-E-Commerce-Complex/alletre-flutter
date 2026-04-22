@@ -89,15 +89,15 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               const SizedBox(height: 15),
               const CarouselBannerWidget(),
               const SizedBox(height: 16),
-              AuctionListWidget(
-                user: UserModel.empty(),
-                title: 'Live Auctions',
-                subtitle: 'Live Deals, Real-Time Wins!',
-                auctions: auctionProvider.filteredLiveAuctions,
-                isLoading: auctionProvider.isLoadingLive,
-                error: auctionProvider.errorLive,
-                placeholder: 'No live auctions at the moment.\nPlace your auction right away.',
-              ),
+              // AuctionListWidget(
+              //   user: UserModel.empty(),
+              //   title: 'Live Auctions',
+              //   subtitle: 'Live Deals, Real-Time Wins!',
+              //   auctions: auctionProvider.filteredLiveAuctions,
+              //   isLoading: auctionProvider.isLoadingLive,
+              //   error: auctionProvider.errorLive,
+              //   placeholder: 'No live auctions at the moment.\nPlace your auction right away.',
+              // ),
               AuctionListWidget(
                 user: UserModel.empty(),
                 title: 'Listed Products',
@@ -107,30 +107,30 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 error: auctionProvider.errorListedProducts,
                 placeholder: 'No products listed for sale.\nList your product here.',
               ),
-              AuctionListWidget(
-                user: UserModel.empty(),
-                title: 'Upcoming Auctions',
-                subtitle: 'Coming Soon: Get Ready to Bid!',
-                auctions: auctionProvider.filteredUpcomingAuctions,
-                // auctions: auctionProvider.isLoadingUpcoming
-                //     ? []
-                //     : auctionProvider.filteredUpcomingAuctions,
-                isLoading: auctionProvider.isLoadingUpcoming,
-                error: auctionProvider.errorUpcoming,
-                placeholder: 'No upcoming auctions available.',
-              ),
-              AuctionListWidget(
-                user: UserModel.empty(),
-                title: 'Expired Auctions',
-                subtitle: 'The Best Deals You Missed',
-                auctions: auctionProvider.filteredExpiredAuctions,
-                // auctions: auctionProvider.isLoadingExpired
-                //     ? []
-                //     : auctionProvider.filteredExpiredAuctions,
-                isLoading: auctionProvider.isLoadingExpired,
-                error: auctionProvider.errorExpired,
-                placeholder: 'No expired auctions to display.',
-              ),
+              // AuctionListWidget(
+              //   user: UserModel.empty(),
+              //   title: 'Upcoming Auctions',
+              //   subtitle: 'Coming Soon: Get Ready to Bid!',
+              //   auctions: auctionProvider.filteredUpcomingAuctions,
+              //   // auctions: auctionProvider.isLoadingUpcoming
+              //   //     ? []
+              //   //     : auctionProvider.filteredUpcomingAuctions,
+              //   isLoading: auctionProvider.isLoadingUpcoming,
+              //   error: auctionProvider.errorUpcoming,
+              //   placeholder: 'No upcoming auctions available.',
+              // ),
+              // AuctionListWidget(
+              //   user: UserModel.empty(),
+              //   title: 'Expired Auctions',
+              //   subtitle: 'The Best Deals You Missed',
+              //   auctions: auctionProvider.filteredExpiredAuctions,
+              //   // auctions: auctionProvider.isLoadingExpired
+              //   //     ? []
+              //   //     : auctionProvider.filteredExpiredAuctions,
+              //   isLoading: auctionProvider.isLoadingExpired,
+              //   error: auctionProvider.errorExpired,
+              //   placeholder: 'No expired auctions to display.',
+              // ),
               const SizedBox(height: 12)
             ],
           ),
