@@ -368,11 +368,23 @@ class AuctionProvider with ChangeNotifier {
       if (item.title.toLowerCase().contains(_searchQuery)) {
         for (var filter in pFilters!) {
           bool isFoundFilter = false;
-          for (var filterValue in filter['values']) {
+          if (filter['type'] == 'toggle_group') {
+            for (var filterValue in filter['values']) {
+              var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
+              if (productValue == filterValue.toString().toLowerCase()) {
+                isFoundFilter = true;
+                break;
+              }
+            }
+          } else if (filter['type'] == 'range_selector') {
             var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
-            if (productValue == filterValue.toString().toLowerCase()) {
+            if (double.parse(productValue) >= filter['values']['min'] && double.parse(productValue) <= filter['values']['max']) {
               isFoundFilter = true;
-              break;
+            }
+          } else if (filter['type'] == 'segmented_button') {
+            var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
+            if (productValue == Set<String>.from(filter['values']).elementAt(0).toLowerCase()) {
+              isFoundFilter = true;
             }
           }
           if (!isFoundFilter) {

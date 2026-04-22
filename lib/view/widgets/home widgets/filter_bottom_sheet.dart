@@ -414,7 +414,7 @@ class _RangeWidgetState extends State<RangeWidget> {
         Row(
           children: [
             Expanded(
-                child: _buildRangeInput(
+              child: _buildRangeInput(
               controller: _minController,
               onRangeChanged: (rangeValue) {
                 double rangeStart = double.parse(rangeValue == "" ? "0" : rangeValue);
@@ -435,7 +435,7 @@ class _RangeWidgetState extends State<RangeWidget> {
               child: Text("—", style: TextStyle(color: Colors.grey)),
             ),
             Expanded(
-                child: _buildRangeInput(
+              child: _buildRangeInput(
               controller: _maxController,
               onRangeChanged: (rangeValue) {
                 double rangeEnd = double.parse(rangeValue == "" ? "0" : rangeValue);
@@ -734,6 +734,7 @@ class _FilterBottomSheetLiteState extends State<FilterBottomSheetLite> {
                             start = double.parse(values['min'].toString());
                             end = double.parse(values['max'].toString());
                           }
+                          newValue = {'min': start, 'max': end};
                           return RangeValues(start, end);
                         },
                       )

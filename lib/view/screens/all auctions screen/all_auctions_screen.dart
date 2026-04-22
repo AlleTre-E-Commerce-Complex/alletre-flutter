@@ -17,7 +17,7 @@ import 'package:alletre_app/view/widgets/home%20widgets/search_field_widget.dart
 import '../auction screen/product_details_screen.dart';
 import '../../../utils/auth_helper.dart';
 
-class AllAuctionsScreen extends StatelessWidget {
+class AllAuctionsScreen extends StatefulWidget {
   final String title;
   final UserModel user;
   final List<AuctionItem> auctions;
@@ -32,6 +32,12 @@ class AllAuctionsScreen extends StatelessWidget {
   });
 
   @override
+  State<AllAuctionsScreen> createState() => _AllAuctionsScreenState();
+}
+
+class _AllAuctionsScreenState extends State<AllAuctionsScreen> {
+  String generalCategory = "All";
+  @override
   Widget build(BuildContext context) {
     // debugPrint('AllAuctionsScreen build called with ${auctions.length} items');
     final isLoggedIn = context.watch<LoggedInProvider>().isLoggedIn;
@@ -39,26 +45,35 @@ class AllAuctionsScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - 32 - 10) / 2;
     // Get card height based on whether we're showing auctions or listed products
-    final cardHeight = getCardHeight(title, isAuctionProduct: title == 'Similar Products' ? auctions.firstOrNull?.isAuctionProduct ?? false : title.contains('Auction'));
+    final cardHeight = getCardHeight(widget.title, isAuctionProduct: widget.title == 'Similar Products' ? widget.auctions.firstOrNull?.isAuctionProduct ?? false : widget.title.contains('Auction'));
 
     // Create a filtered list based on the search query from AuctionProvider
     final auctionProvider = context.watch<AuctionProvider>();
 
-    String generalCategory = "All";
-
     final filteredAuctions = [];
     if (auctionProvider.filters.isNotEmpty) {
-      generalCategory = Set<String>.from(auctionProvider.filters[0]['values']).elementAt(0);
-      filteredAuctions.addAll(auctions.where((item) {
+      filteredAuctions.addAll(widget.auctions.where((item) {
         bool isOk = false;
         if (item.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase())) {
           for (var filter in auctionProvider.filters) {
             bool isFoundFilter = false;
-            for (var filterValue in filter['values']) {
+            if (filter['type'] == 'toggle_group') {
+              for (var filterValue in filter['values']) {
+                var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
+                if (productValue == filterValue.toString().toLowerCase()) {
+                  isFoundFilter = true;
+                  break;
+                }
+              }
+            } else if (filter['type'] == 'range_selector') {
               var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
-              if (productValue == filterValue.toString().toLowerCase()) {
+              if (double.parse(productValue) >= filter['values']['min'] && double.parse(productValue) <= filter['values']['max']) {
                 isFoundFilter = true;
-                break;
+              }
+            } else if (filter['type'] == 'segmented_button') {
+              var productValue = item.product![filter['backend_key_name']].toString().toLowerCase();
+              if (productValue == Set<String>.from(filter['values']).elementAt(0).toLowerCase()) {
+                isFoundFilter = true;
               }
             }
             if (!isFoundFilter) {
@@ -74,9 +89,9 @@ class AllAuctionsScreen extends StatelessWidget {
     } else {
       bool isSameCategory = true;
       filteredAuctions.addAll(auctionProvider.searchQuery.isEmpty
-          ? auctions
-          : auctions.where((auction) {
-              if (auction.categoryName.toLowerCase() != auctions[0].categoryName.toLowerCase()) {
+          ? widget.auctions
+          : widget.auctions.where((auction) {
+              if (auction.categoryName.toLowerCase() != widget.auctions[0].categoryName.toLowerCase()) {
                 isSameCategory = false;
               }
               if (auction.title.toLowerCase().contains(auctionProvider.searchQuery.toLowerCase())) {
@@ -86,7 +101,7 @@ class AllAuctionsScreen extends StatelessWidget {
               }
             }).toList());
       if (isSameCategory) {
-        generalCategory = auctions[0].categoryName;
+        generalCategory = widget.auctions[0].categoryName;
       }
     }
 
@@ -117,6 +132,14 @@ class AllAuctionsScreen extends StatelessWidget {
                     child: FilterBottomSheetLite(
                       filterField: filter,
                       onFilterComplete: (newValue) {
+                        if (auctionProvider.filters.isEmpty) {
+                          auctionProvider.filters.add({
+                            'name': 'CATEGORY',
+                            'type': 'segmented_button',
+                            'backend_key_name': 'categoryName',
+                            'values': [generalCategory.toLowerCase()]
+                          });
+                        }
                         int index = 0;
                         bool isFound = false;
                         for (var tFilter in auctionProvider.filters) {
@@ -161,7 +184,7 @@ class AllAuctionsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: NavbarElementsAppbar(
-        appBarTitle: title,
+        appBarTitle: widget.title,
         showBackButton: true,
       ),
       body: Column(
@@ -187,6 +210,8 @@ class AllAuctionsScreen extends StatelessWidget {
                         carBrandData: cardBrandData,
                         filters: [...auctionProvider.filters],
                         onFilterComplete: (filters) {
+                          String newCategory = Set<String>.from(filters[0]['values']).elementAt(0);
+                          generalCategory = newCategory[0].toUpperCase() + newCategory.substring(1);
                           auctionProvider.searchItems(auctionProvider.searchQuery, filters);
                         },
                       ));
@@ -220,11 +245,11 @@ class AllAuctionsScreen extends StatelessWidget {
                     children: [
                       Center(
                         child: Text(
-                          placeholder,
+                          widget.placeholder,
                           style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: onSecondaryColor, fontSize: 13),
                         ),
                       ),
-                      if (title == "Live Auctions" || title == "Listed Products")
+                      if (widget.title == "Live Auctions" || widget.title == "Listed Products")
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(58, 32),
@@ -255,7 +280,7 @@ class AllAuctionsScreen extends StatelessWidget {
                             }
                           },
                           child: Text(
-                            title == "Live Auctions" ? "Create Now" : "List Product",
+                            widget.title == "Live Auctions" ? "Create Now" : "List Product",
                             style: const TextStyle(color: secondaryColor, fontSize: 9),
                           ),
                         ),
@@ -274,8 +299,8 @@ class AllAuctionsScreen extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return AuctionCard(
                           auction: filteredAuctions[index],
-                          title: title,
-                          user: user,
+                          title: widget.title,
+                          user: widget.user,
                           cardWidth: cardWidth,
                         );
                       },
