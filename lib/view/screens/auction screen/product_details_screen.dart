@@ -381,61 +381,61 @@ class ProductDetailsScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 12),
-                    ValueListenableBuilder<String?>(
-                      valueListenable: categoryController,
-                      builder: (context, selectedCategory, child) {
-                        if (selectedCategory == null) {
-                          return const SizedBox.shrink(); // No subcategory dropdown if category not selected
-                        }
+                    // const SizedBox(height: 12),
+                    // ValueListenableBuilder<String?>(
+                    //   valueListenable: categoryController,
+                    //   builder: (context, selectedCategory, child) {
+                    //     if (selectedCategory == null) {
+                    //       return const SizedBox.shrink(); // No subcategory dropdown if category not selected
+                    //     }
 
-                        return ValueListenableBuilder<String?>(
-                          valueListenable: subCategoryController,
-                          builder: (context, selectedSubCategory, child) {
-                            return DropdownButtonFormField<String>(
-                              decoration: InputDecoration(
-                                labelText: "Sub Category",
-                                labelStyle: labelTextStyle,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                errorBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: errorColor),
-                                ),
-                                focusedErrorBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: errorColor),
-                                ),
-                              ),
-                              value: selectedSubCategory,
-                              // ignore: unnecessary_null_comparison
-                              items: selectedCategory != null
-                                  ? CategoryData.getSubCategories(selectedCategory).map((subcategory) {
-                                      return DropdownMenuItem(
-                                        value: subcategory,
-                                        child: Text(
-                                          subcategory,
-                                          style: const TextStyle(
-                                            color: onSecondaryColor,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList()
-                                  : [],
-                              onChanged: (value) {
-                                subCategoryController.value = value;
-                                // Fetch custom fields for the selected subcategory
-                                fetchAndSetupCustomFields(subCategoryId: CategoryData.getSubCategoryId(selectedCategory, value ?? ''));
-                              },
-                              validator: CreateAuctionValidation.validateSubCategory,
-                            );
-                          },
-                        );
-                      },
-                    ),
+                    //     return ValueListenableBuilder<String?>(
+                    //       valueListenable: subCategoryController,
+                    //       builder: (context, selectedSubCategory, child) {
+                    //         return DropdownButtonFormField<String>(
+                    //           decoration: InputDecoration(
+                    //             labelText: "Sub Category",
+                    //             labelStyle: labelTextStyle,
+                    //             border: OutlineInputBorder(
+                    //               borderRadius: BorderRadius.circular(8),
+                    //             ),
+                    //             errorBorder: OutlineInputBorder(
+                    //               borderRadius: BorderRadius.circular(8),
+                    //               borderSide: const BorderSide(color: errorColor),
+                    //             ),
+                    //             focusedErrorBorder: OutlineInputBorder(
+                    //               borderRadius: BorderRadius.circular(8),
+                    //               borderSide: const BorderSide(color: errorColor),
+                    //             ),
+                    //           ),
+                    //           value: selectedSubCategory,
+                    //           // ignore: unnecessary_null_comparison
+                    //           items: selectedCategory != null
+                    //               ? CategoryData.getSubCategories(selectedCategory).map((subcategory) {
+                    //                   return DropdownMenuItem(
+                    //                     value: subcategory,
+                    //                     child: Text(
+                    //                       subcategory,
+                    //                       style: const TextStyle(
+                    //                         color: onSecondaryColor,
+                    //                         fontWeight: FontWeight.w500,
+                    //                         fontSize: 15,
+                    //                       ),
+                    //                     ),
+                    //                   );
+                    //                 }).toList()
+                    //               : [],
+                    //           onChanged: (value) {
+                    //             subCategoryController.value = value;
+                    //             // Fetch custom fields for the selected subcategory
+                    //             fetchAndSetupCustomFields(subCategoryId: CategoryData.getSubCategoryId(selectedCategory, value ?? ''));
+                    //           },
+                    //           validator: CreateAuctionValidation.validateSubCategory,
+                    //         );
+                    //       },
+                    //     );
+                    //   },
+                    // ),
                     ValueListenableBuilder<String?>(
                       valueListenable: categoryController,
                       builder: (context, selectedCategory, _) {

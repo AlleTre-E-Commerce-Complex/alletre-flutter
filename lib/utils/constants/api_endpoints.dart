@@ -25,4 +25,4 @@ class ApiEndpoints {
   static String unSaveFromWishlist(int auctionId) => '/watch-lists/un-save?auctionId=$auctionId';
 }
 
-const APP_VERSION = "2.0.0";
+const APP_VERSION = "2.0.1";
