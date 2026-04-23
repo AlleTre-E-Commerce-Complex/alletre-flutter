@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Alletre</string>
+	<string>3arbon</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -37,6 +37,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>The camera is needed to allow you to take and upload photos for your profile or product listings.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We use your location to provide you with services based on your current vicinity, such as nearby auctions and product listings/</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>We need your location for better service</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -64,9 +68,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We use your location to provide you with services based on your current vicinity, such as nearby auctions and product listings/</string>
-	<key>NSCameraUsageDescription</key>
-	<string>The camera is needed to allow you to take and upload photos for your profile or product listings.</string>
 </dict>
 </plist>
